@@ -102,7 +102,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "ball read as /bi:/-all",
-          "ball /bɔːl/"
+          "ball /bɔːl/",
+          "cat read as /siː/-at"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: ball /bɔːl/ — نقرأ بصوت الحرف /b/ وليس اسمه «بي»."
@@ -112,7 +113,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "cat read as /siː/-at",
-          "cat /kæt/"
+          "cat /kæt/",
+          "ball read as /bi:/-all"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: cat /kæt/ — c قبل a تنطق /k/."
@@ -122,9 +124,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "jam read as /ɡæm/",
+          "ball read as /bi:/-all",
           "jam /dʒæm/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: jam /dʒæm/ — j دائماً «ج»."
       }
     ],
@@ -562,10 +565,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "ball read as /bi:/-all",
             "Blend the sounds: /k/ /æ/ /t/ → cat",
             "Reading 'cat' as «سي-إيه-تي»"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Blend the sounds: /k/ /æ/ /t/ → cat — التهجئة بأسماء الحروف ما تساعد على القراءة؛ ادمج الأصوات."
         }
       ]
@@ -668,7 +672,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "van /væn/",
-          "van read as «فان» /fæn/"
+          "van read as «فان» /fæn/",
+          "pen read as «بن»"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: van /væn/ — v تنطق بالشفة السفلى مع اهتزاز، وليست f."
@@ -678,7 +683,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "pen read as «بن»",
-          "pen /pɛn/"
+          "pen /pɛn/",
+          "van read as «فان» /fæn/"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: pen /pɛn/ — p هواء بدون اهتزاز، وليست b."
@@ -688,7 +694,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "sun /sʌn/",
-          "sun read as /suːn/"
+          "sun read as /suːn/",
+          "van read as «فان» /fæn/"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: sun /sʌn/ — u القصيرة /ʌ/ «أَ»."
@@ -1080,7 +1087,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "cat /kæt/",
-          "cat read as /siː/-at"
+          "cat read as /siː/-at",
+          "van read as «فان» /fæn/"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: cat /kæt/ — c قبل a تنطق /k/.",
@@ -1141,9 +1149,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Inserting a vowel: «إسيكس» for six",
+            "van read as «فان» /fæn/",
             "six /sɪks/"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: six /sɪks/ — لا تضيف «إ» قبل s أو بعد x."
         }
       ]
@@ -1246,9 +1255,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "bed read as bad",
+          "bus read as boss",
           "bed /bɛd/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: bed /bɛd/ — e القصيرة «إ» مفتوحة شوي."
       },
       {
@@ -1256,7 +1266,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "bus read as boss",
-          "bus /bʌs/"
+          "bus /bʌs/",
+          "bed read as bad"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: bus /bʌs/ — u القصيرة /ʌ/."
@@ -1266,9 +1277,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "hot read as hut",
+          "bed read as bad",
           "hot /hɑːt/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: hot /hɑːt/ — o القصيرة مثل «آ» قصيرة."
       }
     ],
@@ -1466,9 +1478,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Is Pam sad?",
           "options": [
             "Yes",
+            "Not mentioned",
             "No"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الإجابة: No"
         }
       ]
@@ -1658,7 +1671,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "pen /pɛn/",
-          "pen read as «بن»"
+          "pen read as «بن»",
+          "bed read as bad"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: pen /pɛn/ — p هواء بدون اهتزاز، وليست b.",
@@ -1732,7 +1746,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Adding a vowel at the end: «باصّي»",
-            "bus /bʌs/"
+            "bus /bʌs/",
+            "bed read as bad"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: bus /bʌs/ — لا تضيف «ي» أو «ـه» بعد الحرف الأخير."
@@ -1837,19 +1852,21 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "chip read as «شيب»",
+          "think read as «سنك» or «تنك»",
           "chip /tʃɪp/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: chip /tʃɪp/ — ch فيها «ت» قبل «ش»."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "chip read as «شيب»",
           "think /θɪŋk/",
           "think read as «سنك» or «تنك»"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: think /θɪŋk/ — th = «ث»: اللسان بين الأسنان."
       },
       {
@@ -1857,7 +1874,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "duck written duk",
-          "duck"
+          "duck",
+          "chip read as «شيب»"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: duck — بعد متحرك قصير في آخر الكلمة نكتب ck."
@@ -2248,9 +2266,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "bus read as boss",
+          "chip read as «شيب»",
           "bus /bʌs/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: bus /bʌs/ — u القصيرة /ʌ/.",
         "fromLessonId": "srp_305"
       },
@@ -2259,7 +2278,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "ball read as /bi:/-all",
-          "ball /bɔːl/"
+          "ball /bɔːl/",
+          "chip read as «شيب»"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: ball /bɔːl/ — نقرأ بصوت الحرف /b/ وليس اسمه «بي».",
@@ -2333,9 +2353,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Ship and chip sound the same",
+            "chip read as «شيب»",
             "ship /ʃɪp/ vs chip /tʃɪp/"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: ship /ʃɪp/ vs chip /tʃɪp/ — في بعض لهجات الخليج «تش» موجودة (چ) — استخدمها في ch."
         }
       ]
@@ -2438,7 +2459,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "cake /keɪk/",
-          "cake read as «كاكي»"
+          "cake read as «كاكي»",
+          "hope read as hop"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: cake /keɪk/ — e الأخيرة صامتة."
@@ -2447,10 +2469,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "cake read as «كاكي»",
           "hope /hoʊp/",
           "hope read as hop"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: hope /hoʊp/ — e تخلي o تقول اسمها «أو»."
       },
       {
@@ -2458,6 +2481,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "bike /baɪk/",
+          "cake read as «كاكي»",
           "bike read as «بيكي»"
         ],
         "correctIndex": 0,
@@ -2849,10 +2873,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الحروف المزدوجة: sh / ch / th / ck): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "cake read as «كاكي»",
           "think read as «سنك» or «تنك»",
           "think /θɪŋk/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: think /θɪŋk/ — th = «ث»: اللسان بين الأسنان.",
         "fromLessonId": "srp_306"
       },
@@ -2861,9 +2886,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "van read as «فان» /fæn/",
+          "cake read as «كاكي»",
           "van /væn/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: van /væn/ — v تنطق بالشفة السفلى مع اهتزاز، وليست f.",
         "fromLessonId": "srp_304"
       },
@@ -2935,9 +2961,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Pronouncing the final e",
+            "cake read as «كاكي»",
             "cake /keɪk/ (silent e)"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: cake /keɪk/ (silent e) — العربي يقرأ كل حرف مكتوب؛ في الإنجليزي كثير حروف صامتة."
         }
       ]
@@ -3040,9 +3067,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "boat read as «بوت» short",
+          "beach read with short /ɪ/",
           "boat /boʊt/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: boat /boʊt/ — oa = «أو» منزلقة."
       },
       {
@@ -3050,9 +3078,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "beach read with short /ɪ/",
+          "boat read as «بوت» short",
           "beach /biːtʃ/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: beach /biːtʃ/ — ea هنا طويلة /iː/ — انتبه للفرق!"
       },
       {
@@ -3060,7 +3089,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "rain /reɪn/",
-          "rain read as «رَين» with /aɪ/"
+          "rain read as «رَين» with /aɪ/",
+          "boat read as «بوت» short"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: rain /reɪn/ — ai = «إي»."
@@ -3452,9 +3482,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "hope read as hop",
+          "boat read as «بوت» short",
           "hope /hoʊp/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: hope /hoʊp/ — e تخلي o تقول اسمها «أو».",
         "fromLessonId": "srp_307"
       },
@@ -3462,10 +3493,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (قراءة كلمات CVC: دمج الأصوات): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "boat read as «بوت» short",
           "bed /bɛd/",
           "bed read as bad"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: bed /bɛd/ — e القصيرة «إ» مفتوحة شوي.",
         "fromLessonId": "srp_305"
       },
@@ -3537,7 +3569,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Reading every vowel separately: «بو-آت»",
-            "boat = one sound /oʊ/"
+            "boat = one sound /oʊ/",
+            "boat read as «بوت» short"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: boat = one sound /oʊ/ — الحرفان صوت واحد."
@@ -3642,7 +3675,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I want to park here.",
-          "I want to bark here."
+          "I want to bark here.",
+          "I want to here park."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I want to park here. — bark = ينبح! خطأ p يغير المعنى."
@@ -3652,7 +3686,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Pepsi /ˈpɛpsi/",
-          "Bebsi"
+          "Bebsi",
+          "I want to bark here."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Pepsi /ˈpɛpsi/ — حتى الأسماء التجارية لها p."
@@ -3662,6 +3697,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Pray for me.",
+          "Pray me for.",
           "Bray for me."
         ],
         "correctIndex": 0,
@@ -4054,7 +4090,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "beach read with short /ɪ/",
-          "beach /biːtʃ/"
+          "beach /biːtʃ/",
+          "I want to bark here."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: beach /biːtʃ/ — ea هنا طويلة /iː/ — انتبه للفرق!",
@@ -4064,10 +4101,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الحروف المزدوجة: sh / ch / th / ck): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I want to bark here.",
           "chip read as «شيب»",
           "chip /tʃɪp/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: chip /tʃɪp/ — ch فيها «ت» قبل «ش».",
         "fromLessonId": "srp_306"
       },
@@ -4076,7 +4114,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "ball /bɔːl/",
-          "ball read as /bi:/-all"
+          "ball read as /bi:/-all",
+          "I want to bark here."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: ball /bɔːl/ — نقرأ بصوت الحرف /b/ وليس اسمه «بي».",
@@ -4150,9 +4189,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Bebsi / Bizza",
+            "I want to bark here.",
             "Pepsi / pizza"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Pepsi / pizza — لاحظ الأسماء اللي تستخدمها يومياً."
         }
       ]
@@ -4255,29 +4295,32 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I leave in Jeddah.",
+          "I live Jeddah in.",
           "I live in Jeddah."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I live in Jeddah. — live قصيرة = يسكن؛ leave طويلة = يغادر."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Please down sit.",
           "Please sit down.",
           "Please sheet down."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Please sit down. — sit قصيرة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "This are very cheap.",
           "This is very sheep.",
           "This is very cheap."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: This is very cheap. — cheap = رخيص بـ ch."
       }
     ],
@@ -4667,10 +4710,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (P و B: أشهر مشكلة نطق عند العرب): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I leave in Jeddah.",
           "Bebsi",
           "Pepsi /ˈpɛpsi/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Pepsi /ˈpɛpsi/ — حتى الأسماء التجارية لها p.",
         "fromLessonId": "srp_309"
       },
@@ -4678,10 +4722,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الحرف e السحري: الحروف الطويلة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I leave in Jeddah.",
           "cake read as «كاكي»",
           "cake /keɪk/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: cake /keɪk/ — e الأخيرة صامتة.",
         "fromLessonId": "srp_307"
       },
@@ -4690,6 +4735,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "van /væn/",
+          "I leave in Jeddah.",
           "van read as «فان» /fæn/"
         ],
         "correctIndex": 0,
@@ -4763,10 +4809,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "I leave in Jeddah.",
             "Everything long: «سييت داون»",
             "sit down /sɪt daʊn/"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: sit down /sɪt daʊn/ — العربي يميل لتطويل الياء."
         }
       ]
@@ -4869,7 +4916,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "dogs read as /dɒɡs/ with hard s",
-          "dogs /dɔːɡz/"
+          "dogs /dɔːɡz/",
+          "cats read as «كاتِز»"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: dogs /dɔːɡz/ — بعد g المجهورة: /z/."
@@ -4878,10 +4926,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "dogs read as /dɒɡs/ with hard s",
           "cats read as «كاتِز»",
           "cats /kæts/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: cats /kæts/ — لا مقطع زائد بعد t."
       },
       {
@@ -4889,9 +4938,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "watches read as «واتشس» one syllable",
+          "dogs read as /dɒɡs/ with hard s",
           "watches /ˈwɑːtʃɪz/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: watches /ˈwɑːtʃɪz/ — بعد ch مقطع «إز»."
       }
     ],
@@ -5280,7 +5330,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Please sheet down.",
-          "Please sit down."
+          "Please sit down.",
+          "Please down sit."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Please sit down. — sit قصيرة.",
@@ -5290,10 +5341,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (فرق المتحركات: ee / ea / ai / oa): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "dogs read as /dɒɡs/ with hard s",
           "boat /boʊt/",
           "boat read as «بوت» short"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: boat /boʊt/ — oa = «أو» منزلقة.",
         "fromLessonId": "srp_308"
       },
@@ -5301,10 +5353,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (قراءة كلمات CVC: دمج الأصوات): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "dogs read as /dɒɡs/ with hard s",
           "bed read as bad",
           "bed /bɛd/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: bed /bɛd/ — e القصيرة «إ» مفتوحة شوي.",
         "fromLessonId": "srp_305"
       },
@@ -5376,6 +5429,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "books /bʊks/",
+            "dogs read as /dɒɡs/ with hard s",
             "Adding /ɪz/ everywhere: «بوكِز»"
           ],
           "correctIndex": 0,
@@ -5481,6 +5535,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "said /sɛd/",
+          "one read as «أون»",
           "said read as «سيد» /seɪd/"
         ],
         "correctIndex": 0,
@@ -5491,7 +5546,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "one read as «أون»",
-          "one /wʌn/"
+          "one /wʌn/",
+          "said read as «سيد» /seɪd/"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: one /wʌn/ — one تبدأ بصوت «و»."
@@ -5500,10 +5556,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "were /wʌz/",
           "was /wʌz/",
           "was read as «واز» /wæz/"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: was /wʌz/ — «وَز»."
       }
     ],
@@ -5893,10 +5950,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (نهاية s: ثلاثة أصوات /s/ /z/ /ɪz/): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "said read as «سيد» /seɪd/",
           "cats read as «كاتِز»",
           "cats /kæts/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: cats /kæts/ — لا مقطع زائد بعد t.",
         "fromLessonId": "srp_311_s"
       },
@@ -5905,9 +5963,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I want to bark here.",
+          "I want to here park.",
           "I want to park here."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I want to park here. — bark = ينبح! خطأ p يغير المعنى.",
         "fromLessonId": "srp_309"
       },
@@ -5915,10 +5974,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الحروف المزدوجة: sh / ch / th / ck): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "said read as «سيد» /seɪd/",
           "chip /tʃɪp/",
           "chip read as «شيب»"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: chip /tʃɪp/ — ch فيها «ت» قبل «ش».",
         "fromLessonId": "srp_306"
       },
@@ -5989,10 +6049,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "said read as «سيد» /seɪd/",
             "Reading 'the' as «ذي» always",
             "the /ðə/ + consonant, /ði/ + vowel"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: the /ðə/ + consonant, /ði/ + vowel — the book «ذَ بوك»، the apple «ذي آبل»."
         }
       ]
@@ -6095,29 +6156,32 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "k-nife with a /k/",
+          "a hour",
           "knife /naɪf/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: knife /naɪf/ — k قبل n صامتة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "k-nife with a /k/",
           "a hour",
           "an hour"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: an hour — h صامتة فالكلمة تبدأ بصوت متحرك."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "k-nife with a /k/",
           "walk with an /l/ sound",
           "walk /wɔːk/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: walk /wɔːk/ — l صامتة في walk/talk/chalk."
       }
     ],
@@ -6508,10 +6572,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (كلمات البصر وقراءة رسالة قصيرة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "k-nife with a /k/",
           "one /wʌn/",
           "one read as «أون»"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: one /wʌn/ — one تبدأ بصوت «و».",
         "fromLessonId": "srp_312_s"
       },
@@ -6520,7 +6585,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I live in Jeddah.",
-          "I leave in Jeddah."
+          "I leave in Jeddah.",
+          "I live Jeddah in."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I live in Jeddah. — live قصيرة = يسكن؛ leave طويلة = يغادر.",
@@ -6530,10 +6596,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الحرف e السحري: الحروف الطويلة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "k-nife with a /k/",
           "cake read as «كاكي»",
           "cake /keɪk/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: cake /keɪk/ — e الأخيرة صامتة.",
         "fromLessonId": "srp_307"
       },
@@ -6605,9 +6672,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Reading every letter: «كْنايف»",
+            "k-nife with a /k/",
             "knife /naɪf/"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: knife /naɪf/ — عادة العربي إنه ينطق كل حرف مكتوب."
         }
       ]
@@ -6709,10 +6777,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Give me the pen write to.",
           "Give me the pin to write.",
           "Give me the pen to write."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Give me the pen to write. — pen للكتابة، pin دبوس."
       },
       {
@@ -6720,7 +6789,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I sell my car.",
-          "I sit my car."
+          "I sit my car.",
+          "I sell car my."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I sell my car. — sell /sɛl/ = يبيع."
@@ -6729,10 +6799,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Give me the pin to write.",
           "Ten min (men)",
           "ten men /tɛn mɛn/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: ten men /tɛn mɛn/ — افتح الفم أكثر مع /ɛ/."
       }
     ],
@@ -7120,10 +7191,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الحروف الصامتة: knife, write, lamb): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Give me the pin to write.",
           "a hour",
           "an hour"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: an hour — h صامتة فالكلمة تبدأ بصوت متحرك.",
         "fromLessonId": "srp_302"
       },
@@ -7132,7 +7204,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "dogs read as /dɒɡs/ with hard s",
-          "dogs /dɔːɡz/"
+          "dogs /dɔːɡz/",
+          "Give me the pin to write."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: dogs /dɔːɡz/ — بعد g المجهورة: /z/.",
@@ -7142,10 +7215,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (فرق المتحركات: ee / ea / ai / oa): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Give me the pin to write.",
           "boat /boʊt/",
           "boat read as «بوت» short"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: boat /boʊt/ — oa = «أو» منزلقة.",
         "fromLessonId": "srp_308"
       },
@@ -7217,7 +7291,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "pen /pɛn/",
-            "Saying pin for pen"
+            "Saying pin for pen",
+            "Give me the pin to write."
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: pen /pɛn/ — مشكلة شائعة في اللهجات؛ ركز على فتح الفم."
@@ -7321,10 +7396,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "played as «بلييت»",
           "walked as «ووكِد» (2 syllables)",
           "walked /wɔːkt/ (1 syllable)"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: walked /wɔːkt/ (1 syllable) — ed بعد k = /t/ بدون مقطع."
       },
       {
@@ -7332,9 +7408,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "played as «بلييت»",
+          "walked as «ووكِد» (2 syllables)",
           "played /pleɪd/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: played /pleɪd/ — بعد متحرك = /d/."
       },
       {
@@ -7342,7 +7419,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "wanted /ˈwɑːntɪd/",
-          "wanted as «وانتد» one syllable"
+          "wanted as «وانتد» one syllable",
+          "walked as «ووكِد» (2 syllables)"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: wanted /ˈwɑːntɪd/ — بعد t نضيف «إد»."
@@ -7733,9 +7811,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I sit my car.",
+          "I sell car my.",
           "I sell my car."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I sell my car. — sell /sɛl/ = يبيع.",
         "fromLessonId": "srp_313"
       },
@@ -7743,10 +7822,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (كلمات البصر وقراءة رسالة قصيرة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "walked as «ووكِد» (2 syllables)",
           "said read as «سيد» /seɪd/",
           "said /sɛd/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: said /sɛd/ — said شاذة: «سِد».",
         "fromLessonId": "srp_312_s"
       },
@@ -7755,6 +7835,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I want to park here.",
+          "I want to here park.",
           "I want to bark here."
         ],
         "correctIndex": 0,
@@ -7829,6 +7910,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "played /pleɪd/, walked /wɔːkt/",
+            "walked as «ووكِد» (2 syllables)",
             "«بلايِد» / «ووكِد»"
           ],
           "correctIndex": 0,
@@ -7912,9 +7994,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Stress in 'hotel'?",
         "options": [
           "HO-tel",
+          "played as «بلييت»",
           "ho-TEL"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "hoTEL."
       },
       {
@@ -7933,6 +8016,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "comPUter /kəmˈpjuːtər/",
+          "played as «بلييت»",
           "COMputer"
         ],
         "correctIndex": 0,
@@ -7943,7 +8027,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "hoTEL /hoʊˈtɛl/",
-          "HOtel"
+          "HOtel",
+          "played as «بلييت»"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: hoTEL /hoʊˈtɛl/ — hotel ضغطها في الآخر."
@@ -7952,10 +8037,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "played as «بلييت»",
           "INformation",
           "inforMAtion /ˌɪnfərˈmeɪʃən/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: inforMAtion /ˌɪnfərˈmeɪʃən/ — قبل tion."
       }
     ],
@@ -8344,7 +8430,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "played as «بلييت»",
-          "played /pleɪd/"
+          "played /pleɪd/",
+          "k-nife with a /k/"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: played /pleɪd/ — بعد متحرك = /d/.",
@@ -8355,9 +8442,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "k-nife with a /k/",
+          "played as «بلييت»",
           "knife /naɪf/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: knife /naɪf/ — k قبل n صامتة.",
         "fromLessonId": "srp_302"
       },
@@ -8366,7 +8454,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I leave in Jeddah.",
-          "I live in Jeddah."
+          "I live in Jeddah.",
+          "I live Jeddah in."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I live in Jeddah. — live قصيرة = يسكن؛ leave طويلة = يغادر.",
@@ -8439,10 +8528,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "One strong syllable word per",
             "One strong syllable per word",
             "Equal stress on all syllables (robotic)"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: One strong syllable per word — العربي يعطي كل مقطع وزن؛ الإنجليزي يضغط واحد."
         }
       ]
@@ -8545,6 +8635,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "student /ˈstuːdənt/",
+          "sipring",
           "estudent"
         ],
         "correctIndex": 0,
@@ -8555,9 +8646,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "sipring",
+          "estudent",
           "spring /sprɪŋ/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: spring /sprɪŋ/ — لا متحرك بين s و p."
       },
       {
@@ -8565,7 +8657,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "desks /dɛsks/",
-          "deskis"
+          "deskis",
+          "estudent"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: desks /dɛsks/ — النهاية sks بدون إضافة."
@@ -8957,6 +9050,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "hoTEL /hoʊˈtɛl/",
+          "estudent",
           "HOtel"
         ],
         "correctIndex": 0,
@@ -8968,7 +9062,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Give me the pin to write.",
-          "Give me the pen to write."
+          "Give me the pen to write.",
+          "Give me the pen write to."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Give me the pen to write. — pen للكتابة، pin دبوس.",
@@ -8979,7 +9074,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "dogs read as /dɒɡs/ with hard s",
-          "dogs /dɔːɡz/"
+          "dogs /dɔːɡz/",
+          "estudent"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: dogs /dɔːɡz/ — بعد g المجهورة: /z/.",
@@ -9053,6 +9149,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "special /ˈspɛʃəl/",
+            "estudent",
             "«إسبيشال» for special"
           ],
           "correctIndex": 0,
@@ -9158,7 +9255,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "ba-NA-NA (all full vowels)",
-          "bə-NA-nə /bəˈnænə/"
+          "bə-NA-nə /bəˈnænə/",
+          "doc-TOOR"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: bə-NA-nə /bəˈnænə/ — أضعف المقطعين الأول والأخير."
@@ -9167,20 +9265,22 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "ba-NA-NA (all full vowels)",
           "doc-TOOR",
           "DOC-tər /ˈdɑːktər/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: DOC-tər /ˈdɑːktər/ — or في آخر doctor ضعيفة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "ba-NA-NA (all full vowels)",
           "too-DAY",
           "tə-DAY /təˈdeɪ/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: tə-DAY /təˈdeɪ/ — to تضعف."
       }
     ],
@@ -9569,10 +9669,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (تجمعات الحروف الساكنة: street و spring): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "ba-NA-NA (all full vowels)",
           "sipring",
           "spring /sprɪŋ/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: spring /sprɪŋ/ — لا متحرك بين s و p.",
         "fromLessonId": "srp_316"
       },
@@ -9581,7 +9682,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "walked /wɔːkt/ (1 syllable)",
-          "walked as «ووكِد» (2 syllables)"
+          "walked as «ووكِد» (2 syllables)",
+          "ba-NA-NA (all full vowels)"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: walked /wɔːkt/ (1 syllable) — ed بعد k = /t/ بدون مقطع.",
@@ -9591,10 +9693,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (كلمات البصر وقراءة رسالة قصيرة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "ba-NA-NA (all full vowels)",
           "said read as «سيد» /seɪd/",
           "said /sɛd/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: said /sɛd/ — said شاذة: «سِد».",
         "fromLessonId": "srp_312_s"
       },
@@ -9666,9 +9769,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Reading every vowel fully like Arabic",
+            "ba-NA-NA (all full vowels)",
             "Weaken unstressed vowels to /ə/"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Weaken unstressed vowels to /ə/ — العربي واضح المقاطع؛ الإنجليزي يخفيها."
         }
       ]
@@ -9770,30 +9874,33 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Pause at every comma and stop full",
           "Reading without pauses",
           "Pause at every comma and full stop"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Pause at every comma and full stop — القراءة المتواصلة تضيع المعنى."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Reading without pauses",
           "Flat voice for 'Help!'",
           "Strong, loud voice for 'Help!'"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Strong, loud voice for 'Help!' — التعجب يحتاج طاقة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Reading without pauses",
           "Rising tone: Are you ready? ↗",
           "Falling tone for 'Are you ready?'"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Rising tone: Are you ready? ↗ — سؤال نعم/لا صاعد."
       }
     ],
@@ -10181,10 +10288,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الصوت الضعيف schwa /ə/): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Reading without pauses",
           "doc-TOOR",
           "DOC-tər /ˈdɑːktər/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: DOC-tər /ˈdɑːktər/ — or في آخر doctor ضعيفة.",
         "fromLessonId": "srp_317"
       },
@@ -10192,10 +10300,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (نبر الكلمة: أين الضغط؟): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Reading without pauses",
           "comPUter /kəmˈpjuːtər/",
           "COMputer"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: comPUter /kəmˈpjuːtər/ — computer ضغطها على المقطع الثاني PU.",
         "fromLessonId": "srp_315"
       },
@@ -10204,6 +10313,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "knife /naɪf/",
+          "Reading without pauses",
           "k-nife with a /k/"
         ],
         "correctIndex": 0,
@@ -10278,7 +10388,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Reading quotes in the narrator's voice",
-            "Change voice for each character"
+            "Change voice for each character",
+            "Change voice for character each"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: Change voice for each character — القصص تحيا بتغيير الصوت."
@@ -10383,19 +10494,21 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I-WANT-A-CUP-OF-TEA (all equal)",
+          "I WANT an CUP of TEA",
           "I WANT a CUP of TEA"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I WANT a CUP of TEA — التساوي يخلي الكلام آلي."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "To BEACH the",
           "to the BEACH",
           "Stressing 'the': to THE beach"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: to the BEACH — the ضعيفة /ðə/."
       },
       {
@@ -10403,7 +10516,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Stressing 'of': a cup OF tea",
-          "a CUP of TEA /ə kʌp əv tiː/"
+          "a CUP of TEA /ə kʌp əv tiː/",
+          "an CUP of TEA /ə kʌp əv tiː/"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: a CUP of TEA /ə kʌp əv tiː/ — of تصير /əv/."
@@ -10793,10 +10907,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (القراءة المعبرة: علامات الترقيم والوقفات): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I-WANT-A-CUP-OF-TEA (all equal)",
           "Flat voice for 'Help!'",
           "Strong, loud voice for 'Help!'"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Strong, loud voice for 'Help!' — التعجب يحتاج طاقة.",
         "fromLessonId": "srp_318"
       },
@@ -10805,6 +10920,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "student /ˈstuːdənt/",
+          "I-WANT-A-CUP-OF-TEA (all equal)",
           "estudent"
         ],
         "correctIndex": 0,
@@ -10816,7 +10932,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Give me the pen to write.",
-          "Give me the pin to write."
+          "Give me the pin to write.",
+          "Give me the pen write to."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Give me the pen to write. — pen للكتابة، pin دبوس.",
@@ -10890,9 +11007,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Every word at the same volume",
+            "Strong content words, weak words function",
             "Strong content words, weak function words"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Strong content words, weak function words — هذا سر الطلاقة الحقيقي."
         }
       ]
@@ -10995,7 +11113,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Guess from context and keep reading",
-          "Stopping at every new word"
+          "Stopping at every new word",
+          "Guess from context and reading keep"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Guess from context and keep reading — التوقف يضيع الفكرة."
@@ -11005,9 +11124,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Translating word by word",
+          "Stopping at every new word",
           "Read in chunks: 'every morning / he sailed out / before sunrise'"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Read in chunks: 'every morning / he sailed out / before sunrise' — القراءة بمجموعات أسرع وأفهم."
       },
       {
@@ -11015,7 +11135,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Answering from memory, not the text",
-          "Find the line in the text that proves it"
+          "Find the line in the text that proves it",
+          "Find the line in the text that it proves"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Find the line in the text that proves it — ارجع للنص كدليل."
@@ -11404,10 +11525,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (نبر الجملة: الكلمات المهمة أقوى): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "To BEACH the",
           "Stressing 'the': to THE beach",
           "to the BEACH"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: to the BEACH — the ضعيفة /ðə/.",
         "fromLessonId": "srp_319"
       },
@@ -11416,6 +11538,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "bə-NA-nə /bəˈnænə/",
+          "Stopping at every new word",
           "ba-NA-NA (all full vowels)"
         ],
         "correctIndex": 0,
@@ -11427,7 +11550,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "walked as «ووكِد» (2 syllables)",
-          "walked /wɔːkt/ (1 syllable)"
+          "walked /wɔːkt/ (1 syllable)",
+          "Stopping at every new word"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: walked /wɔːkt/ (1 syllable) — ed بعد k = /t/ بدون مقطع.",
@@ -11501,7 +11625,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "pearl read as «بيرل»",
-            "pearl /pɜːrl/"
+            "pearl /pɜːrl/",
+            "Stopping at every new word"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: pearl /pɜːrl/ — صوت /ɜːr/ مثل bird."
@@ -11606,7 +11731,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Exit = entrance",
-          "Exit = مخرج, Entrance = مدخل"
+          "Exit = مخرج, Entrance = مدخل",
+          "Push the door when it says Pull"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Exit = مخرج, Entrance = مدخل — لا تخلط."
@@ -11616,9 +11742,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Push the door when it says Pull",
+          "Exit = entrance",
           "Pull = اسحب, Push = ادفع"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Pull = اسحب, Push = ادفع — أشهر غلطة!"
       },
       {
@@ -11626,6 +11753,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Best before = best quality before; Expiry/Use by = do not use after",
+          "Best before = best quality before; Expiry/Use by = does not use after",
           "Best before = expiry date exactly"
         ],
         "correctIndex": 0,
@@ -12017,7 +12145,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Translating word by word",
-          "Read in chunks: 'every morning / he sailed out / before sunrise'"
+          "Read in chunks: 'every morning / he sailed out / before sunrise'",
+          "Exit = entrance"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Read in chunks: 'every morning / he sailed out / before sunrise' — القراءة بمجموعات أسرع وأفهم.",
@@ -12028,9 +12157,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Reading without pauses",
+          "Pause at every comma and stop full",
           "Pause at every comma and full stop"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Pause at every comma and full stop — القراءة المتواصلة تضيع المعنى.",
         "fromLessonId": "srp_318"
       },
@@ -12038,10 +12168,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (نبر الكلمة: أين الضغط؟): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Exit = entrance",
           "comPUter /kəmˈpjuːtər/",
           "COMputer"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: comPUter /kəmˈpjuːtər/ — computer ضغطها على المقطع الثاني PU.",
         "fromLessonId": "srp_315"
       },
@@ -12112,10 +12243,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Exit = entrance",
             "Do not exceed = لا تزيد/لا تتجاوز",
             "exceed /ɪkˈsiːd/"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: exceed /ɪkˈsiːd/ — كلمة مهمة في الأدوية."
         }
       ]
@@ -12218,7 +12350,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Turn / it / off (separated)",
-          "Turn_it_off /tɜːrnɪˈtɔːf/"
+          "Turn_it_off /tɜːrnɪˈtɔːf/",
+          "Inserting a glottal stop: an ʔapple"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Turn_it_off /tɜːrnɪˈtɔːf/ — الفصل يخلي الكلام متقطع."
@@ -12227,10 +12360,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Turn / it / off (separated)",
           "an_apple /əˈnæpəl/",
           "Inserting a glottal stop: an ʔapple"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: an_apple /əˈnæpəl/ — العربي يضع همزة قبل الحرف المتحرك؛ الإنجليزي يربط."
       },
       {
@@ -12238,9 +12372,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Pick up it",
+          "Turn / it / off (separated)",
           "Pick it up"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Pick it up — الضمير بين الفعل وحرف الجر."
       }
     ],
@@ -12631,6 +12766,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Pull = اسحب, Push = ادفع",
+          "Turn / it / off (separated)",
           "Push the door when it says Pull"
         ],
         "correctIndex": 0,
@@ -12642,9 +12778,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I-WANT-A-CUP-OF-TEA (all equal)",
+          "I WANT an CUP of TEA",
           "I WANT a CUP of TEA"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I WANT a CUP of TEA — التساوي يخلي الكلام آلي.",
         "fromLessonId": "srp_319"
       },
@@ -12653,6 +12790,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "student /ˈstuːdənt/",
+          "Turn / it / off (separated)",
           "estudent"
         ],
         "correctIndex": 0,
@@ -12727,7 +12865,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Glottal stop before vowels: «إن ءِبِل»",
-            "an apple /əˈnæpəl/"
+            "an apple /əˈnæpəl/",
+            "a apple /əˈnæpəl/"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: an apple /əˈnæpəl/ — تخلص من الهمزة بين الكلمات."
@@ -12831,20 +12970,22 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I want TOO go",
           "Fish AND chips (strong)",
           "fish 'n' chips /fɪʃən tʃɪps/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: fish 'n' chips /fɪʃən tʃɪps/ — and ضعيفة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Fish AND chips (strong)",
           "I want to go /tə ɡoʊ/",
           "I want TOO go"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I want to go /tə ɡoʊ/ — to ضعيفة /tə/."
       },
       {
@@ -12852,9 +12993,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Yes, I /kən/.",
+          "Not mentioned",
           "Yes, I can /kæn/."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Yes, I can /kæn/. — في آخر الجملة قوية."
       }
     ],
@@ -13051,10 +13193,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "يقدر يدفع بالبطاقة؟",
           "questionEn": "Can he pay by card?",
           "options": [
+            "Not mentioned",
             "Yes",
             "No"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الإجابة: Yes"
         }
       ]
@@ -13242,9 +13385,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Inserting a glottal stop: an ʔapple",
+          "Fish AND chips (strong)",
           "an_apple /əˈnæpəl/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: an_apple /əˈnæpəl/ — العربي يضع همزة قبل الحرف المتحرك؛ الإنجليزي يربط.",
         "fromLessonId": "srp_303"
       },
@@ -13252,10 +13396,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (قراءة قصة قصيرة وفهمها): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Guess from context and reading keep",
           "Stopping at every new word",
           "Guess from context and keep reading"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Guess from context and keep reading — التوقف يضيع الفكرة.",
         "fromLessonId": "srp_320"
       },
@@ -13264,6 +13409,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "bə-NA-nə /bəˈnænə/",
+          "Fish AND chips (strong)",
           "ba-NA-NA (all full vowels)"
         ],
         "correctIndex": 0,
@@ -13337,10 +13483,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Fish AND chips (strong)",
             "to /tə/",
             "Every 'to' as «تو» long"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: to /tə/ — صيغة قوية دايماً = نطق غير طبيعي."
         }
       ]
@@ -13421,19 +13568,21 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Intonation of 'Where are you going?':",
         "options": [
           "↗",
+          "Where do you live? ↗ (rising)",
           "↘"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "wh ⇐ ↘."
       },
       {
         "questionAr": "آخر عنصر في القائمة:",
         "questionEn": "Last item in a list:",
         "options": [
+          "Where do you live? ↗ (rising)",
           "↗",
           "↘"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "↘ يقفل القائمة."
       },
       {
@@ -13441,7 +13590,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Where do you live? ↘",
-          "Where do you live? ↗ (rising)"
+          "Where do you live? ↗ (rising)",
+          "Where does you live? ↘"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Where do you live? ↘ — أسئلة wh نازلة."
@@ -13451,6 +13601,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Thank you ↘ (warm fall)",
+          "Where do you live? ↗ (rising)",
           "Flat 'Thank you' →"
         ],
         "correctIndex": 0,
@@ -13461,6 +13612,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "eggs ↗, milk ↗, and bread ↘",
+          "Where do you live? ↗ (rising)",
           "Rising on every item including last"
         ],
         "correctIndex": 0,
@@ -13852,9 +14004,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I want TOO go",
+          "Where do you live? ↗ (rising)",
           "I want to go /tə ɡoʊ/"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I want to go /tə ɡoʊ/ — to ضعيفة /tə/.",
         "fromLessonId": "srp_322"
       },
@@ -13863,9 +14016,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Exit = entrance",
+          "Where do you live? ↗ (rising)",
           "Exit = مخرج, Entrance = مدخل"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Exit = مخرج, Entrance = مدخل — لا تخلط.",
         "fromLessonId": "srp_321_m"
       },
@@ -13874,9 +14028,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Reading without pauses",
+          "Pause at every comma and stop full",
           "Pause at every comma and full stop"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Pause at every comma and full stop — القراءة المتواصلة تضيع المعنى.",
         "fromLessonId": "srp_318"
       },
@@ -13947,10 +14102,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Where do you live? ↗ (rising)",
             "Flat Arabic-style intonation for English questions",
             "Clear ↗ on yes/no questions"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Clear ↗ on yes/no questions — بدون صعود ممكن ينفهم سؤالك كجملة."
         }
       ]
@@ -14053,6 +14209,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Read headline + first sentences first",
+          "Read headline + first first sentences",
           "Reading every word slowly"
         ],
         "correctIndex": 0,
@@ -14062,10 +14219,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Ignore words that doesn't block the main idea",
           "Looking up every new word",
           "Ignore words that don't block the main idea"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Ignore words that don't block the main idea — مو كل كلمة مهمة."
       },
       {
@@ -14073,6 +14231,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Summary in your own words",
+          "Summary in your words own",
           "Summary = copy a sentence"
         ],
         "correctIndex": 0,
@@ -14464,9 +14623,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Flat 'Thank you' →",
+          "Reading every word slowly",
           "Thank you ↘ (warm fall)"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Thank you ↘ (warm fall) — الصوت المسطح يبين ملل.",
         "fromLessonId": "srp_323"
       },
@@ -14475,7 +14635,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Turn / it / off (separated)",
-          "Turn_it_off /tɜːrnɪˈtɔːf/"
+          "Turn_it_off /tɜːrnɪˈtɔːf/",
+          "Reading every word slowly"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Turn_it_off /tɜːrnɪˈtɔːf/ — الفصل يخلي الكلام متقطع.",
@@ -14486,6 +14647,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I WANT a CUP of TEA",
+          "I WANT an CUP of TEA",
           "I-WANT-A-CUP-OF-TEA (all equal)"
         ],
         "correctIndex": 0,
@@ -14560,9 +14722,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Translating the whole article first",
+            "Skim in English first, then details check",
             "Skim in English first, then check details"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Skim in English first, then check details — الترجمة الكاملة بطيئة."
         }
       ]
@@ -14665,9 +14828,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Reading the whole timetable top to bottom",
+          "Jump to the line with your number flight",
           "Jump to the line with your flight number"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Jump to the line with your flight number — ابحث عن المفتاح مباشرة."
       },
       {
@@ -14675,19 +14839,21 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Confusing departs and arrives",
+          "Reading the whole timetable top to bottom",
           "departs = تقلع, arrives = توصل"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: departs = تقلع, arrives = توصل — أهم كلمتين في الجداول."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Reading the whole timetable top to bottom",
           "14:35 = 4:35 pm",
           "14:35 = 2:35 pm"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: 14:35 = 2:35 pm — نظام ٢٤ ساعة."
       }
     ],
@@ -15076,7 +15242,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Looking up every new word",
-          "Ignore words that don't block the main idea"
+          "Ignore words that don't block the main idea",
+          "Ignore words that doesn't block the main idea"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Ignore words that don't block the main idea — مو كل كلمة مهمة.",
@@ -15087,6 +15254,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "fish 'n' chips /fɪʃən tʃɪps/",
+          "Reading the whole timetable top to bottom",
           "Fish AND chips (strong)"
         ],
         "correctIndex": 0,
@@ -15097,10 +15265,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (قراءة قصة قصيرة وفهمها): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Guess from context and reading keep",
           "Stopping at every new word",
           "Guess from context and keep reading"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Guess from context and keep reading — التوقف يضيع الفكرة.",
         "fromLessonId": "srp_320"
       },
@@ -15172,9 +15341,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Reading 24-hour time as 12-hour",
+            "Reading the whole timetable top to bottom",
             "14:00 = 2 pm"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: 14:00 = 2 pm — خطأ ممكن يفوتك القطار!"
         }
       ]
@@ -15277,7 +15447,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Choose one accent and be consistent",
-          "Hard British T in an American accent mix"
+          "Hard British T in an American accent mix",
+          "Choose one accent and consistent be"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Choose one accent and be consistent — الاثنين صح، بس لا تخلط بشكل غريب."
@@ -15287,6 +15458,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "hotel /hoʊˈtɛl/",
+          "Hard British T in an American accent mix",
           "Flap in 'hotel': «هودِل»"
         ],
         "correctIndex": 0,
@@ -15297,9 +15469,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Not understanding 'wader'",
+          "Hard British T in an American accent mix",
           "water /ˈwɑːɾər/ (US)"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: water /ˈwɑːɾər/ (US) — تعرف عليها في الأفلام والمسلسلات."
       }
     ],
@@ -15688,7 +15861,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Confusing departs and arrives",
-          "departs = تقلع, arrives = توصل"
+          "departs = تقلع, arrives = توصل",
+          "Hard British T in an American accent mix"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: departs = تقلع, arrives = توصل — أهم كلمتين في الجداول.",
@@ -15699,6 +15873,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Where do you live? ↘",
+          "Where does you live? ↘",
           "Where do you live? ↗ (rising)"
         ],
         "correctIndex": 0,
@@ -15710,6 +15885,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Exit = مخرج, Entrance = مدخل",
+          "Hard British T in an American accent mix",
           "Exit = entrance"
         ],
         "correctIndex": 0,
@@ -15784,7 +15960,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "«واتِر» with strong t in US conversation",
-            "Either is fine; but recognise /ˈwɑːɾər/"
+            "Either is fine; but recognise /ˈwɑːɾər/",
+            "Either are fine; but recognise /ˈwɑːɾər/"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: Either is fine; but recognise /ˈwɑːɾər/ — مهم للفهم أكثر من النطق."
@@ -15889,7 +16066,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm going to send the report.",
-          "Writing 'gonna' in an email to your boss"
+          "Writing 'gonna' in an email to your boss",
+          "I'm going to send report the."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'm going to send the report. — الاختصارات العامية للكلام فقط."
@@ -15899,6 +16077,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm gonna go.",
+          "I'm go gonna.",
           "I'm gonna to go."
         ],
         "correctIndex": 0,
@@ -15909,7 +16088,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He wanna come.",
-          "He wants to come."
+          "He wants to come.",
+          "He wants come to."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: He wants to come. — مع he ما نستخدم wanna عادة."
@@ -16312,6 +16492,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "hotel /hoʊˈtɛl/",
+          "Writing 'gonna' in an email to your boss",
           "Flap in 'hotel': «هودِل»"
         ],
         "correctIndex": 0,
@@ -16322,10 +16503,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (القراءة السريعة للفكرة العامة (Skimming)): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Read headline + first first sentences",
           "Read headline + first sentences first",
           "Reading every word slowly"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Read headline + first sentences first — الهدف الفكرة العامة مو التفاصيل.",
         "fromLessonId": "srp_324"
       },
@@ -16334,7 +16516,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Turn_it_off /tɜːrnɪˈtɔːf/",
-          "Turn / it / off (separated)"
+          "Turn / it / off (separated)",
+          "Writing 'gonna' in an email to your boss"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Turn_it_off /tɜːrnɪˈtɔːf/ — الفصل يخلي الكلام متقطع.",
@@ -16408,6 +16591,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Use full forms in exams",
+            "Use full forms exams in",
             "Using slang in IELTS/formal speaking"
           ],
           "correctIndex": 0,
@@ -16513,7 +16697,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "claims = proves",
-          "claims = يدّعي (الكاتب يشك)"
+          "claims = يدّعي (الكاتب يشك)",
+          "so-called = famous"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: claims = يدّعي (الكاتب يشك) — اختيار الفعل يبين رأي الكاتب."
@@ -16522,20 +16707,22 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "claims = proves",
           "so-called = ما يسمى (سخرية/شك)",
           "so-called = famous"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: so-called = ما يسمى (سخرية/شك) — كلمة فيها انتقاد."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "claims = proves",
           "Answering from personal opinion",
           "Answer from the writer's words"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Answer from the writer's words — الاستنتاج من النص مو من رأيك."
       }
     ],
@@ -16923,10 +17110,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الاختصارات والحذف في الكلام السريع): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I'm go gonna.",
           "I'm gonna to go.",
           "I'm gonna go."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'm gonna go. — gonna فيها to أصلاً.",
         "fromLessonId": "srp_327"
       },
@@ -16935,6 +17123,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Jump to the line with your flight number",
+          "Jump to the line with your number flight",
           "Reading the whole timetable top to bottom"
         ],
         "correctIndex": 0,
@@ -16946,6 +17135,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "fish 'n' chips /fɪʃən tʃɪps/",
+          "claims = proves",
           "Fish AND chips (strong)"
         ],
         "correctIndex": 0,
@@ -17020,9 +17210,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Taking 'world-class' in quotes literally",
+            "Quotes can irony signal",
             "Quotes can signal irony"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Quotes can signal irony — الكاتب ينقل الكلمة ويشكك فيها."
         }
       ]
@@ -17125,7 +17316,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "You're welcome.",
-          "Your welcome."
+          "Your welcome.",
+          "Their going to the mall."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: You're welcome. — you are welcome."
@@ -17135,9 +17327,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Their going to the mall.",
+          "They're going to mall the.",
           "They're going to the mall."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: They're going to the mall. — they are going."
       },
       {
@@ -17145,6 +17338,7 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The company changed its logo.",
+          "The company changed logo its.",
           "The company changed it's logo."
         ],
         "correctIndex": 0,
@@ -17539,10 +17733,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (القراءة الاستنتاجية: ما بين السطور): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Your welcome.",
           "so-called = ما يسمى (سخرية/شك)",
           "so-called = famous"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: so-called = ما يسمى (سخرية/شك) — كلمة فيها انتقاد.",
         "fromLessonId": "srp_328"
       },
@@ -17550,10 +17745,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الـ T الأمريكية: water و better): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Choose one accent and consistent be",
           "Choose one accent and be consistent",
           "Hard British T in an American accent mix"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Choose one accent and be consistent — الاثنين صح، بس لا تخلط بشكل غريب.",
         "fromLessonId": "srp_326"
       },
@@ -17562,9 +17758,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Where do you live? ↗ (rising)",
+          "Where does you live? ↘",
           "Where do you live? ↘"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Where do you live? ↘ — أسئلة wh نازلة.",
         "fromLessonId": "srp_323"
       },
@@ -17636,9 +17833,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Using spell-check as a safety net",
+            "Spell-check homophones misses!",
             "Spell-check misses homophones!"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Spell-check misses homophones! — المدقق ما يكتشف their بدل there."
         }
       ]
@@ -17729,10 +17927,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "نهاية الجمل في الخطاب:",
         "questionEn": "Ending sentences in a speech:",
         "options": [
+          "Reading too fast to finish quickly",
           "↗ rise",
           "↘ fall"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "النزول يعطي ثقة."
       },
       {
@@ -17740,7 +17939,8 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Slow down: about 120–140 words per minute",
-          "Reading too fast to finish quickly"
+          "Reading too fast to finish quickly",
+          "Slow down: about 120–140 words minute per"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Slow down: about 120–140 words per minute — السرعة تضيع التأثير."
@@ -17750,19 +17950,21 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Pausing in the middle of a phrase",
+          "Pause between groups thought",
           "Pause between thought groups"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Pause between thought groups — الوقفة في المكان الغلط تكسر المعنى."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Fall ↘ to confident sound",
           "Rising tone at the end of every sentence",
           "Fall ↘ to sound confident"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Fall ↘ to sound confident — الصعود يبين تردد."
       }
     ],
@@ -18152,9 +18354,10 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Their going to the mall.",
+          "They're going to mall the.",
           "They're going to the mall."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: They're going to the mall. — they are going.",
         "fromLessonId": "srp_329"
       },
@@ -18162,10 +18365,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الاختصارات والحذف في الكلام السريع): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I'm going to send report the.",
           "Writing 'gonna' in an email to your boss",
           "I'm going to send the report."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'm going to send the report. — الاختصارات العامية للكلام فقط.",
         "fromLessonId": "srp_327"
       },
@@ -18173,10 +18377,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (القراءة السريعة للفكرة العامة (Skimming)): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Read headline + first first sentences",
           "Read headline + first sentences first",
           "Reading every word slowly"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Read headline + first sentences first — الهدف الفكرة العامة مو التفاصيل.",
         "fromLessonId": "srp_324"
       },
@@ -18247,10 +18452,11 @@ export const SARA_READING_PHONETICS_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Look up at the end of chunk each",
             "Look up at the end of each chunk",
             "Reading with eyes down all the time"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Look up at the end of each chunk — التواصل البصري يزيد التأثير."
         }
       ]

@@ -102,6 +102,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am Faisal.",
+          "I is Faisal.",
           "I Faisal."
         ],
         "correctIndex": 0,
@@ -111,10 +112,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I are ten.",
           "I am ten. / I'm ten years old.",
           "I is ten."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I am ten. / I'm ten years old. — مع I نستخدم am دائماً، وليس is."
       },
       {
@@ -122,7 +124,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "You is my friend.",
-          "You are my friend."
+          "You are my friend.",
+          "You am my friend."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: You are my friend. — مع you نستخدم are حتى لو كان شخصاً واحداً."
@@ -562,7 +565,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "My name Faisal.",
-            "My name is Faisal."
+            "My name is Faisal.",
+            "My name are Faisal."
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: My name is Faisal. — لا تحذف is/am/are؛ الإنجليزي ما يقبل جملة اسمية بدون فعل."
@@ -667,7 +671,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My sister is tall.",
-          "My sister he is tall."
+          "My sister he is tall.",
+          "My sister are tall."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: My sister is tall. — لا نكرر الضمير بعد الاسم مثل «أختي هي طويلة»."
@@ -676,10 +681,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She are my mother.",
           "She is my mother.",
           "He is my mother."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: She is my mother. — she للأنثى و he للذكر؛ لا تخلط بينهما."
       },
       {
@@ -687,9 +693,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My father doctor.",
+          "My father are a doctor.",
           "My father is a doctor."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: My father is a doctor. — نحتاج is، ونحتاج a قبل المهنة."
       }
     ],
@@ -1079,7 +1086,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am ten. / I'm ten years old.",
-          "I is ten."
+          "I is ten.",
+          "I are ten."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I am ten. / I'm ten years old. — مع I نستخدم am دائماً، وليس is.",
@@ -1140,7 +1148,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "She is my brother.",
-            "He is my brother."
+            "He is my brother.",
+            "He are my brother."
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: He is my brother. — بعض المتعلمين يخلطون he و she في الكلام السريع؛ ركّز: he = هو، she = هي."
@@ -1245,6 +1254,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Are you hungry?",
+          "Are hungry you?",
           "You are hungry?"
         ],
         "correctIndex": 0,
@@ -1255,7 +1265,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I no tired.",
-          "I'm not tired."
+          "I'm not tired.",
+          "I'm tired not."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I'm not tired. — النفي مع be يكون بـ not بعد الفعل، وليس no."
@@ -1264,10 +1275,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Not mentioned",
           "Yes, I'm.",
           "Yes, I am."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Yes, I am. — في الجواب القصير الإيجابي ما نختصر: Yes, I am."
       }
     ],
@@ -1443,7 +1455,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Is the student ready?",
           "options": [
             "Yes, he is.",
-            "No, he isn't."
+            "No, he isn't.",
+            "Not mentioned"
           ],
           "correctIndex": 0,
           "explanationAr": "الإجابة: Yes, he is."
@@ -1453,9 +1466,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Is the student hungry?",
           "options": [
             "Yes",
+            "Not mentioned",
             "No, he's thirsty"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الإجابة: No, he's thirsty"
         },
         {
@@ -1654,7 +1668,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He is my mother.",
-          "She is my mother."
+          "She is my mother.",
+          "She are my mother."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: She is my mother. — she للأنثى و he للذكر؛ لا تخلط بينهما.",
@@ -1728,6 +1743,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "He isn't at home.",
+            "He isn't home at.",
             "He not at home."
           ],
           "correctIndex": 0,
@@ -1832,20 +1848,22 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "These is my books.",
           "These are my books.",
           "This are my books."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: These are my books. — الجمع يحتاج these و are."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "That are my bag.",
           "That is my bag.",
           "Those is my bag."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: That is my bag. — شيء واحد بعيد ⇐ that is."
       },
       {
@@ -1853,7 +1871,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "What's this? It's eraser.",
-          "It's an eraser."
+          "It's an eraser.",
+          "It's a eraser."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: It's an eraser. — نستخدم an قبل الكلمة التي تبدأ بصوت متحرك."
@@ -2052,10 +2071,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "الشنطة للطالب؟",
           "questionEn": "Is the bag the student's?",
           "options": [
+            "Not mentioned",
             "Yes",
             "No"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الإجابة: Yes"
         }
       ]
@@ -2243,7 +2263,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm not tired.",
-          "I no tired."
+          "I no tired.",
+          "I'm tired not."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'm not tired. — النفي مع be يكون بـ not بعد الفعل، وليس no.",
@@ -2254,7 +2275,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am Faisal.",
-          "I Faisal."
+          "I Faisal.",
+          "I is Faisal."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I am Faisal. — في العربي نقول «أنا فيصل» بدون فعل، لكن في الإنجليزي لازم am.",
@@ -2327,10 +2349,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "This are a pencil.",
             "This is a pencil.",
             "This is pencil."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: This is a pencil. — العربي ما فيه أداة نكرة؛ في الإنجليزي لازم a/an مع المفرد."
         }
       ]
@@ -2433,9 +2456,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my house there is four rooms.",
+          "In my house there am four rooms.",
           "In my house there are four rooms."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: In my house there are four rooms. — أكثر من واحد ⇐ there are."
       },
       {
@@ -2443,9 +2467,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My house has a garden near.",
+          "There are a garden near my house.",
           "There is a garden near my house."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: There is a garden near my house. — للتعبير عن وجود شيء في مكان نستخدم there is."
       },
       {
@@ -2453,7 +2478,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "There is not garden.",
-          "There isn't a garden. / There's no garden."
+          "There isn't a garden. / There's no garden.",
+          "There isn't an garden."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: There isn't a garden. / There's no garden. — مع isn't نحتاج a، أو نقول There's no."
@@ -2843,10 +2869,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (This / That / These / Those في الفصل والبيت): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "That are my bag.",
           "Those is my bag.",
           "That is my bag."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: That is my bag. — شيء واحد بعيد ⇐ that is.",
         "fromLessonId": "sg_106"
       },
@@ -2855,7 +2882,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My sister he is tall.",
-          "My sister is tall."
+          "My sister is tall.",
+          "My sister are tall."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: My sister is tall. — لا نكرر الضمير بعد الاسم مثل «أختي هي طويلة».",
@@ -2928,10 +2956,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "My house have five rooms.",
             "My house it has five rooms.",
             "My house has five rooms. / There are five rooms in my house."
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: My house has five rooms. / There are five rooms in my house. — لا تكرر الضمير it بعد الاسم."
         }
       ]
@@ -3034,29 +3063,32 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She have a phone.",
+          "She has an phone.",
           "She has a phone."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: She has a phone. — مع she/he/it نستخدم has."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I doesn't have a car.",
           "I have not a car.",
           "I don't have a car."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I don't have a car. — النفي في الإنجليزي الحديث يكون بـ don't have."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "He don't have a bike.",
           "He doesn't have a bike.",
           "He doesn't has a bike."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: He doesn't have a bike. — بعد doesn't يرجع الفعل لأصله have."
       }
     ],
@@ -3444,10 +3476,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (There is / There are: وصف البيت): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "There are a garden near my house.",
           "My house has a garden near.",
           "There is a garden near my house."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: There is a garden near my house. — للتعبير عن وجود شيء في مكان نستخدم there is.",
         "fromLessonId": "sg_107"
       },
@@ -3456,7 +3489,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "You are hungry?",
-          "Are you hungry?"
+          "Are you hungry?",
+          "Are hungry you?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Are you hungry? — في السؤال المكتوب نقدم are قبل you.",
@@ -3530,6 +3564,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I'm 20 years old.",
+            "I'm 20 old years.",
             "I have 20 years."
           ],
           "correctIndex": 0,
@@ -3635,7 +3670,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am wake up at six.",
-          "I wake up at six."
+          "I wake up at six.",
+          "I wake up six at."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I wake up at six. — لا نضع am قبل الفعل في المضارع البسيط."
@@ -3645,7 +3681,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I go to school at 7 o'clock.",
-          "I go to school in 7 o'clock."
+          "I go to school in 7 o'clock.",
+          "I am wake up at six."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I go to school at 7 o'clock. — مع الساعة نستخدم at."
@@ -3655,7 +3692,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I go to bed at ten.",
-          "I going to bed at ten."
+          "I going to bed at ten.",
+          "I go to bed ten at."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I go to bed at ten. — للروتين نستخدم الفعل الأصلي بدون ing."
@@ -4045,10 +4083,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Have و Has: أشياؤك وعائلتك): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I doesn't have a car.",
           "I have not a car.",
           "I don't have a car."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I don't have a car. — النفي في الإنجليزي الحديث يكون بـ don't have.",
         "fromLessonId": "sg_108"
       },
@@ -4056,10 +4095,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (This / That / These / Those في الفصل والبيت): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "These is my books.",
           "This are my books.",
           "These are my books."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: These are my books. — الجمع يحتاج these و are.",
         "fromLessonId": "sg_106"
       },
@@ -4068,7 +4108,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I Faisal.",
-          "I am Faisal."
+          "I am Faisal.",
+          "I is Faisal."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I am Faisal. — في العربي نقول «أنا فيصل» بدون فعل، لكن في الإنجليزي لازم am.",
@@ -4142,7 +4183,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I go to the school every day.",
-            "I go to school every day."
+            "I go to school every day.",
+            "I go to school day every."
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: I go to school every day. — go to school/bed/work بدون the عند الكلام العام."
@@ -4247,6 +4289,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He works in a bank.",
+          "He works in an bank.",
           "He work in a bank."
         ],
         "correctIndex": 0,
@@ -4257,7 +4300,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She studys at night.",
-          "She studies at night."
+          "She studies at night.",
+          "She studies night at."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: She studies at night. — حرف ساكن + y ⇐ ies."
@@ -4267,7 +4311,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He goes to the gym.",
-          "He go to the gym."
+          "He go to the gym.",
+          "He goes to gym the."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: He goes to the gym. — go ⇐ goes مع he/she."
@@ -4658,9 +4703,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I go to school in 7 o'clock.",
+          "He work in a bank.",
           "I go to school at 7 o'clock."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I go to school at 7 o'clock. — مع الساعة نستخدم at.",
         "fromLessonId": "sg_109"
       },
@@ -4669,9 +4715,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my house there is four rooms.",
+          "In my house there am four rooms.",
           "In my house there are four rooms."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: In my house there are four rooms. — أكثر من واحد ⇐ there are.",
         "fromLessonId": "sg_107"
       },
@@ -4680,7 +4727,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My sister is tall.",
-          "My sister he is tall."
+          "My sister he is tall.",
+          "My sister are tall."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: My sister is tall. — لا نكرر الضمير بعد الاسم مثل «أختي هي طويلة».",
@@ -4753,10 +4801,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "My cooks mother.",
             "My mother cooks.",
             "My mother she cook."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: My mother cooks. — خطآن شائعان: تكرار الضمير ونسيان s."
         }
       ]
@@ -4859,7 +4908,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Does he play football?",
-          "Does he plays football?"
+          "Does he plays football?",
+          "Does he football play?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Does he play football? — بعد does الفعل يرجع لأصله."
@@ -4868,20 +4918,22 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Do you dates like?",
           "You like dates?",
           "Do you like dates?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Do you like dates? — في السؤال المكتوب نبدأ بـ do."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She doesn't milk like.",
           "She doesn't like milk.",
           "She don't like milk."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: She doesn't like milk. — she ⇐ doesn't."
       }
     ],
@@ -5079,7 +5131,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Does the student drink coffee?",
           "options": [
             "Yes",
-            "No"
+            "No",
+            "Not mentioned"
           ],
           "correctIndex": 1,
           "explanationAr": "الإجابة: No"
@@ -5268,10 +5321,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (He works / She studies: حرف s مع الغائب): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She studies night at.",
           "She studys at night.",
           "She studies at night."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: She studies at night. — حرف ساكن + y ⇐ ies.",
         "fromLessonId": "sg_110"
       },
@@ -5279,10 +5333,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Have و Has: أشياؤك وعائلتك): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She has an phone.",
           "She has a phone.",
           "She have a phone."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: She has a phone. — مع she/he/it نستخدم has.",
         "fromLessonId": "sg_108"
       },
@@ -5291,7 +5346,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "You are hungry?",
-          "Are you hungry?"
+          "Are you hungry?",
+          "Are hungry you?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Are you hungry? — في السؤال المكتوب نقدم are قبل you.",
@@ -5364,10 +5420,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Why doesn't you come?",
             "Why you don't come?",
             "Why don't you come?"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Why don't you come? — في سؤال wh الترتيب: Why + don't + you."
         }
       ]
@@ -5469,20 +5526,22 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I always go to school bus by.",
           "I always go to school by bus.",
           "I go always to school by bus."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I always go to school by bus. — كلمة التكرار قبل الفعل الأساسي."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She are always happy.",
           "She is always happy.",
           "She always is happy."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: She is always happy. — مع be تأتي بعده."
       },
       {
@@ -5490,7 +5549,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I don't never eat fish.",
-          "I never eat fish."
+          "I never eat fish.",
+          "I never fish eat."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I never eat fish. — never نفي بحد ذاتها؛ لا نجمعها مع don't."
@@ -5880,10 +5940,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Do و Does: السؤال والنفي في المضارع): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Do you dates like?",
           "Do you like dates?",
           "You like dates?"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Do you like dates? — في السؤال المكتوب نبدأ بـ do.",
         "fromLessonId": "sg_120_s"
       },
@@ -5891,10 +5952,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المضارع البسيط: روتينك اليومي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I wake up six at.",
           "I wake up at six.",
           "I am wake up at six."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I wake up at six. — لا نضع am قبل الفعل في المضارع البسيط.",
         "fromLessonId": "sg_109"
       },
@@ -5902,10 +5964,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (This / That / These / Those في الفصل والبيت): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "These is my books.",
           "This are my books.",
           "These are my books."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: These are my books. — الجمع يحتاج these و are.",
         "fromLessonId": "sg_106"
       },
@@ -5977,7 +6040,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Always I go to the mosque.",
-            "I always go to the mosque."
+            "I always go to the mosque.",
+            "I always go to mosque the."
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: I always go to the mosque. — العربي يقدّم «دائماً»، والإنجليزي يضعها قبل الفعل."
@@ -6082,7 +6146,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I can swim.",
-          "I can to swim."
+          "I can to swim.",
+          "I swim can."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I can swim. — لا نضع to بعد can."
@@ -6092,19 +6157,21 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She cans cook.",
+          "She cook can.",
           "She can cook."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: She can cook. — can لا تأخذ s أبداً."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "He can football play.",
           "He can play football.",
           "He can plays football."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: He can play football. — بعد can الفعل أصلي بدون s."
       }
     ],
@@ -6493,6 +6560,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She is always happy.",
+          "She are always happy.",
           "She always is happy."
         ],
         "correctIndex": 0,
@@ -6503,10 +6571,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (He works / She studies: حرف s مع الغائب): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "He works in an bank.",
           "He works in a bank.",
           "He work in a bank."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: He works in a bank. — مع he لازم s؛ هذا أكثر خطأ عند المتعلمين العرب.",
         "fromLessonId": "sg_110"
       },
@@ -6515,9 +6584,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my house there is four rooms.",
+          "In my house there am four rooms.",
           "In my house there are four rooms."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: In my house there are four rooms. — أكثر من واحد ⇐ there are.",
         "fromLessonId": "sg_107"
       },
@@ -6588,10 +6658,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "I can to swim.",
             "I can't come.",
             "I can't to come."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: I can't come. — لا to بعد can't."
         }
       ]
@@ -6693,10 +6764,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I'm now studying.",
           "I'm studying now.",
           "I studying now."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I'm studying now. — لا تنسَ am/is/are قبل ing."
       },
       {
@@ -6704,7 +6776,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She is make tea.",
-          "She is making tea."
+          "She is making tea.",
+          "She are making tea."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: She is making tea. — بعد is الفعل يأخذ ing."
@@ -6714,7 +6787,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am go to school every day.",
-          "I go to school every day."
+          "I go to school every day.",
+          "I go to school day every."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I go to school every day. — للعادات نستخدم المضارع البسيط، ليس المستمر."
@@ -7105,6 +7179,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She can cook.",
+          "She cook can.",
           "She cans cook."
         ],
         "correctIndex": 0,
@@ -7116,7 +7191,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Does he play football?",
-          "Does he plays football?"
+          "Does he plays football?",
+          "Does he football play?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Does he play football? — بعد does الفعل يرجع لأصله.",
@@ -7126,10 +7202,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Have و Has: أشياؤك وعائلتك): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She has an phone.",
           "She has a phone.",
           "She have a phone."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: She has a phone. — مع she/he/it نستخدم has.",
         "fromLessonId": "sg_108"
       },
@@ -7201,7 +7278,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I am wanting water.",
-            "I want water."
+            "I want water.",
+            "I water want."
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: I want water. — أفعال الحالة مثل want/like/know ما تأخذ ing عادة."
@@ -7306,9 +7384,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "We was in Jeddah.",
+          "We were Jeddah in.",
           "We were in Jeddah."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: We were in Jeddah. — we ⇐ were."
       },
       {
@@ -7316,9 +7395,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I were tired.",
+          "I tired was.",
           "I was tired."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I was tired. — I ⇐ was."
       },
       {
@@ -7326,7 +7406,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Yesterday I was at home.",
-          "Yesterday I at home."
+          "Yesterday I at home.",
+          "Yesterday I were at home."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Yesterday I was at home. — لا تحذف فعل be في الماضي أيضاً."
@@ -7717,7 +7798,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She is make tea.",
-          "She is making tea."
+          "She is making tea.",
+          "She are making tea."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: She is making tea. — بعد is الفعل يأخذ ing.",
@@ -7727,10 +7809,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Always / usually / never: كم مرة تسويها؟): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I always go to school bus by.",
           "I go always to school by bus.",
           "I always go to school by bus."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I always go to school by bus. — كلمة التكرار قبل الفعل الأساسي.",
         "fromLessonId": "sg_102"
       },
@@ -7738,10 +7821,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المضارع البسيط: روتينك اليومي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I wake up six at.",
           "I am wake up at six.",
           "I wake up at six."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I wake up at six. — لا نضع am قبل الفعل في المضارع البسيط.",
         "fromLessonId": "sg_109"
       },
@@ -7812,10 +7896,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "I were in the desert two days ago.",
             "I was in the desert two days ago.",
             "I was in the desert before two days."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: I was in the desert two days ago. — «قبل يومين» = two days ago، وليس before two days."
         }
       ]
@@ -7918,7 +8003,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I went to the mall.",
-          "I goed to the mall."
+          "I goed to the mall.",
+          "I went to mall the."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I went to the mall. — go فعل شاذ ⇐ went."
@@ -7928,7 +8014,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Yesterday I play football.",
-          "Yesterday I played football."
+          "Yesterday I played football.",
+          "Yesterday I football played."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Yesterday I played football. — مع yesterday لازم الماضي."
@@ -7937,10 +8024,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She bought an dress.",
           "She buyed a dress.",
           "She bought a dress."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: She bought a dress. — buy ⇐ bought."
       }
     ],
@@ -8328,10 +8416,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Was و Were: الماضي مع be): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I tired was.",
           "I were tired.",
           "I was tired."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I was tired. — I ⇐ was.",
         "fromLessonId": "sg_113"
       },
@@ -8340,9 +8429,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I can to swim.",
+          "I swim can.",
           "I can swim."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I can swim. — لا نضع to بعد can.",
         "fromLessonId": "sg_111"
       },
@@ -8350,10 +8440,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (He works / She studies: حرف s مع الغائب): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "He works in an bank.",
           "He works in a bank.",
           "He work in a bank."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: He works in a bank. — مع he لازم s؛ هذا أكثر خطأ عند المتعلمين العرب.",
         "fromLessonId": "sg_110"
       },
@@ -8425,7 +8516,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I was go to the mall.",
-            "I went to the mall."
+            "I went to the mall.",
+            "I went to mall the."
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: I went to the mall. — لا نجمع was مع فعل الماضي."
@@ -8530,7 +8622,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Did you go?",
-          "Did you went?"
+          "Did you went?",
+          "Did go you?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Did you go? — بعد did الفعل أصلي."
@@ -8540,7 +8633,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I didn't saw it.",
-          "I didn't see it."
+          "I didn't see it.",
+          "I didn't it see."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I didn't see it. — didn't + فعل أصلي."
@@ -8549,10 +8643,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Where did go you?",
           "Where you went?",
           "Where did you go?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Where did you go? — سؤال wh في الماضي يحتاج did."
       }
     ],
@@ -8728,7 +8823,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Did Sara watch the match?",
           "options": [
             "Yes",
-            "No"
+            "No",
+            "Not mentioned"
           ],
           "correctIndex": 1,
           "explanationAr": "الإجابة: No"
@@ -8939,10 +9035,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الماضي البسيط: أفعال منتظمة وشاذة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Yesterday I football played.",
           "Yesterday I play football.",
           "Yesterday I played football."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Yesterday I played football. — مع yesterday لازم الماضي.",
         "fromLessonId": "sg_114"
       },
@@ -8951,6 +9048,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm studying now.",
+          "I'm now studying.",
           "I studying now."
         ],
         "correctIndex": 0,
@@ -8962,7 +9060,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Does he play football?",
-          "Does he plays football?"
+          "Does he plays football?",
+          "Does he football play?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Does he play football? — بعد does الفعل يرجع لأصله.",
@@ -9036,7 +9135,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Did you go to the mall yesterday?",
-            "You went to the mall yesterday?"
+            "You went to the mall yesterday?",
+            "Did you go to the yesterday mall?"
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: Did you go to the mall yesterday? — في الكتابة لا نكتفي بنبرة السؤال كما في العربي."
@@ -9141,7 +9241,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I want some rice.",
-          "I want a rice."
+          "I want a rice.",
+          "I want rice some."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I want some rice. — rice غير معدود؛ ما نقول a rice."
@@ -9151,7 +9252,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "How many milk?",
-          "How much milk?"
+          "How much milk?",
+          "How milk much?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: How much milk? — milk غير معدود ⇐ How much."
@@ -9161,9 +9263,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "We don't have some bread.",
+          "We doesn't have any bread.",
           "We don't have any bread."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: We don't have any bread. — في النفي نستخدم any."
       }
     ],
@@ -9551,10 +9654,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Did: السؤال والنفي في الماضي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I didn't it see.",
           "I didn't saw it.",
           "I didn't see it."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I didn't see it. — didn't + فعل أصلي.",
         "fromLessonId": "sg_115"
       },
@@ -9562,10 +9666,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Was و Were: الماضي مع be): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "We were Jeddah in.",
           "We was in Jeddah.",
           "We were in Jeddah."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: We were in Jeddah. — we ⇐ were.",
         "fromLessonId": "sg_113"
       },
@@ -9573,10 +9678,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Always / usually / never: كم مرة تسويها؟): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I always go to school bus by.",
           "I go always to school by bus.",
           "I always go to school by bus."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I always go to school by bus. — كلمة التكرار قبل الفعل الأساسي.",
         "fromLessonId": "sg_102"
       },
@@ -9647,10 +9753,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "I want two loaves bread of.",
             "I want two loaves of bread. / I want some bread.",
             "I want two breads."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: I want two loaves of bread. / I want some bread. — bread غير معدود بالإنجليزي حتى لو نعده بالعربي."
         }
       ]
@@ -9753,6 +9860,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Riyadh is bigger than Abha.",
+          "Riyadh are bigger than Abha.",
           "Riyadh is bigger from Abha."
         ],
         "correctIndex": 0,
@@ -9763,9 +9871,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "This is more cheaper.",
+          "This are cheaper.",
           "This is cheaper."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: This is cheaper. — لا نجمع more مع er."
       },
       {
@@ -9773,7 +9882,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He is better than me.",
-          "He is gooder than me."
+          "He is gooder than me.",
+          "He are better than me."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: He is better than me. — good شاذة ⇐ better."
@@ -10164,6 +10274,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "How much milk?",
+          "How milk much?",
           "How many milk?"
         ],
         "correctIndex": 0,
@@ -10174,10 +10285,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الماضي البسيط: أفعال منتظمة وشاذة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I went to mall the.",
           "I goed to the mall.",
           "I went to the mall."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I went to the mall. — go فعل شاذ ⇐ went.",
         "fromLessonId": "sg_114"
       },
@@ -10186,9 +10298,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I can to swim.",
+          "I swim can.",
           "I can swim."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I can swim. — لا نضع to بعد can.",
         "fromLessonId": "sg_111"
       },
@@ -10259,10 +10372,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "My brother are taller than me.",
             "My brother is more tall than me.",
             "My brother is taller than me."
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: My brother is taller than me. — الصفات القصيرة بـ er."
         }
       ]
@@ -10365,6 +10479,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He is the tallest boy.",
+          "He are the tallest boy.",
           "He is the most tall boy."
         ],
         "correctIndex": 0,
@@ -10374,20 +10489,22 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She are the best student.",
           "She is the best student.",
           "She is best student."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: She is the best student. — لا تنسَ the مع التفضيل."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "The biggest city in Arabia Saudi.",
           "The biggest city of Saudi Arabia.",
           "The biggest city in Saudi Arabia."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: The biggest city in Saudi Arabia. — مع الأماكن نستخدم in."
       }
     ],
@@ -10776,7 +10893,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "This is cheaper.",
-          "This is more cheaper."
+          "This is more cheaper.",
+          "This are cheaper."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: This is cheaper. — لا نجمع more مع er.",
@@ -10787,9 +10905,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Did you went?",
+          "Did go you?",
           "Did you go?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Did you go? — بعد did الفعل أصلي.",
         "fromLessonId": "sg_115"
       },
@@ -10798,6 +10917,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm studying now.",
+          "I'm now studying.",
           "I studying now."
         ],
         "correctIndex": 0,
@@ -10872,7 +10992,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "He is the strongest.",
-            "He is the more strong."
+            "He is the more strong.",
+            "He are the strongest."
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: He is the strongest. — خلط المقارنة بالتفضيل."
@@ -10976,10 +11097,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I'm going travel to.",
           "I'm going to travel.",
           "I going to travel."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I'm going to travel. — لا تحذف am."
       },
       {
@@ -10987,6 +11109,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She is going to visit us.",
+          "She are going to visit us.",
           "She is going to visits us."
         ],
         "correctIndex": 0,
@@ -10996,10 +11119,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I'm going travel to.",
           "I'm going to the travel.",
           "I'm going to travel."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'm going to travel. — travel هنا فعل وليس اسم."
       }
     ],
@@ -11388,6 +11512,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She is the best student.",
+          "She are the best student.",
           "She is best student."
         ],
         "correctIndex": 0,
@@ -11398,10 +11523,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Some / Any / How much / How many: في السوبرماركت): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I want rice some.",
           "I want some rice.",
           "I want a rice."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I want some rice. — rice غير معدود؛ ما نقول a rice.",
         "fromLessonId": "sg_116"
       },
@@ -11409,10 +11535,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Was و Were: الماضي مع be): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "We were Jeddah in.",
           "We was in Jeddah.",
           "We were in Jeddah."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: We were in Jeddah. — we ⇐ were.",
         "fromLessonId": "sg_113"
       },
@@ -11483,10 +11610,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "I'm going to travel week next.",
             "I'm going to travel next week.",
             "I will to travel next week."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: I'm going to travel next week. — will لا تأخذ to، والخطة المقررة أفضل بـ going to."
         }
       ]
@@ -11589,7 +11717,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'll call you.",
-          "I will to call you."
+          "I will to call you.",
+          "I'll you call."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'll call you. — لا to بعد will."
@@ -11599,9 +11728,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm going to answer it! (phone rings now)",
+          "I'll it answer!",
           "I'll answer it!"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'll answer it! — القرار اللحظي ⇐ will."
       },
       {
@@ -11609,6 +11739,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He will come.",
+          "He come will.",
           "He wills come."
         ],
         "correctIndex": 0,
@@ -12000,9 +12131,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She is going to visits us.",
+          "She are going to visit us.",
           "She is going to visit us."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: She is going to visit us. — بعد to فعل أصلي.",
         "fromLessonId": "sg_119"
       },
@@ -12010,10 +12142,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المقارنة: bigger than / more expensive than): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Riyadh are bigger than Abha.",
           "Riyadh is bigger than Abha.",
           "Riyadh is bigger from Abha."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Riyadh is bigger than Abha. — «من» في المقارنة = than وليس from.",
         "fromLessonId": "sg_117"
       },
@@ -12021,10 +12154,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الماضي البسيط: أفعال منتظمة وشاذة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I went to mall the.",
           "I goed to the mall.",
           "I went to the mall."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I went to the mall. — go فعل شاذ ⇐ went.",
         "fromLessonId": "sg_114"
       },
@@ -12096,7 +12230,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I will going to travel.",
-            "I'm going to travel. / I'll travel."
+            "I'm going to travel. / I'll travel.",
+            "I'm going travel to."
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: I'm going to travel. / I'll travel. — لا نجمع will مع going to."
@@ -12201,7 +12336,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Have you ever been to Paris?",
-          "Have you ever went to Paris?"
+          "Have you ever went to Paris?",
+          "Have you ever been Paris to?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Have you ever been to Paris? — بعد have نستخدم التصريف الثالث."
@@ -12211,9 +12347,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I have visited London in 2022.",
+          "Have you ever went to Paris?",
           "I visited London in 2022."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I visited London in 2022. — مع وقت محدد نستخدم الماضي البسيط."
       },
       {
@@ -12221,6 +12358,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She has never seen snow.",
+          "She has never snow seen.",
           "She have never seen snow."
         ],
         "correctIndex": 0,
@@ -12615,6 +12753,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'll answer it!",
+          "I'll it answer!",
           "I'm going to answer it! (phone rings now)"
         ],
         "correctIndex": 0,
@@ -12626,9 +12765,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He is the most tall boy.",
+          "He are the tallest boy.",
           "He is the tallest boy."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: He is the tallest boy. — الصفة القصيرة ⇐ est.",
         "fromLessonId": "sg_118"
       },
@@ -12637,6 +12777,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Did you go?",
+          "Did go you?",
           "Did you went?"
         ],
         "correctIndex": 0,
@@ -12711,7 +12852,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Have you ever been to Paris?",
-            "Did you ever go to Paris? (as experience)"
+            "Did you ever go to Paris? (as experience)",
+            "Have you ever been Paris to?"
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: Have you ever been to Paris? — لسؤال التجربة نستخدم المضارع التام."
@@ -12816,7 +12958,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I have finished it yesterday.",
-          "I finished it yesterday."
+          "I finished it yesterday.",
+          "I finished yesterday it."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I finished it yesterday. — yesterday ⇐ ماضي بسيط."
@@ -12826,7 +12969,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I haven't eaten yet.",
-          "I didn't eat yet."
+          "I didn't eat yet.",
+          "I haven't yet eaten."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I haven't eaten yet. — yet مع المضارع التام (في الإنجليزية البريطانية والفصحى)."
@@ -12835,10 +12979,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I have finished it yesterday.",
           "I've finished just.",
           "I've just finished."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I've just finished. — just بين have والفعل."
       }
     ],
@@ -13226,10 +13371,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المضارع التام للتجارب: Have you ever...?): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I have finished it yesterday.",
           "I have visited London in 2022.",
           "I visited London in 2022."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I visited London in 2022. — مع وقت محدد نستخدم الماضي البسيط.",
         "fromLessonId": "sg_121"
       },
@@ -13238,7 +13384,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm going to travel.",
-          "I going to travel."
+          "I going to travel.",
+          "I'm going travel to."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'm going to travel. — لا تحذف am.",
@@ -13248,10 +13395,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Some / Any / How much / How many: في السوبرماركت): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I want rice some.",
           "I want some rice.",
           "I want a rice."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I want some rice. — rice غير معدود؛ ما نقول a rice.",
         "fromLessonId": "sg_116"
       },
@@ -13323,7 +13471,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Did you finish yet?",
-            "Have you finished yet?"
+            "Have you finished yet?",
+            "Have you yet finished?"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: Have you finished yet? — الإنجليزية الرسمية تفضّل المضارع التام مع yet."
@@ -13427,10 +13576,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "You should early sleep.",
           "You should sleep early.",
           "You should to sleep early."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: You should sleep early. — لا to بعد should."
       },
       {
@@ -13438,7 +13588,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He have to work.",
-          "He has to work."
+          "He has to work.",
+          "He has work to."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: He has to work. — he ⇐ has to."
@@ -13448,7 +13599,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "You mustn't come (meaning: optional).",
-          "You don't have to come."
+          "You don't have to come.",
+          "You doesn't have to come."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: You don't have to come. — mustn't = ممنوع، و don't have to = مو لازم."
@@ -13839,7 +13991,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I didn't eat yet.",
-          "I haven't eaten yet."
+          "I haven't eaten yet.",
+          "I haven't yet eaten."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I haven't eaten yet. — yet مع المضارع التام (في الإنجليزية البريطانية والفصحى).",
@@ -13850,7 +14003,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'll call you.",
-          "I will to call you."
+          "I will to call you.",
+          "I'll you call."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'll call you. — لا to بعد will.",
@@ -13860,10 +14014,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المقارنة: bigger than / more expensive than): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Riyadh are bigger than Abha.",
           "Riyadh is bigger from Abha.",
           "Riyadh is bigger than Abha."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Riyadh is bigger than Abha. — «من» في المقارنة = than وليس from.",
         "fromLessonId": "sg_117"
       },
@@ -13935,7 +14090,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "You must go.",
-            "You must to go."
+            "You must to go.",
+            "You go must."
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: You must go. — لا to بعد must."
@@ -14040,7 +14196,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "If it will rain, we'll stay home.",
-          "If it rains, we'll stay home."
+          "If it rains, we'll stay home.",
+          "If it rains, we'll home stay."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: If it rains, we'll stay home. — بعد if مضارع بسيط وليس will."
@@ -14050,7 +14207,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "If you study, you pass.",
-          "If you study, you'll pass."
+          "If you study, you'll pass.",
+          "If it will rain, we'll stay home."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: If you study, you'll pass. — النتيجة المستقبلية تحتاج will."
@@ -14060,7 +14218,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Unless you don't hurry, you'll be late.",
-          "Unless you hurry, you'll be late."
+          "Unless you hurry, you'll be late.",
+          "Unless you hurry, you'll late be."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Unless you hurry, you'll be late. — unless = if not، فلا نضيف نفياً ثانياً."
@@ -14450,10 +14609,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Should / Must / Have to: النصيحة والإلزام): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "He has work to.",
           "He have to work.",
           "He has to work."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: He has to work. — he ⇐ has to.",
         "fromLessonId": "sg_123"
       },
@@ -14461,10 +14621,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المضارع التام للتجارب: Have you ever...?): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Have you ever been Paris to?",
           "Have you ever been to Paris?",
           "Have you ever went to Paris?"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Have you ever been to Paris? — بعد have نستخدم التصريف الثالث.",
         "fromLessonId": "sg_121"
       },
@@ -14473,9 +14634,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He is the most tall boy.",
+          "He are the tallest boy.",
           "He is the tallest boy."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: He is the tallest boy. — الصفة القصيرة ⇐ est.",
         "fromLessonId": "sg_118"
       },
@@ -14547,7 +14709,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "If I travel, I'll tell you.",
-            "If I will travel, I will tell you."
+            "If I will travel, I will tell you.",
+            "If I travel, I'll you tell."
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: If I travel, I'll tell you. — لا تترجم «إذا بسافر» حرفياً."
@@ -14651,30 +14814,33 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I used to football play.",
           "I use to play football.",
           "I used to play football."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I used to play football. — في الإيجاب used بـ d."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I used to football play.",
           "I used to playing football.",
           "I used to play football."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I used to play football. — used to + فعل أصلي."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I didn't use to it like.",
           "I didn't use to like it.",
           "I didn't used to like it."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I didn't use to like it. — بعد didn't نكتب use."
       }
     ],
@@ -15063,7 +15229,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "If you study, you'll pass.",
-          "If you study, you pass."
+          "If you study, you pass.",
+          "I use to play football."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: If you study, you'll pass. — النتيجة المستقبلية تحتاج will.",
@@ -15073,10 +15240,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المضارع التام والماضي البسيط: just / already / yet): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I finished yesterday it.",
           "I have finished it yesterday.",
           "I finished it yesterday."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I finished it yesterday. — yesterday ⇐ ماضي بسيط.",
         "fromLessonId": "sg_122"
       },
@@ -15085,7 +15253,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm going to travel.",
-          "I going to travel."
+          "I going to travel.",
+          "I'm going travel to."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'm going to travel. — لا تحذف am.",
@@ -15159,9 +15328,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I was used to play football when I was young.",
+            "I used to play football when I were young.",
             "I used to play football when I was young."
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: I used to play football when I was young. — was used to معناها متعود، مو كنت أسوي."
         }
       ]
@@ -15264,6 +15434,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I was driving when my phone rang.",
+          "I were driving when my phone rang.",
           "I drove when my phone was ringing."
         ],
         "correctIndex": 0,
@@ -15273,10 +15444,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "While I were walking, I saw a cat.",
           "While I was walking, I saw a cat.",
           "While I walked, I was seeing a cat."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: While I was walking, I saw a cat. — عكس الأدوار خطأ."
       },
       {
@@ -15284,9 +15456,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "They was playing.",
+          "They playing were.",
           "They were playing."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: They were playing. — they ⇐ were."
       }
     ],
@@ -15676,10 +15849,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Used to: عادات الماضي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I used to football play.",
           "I used to play football.",
           "I used to playing football."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I used to play football. — used to + فعل أصلي.",
         "fromLessonId": "sg_125"
       },
@@ -15687,10 +15861,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Should / Must / Have to: النصيحة والإلزام): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "You should early sleep.",
           "You should to sleep early.",
           "You should sleep early."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: You should sleep early. — لا to بعد should.",
         "fromLessonId": "sg_123"
       },
@@ -15699,7 +15874,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'll call you.",
-          "I will to call you."
+          "I will to call you.",
+          "I'll you call."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'll call you. — لا to بعد will.",
@@ -15772,10 +15948,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "When I were driving, I saw...",
             "When I was drive, I saw...",
             "When I was driving, I saw..."
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: When I was driving, I saw... — لا تنسَ ing."
         }
       ]
@@ -15877,10 +16054,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "The man who lives door next...",
           "The man who he lives next door...",
           "The man who lives next door..."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: The man who lives next door... — لا نكرر he بعد who."
       },
       {
@@ -15888,7 +16066,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The car who I bought...",
-          "The car which/that I bought..."
+          "The car which/that I bought...",
+          "The car which/that bought I..."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: The car which/that I bought... — who للأشخاص فقط."
@@ -15898,7 +16077,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The city where I was born.",
-          "The city which I was born."
+          "The city which I was born.",
+          "The city where I were born."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: The city where I was born. — للمكان مع فعل لازم ⇐ where."
@@ -16289,7 +16469,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "While I was walking, I saw a cat.",
-          "While I walked, I was seeing a cat."
+          "While I walked, I was seeing a cat.",
+          "While I were walking, I saw a cat."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: While I was walking, I saw a cat. — عكس الأدوار خطأ.",
@@ -16300,6 +16481,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "If it rains, we'll stay home.",
+          "If it rains, we'll home stay.",
           "If it will rain, we'll stay home."
         ],
         "correctIndex": 0,
@@ -16310,10 +16492,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المضارع التام للتجارب: Have you ever...?): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Have you ever been Paris to?",
           "Have you ever went to Paris?",
           "Have you ever been to Paris?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Have you ever been to Paris? — بعد have نستخدم التصريف الثالث.",
         "fromLessonId": "sg_121"
       },
@@ -16384,10 +16567,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "The book that I read were great.",
             "The book that I read was great.",
             "The book that I read it was great."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: The book that I read was great. — بالعربي نقول «اللي قرأته»، بالإنجليزي ما نكرر it."
         }
       ]
@@ -16490,7 +16674,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The fort was built in 1865.",
-          "The fort was build in 1865."
+          "The fort was build in 1865.",
+          "The fort were built in 1865."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: The fort was built in 1865. — المجهول يحتاج التصريف الثالث built."
@@ -16499,20 +16684,22 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Coffee are made with cardamom.",
           "Coffee is made with cardamom.",
           "Coffee is make with cardamom."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Coffee is made with cardamom. — made وليس make."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "The thief were caught by the police.",
           "The thief was caught from the police.",
           "The thief was caught by the police."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: The thief was caught by the police. — الفاعل في المجهول بعد by."
       }
     ],
@@ -16903,6 +17090,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The car which/that I bought...",
+          "The car which/that bought I...",
           "The car who I bought..."
         ],
         "correctIndex": 0,
@@ -16913,10 +17101,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Used to: عادات الماضي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I used to football play.",
           "I used to play football.",
           "I use to play football."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I used to play football. — في الإيجاب used بـ d.",
         "fromLessonId": "sg_125"
       },
@@ -16924,10 +17113,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (المضارع التام والماضي البسيط: just / already / yet): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I finished yesterday it.",
           "I finished it yesterday.",
           "I have finished it yesterday."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I finished it yesterday. — yesterday ⇐ ماضي بسيط.",
         "fromLessonId": "sg_122"
       },
@@ -16998,10 +17188,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "This mosque were built in 1950.",
             "This mosque was built in 1950.",
             "This mosque built in 1950."
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: This mosque was built in 1950. — بدون was تصير الجملة كأن المسجد هو اللي بنى."
         }
       ]
@@ -17103,30 +17294,33 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "She told me that she were busy.",
           "She told me that she was busy.",
           "She said me that she was busy."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: She told me that she was busy. — said لا تأخذ مفعولاً مباشرة؛ told me."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "He asked me where worked I.",
           "He asked me where did I work.",
           "He asked me where I worked."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: He asked me where I worked. — في السؤال المنقول ترتيب جملة عادية."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "He said he come would.",
           "He said he will come.",
           "He said he would come."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: He said he would come. — will ⇐ would بعد said (في الغالب)."
       }
     ],
@@ -17515,7 +17709,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Coffee is made with cardamom.",
-          "Coffee is make with cardamom."
+          "Coffee is make with cardamom.",
+          "Coffee are made with cardamom."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Coffee is made with cardamom. — made وليس make.",
@@ -17525,10 +17720,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الماضي المستمر: كنت أسوق لما...): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I were driving when my phone rang.",
           "I drove when my phone was ringing.",
           "I was driving when my phone rang."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I was driving when my phone rang. — الحدث الطويل مستمر، والقصير بسيط.",
         "fromLessonId": "sg_126"
       },
@@ -17536,10 +17732,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (Should / Must / Have to: النصيحة والإلزام): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "You should early sleep.",
           "You should to sleep early.",
           "You should sleep early."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: You should sleep early. — لا to بعد should.",
         "fromLessonId": "sg_123"
       },
@@ -17610,10 +17807,11 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "He said that he were coming.",
             "He told that he is coming.",
             "He said that he was coming."
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: He said that he was coming. — told يحتاج شخصاً بعده؛ واستخدم said بدون مفعول."
         }
       ]
@@ -17716,9 +17914,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "If I would have money, I would travel.",
+          "If I had money, I travel would.",
           "If I had money, I would travel."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: If I had money, I would travel. — لا would بعد if."
       },
       {
@@ -17726,7 +17925,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "If I am you, I'll study.",
-          "If I were you, I'd study."
+          "If I were you, I'd study.",
+          "If I was you, I'd study."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: If I were you, I'd study. — النصيحة الخيالية ⇐ were + would."
@@ -17736,7 +17936,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I wish I could fly.",
-          "I wish I can fly."
+          "I wish I can fly.",
+          "I wish I fly could."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I wish I could fly. — بعد wish نرجع للماضي: could."
@@ -18127,6 +18328,7 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "He asked me where I worked.",
+          "He asked me where worked I.",
           "He asked me where did I work."
         ],
         "correctIndex": 0,
@@ -18138,7 +18340,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The man who he lives next door...",
-          "The man who lives next door..."
+          "The man who lives next door...",
+          "The man who lives door next..."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: The man who lives next door... — لا نكرر he بعد who.",
@@ -18149,9 +18352,10 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "If it will rain, we'll stay home.",
+          "If it rains, we'll home stay.",
           "If it rains, we'll stay home."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: If it rains, we'll stay home. — بعد if مضارع بسيط وليس will.",
         "fromLessonId": "sg_124"
       },
@@ -18223,7 +18427,8 @@ export const SARA_SPOKEN_GRAMMAR_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "If I had time, I would come.",
-            "If I have time, I would come."
+            "If I have time, I would come.",
+            "If I had time, I come would."
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: If I had time, I would come. — لا تخلط الشرط الأول بالثاني."

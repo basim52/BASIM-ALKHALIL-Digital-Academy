@@ -102,7 +102,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "my name is ali",
-          "My name is Ali."
+          "My name is Ali.",
+          "My name are Ali."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: My name is Ali. — حرف كبير في البداية وفي الاسم، ونقطة في الآخر."
@@ -112,7 +113,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "i like tea.",
-          "I like tea."
+          "I like tea.",
+          "I tea like."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I like tea. — I دائماً كبيرة."
@@ -122,7 +124,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I live in Riyadh.",
-          "I live in riyadh"
+          "I live in riyadh",
+          "I live Riyadh in."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I live in Riyadh. — أسماء المدن بحرف كبير + نقطة."
@@ -560,10 +563,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "English has capitals; Arabic don't",
             "Writing like Arabic with no capitals",
             "English has capitals; Arabic doesn't"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: English has capitals; Arabic doesn't — العربي ما فيه حروف كبيرة، فننساها."
         }
       ]
@@ -666,6 +670,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am 12 years old.",
+          "I is 12 years old.",
           "I have 12 years."
         ],
         "correctIndex": 0,
@@ -676,7 +681,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I live in Taif.",
-          "I am live in Taif."
+          "I am live in Taif.",
+          "I live Taif in."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I live in Taif. — لا تجمع am مع فعل."
@@ -686,9 +692,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I like play football.",
+          "I like football playing.",
           "I like playing football."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I like playing football. — بعد like نستخدم -ing أو to play."
       }
     ],
@@ -1076,10 +1083,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (الحرف الكبير والنقطة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I tea like.",
           "I like tea.",
           "i like tea."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I like tea. — I دائماً كبيرة.",
         "fromLessonId": "scw_401"
       }
@@ -1138,6 +1146,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I am 12 years old.",
+            "I is 12 years old.",
             "Translating «عندي ١٢ سنة»"
           ],
           "correctIndex": 0,
@@ -1242,20 +1251,22 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "My sister has an cat.",
           "My sister have a cat.",
           "My sister has a cat."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: My sister has a cat. — مع she/he/المفرد: has."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "My father are a teacher.",
           "My father is a teacher.",
           "My father he is a teacher."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: My father is a teacher. — لا تكرر الفاعل بضمير."
       },
       {
@@ -1263,7 +1274,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "She is my brother.",
-          "He is my brother."
+          "He is my brother.",
+          "He are my brother."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: He is my brother. — he للذكر، she للأنثى."
@@ -1653,10 +1665,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (أكتب عن نفسي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I live Taif in.",
           "I live in Taif.",
           "I am live in Taif."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I live in Taif. — لا تجمع am مع فعل.",
         "fromLessonId": "scw_404"
       },
@@ -1728,7 +1741,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "«my uncle» for both عم and خال without detail",
-            "my uncle (father's side) if needed"
+            "my uncle (father's side) if needed",
+            "My uncle (father's side) needed if"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: my uncle (father's side) if needed — الإنجليزي ما يفرق؛ وضّح إذا تحتاج."
@@ -1833,19 +1847,21 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "What your name?",
+          "What are your name?",
           "What is your name?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: What is your name? — لا تنسى is."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Do you tea like?",
           "Do you like tea?",
           "You like tea?"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Do you like tea? — في الكتابة استخدم Do."
       },
       {
@@ -1853,7 +1869,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Where do you live?",
-          "Where you live؟"
+          "Where you live؟",
+          "Where does you live?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Where do you live? — do + علامة ? الإنجليزية."
@@ -2243,7 +2260,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My father he is a teacher.",
-          "My father is a teacher."
+          "My father is a teacher.",
+          "My father are a teacher."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: My father is a teacher. — لا تكرر الفاعل بضمير.",
@@ -2254,9 +2272,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "my name is ali",
+          "My name are Ali.",
           "My name is Ali."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: My name is Ali. — حرف كبير في البداية وفي الاسم، ونقطة في الآخر.",
         "fromLessonId": "scw_401"
       },
@@ -2328,7 +2347,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Use ?",
-            "Using Arabic ؟ in English"
+            "Using Arabic ؟ in English",
+            "What your name?"
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: Use ? — الشكل مختلف: ? مقلوب عن العربي."
@@ -2432,30 +2452,33 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "How are you? I fine.",
           "I'm fine.",
           "Im fine."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I'm fine. — الفاصلة العليا (') لازمة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Im fine.",
           "How are you? I fine.",
           "I'm fine."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'm fine. — لا تحذف am."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Im fine.",
           "See you tomorrow, inshallah!",
           "See you tomorrow inshallah?"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: See you tomorrow, inshallah! — بدون ? إذا مو سؤال."
       }
     ],
@@ -2843,10 +2866,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (علامة الاستفهام وكتابة الأسئلة): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Do you tea like?",
           "You like tea?",
           "Do you like tea?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Do you like tea? — في الكتابة استخدم Do.",
         "fromLessonId": "scw_406"
       },
@@ -2854,10 +2878,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (أكتب عن نفسي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I is 12 years old.",
           "I am 12 years old.",
           "I have 12 years."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I am 12 years old. — العمر بـ am مو have.",
         "fromLessonId": "scw_404"
       },
@@ -2929,9 +2954,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Writing 'Hi' then a long paragraph",
+            "Short lines chats in",
             "Short lines in chats"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Short lines in chats — الواتساب رسائل قصيرة."
         }
       ]
@@ -3033,30 +3059,33 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I like tea, but I doesn't like coffee.",
           "I like tea, but I don't like coffee.",
           "I like tea, and I don't like coffee."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I like tea, but I don't like coffee. — الفكرتين متعاكسة ⇐ but."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I go to school study and.",
           "And I go to school. And I study.",
           "I go to school and study."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I go to school and study. — لا تبدأ كل جملة بـ and."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "It's cheap and good, small but.",
           "It's cheap but good but small.",
           "It's cheap and good, but small."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: It's cheap and good, but small. — لا تكرر but."
       }
     ],
@@ -3444,9 +3473,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "How are you? I fine.",
+          "I like tea, and I don't like coffee.",
           "I'm fine."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'm fine. — لا تحذف am.",
         "fromLessonId": "scw_407"
       },
@@ -3455,9 +3485,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My sister have a cat.",
+          "My sister has an cat.",
           "My sister has a cat."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: My sister has a cat. — مع she/he/المفرد: has.",
         "fromLessonId": "scw_405"
       },
@@ -3529,6 +3560,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Join inside one sentence",
+            "Join inside sentence one",
             "Starting sentences with 'And' like Arabic «و»"
           ],
           "correctIndex": 0,
@@ -3633,10 +3665,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I go to school bus by.",
           "I go to school by bus.",
           "I go to school with bus."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I go to school by bus. — وسيلة المواصلات بـ by."
       },
       {
@@ -3644,7 +3677,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My brother wake up at 7.",
-          "My brother wakes up at 7."
+          "My brother wakes up at 7.",
+          "I go to school with bus."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: My brother wakes up at 7. — he ⇐ wakes."
@@ -3654,7 +3688,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I make my homework.",
-          "I do my homework."
+          "I do my homework.",
+          "I does my homework."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I do my homework. — homework مع do."
@@ -4044,10 +4079,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (ربط الجمل بـ and و but): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I go to school study and.",
           "I go to school and study.",
           "And I go to school. And I study."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I go to school and study. — لا تبدأ كل جملة بـ and.",
         "fromLessonId": "scw_408"
       },
@@ -4056,9 +4092,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "What your name?",
+          "What are your name?",
           "What is your name?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: What is your name? — لا تنسى is.",
         "fromLessonId": "scw_406"
       },
@@ -4067,6 +4104,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My name is Ali.",
+          "My name are Ali.",
           "my name is ali"
         ],
         "correctIndex": 0,
@@ -4141,6 +4179,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "I wake up at 6 every day.",
+            "I wake up at 6 day every.",
             "Using -ing for habits: I am waking at 6 every day."
           ],
           "correctIndex": 0,
@@ -4245,10 +4284,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "There am two chairs.",
           "There are two chairs.",
           "There is two chairs."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: There are two chairs. — الجمع ⇐ are."
       },
       {
@@ -4256,6 +4296,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "There is a TV in my room.",
+          "There are a TV in my room.",
           "In my room have a TV."
         ],
         "correctIndex": 0,
@@ -4266,7 +4307,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The book is in the table.",
-          "The book is on the table."
+          "The book is on the table.",
+          "The book are on the table."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: The book is on the table. — على السطح ⇐ on."
@@ -4655,10 +4697,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (فقرة عن يومي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "There is two chairs.",
           "My brother wake up at 7.",
           "My brother wakes up at 7."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: My brother wakes up at 7. — he ⇐ wakes.",
         "fromLessonId": "scw_409"
       },
@@ -4667,9 +4710,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Im fine.",
+          "There is two chairs.",
           "I'm fine."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'm fine. — الفاصلة العليا (') لازمة.",
         "fromLessonId": "scw_407"
       },
@@ -4677,10 +4721,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (أكتب عن نفسي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I is 12 years old.",
           "I am 12 years old.",
           "I have 12 years."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I am 12 years old. — العمر بـ am مو have.",
         "fromLessonId": "scw_404"
       },
@@ -4752,7 +4797,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "«في غرفتي يوجد» → In my room there is",
-            "There is ... in my room (both OK)"
+            "There is ... in my room (both OK)",
+            "There are ... in my room (both OK)"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: There is ... in my room (both OK) — الأشيع تحط المكان آخر الجملة."
@@ -4857,7 +4903,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Would you like to come?",
-          "Would you like come?"
+          "Would you like come?",
+          "Would you like come to?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Would you like to come? — would like + to."
@@ -4867,6 +4914,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "It's on Thursday.",
+          "It's Thursday on.",
           "It's in Thursday."
         ],
         "correctIndex": 0,
@@ -4877,9 +4925,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "No, I can't.",
+          "Sorry, I can't make it. Thanks for me inviting!",
           "Sorry, I can't make it. Thanks for inviting me!"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Sorry, I can't make it. Thanks for inviting me! — الرفض بأدب مع شكر."
       }
     ],
@@ -5267,7 +5316,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my room have a TV.",
-          "There is a TV in my room."
+          "There is a TV in my room.",
+          "There are a TV in my room."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: There is a TV in my room. — «فيه» = there is، مو have.",
@@ -5277,10 +5327,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (ربط الجمل بـ and و but): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I like tea, but I doesn't like coffee.",
           "I like tea, but I don't like coffee.",
           "I like tea, and I don't like coffee."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I like tea, but I don't like coffee. — الفكرتين متعاكسة ⇐ but.",
         "fromLessonId": "scw_408"
       },
@@ -5289,6 +5340,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My sister has a cat.",
+          "My sister has an cat.",
           "My sister have a cat."
         ],
         "correctIndex": 0,
@@ -5363,9 +5415,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Missing the time or place",
+            "Would you like come?",
             "Always include day, time, place"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Always include day, time, place — الدعوة بدون مكان أو وقت ناقصة."
         }
       ]
@@ -5468,7 +5521,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "We went to Abha.",
-          "We goed to Abha."
+          "We goed to Abha.",
+          "We went Abha to."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: We went to Abha. — go شاذ ⇐ went."
@@ -5478,7 +5532,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The rocks were huge.",
-          "The rocks was huge."
+          "The rocks was huge.",
+          "The rocks huge were."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: The rocks were huge. — الجمع ⇐ were."
@@ -5488,7 +5543,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Yesterday I visited my aunt.",
-          "Yesterday I visit my aunt."
+          "Yesterday I visit my aunt.",
+          "Yesterday I visited aunt my."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Yesterday I visited my aunt. — مع yesterday ⇐ ماضي."
@@ -5879,9 +5935,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "It's in Thursday.",
+          "It's Thursday on.",
           "It's on Thursday."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: It's on Thursday. — الأيام مع on.",
         "fromLessonId": "scw_411_s"
       },
@@ -5890,6 +5947,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I go to school by bus.",
+          "I go to school bus by.",
           "I go to school with bus."
         ],
         "correctIndex": 0,
@@ -5901,6 +5959,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "What is your name?",
+          "What are your name?",
           "What your name?"
         ],
         "correctIndex": 0,
@@ -5974,10 +6033,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Last summer went we...",
             "Last summer we went...",
             "Forgetting past after 'last summer'"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Last summer we went... — الكلمة الزمنية تحدد الماضي."
         }
       ]
@@ -6080,7 +6140,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Nationality: Saudi",
-          "Nationality: Saudi Arabia"
+          "Nationality: Saudi Arabia",
+          "Surname: Faisal"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Nationality: Saudi — الجنسية صفة: Saudi، والبلد Saudi Arabia."
@@ -6090,7 +6151,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Surname: Faisal",
-          "Surname: Alqahtani"
+          "Surname: Alqahtani",
+          "Nationality: Saudi Arabia"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Surname: Alqahtani — surname = اسم العائلة."
@@ -6100,9 +6162,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Date of birth: 2010",
+          "Nationality: Saudi Arabia",
           "Date of birth: 14/03/2010"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Date of birth: 14/03/2010 — التاريخ كامل."
       }
     ],
@@ -6490,7 +6553,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The rocks was huge.",
-          "The rocks were huge."
+          "The rocks were huge.",
+          "The rocks huge were."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: The rocks were huge. — الجمع ⇐ were.",
@@ -6500,10 +6564,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (وصف بيتي وغرفتي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "There am two chairs.",
           "There is two chairs.",
           "There are two chairs."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: There are two chairs. — الجمع ⇐ are.",
         "fromLessonId": "scw_410"
       },
@@ -6512,6 +6577,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm fine.",
+          "Nationality: Saudi Arabia",
           "Im fine."
         ],
         "correctIndex": 0,
@@ -6585,10 +6651,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Write the month as an word if unsure: 3 April",
             "Write the month as a word if unsure: 3 April",
             "Mixing UK and US dates (03/04)"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Write the month as a word if unsure: 3 April — ٠٣/٠٤ ممكن تعني مارس أو أبريل."
         }
       ]
@@ -6691,19 +6758,21 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Sorry for I was late.",
+          "Sorry I were late.",
           "Sorry I was late. / Sorry for being late."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Sorry I was late. / Sorry for being late. — for + -ing، أو بدون for مع جملة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I'm sorry. The traffic were terrible.",
           "I'm sorry, the traffic, my phone, my brother...",
           "I'm sorry. The traffic was terrible."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I'm sorry. The traffic was terrible. — سبب واحد يكفي."
       },
       {
@@ -6711,9 +6780,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I must helped my dad.",
+          "I had to help dad my.",
           "I had to help my dad."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I had to help my dad. — الماضي من must ⇐ had to."
       }
     ],
@@ -7101,7 +7171,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Surname: Faisal",
-          "Surname: Alqahtani"
+          "Surname: Alqahtani",
+          "Sorry for I was late."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Surname: Alqahtani — surname = اسم العائلة.",
@@ -7112,6 +7183,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Would you like to come?",
+          "Would you like come to?",
           "Would you like come?"
         ],
         "correctIndex": 0,
@@ -7122,10 +7194,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (ربط الجمل بـ and و but): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I like tea, but I doesn't like coffee.",
           "I like tea, and I don't like coffee.",
           "I like tea, but I don't like coffee."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I like tea, but I don't like coffee. — الفكرتين متعاكسة ⇐ but.",
         "fromLessonId": "scw_408"
       },
@@ -7196,10 +7269,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Sorry for I was late.",
             "Short reason + solution",
             "Over-long excuses"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Short reason + solution — الإنجليز يفضلون الاعتذار المختصر."
         }
       ]
@@ -7302,9 +7376,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I want my money now!",
+          "I would like an refund, please.",
           "I would like a refund, please."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I would like a refund, please. — الأسلوب المهذب يحل المشكلة أسرع."
       },
       {
@@ -7312,19 +7387,21 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "My order not arrived.",
+          "I want my money now!",
           "My order hasn't arrived."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: My order hasn't arrived. — has not + arrived."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I want my money now!",
           "My food arrived cold. Order #45821.",
           "The burger is cold, the fries are cold..."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: My food arrived cold. Order #45821. — اختصر ووضح."
       }
     ],
@@ -7712,7 +7789,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I'm sorry. The traffic was terrible.",
-          "I'm sorry, the traffic, my phone, my brother..."
+          "I'm sorry, the traffic, my phone, my brother...",
+          "I'm sorry. The traffic were terrible."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I'm sorry. The traffic was terrible. — سبب واحد يكفي.",
@@ -7722,10 +7800,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (رسالة من الإجازة (الماضي البسيط)): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "We went Abha to.",
           "We goed to Abha.",
           "We went to Abha."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: We went to Abha. — go شاذ ⇐ went.",
         "fromLessonId": "scw_412_s"
       },
@@ -7734,6 +7813,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I go to school by bus.",
+          "I go to school bus by.",
           "I go to school with bus."
         ],
         "correctIndex": 0,
@@ -7807,10 +7887,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "I want my money now!",
             "Normal case",
             "ALL CAPS when angry"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Normal case — الحروف الكبيرة كلها تعني صراخ."
         }
       ]
@@ -7912,20 +7993,22 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Start with the main idea: 'Winter are my favourite season.'",
           "Starting with a detail: 'We camp in the desert.'",
           "Start with the main idea: 'Winter is my favourite season.'"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Start with the main idea: 'Winter is my favourite season.' — ابدأ بالفكرة العامة."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Keep every sentence topic on",
           "Adding an off-topic sentence about school",
           "Keep every sentence on topic"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Keep every sentence on topic — لا تطلع عن الموضوع."
       },
       {
@@ -7933,7 +8016,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "For these reasons, ...",
-          "No conclusion"
+          "No conclusion",
+          "Starting with a detail: 'We camp in the desert.'"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: For these reasons, ... — الختام يقفل الفكرة."
@@ -8322,10 +8406,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (محادثة خدمة العملاء في التطبيقات): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Starting with a detail: 'We camp in the desert.'",
           "My order not arrived.",
           "My order hasn't arrived."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: My order hasn't arrived. — has not + arrived.",
         "fromLessonId": "scw_414"
       },
@@ -8334,9 +8419,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Nationality: Saudi Arabia",
+          "Starting with a detail: 'We camp in the desert.'",
           "Nationality: Saudi"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Nationality: Saudi — الجنسية صفة: Saudi، والبلد Saudi Arabia.",
         "fromLessonId": "scw_402"
       },
@@ -8344,10 +8430,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (وصف بيتي وغرفتي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "There am two chairs.",
           "There is two chairs.",
           "There are two chairs."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: There are two chairs. — الجمع ⇐ are.",
         "fromLessonId": "scw_410"
       },
@@ -8418,10 +8505,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Several short sentences linkers with",
             "Several short sentences with linkers",
             "Arabic-style long sentence with many و"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Several short sentences with linkers — الإنجليزي يفضل جمل أوضح."
         }
       ]
@@ -8523,10 +8611,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "First, boil water the.",
           "First, boil the water.",
           "First, you must to boil the water."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: First, boil the water. — صيغة الأمر أبسط وأوضح."
       },
       {
@@ -8534,9 +8623,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Then adds the coffee.",
+          "Then, add coffee the.",
           "Then, add the coffee."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Then, add the coffee. — الأمر بدون s."
       },
       {
@@ -8544,9 +8634,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Finally first serve it.",
+          "Finally, it serve.",
           "Finally, serve it."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Finally, serve it. — أداة ترتيب وحدة."
       }
     ],
@@ -8934,10 +9025,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (بناء الفقرة: الجملة الرئيسية والتفاصيل): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Keep every sentence topic on",
           "Keep every sentence on topic",
           "Adding an off-topic sentence about school"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Keep every sentence on topic — لا تطلع عن الموضوع.",
         "fromLessonId": "scw_415"
       },
@@ -8945,10 +9037,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (رسالة اعتذار): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Sorry I were late.",
           "Sorry for I was late.",
           "Sorry I was late. / Sorry for being late."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Sorry I was late. / Sorry for being late. — for + -ing، أو بدون for مع جملة.",
         "fromLessonId": "scw_413"
       },
@@ -8957,9 +9050,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Would you like come?",
+          "Would you like come to?",
           "Would you like to come?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Would you like to come? — would like + to.",
         "fromLessonId": "scw_411_s"
       },
@@ -9031,7 +9125,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Imperatives are normal in instructions",
-            "Using 'you should' in every step"
+            "Using 'you should' in every step",
+            "Imperatives is normal in instructions"
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: Imperatives are normal in instructions — مو قلة أدب، هذا الأسلوب الطبيعي."
@@ -9136,7 +9231,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I was walking when I saw him.",
-          "I walked when I was seeing him."
+          "I walked when I was seeing him.",
+          "I were walking when I saw him."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I was walking when I saw him. — الخلفية مستمرة، الحدث بسيط."
@@ -9145,20 +9241,22 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Suddenly I saw an boy.",
           "Suddenly I saw a boy.",
           "Suddenly I was see a boy."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Suddenly I saw a boy. — saw ماضي see."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "In the end she us thanked.",
           "In the end she thank us.",
           "In the end she thanked us."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: In the end she thanked us. — ماضي ⇐ -ed."
       }
     ],
@@ -9545,10 +9643,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (أدوات الترتيب: first, then, after that, finally): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Then, add coffee the.",
           "Then adds the coffee.",
           "Then, add the coffee."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Then, add the coffee. — الأمر بدون s.",
         "fromLessonId": "scw_416"
       },
@@ -9557,6 +9656,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I would like a refund, please.",
+          "I would like an refund, please.",
           "I want my money now!"
         ],
         "correctIndex": 0,
@@ -9567,10 +9667,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (رسالة من الإجازة (الماضي البسيط)): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "We went Abha to.",
           "We goed to Abha.",
           "We went to Abha."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: We went to Abha. — go شاذ ⇐ went.",
         "fromLessonId": "scw_412_s"
       },
@@ -9642,7 +9743,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Keep the past throughout",
-            "Mixing present and past: 'I see a boy and he cried'"
+            "Mixing present and past: 'I see a boy and he cried'",
+            "Keep the throughout past"
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: Keep the past throughout — ثبّت الزمن."
@@ -9747,7 +9849,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Go straight.",
-          "Go straightly."
+          "Go straightly.",
+          "Turn to right."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Go straight. — straight بدون ly."
@@ -9757,7 +9860,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Turn to right.",
-          "Turn right."
+          "Turn right.",
+          "Go straightly."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Turn right. — بدون to."
@@ -9766,10 +9870,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "It's in front of mosque the.",
           "It's in front the mosque.",
           "It's in front of the mosque."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: It's in front of the mosque. — in front of."
       }
     ],
@@ -10158,9 +10263,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Suddenly I was see a boy.",
+          "Suddenly I saw an boy.",
           "Suddenly I saw a boy."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Suddenly I saw a boy. — saw ماضي see.",
         "fromLessonId": "scw_417"
       },
@@ -10168,10 +10274,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (بناء الفقرة: الجملة الرئيسية والتفاصيل): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Start with the main idea: 'Winter are my favourite season.'",
           "Start with the main idea: 'Winter is my favourite season.'",
           "Starting with a detail: 'We camp in the desert.'"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Start with the main idea: 'Winter is my favourite season.' — ابدأ بالفكرة العامة.",
         "fromLessonId": "scw_415"
       },
@@ -10180,9 +10287,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Nationality: Saudi Arabia",
+          "Go straightly.",
           "Nationality: Saudi"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Nationality: Saudi — الجنسية صفة: Saudi، والبلد Saudi Arabia.",
         "fromLessonId": "scw_402"
       },
@@ -10254,7 +10362,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Only sending a location pin",
-            "Add one landmark sentence"
+            "Add one landmark sentence",
+            "Add one sentence landmark"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: Add one landmark sentence — المعلم يساعد إذا الخريطة غلطت."
@@ -10358,10 +10467,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "The food were absolutely delicious.",
           "The food was absolutely delicious.",
           "The food was very delicious."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: The food was absolutely delicious. — delicious قوية؛ نستخدم absolutely."
       },
       {
@@ -10369,7 +10479,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "It's more better.",
-          "It's better."
+          "It's better.",
+          "The food was very delicious."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: It's better. — لا تجمع more مع -er."
@@ -10379,6 +10490,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The service was boring/slow.",
+          "The service were boring/slow.",
           "The service was bored."
         ],
         "correctIndex": 0,
@@ -10770,7 +10882,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Turn to right.",
-          "Turn right."
+          "Turn right.",
+          "The food was very delicious."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Turn right. — بدون to.",
@@ -10781,9 +10894,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "First, you must to boil the water.",
+          "First, boil water the.",
           "First, boil the water."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: First, boil the water. — صيغة الأمر أبسط وأوضح.",
         "fromLessonId": "scw_416"
       },
@@ -10791,10 +10905,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (رسالة اعتذار): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Sorry I were late.",
           "Sorry I was late. / Sorry for being late.",
           "Sorry for I was late."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Sorry I was late. / Sorry for being late. — for + -ing، أو بدون for مع جملة.",
         "fromLessonId": "scw_413"
       },
@@ -10866,7 +10981,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Use delicious, friendly, overpriced",
-            "Only 'good' and 'bad'"
+            "Only 'good' and 'bad'",
+            "The food was very delicious."
           ],
           "correctIndex": 0,
           "explanationAr": "الصحيح: Use delicious, friendly, overpriced — الصفات القوية تخلي التقييم مفيد."
@@ -10970,30 +11086,33 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Thank you for me helping.",
           "Thank you for helping me.",
           "Thank you for help me."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Thank you for helping me. — for + -ing."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Thank you for gift the.",
           "Thank you for the gift.",
           "Thanks to you for the gift."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Thank you for the gift. — Thanks to = بفضل."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Dear Ms Huda, thank you everything for.",
           "Dear teacher, thx 4 everything",
           "Dear Ms Huda, thank you for everything."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Dear Ms Huda, thank you for everything. — مع المعلم لا تستخدم اختصارات."
       }
     ],
@@ -11380,10 +11499,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (كتابة تقييم مطعم أو تطبيق): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Thank you for help me.",
           "It's better.",
           "It's more better."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: It's better. — لا تجمع more مع -er.",
         "fromLessonId": "scw_419"
       },
@@ -11391,10 +11511,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (كتابة قصة قصيرة بالماضي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I were walking when I saw him.",
           "I was walking when I saw him.",
           "I walked when I was seeing him."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I was walking when I saw him. — الخلفية مستمرة، الحدث بسيط.",
         "fromLessonId": "scw_417"
       },
@@ -11403,6 +11524,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I would like a refund, please.",
+          "I would like an refund, please.",
           "I want my money now!"
         ],
         "correctIndex": 0,
@@ -11476,10 +11598,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Say what for and why mattered it",
             "Say what for and why it mattered",
             "'Thank you' only, no detail"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Say what for and why it mattered — التفاصيل تخلي الشكر صادق."
         }
       ]
@@ -11582,9 +11705,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Hey Dr Ahmed, can u send the slides?",
+          "Dear Dr Ahmed, could you please send slides the?",
           "Dear Dr Ahmed, could you please send the slides?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Dear Dr Ahmed, could you please send the slides? — مع الدكتور: رسمي بدون u."
       },
       {
@@ -11592,7 +11716,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Hey Saad, fancy a coffee?",
-          "Dear Saad, I would be grateful if you joined me for coffee."
+          "Dear Saad, I would be grateful if you joined me for coffee.",
+          "Hey Saad, fancy an coffee?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Hey Saad, fancy a coffee? — مع صديق: الرسمي زيادة يبين برود."
@@ -11602,7 +11727,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "pls",
-          "please"
+          "please",
+          "Hey Dr Ahmed, can u send the slides?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: please — لا اختصارات في الرسمي."
@@ -11992,10 +12118,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (رسالة شكر): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Thank you for gift the.",
           "Thanks to you for the gift.",
           "Thank you for the gift."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Thank you for the gift. — Thanks to = بفضل.",
         "fromLessonId": "scw_420"
       },
@@ -12004,7 +12131,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Go straightly.",
-          "Go straight."
+          "Go straight.",
+          "Hey Dr Ahmed, can u send the slides?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Go straight. — straight بدون ly.",
@@ -12014,10 +12142,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (بناء الفقرة: الجملة الرئيسية والتفاصيل): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Start with the main idea: 'Winter are my favourite season.'",
           "Start with the main idea: 'Winter is my favourite season.'",
           "Starting with a detail: 'We camp in the desert.'"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Start with the main idea: 'Winter is my favourite season.' — ابدأ بالفكرة العامة.",
         "fromLessonId": "scw_415"
       },
@@ -12089,6 +12218,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Dear + title + name",
+            "Hey Dr Ahmed, can u send the slides?",
             "Writing to a teacher like a friend"
           ],
           "correctIndex": 0,
@@ -12194,6 +12324,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I look forward to hearing from you.",
+          "I look forward to hearing you from.",
           "I look forward to hear from you."
         ],
         "correctIndex": 0,
@@ -12203,10 +12334,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I look forward to hear from you.",
           "Dear Mr Alotaibi,",
           "Dear Mr Abdullah Alotaibi,"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Dear Mr Alotaibi, — Mr + اسم العائلة فقط."
       },
       {
@@ -12214,7 +12346,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Subject: (empty) / Subject: Hello",
-          "Subject: Internship Application – Abdullah Alotaibi"
+          "Subject: Internship Application – Abdullah Alotaibi",
+          "Subject: Internship Application – Alotaibi Abdullah"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Subject: Internship Application – Abdullah Alotaibi — الموضوع يوضح الغرض."
@@ -12604,9 +12737,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Dear Saad, I would be grateful if you joined me for coffee.",
+          "Hey Saad, fancy an coffee?",
           "Hey Saad, fancy a coffee?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Hey Saad, fancy a coffee? — مع صديق: الرسمي زيادة يبين برود.",
         "fromLessonId": "scw_421_m"
       },
@@ -12615,6 +12749,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The food was absolutely delicious.",
+          "The food were absolutely delicious.",
           "The food was very delicious."
         ],
         "correctIndex": 0,
@@ -12626,6 +12761,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "First, boil the water.",
+          "First, boil water the.",
           "First, you must to boil the water."
         ],
         "correctIndex": 0,
@@ -12699,10 +12835,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "One short line or go straight to purpose the",
             "One short line or go straight to the purpose",
             "Flowery Arabic-style openings: 'I hope this email finds you in the best health and happiness...'"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: One short line or go straight to the purpose — الرسمي الإنجليزي مباشر."
         }
       ]
@@ -12804,10 +12941,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Could you tell me when starts it?",
           "Could you tell me when does it start?",
           "Could you tell me when it starts?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Could you tell me when it starts? — لا تستخدم does في السؤال غير المباشر."
       },
       {
@@ -12815,19 +12953,21 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I wonder is it free?",
+          "I wonder if it are free.",
           "I wonder if it is free."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I wonder if it is free. — نعم/لا ⇐ if + ترتيب خبري."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Do you know where the bank are?",
           "Do you know where the bank is?",
           "Do you know where is the bank?"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Do you know where the bank is? — الفاعل قبل الفعل."
       }
     ],
@@ -13214,6 +13354,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Dear Mr Alotaibi,",
+          "Could you tell me when does it start?",
           "Dear Mr Abdullah Alotaibi,"
         ],
         "correctIndex": 0,
@@ -13224,10 +13365,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (رسالة شكر): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Thank you for me helping.",
           "Thank you for helping me.",
           "Thank you for help me."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Thank you for helping me. — for + -ing.",
         "fromLessonId": "scw_420"
       },
@@ -13235,10 +13377,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (كتابة قصة قصيرة بالماضي): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I were walking when I saw him.",
           "I walked when I was seeing him.",
           "I was walking when I saw him."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I was walking when I saw him. — الخلفية مستمرة، الحدث بسيط.",
         "fromLessonId": "scw_417"
       },
@@ -13309,10 +13452,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Statement order: ...when starts it",
             "Statement order: ...when it starts",
             "Keeping question order after 'Could you tell me'"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Statement order: ...when it starts — أكثر غلط عند العرب."
         }
       ]
@@ -13415,7 +13559,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my opinion, I think...",
-          "In my opinion, ... / I think..."
+          "In my opinion, ... / I think...",
+          "For example: like many companies"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: In my opinion, ... / I think... — لا تجمعهم، نفس المعنى."
@@ -13424,10 +13569,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "For example, companies many...",
           "For example: like many companies",
           "For example, many companies..."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: For example, many companies... — لا تجمع for example مع like."
       },
       {
@@ -13435,7 +13581,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my view / In my opinion",
-          "According to me"
+          "According to me",
+          "In view my"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: In my view / In my opinion — According to me غير طبيعية."
@@ -13825,6 +13972,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I wonder if it is free.",
+          "I wonder if it are free.",
           "I wonder is it free?"
         ],
         "correctIndex": 0,
@@ -13836,7 +13984,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Hey Dr Ahmed, can u send the slides?",
-          "Dear Dr Ahmed, could you please send the slides?"
+          "Dear Dr Ahmed, could you please send the slides?",
+          "Dear Dr Ahmed, could you please send slides the?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Dear Dr Ahmed, could you please send the slides? — مع الدكتور: رسمي بدون u.",
@@ -13847,7 +13996,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Go straightly.",
-          "Go straight."
+          "Go straight.",
+          "For example: like many companies"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Go straight. — straight بدون ly.",
@@ -13920,10 +14070,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "State your opinion in one sentence",
             "State your opinion in sentence one",
             "Long introduction before the opinion"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: State your opinion in sentence one — القارئ الإنجليزي يبي الرأي أول."
         }
       ]
@@ -14025,10 +14176,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I is writing to complain.",
           "I am writing to complaint.",
           "I am writing to complain."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I am writing to complain. — complain فعل، complaint اسم."
       },
       {
@@ -14036,9 +14188,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Your company is terrible and dishonest!",
+          "I is very disappointed with the service.",
           "I am very disappointed with the service."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I am very disappointed with the service. — الإهانة تضعف الشكوى."
       },
       {
@@ -14046,9 +14199,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I want my money back now.",
+          "I would like an full refund.",
           "I would like a full refund."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I would like a full refund. — رسمي ومحدد."
       }
     ],
@@ -14436,6 +14590,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "For example, many companies...",
+          "For example, companies many...",
           "For example: like many companies"
         ],
         "correctIndex": 0,
@@ -14447,7 +14602,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I look forward to hear from you.",
-          "I look forward to hearing from you."
+          "I look forward to hearing from you.",
+          "I look forward to hearing you from."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: I look forward to hearing from you. — to هنا حرف جر ⇐ -ing.",
@@ -14458,9 +14614,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The food was very delicious.",
+          "The food were absolutely delicious.",
           "The food was absolutely delicious."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: The food was absolutely delicious. — delicious قوية؛ نستخدم absolutely.",
         "fromLessonId": "scw_419"
       },
@@ -14531,10 +14688,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Facts + calm tone firm",
             "Facts + calm firm tone",
             "Emotional, accusing language"
           ],
-          "correctIndex": 0,
+          "correctIndex": 1,
           "explanationAr": "الصحيح: Facts + calm firm tone — الحقائق أقوى من الغضب."
         }
       ]
@@ -14637,7 +14795,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Can we postpone the meeting to before?",
-          "Can we bring the meeting forward?"
+          "Can we bring the meeting forward?",
+          "Can we bring the forward meeting?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Can we bring the meeting forward? — أقدم = bring forward، أأخر = postpone."
@@ -14646,20 +14805,22 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Would Tuesday at 10 you suit?",
           "Would Tuesday at 10 suit you?",
           "Is Tuesday suitable for you at 10?"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Would Tuesday at 10 suit you? — الأسلوب الأشيع."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Unfortunately, I need to cancel. I apologise for inconvenience any.",
           "I want to cancel.",
           "Unfortunately, I need to cancel. I apologise for any inconvenience."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Unfortunately, I need to cancel. I apologise for any inconvenience. — اعتذر وبرر."
       }
     ],
@@ -15047,9 +15208,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Your company is terrible and dishonest!",
+          "I is very disappointed with the service.",
           "I am very disappointed with the service."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I am very disappointed with the service. — الإهانة تضعف الشكوى.",
         "fromLessonId": "scw_424"
       },
@@ -15058,9 +15220,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Could you tell me when does it start?",
+          "Could you tell me when starts it?",
           "Could you tell me when it starts?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Could you tell me when it starts? — لا تستخدم does في السؤال غير المباشر.",
         "fromLessonId": "scw_422"
       },
@@ -15068,10 +15231,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (رسالة شكر): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Thank you for me helping.",
           "Thank you for help me.",
           "Thank you for helping me."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Thank you for helping me. — for + -ing.",
         "fromLessonId": "scw_420"
       },
@@ -15142,10 +15306,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionAr": "أي جملة صحيحة؟",
           "questionEn": "Which sentence is correct?",
           "options": [
+            "Can we postpone the meeting to before?",
             "'Postpone before'",
             "bring forward = earlier; postpone = later"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: bring forward = earlier; postpone = later — خلط شائع."
         }
       ]
@@ -15248,7 +15413,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Paraphrase in your own words",
-          "Copying whole sentences from the text"
+          "Copying whole sentences from the text",
+          "Paraphrase in your words own"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Paraphrase in your own words — النسخ مو تلخيص."
@@ -15258,19 +15424,21 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I think the article is great.",
+          "(no opinion in an summary)",
           "(no opinion in a summary)"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: (no opinion in a summary) — الملخص بدون رأي."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Keep only points main",
           "Including every example",
           "Keep only main points"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Keep only main points — الأمثلة تنحذف."
       }
     ],
@@ -15660,7 +15828,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Would Tuesday at 10 suit you?",
-          "Is Tuesday suitable for you at 10?"
+          "Is Tuesday suitable for you at 10?",
+          "Would Tuesday at 10 you suit?"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: Would Tuesday at 10 suit you? — الأسلوب الأشيع.",
@@ -15671,6 +15840,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my opinion, ... / I think...",
+          "Copying whole sentences from the text",
           "In my opinion, I think..."
         ],
         "correctIndex": 0,
@@ -15682,7 +15852,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Hey Dr Ahmed, can u send the slides?",
-          "Dear Dr Ahmed, could you please send the slides?"
+          "Dear Dr Ahmed, could you please send the slides?",
+          "Dear Dr Ahmed, could you please send slides the?"
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Dear Dr Ahmed, could you please send the slides? — مع الدكتور: رسمي بدون u.",
@@ -15756,7 +15927,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Translating word by word = copying",
-            "Change structure and vocabulary"
+            "Change structure and vocabulary",
+            "Change structure vocabulary and"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: Change structure and vocabulary — غيّر الكلمات والترتيب."
@@ -15861,6 +16033,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I led a five-person team to win a national hackathon.",
+          "I led an five-person team to win a national hackathon.",
           "I am a hard-working, passionate team player."
         ],
         "correctIndex": 0,
@@ -15870,20 +16043,22 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Dear Ms Alfaisal, I is writing to apply for...",
           "Dear Ms Alfaisal, I am writing to apply for...",
           "Dear Sir, I need a job, please."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Dear Ms Alfaisal, I am writing to apply for... — الأسلوب يركز على قيمتك مو حاجتك."
       },
       {
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I led project the.",
           "I led the project.",
           "I leaded the project."
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: I led the project. — lead → led شاذ."
       }
     ],
@@ -16272,10 +16447,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (كتابة الملخص): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "(no opinion in an summary)",
           "I think the article is great.",
           "(no opinion in a summary)"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: (no opinion in a summary) — الملخص بدون رأي.",
         "fromLessonId": "scw_426"
       },
@@ -16284,9 +16460,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am writing to complaint.",
+          "I is writing to complain.",
           "I am writing to complain."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I am writing to complain. — complain فعل، complaint اسم.",
         "fromLessonId": "scw_424"
       },
@@ -16295,7 +16472,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I look forward to hearing from you.",
-          "I look forward to hear from you."
+          "I look forward to hear from you.",
+          "I look forward to hearing you from."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: I look forward to hearing from you. — to هنا حرف جر ⇐ -ing.",
@@ -16369,9 +16547,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Generic adjectives with no proof",
+            "I am a hard-working, passionate team player.",
             "Action verb + result + number"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Action verb + result + number — الأرقام تقنع."
         }
       ]
@@ -16474,7 +16653,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "On the other hand",
-          "In the other hand"
+          "In the other hand",
+          "On the hand other"
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: On the other hand — حرف الجر on."
@@ -16483,10 +16663,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "In the other hand",
           "Giving your opinion in every paragraph",
           "Opinion in the conclusion (and maybe intro)"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Opinion in the conclusion (and maybe intro) — المقال المتوازن يأجل الرأي."
       },
       {
@@ -16494,7 +16675,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "It is argued that... / Many believe...",
-          "I think, I think, I think"
+          "I think, I think, I think",
+          "It are argued that..."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: It is argued that... / Many believe... — نوّع ولا تكرر."
@@ -16884,10 +17066,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (خطاب التقديم ورسالة LinkedIn المهنية): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Dear Ms Alfaisal, I is writing to apply for...",
           "Dear Sir, I need a job, please.",
           "Dear Ms Alfaisal, I am writing to apply for..."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Dear Ms Alfaisal, I am writing to apply for... — الأسلوب يركز على قيمتك مو حاجتك.",
         "fromLessonId": "scw_427"
       },
@@ -16896,6 +17079,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Can we bring the meeting forward?",
+          "Can we bring the forward meeting?",
           "Can we postpone the meeting to before?"
         ],
         "correctIndex": 0,
@@ -16907,9 +17091,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Could you tell me when does it start?",
+          "Could you tell me when starts it?",
           "Could you tell me when it starts?"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Could you tell me when it starts? — لا تستخدم does في السؤال غير المباشر.",
         "fromLessonId": "scw_422"
       },
@@ -16981,7 +17166,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Very long sentences joined with 'and'",
-            "Split; use Furthermore / Moreover"
+            "Split; use Furthermore / Moreover",
+            "Split; Furthermore use"
           ],
           "correctIndex": 1,
           "explanationAr": "الصحيح: Split; use Furthermore / Moreover — الأكاديمي يحب الوضوح."
@@ -17085,10 +17271,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "A survey were carried out among 200 students.",
           "I asked 200 students and they told me...",
           "A survey was carried out among 200 students."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: A survey was carried out among 200 students. — التقرير غير شخصي."
       },
       {
@@ -17096,7 +17283,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Most of students",
-          "Most students / The majority of students"
+          "Most students / The majority of students",
+          "I asked 200 students and they told me..."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: Most students / The majority of students — most بدون of مع الجمع العام."
@@ -17106,7 +17294,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "72% of respondents were satisfied.",
-          "Very many people liked it."
+          "Very many people liked it.",
+          "72% of respondents was satisfied."
         ],
         "correctIndex": 0,
         "explanationAr": "الصحيح: 72% of respondents were satisfied. — استخدم أرقام دقيقة."
@@ -17495,10 +17684,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "مراجعة (مقال الإيجابيات والسلبيات): أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "I asked 200 students and they told me...",
           "Opinion in the conclusion (and maybe intro)",
           "Giving your opinion in every paragraph"
         ],
-        "correctIndex": 0,
+        "correctIndex": 1,
         "explanationAr": "الصحيح: Opinion in the conclusion (and maybe intro) — المقال المتوازن يأجل الرأي.",
         "fromLessonId": "scw_428"
       },
@@ -17507,9 +17697,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Copying whole sentences from the text",
+          "Paraphrase in your words own",
           "Paraphrase in your own words"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Paraphrase in your own words — النسخ مو تلخيص.",
         "fromLessonId": "scw_426"
       },
@@ -17518,9 +17709,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "In my opinion, I think...",
+          "I asked 200 students and they told me...",
           "In my opinion, ... / I think..."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: In my opinion, ... / I think... — لا تجمعهم، نفس المعنى.",
         "fromLessonId": "scw_423"
       },
@@ -17592,9 +17784,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Writing a report like a story",
+            "I asked 200 students and they told me...",
             "Headings + bullet-like clarity"
           ],
-          "correctIndex": 1,
+          "correctIndex": 2,
           "explanationAr": "الصحيح: Headings + bullet-like clarity — التقرير للقراءة السريعة."
         }
       ]
@@ -17697,9 +17890,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "At this point in time",
+          "The decision was made by the team to...",
           "Now"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Now — اختصر."
       },
       {
@@ -17707,7 +17901,8 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "The decision was made by the team to...",
-          "The team decided to..."
+          "The team decided to...",
+          "The team to decided..."
         ],
         "correctIndex": 1,
         "explanationAr": "الصحيح: The team decided to... — المبني للمعلوم أوضح وأقوى."
@@ -17716,10 +17911,11 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionAr": "أي جملة صحيحة؟",
         "questionEn": "Which sentence is correct?",
         "options": [
+          "Each of the has students...",
           "Each of the students have...",
           "Each of the students has..."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Each of the students has... — each مفرد."
       }
     ],
@@ -18107,9 +18303,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "Most of students",
+          "At this point in time",
           "Most students / The majority of students"
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: Most students / The majority of students — most بدون of مع الجمع العام.",
         "fromLessonId": "scw_429"
       },
@@ -18118,6 +18315,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I led a five-person team to win a national hackathon.",
+          "I led an five-person team to win a national hackathon.",
           "I am a hard-working, passionate team player."
         ],
         "correctIndex": 0,
@@ -18129,9 +18327,10 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
         "questionEn": "Which sentence is correct?",
         "options": [
           "I am writing to complaint.",
+          "I is writing to complain.",
           "I am writing to complain."
         ],
-        "correctIndex": 1,
+        "correctIndex": 2,
         "explanationAr": "الصحيح: I am writing to complain. — complain فعل، complaint اسم.",
         "fromLessonId": "scw_424"
       },
@@ -18203,6 +18402,7 @@ export const SARA_CONVERSATIONAL_WRITING_LESSONS: SaraCurriculumLesson[] = [
           "questionEn": "Which sentence is correct?",
           "options": [
             "Cut to the essential meaning",
+            "Cut to the meaning essential",
             "Translating Arabic formal padding"
           ],
           "correctIndex": 0,
