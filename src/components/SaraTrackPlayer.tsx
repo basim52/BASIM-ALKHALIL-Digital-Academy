@@ -6,7 +6,7 @@ import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'l
 import { auth } from '../lib/firebase';
 import { CompletionCertificateModal, type CertificateData } from './CompletionCertificateModal';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
-import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio, ttsDiag } from '../lib/audio';
+import { prefetchAcademyAudio, cancelAllSpeech, createManagedAudio, ttsDiag, fetchCloudVoice } from '../lib/audio';
 import { boardLinesToSpeech } from '../utils/boardToSpeech';
 import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
 import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
@@ -58,6 +58,7 @@ async function playB64(b64: string): Promise<void> {
   void token;
 }
 let narratorPaused = false;
+export let lastNarrateReason = '';
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 const lessonAudioCache = new Map<string, string>(); // text → object URL (this session)
 const lessonAudioBytes = new Map<string, Uint8Array>(); // object URL → bytes (avatar lip-sync envelope only)
@@ -75,7 +76,7 @@ async function fetchLessonAudio(text: string, token: number, voice = 'Kore'): Pr
     if (d) await wait(d);
     if (token !== narratorToken) return null;
     try {
-      const tok = auth.currentUser ? await auth.currentUser.getIdToken().catch(() => '') : '';
+      const tok = auth.currentUser ? await auth.currentUser.getIdToken(d > 0).catch(() => '') : '';
       const r = await fetch(`/api/tts/lesson?v=${encodeURIComponent(voice)}&t=${encodeURIComponent(text)}`, tok ? { headers: { Authorization: `Bearer ${tok}` } } : undefined);
       ttsDiag('fetch:/api/tts/lesson', { status: r.status, voice, type: r.headers.get('content-type') || '', cache: r.headers.get('x-vercel-cache') || '' });
       if (r.ok && (r.headers.get('content-type') || '').includes('audio')) {
@@ -85,8 +86,9 @@ async function fetchLessonAudio(text: string, token: number, voice = 'Kore'): Pr
         lessonAudioCache.set(ck, url);
         return url;
       }
-      if (r.status === 503) { const j = await r.json().catch(() => ({})); if (j?.quotaExhausted) return null; }
-    } catch { /* network: retry */ }
+      lastNarrateReason = `lesson-http-${r.status}${tok ? '' : '-notoken'}`;
+      if (r.status === 503) { const j = await r.json().catch(() => ({})); if (j?.quotaExhausted) { lastNarrateReason = 'quota'; return null; } }
+    } catch (e) { lastNarrateReason = 'lesson-network'; ttsDiag('fetch:lesson-error', { voice, err: String(e) }); }
   }
   return null;
 }
@@ -102,7 +104,28 @@ async function narrate(text: string, onBlocked: () => void, onFailed: () => void
   narratorPaused = false;
   const url = await fetchLessonAudio(text, token, voice);
   if (token !== narratorToken) return;
-  if (!url) { ttsDiag('narrator:no-audio', { voice }); onFailed(); return; }
+  if (!url) {
+    // Fallback: whole-page generation failed (timeout / big text / uncached). Speak it in short chunks via POST /api/tts.
+    ttsDiag('narrator:lesson-failed→chunks', { voice, reason: lastNarrateReason, len: text.length });
+    const chunks = (text.match(/[^.!?؟\n]+[.!?؟\n]*/g) || [text]).reduce<string[]>((a, c) => { const l = a.length - 1; if (l >= 0 && (a[l] + c).length < 350) a[l] += c; else a.push(c); return a; }, []).map(c => c.trim()).filter(Boolean);
+    let played = 0;
+    for (const c of chunks) {
+      if (token !== narratorToken) return;
+      const { audio, reason } = await fetchCloudVoice(c, voice, /[\u0600-\u06FF]/.test(c) ? 'ar' : 'en');
+      if (token !== narratorToken) return;
+      if (!audio) { lastNarrateReason = `chunk-${reason}`; break; }
+      const el = getNarrator();
+      const u = URL.createObjectURL(new Blob([Uint8Array.from(atob(audio), ch => ch.charCodeAt(0))], { type: 'audio/wav' }));
+      el.src = u;
+      const ok = await new Promise<boolean>(res => { el.onended = () => res(true); el.onerror = () => res(true); el.play().then(() => ttsDiag('narrator:chunk-playing', { voice })).catch(err => { ttsDiag('narrator:play-failed', { voice, err: String(err?.name || err) }); res(err?.name !== 'NotAllowedError'); }); });
+      URL.revokeObjectURL(u);
+      if (!ok) { if (token === narratorToken) onBlocked(); return; }
+      played++;
+    }
+    if (token !== narratorToken) return;
+    if (!played) { ttsDiag('narrator:no-audio', { voice, reason: lastNarrateReason }); onFailed(); return; }
+    onDone(); return;
+  }
   while (narratorPaused) { await wait(150); if (token !== narratorToken) return; }
   const el = getNarrator();
   el.src = url;
@@ -570,3 +593,4 @@ export default SaraTrackPlayer;
 export const saraNarrate = narrate;
 export const saraStopNarrator = stopNarrator;
 export const saraUnlockNarrator = unlockNarrator;
+export const saraLastReason = () => lastNarrateReason || 'unknown';

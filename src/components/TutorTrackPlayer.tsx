@@ -3,7 +3,8 @@ import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Volume2, Square, Lock, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
+import { TtsDebugOverlay, longPressDebug } from './TtsDebugOverlay';
+import { saraNarrate, saraStopNarrator, saraUnlockNarrator, saraLastReason } from './SaraTrackPlayer';
 import { toToolCalls } from '../lib/boardActions';
 import { personaById } from '../data/saraBoardPersonas';
 import TutorConversation from './TutorConversation';
@@ -67,6 +68,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
         {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 {t("محاورة", "Talk with")} {NM}</button>}
       </div>
       {body}
+      <TtsDebugOverlay />
     </div>
   );
   const VoiceBtn: React.FC<{ text: string }> = ({ text }) => (
@@ -74,8 +76,8 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       {v.st === 'loading'
         ? <button onClick={v.stop} className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Square size={13} className="inline" /> {t("إيقاف", "Stop")}</button>
         : <button onClick={() => v.play(text)} data-testid="tutor-voice" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.st === 'failed' ? t('إعادة المحاولة', 'Try again') : t(`استمع لـ${persona.nameAr}`, `Listen to ${persona.nameEn}`)}</button>}
-      {v.st === 'failed' && <span className="text-[10px] text-rose-300 font-bold">{t("الصوت غير متاح الآن", "Audio is not available right now")}</span>}
-      {v.st === 'blocked' && <span className="text-[10px] text-white/70 font-bold">{t("اضغط مرة ثانية", "Tap again")}</span>}
+      {v.st === 'failed' && <span className="text-[10px] text-rose-300 font-bold">{t("الصوت غير متاح الآن", "Audio is not available right now")} <span data-no-i18n className="opacity-60">({saraLastReason()})</span></span>}
+      {v.st === 'blocked' && <button onClick={() => v.play(text)} className="px-3 py-1.5 rounded-xl bg-[#C49E3A] text-[#001a38] text-[12px] font-black animate-pulse">{t("اضغط للاستماع 🔊", "Tap to listen 🔊")}</button>}
     </div>
   );
   const nextBtn = (label: string, onClick: () => void, disabled = false) => (
@@ -85,7 +87,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   // Lesson list
   if (!lesson) {
     return shell(
-      <><p className="text-[10px] text-amber-300 font-bold">{persona.emoji} {NM}</p><p className="text-[13px] font-black truncate">{t(track.titleAr, (track as { titleEn?: string }).titleEn || track.titleAr)}</p></>,
+      <><p {...longPressDebug()} className="text-[10px] text-amber-300 font-bold select-none">{persona.emoji} {NM}</p><p className="text-[13px] font-black truncate">{t(track.titleAr, (track as { titleEn?: string }).titleEn || track.titleAr)}</p></>,
       <div className="flex-1 min-h-0 overflow-y-auto grid gap-1.5 content-start" data-testid="tutor-lessons">
         {track.lessons.map((l, idx) => {
           const open = l.order <= unlocked;
@@ -111,7 +113,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const c = lesson.content!;
   if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
   const total = 1 + c.exercises.length;
-  const head = <><p className="text-[10px] text-amber-300 font-bold">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{t(lesson.titleAr, lesson.titleEn)}{enLoading ? ' · …EN' : ''}</p></>;
+  const head = <><p {...longPressDebug()} className="text-[10px] text-amber-300 font-bold select-none">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{t(lesson.titleAr, lesson.titleEn)}{enLoading ? ' · …EN' : ''}</p></>;
   const narration = `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
 
   if (step.k === 'board') return shell(head, <>
