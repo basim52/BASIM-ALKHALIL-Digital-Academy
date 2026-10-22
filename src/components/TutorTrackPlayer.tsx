@@ -85,7 +85,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   // Lesson list
   if (!lesson) {
     return shell(
-      <><p className="text-[10px] text-amber-300 font-bold">{persona.emoji} {persona.nameAr}</p><p className="text-[13px] font-black truncate">{track.titleAr}</p></>,
+      <><p className="text-[10px] text-amber-300 font-bold">{persona.emoji} {NM}</p><p className="text-[13px] font-black truncate">{t(track.titleAr, (track as { titleEn?: string }).titleEn || track.titleAr)}</p></>,
       <div className="flex-1 min-h-0 overflow-y-auto grid gap-1.5 content-start" data-testid="tutor-lessons">
         {track.lessons.map((l, idx) => {
           const open = l.order <= unlocked;
@@ -93,11 +93,11 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
           const showLevel = !!lvl && (track.levels?.length || 0) > 1 && (idx === 0 || track.lessons[idx - 1].levelId !== l.levelId);
           return (
             <React.Fragment key={l.id}>
-            {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-300" data-testid="tutor-level-head">{lvl!.titleAr}</p>}
+            {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-300" data-testid="tutor-level-head">{t(lvl!.titleAr, (lvl as { titleEn?: string }).titleEn || lvl!.titleAr)}</p>}
             <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; if (lang === 'en') { v.stop(); void englishLessonAsync(l).then(x => { const e2 = x.content!; v.play(`${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else v.play(`${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-start border ${open ? 'bg-[#0a2d5c] border-amber-400/40' : 'bg-white/5 border-white/10 opacity-60'}`}>
               <span className="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-[#001a38] text-[12px] font-black flex items-center justify-center">{l.order}</span>
-              <span className="flex-1 min-w-0"><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></span>
+              <span className="flex-1 min-w-0">{lang === 'en' ? <span dir="ltr" className="block text-[13px] font-black truncate text-start">{l.titleEn}</span> : <><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></>}</span>
               {!open && <Lock size={14} className="text-white/50 shrink-0" />}
               {l.order < unlocked && <CheckCircle2 size={14} className="text-emerald-300 shrink-0" />}
             </button>
@@ -111,7 +111,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const c = lesson.content!;
   if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
   const total = 1 + c.exercises.length;
-  const head = <><p className="text-[10px] text-amber-300 font-bold">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{lesson.titleAr}{enLoading ? ' · …EN' : ''}</p></>;
+  const head = <><p className="text-[10px] text-amber-300 font-bold">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{t(lesson.titleAr, lesson.titleEn)}{enLoading ? ' · …EN' : ''}</p></>;
   const narration = `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
 
   if (step.k === 'board') return shell(head, <>

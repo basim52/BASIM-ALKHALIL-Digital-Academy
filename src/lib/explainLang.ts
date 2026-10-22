@@ -25,6 +25,8 @@ export const adoptExplainLangFromProfile = (v: unknown) => {
 let adopted = false;
 try { onAuthStateChanged(auth, u => { if (!u || adopted) return; adopted = true; let local: string | null = null; try { local = localStorage.getItem(LS); } catch { /* ignore */ }
   if (local) return; void getDoc(doc(db, 'users', u.uid)).then(d => adoptExplainLangFromProfile(d.data()?.explainLang)).catch(() => {}); }); } catch { /* ignore */ }
+// Site-wide EN safety net (lazy import keeps it out of the AR path).
+if (typeof window !== 'undefined') { const sync = () => { void import('./domTranslate').then(m => m.syncDomTranslation()); }; if (getExplainLang() === 'en') sync(); window.addEventListener(EVT, sync); }
 export const useExplainLang = (): [ExplainLang, (l: ExplainLang) => void] => {
   const [l, setL] = useState<ExplainLang>(getExplainLang);
   useEffect(() => {
