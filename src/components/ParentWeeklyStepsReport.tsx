@@ -1,3 +1,4 @@
+import { L, useExplainLang } from '../lib/explainLang';
 import React, { useEffect, useMemo, useState } from 'react';
 import { collection, query, where, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
@@ -143,6 +144,7 @@ export async function loadWeeklyReportData(uid: string, parentUid: string = auth
 }
 
 export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, isParentAdmin = false }) => {
+  const [plang] = useExplainLang();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WeeklyReportData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -174,23 +176,23 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
     try {
       await setDoc(doc(db, 'users', student.uid), { weeklyGoalLessons: goalDraft }, { merge: true });
       setData(d => d ? { ...d, goal: goalDraft } : d);
-      setMsg('تم حفظ الهدف ✓');
+      setMsg(L('تم حفظ الهدف ✓', 'Goal saved ✓'));
     } catch (e) {
       console.warn('save weekly goal failed', e);
-      setMsg('تعذّر الحفظ، حاول لاحقاً');
+      setMsg(L('تعذّر الحفظ، حاول لاحقاً', 'Could not save, try later'));
     } finally { setSaving(false); }
   };
 
   const GoalBar = ({ compact = false }: { compact?: boolean }) => (
     <div className={`rounded-2xl border border-[#C49E3A]/40 bg-[#002147] text-white ${compact ? 'p-3' : 'p-4'}`}>
       <div className="flex items-center justify-between text-[12px] font-black">
-        <span>{goal ? `المنجز هذا الأسبوع: ${done} من ${goal} دروس` : `المنجز هذا الأسبوع: ${done} دروس`}</span>
-        {exceeded && <span className="text-[#C49E3A]">تجاوز الهدف 🎉</span>}
+        <span>{goal ? L(`المنجز هذا الأسبوع: ${done} من ${goal} دروس`, `Done this week: ${done} of ${goal} lessons`) : L(`المنجز هذا الأسبوع: ${done} دروس`, `Done this week: ${done} lessons`)}</span>
+        {exceeded && <span className="text-[#C49E3A]">{L("تجاوز الهدف 🎉", "Goal exceeded 🎉")}</span>}
       </div>
       <div className="mt-2 h-2.5 rounded-full bg-white/15 overflow-hidden">
         <div className="h-full rounded-full" style={{ width: `${goal ? pct : 0}%`, background: GOLD }} />
       </div>
-      {!goal && <p className="mt-1.5 text-[11px] text-white/70">لم يُحدَّد هدف أسبوعي بعد</p>}
+      {!goal && <p className="mt-1.5 text-[11px] text-white/70">{L("لم يُحدَّد هدف أسبوعي بعد", "No weekly goal set yet")}</p>}
     </div>
   );
 
@@ -202,46 +204,46 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
     </div>
   );
 
-  const steps = ['١. التقرير', '٢. الأنشطة', '٣. الهدف'];
+  const steps = [L('١. التقرير', '1. Report'), L('٢. الأنشطة', '2. Activity'), L('٣. الهدف', '3. Goal')];
 
   const body = useMemo(() => {
-    if (loading || !data) return <div className="flex-1 flex items-center justify-center text-[13px] font-bold text-white/70">جاري تحميل التقرير…</div>;
+    if (loading || !data) return <div className="flex-1 flex items-center justify-center text-[13px] font-bold text-white/70">{L("جاري تحميل التقرير…", "Loading the report…")}</div>;
     if (step === 0) return (
       <div className="flex-1 flex flex-col gap-3 min-h-0">
         <div className="relative">
           <GoalBar compact />
-          <button onClick={() => setStep(2)} className="absolute top-2.5 left-3 text-[11px] font-black text-[#C49E3A] underline">تعديل الهدف</button>
+          <button onClick={() => setStep(2)} className="absolute top-2.5 left-3 text-[11px] font-black text-[#C49E3A] underline">{L("تعديل الهدف", "Edit goal")}</button>
         </div>
         <div className="grid grid-cols-2 gap-2.5 flex-1 min-h-0">
-          <Tile label="الدروس المنجزة (7 أيام)" value={String(done)} note={done ? 'دروس مختلفة بدون تكرار' : 'لا دروس مكتملة هذا الأسبوع'} />
-          <Tile label="الدقائق الفعلية المسجلة" value={data.minutes === null ? '—' : `${data.minutes} د`} note={data.minutes === null ? 'لا توجد جلسات مؤقّتة مع سارة' : 'من جلسات سارة المسجّلة'} />
-          <Tile label="آخر نتيجة اختبار" value={data.lastTest ? `${data.lastTest.pct}%` : '—'} note={data.lastTest ? `${data.lastTest.total ? `(${data.lastTest.correct}/${data.lastTest.total}) ` : ''}${data.lastTest.name}` : 'لا يوجد اختبار مسجّل'} />
-          <Tile label="أضعف مهارة" value={data.weakest ? data.weakest.name : '—'} note={data.weakest ? `المتوسط ${data.weakest.avg}%` : 'بيانات غير كافية هذا الأسبوع'} />
+          <Tile label={L("الدروس المنجزة (7 أيام)", "Lessons completed (7 days)")} value={String(done)} note={done ? L('دروس مختلفة بدون تكرار', 'Distinct lessons, no repeats') : L('لا دروس مكتملة هذا الأسبوع', 'No lessons completed this week')} />
+          <Tile label={L("الدقائق الفعلية المسجلة", "Recorded minutes")} value={data.minutes === null ? '—' : `${data.minutes} د`} note={data.minutes === null ? 'لا توجد جلسات مؤقّتة مع سارة' : 'من جلسات سارة المسجّلة'} />
+          <Tile label={L("آخر نتيجة اختبار", "Latest test result")} value={data.lastTest ? `${data.lastTest.pct}%` : '—'} note={data.lastTest ? `${data.lastTest.total ? `(${data.lastTest.correct}/${data.lastTest.total}) ` : ''}${data.lastTest.name}` : 'لا يوجد اختبار مسجّل'} />
+          <Tile label={L("أضعف مهارة", "Weakest skill")} value={data.weakest ? data.weakest.name : '—'} note={data.weakest ? `المتوسط ${data.weakest.avg}%` : 'بيانات غير كافية هذا الأسبوع'} />
         </div>
       </div>
     );
     if (step === 1) {
       const items = [
-        ...data.completed.map(c => ({ at: c.at, text: `أكمل درس: ${c.title}${c.pct !== null ? ` · ${c.pct}%` : ''}`, icon: '📘' })),
-        ...data.sessions.map(s => ({ at: s.at, text: `جلسة مع سارة${s.skill ? ` (${s.skill})` : ''}${s.summary ? `: ${s.summary}` : ''}`, icon: '🎙️' })),
+        ...data.completed.map(c => ({ at: c.at, text: `${L('أكمل درس:', 'Completed lesson:')} ${c.title}${c.pct !== null ? ` · ${c.pct}%` : ''}`, icon: '📘' })),
+        ...data.sessions.map(s => ({ at: s.at, text: `${L('جلسة مع سارة', 'Session with Sara')}${s.skill ? ` (${s.skill})` : ''}${s.summary ? `: ${s.summary}` : ''}`, icon: '🎙️' })),
       ].sort((a, b) => b.at - a.at).slice(0, 4);
       return (
         <div className="flex-1 flex flex-col gap-3 min-h-0">
           <div className="rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 p-3">
-            <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>كلمات تعلّمها مؤخراً</p>
+            <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>{L("كلمات تعلّمها مؤخراً", "Recently learned words")}</p>
             {data.words.length ? (
               <div className="flex flex-wrap gap-1.5">{data.words.map((w, i) => <span key={i} className="px-2 py-0.5 rounded-full text-[11.5px] font-bold bg-[#C49E3A]/20 text-[#F5E6B8]" dir="ltr">{w}</span>)}</div>
-            ) : <p className="text-[11.5px] font-bold text-white/70">— لا توجد كلمات مسجّلة بعد</p>}
-            <p className="mt-1.5 text-[10px] text-white/55">آخر الكلمات من ذاكرة سارة (غير مؤرّخة بالأسبوع)</p>
+            ) : <p className="text-[11.5px] font-bold text-white/70">{L("— لا توجد كلمات مسجّلة بعد", "No words recorded yet")}</p>}
+            <p className="mt-1.5 text-[10px] text-white/55">{L("آخر الكلمات من ذاكرة سارة (غير مؤرّخة بالأسبوع)", "Latest words from Sara's memory (not limited to this week)")}</p>
           </div>
           <div className="rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 p-3 flex-1 min-h-0 overflow-hidden">
-            <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>آخر النشاطات</p>
+            <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>{L("آخر النشاطات", "Recent activity")}</p>
             {items.length ? (
               <ul className="space-y-1.5">{items.map((it, i) => (
                 <li key={i} className="flex items-start gap-2 text-[11.5px] font-bold text-white">
                   <span>{it.icon}</span><span className="flex-1 line-clamp-1">{it.text}</span><span className="text-white/55 whitespace-nowrap">{fmtDate(it.at)}</span>
                 </li>))}</ul>
-            ) : <div className="h-full flex items-center justify-center text-[13px] font-black text-white/70">لا يوجد نشاط هذا الأسبوع</div>}
+            ) : <div className="h-full flex items-center justify-center text-[13px] font-black text-white/70">{L("لا يوجد نشاط هذا الأسبوع", "No activity this week")}</div>}
           </div>
         </div>
       );
@@ -249,16 +251,16 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
     return (
       <div className="flex-1 flex flex-col gap-3 min-h-0">
         <div className="rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 p-3">
-          <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>حدّد هدف الدروس الأسبوعي</p>
+          <p className="text-[12px] font-black mb-2" style={{ color: GOLD }}>{L("حدّد هدف الدروس الأسبوعي", "Set the weekly lesson goal")}</p>
           <div className="flex gap-1.5 justify-between">
             {GOAL_PRESETS.map(g => (
               <button key={g} onClick={() => setGoalDraft(g)} className={`flex-1 py-2 rounded-xl text-[13px] font-black border ${goalDraft === g ? 'bg-[#002147] text-[#C49E3A] border-[#C49E3A]' : 'bg-[#0a2d5c] text-white border-[#C49E3A]/30'}`}>{g}</button>
             ))}
           </div>
           <div className="mt-3 flex items-center justify-center gap-4">
-            <button aria-label="إنقاص" onClick={() => setGoalDraft(g => Math.max(1, g - 1))} className="w-10 h-10 rounded-full bg-[#002147] border border-[#C49E3A]/50 text-[20px] font-black text-[#C49E3A]">−</button>
-            <span className="text-[22px] font-black min-w-[72px] text-center" style={{ color: GOLD }}>{goalDraft} دروس</span>
-            <button aria-label="زيادة" onClick={() => setGoalDraft(g => Math.min(14, g + 1))} className="w-10 h-10 rounded-full bg-[#002147] border border-[#C49E3A]/50 text-[20px] font-black text-[#C49E3A]">+</button>
+            <button aria-label={L("إنقاص", "Decrease")} onClick={() => setGoalDraft(g => Math.max(1, g - 1))} className="w-10 h-10 rounded-full bg-[#002147] border border-[#C49E3A]/50 text-[20px] font-black text-[#C49E3A]">−</button>
+            <span className="text-[22px] font-black min-w-[72px] text-center" style={{ color: GOLD }}>{goalDraft} {L("دروس", "lessons")}</span>
+            <button aria-label={L("زيادة", "Increase")} onClick={() => setGoalDraft(g => Math.min(14, g + 1))} className="w-10 h-10 rounded-full bg-[#002147] border border-[#C49E3A]/50 text-[20px] font-black text-[#C49E3A]">+</button>
           </div>
           <button disabled={saving || goalDraft === goal} onClick={saveGoal} className="mt-3 w-full py-2.5 rounded-xl text-[13px] font-black disabled:opacity-50" style={{ background: GOLD, color: NAVY }}>{saving ? 'جاري الحفظ…' : 'حفظ الهدف'}</button>
           {msg && <p className="mt-1.5 text-center text-[11.5px] font-bold text-white/80">{msg}</p>}
@@ -273,10 +275,10 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
   void isParentAdmin;
 
   return (
-    <section dir="rtl" data-testid="parent-weekly-steps-report" className="rounded-3xl overflow-hidden border border-[#C49E3A]/40 bg-[#001a38] flex flex-col" style={{ height: 'min(560px, calc(100dvh - 140px))', minHeight: 440 }}>
+    <section dir={plang === "en" ? "ltr" : "rtl"} data-testid="parent-weekly-steps-report" className="rounded-3xl overflow-hidden border border-[#C49E3A]/40 bg-[#001a38] flex flex-col" style={{ height: 'min(560px, calc(100dvh - 140px))', minHeight: 440 }}>
       <header className="px-4 pt-3 pb-2" style={{ background: NAVY }}>
-        <p className="text-[13px] font-black text-white">التقرير الأسبوعي المختصر • آخر 7 أيام</p>
-        <p className="text-[11px] font-bold text-[#C49E3A]">{student.displayName || 'الطالب'}</p>
+        <p className="text-[13px] font-black text-white">{L("التقرير الأسبوعي المختصر • آخر 7 أيام", "Weekly summary • last 7 days")}</p>
+        <p className="text-[11px] font-bold text-[#C49E3A]">{student.displayName || L('الطالب', 'Student')}</p>
         <div className="mt-2 grid grid-cols-3 gap-1.5">
           {steps.map((s, i) => (
             <button key={s} onClick={() => setStep(i)} className={`py-1.5 rounded-xl text-[12px] font-black ${step === i ? 'bg-[#C49E3A] text-[#002147]' : 'bg-white/10 text-white'}`}>{s}</button>
@@ -285,9 +287,9 @@ export const ParentWeeklyStepsReport: React.FC<Props> = ({ student, parentUid, i
       </header>
       <div className="flex-1 flex flex-col p-3 min-h-0">{body}</div>
       <footer className="px-3 py-2.5 border-t border-[#C49E3A]/30 bg-[#002147] flex items-center justify-between">
-        <button disabled={step === 0} onClick={() => setStep(s => Math.max(0, s - 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black border border-[#C49E3A]/50 text-white disabled:opacity-40">السابق</button>
-        <span className="text-[11.5px] font-bold text-white/70">خطوة {step + 1} من 3</span>
-        <button disabled={step === 2} onClick={() => setStep(s => Math.min(2, s + 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black disabled:opacity-40" style={{ background: GOLD, color: NAVY }}>التالي</button>
+        <button disabled={step === 0} onClick={() => setStep(s => Math.max(0, s - 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black border border-[#C49E3A]/50 text-white disabled:opacity-40">{L("السابق", "Previous")}</button>
+        <span className="text-[11.5px] font-bold text-white/70">{L("خطوة", "Step")} {step + 1} {L("من", "of")} 3</span>
+        <button disabled={step === 2} onClick={() => setStep(s => Math.min(2, s + 1))} className="px-4 py-1.5 rounded-xl text-[12px] font-black disabled:opacity-40" style={{ background: GOLD, color: NAVY }}>{L("التالي", "Next")}</button>
       </footer>
     </section>
   );
