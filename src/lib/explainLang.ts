@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { lessonTextsForEnglish, lessonSig } from './lessonEnglishKeys';
 import { auth, db } from './firebase';
 
 /**
@@ -38,7 +39,15 @@ export const useExplainLang = (): [ExplainLang, (l: ExplainLang) => void] => {
 const mem = new Map<string, string[]>();
 const inflight = new Map<string, Promise<string[] | null>>();
 const lsKey = (id: string) => `lesson_en_v1_${id}`;
-export const fetchEnglishTexts = (id: string, texts: string[]): Promise<string[] | null> => {
+/** Build-time English for every lesson (public/lesson-en/all.json): loaded once, makes EN switching instant. */
+let staticAll: Promise<Record<string, { sig: string; texts: string[] }>> | null = null;
+export const loadStaticEnglish = () => (staticAll ??= fetch('/lesson-en/all.json').then(r => r.ok ? r.json() : {}).catch(() => ({})));
+export const fetchEnglishTexts = async (id: string, texts: string[]): Promise<string[] | null> => {
+  const s = (await loadStaticEnglish())[id];
+  if (s && s.sig === lessonSig(texts) && s.texts.length === texts.length) return s.texts;
+  return fetchEnglishTextsServer(id, texts);
+};
+const fetchEnglishTextsServer = (id: string, texts: string[]): Promise<string[] | null> => {
   const sig = `${id}|${texts.join('\u0001').length}|${texts.length}`;
   const hit = mem.get(sig); if (hit) return Promise.resolve(hit);
   try { const c = JSON.parse(localStorage.getItem(lsKey(id)) || 'null'); if (c?.sig === sig && Array.isArray(c.texts)) { mem.set(sig, c.texts); return Promise.resolve(c.texts); } } catch { /* ignore */ }
@@ -57,7 +66,7 @@ export const fetchEnglishTexts = (id: string, texts: string[]): Promise<string[]
 
 type Q = { promptAr: string; promptEn?: string; options: string[]; correctIndex: number };
 type LessonLike = { id: string; titleAr: string; titleEn: string; content?: { explanationAr: string; altExplanationAr: string; example: { en: string; ar: string }[]; check: Q; exercises: Q[] } | null; board?: any[] };
-const textsOf = (l: LessonLike) => { const c = l.content!; return [c.explanationAr, c.altExplanationAr, c.check.promptAr, ...c.exercises.map(e => e.promptAr)]; };
+const textsOf = (l: LessonLike) => lessonTextsForEnglish(l);
 const isArabic = (s: string) => /[\u0600-\u06FF]/.test(s);
 /** Same lesson object with every Arabic explanation/prompt replaced by English; example translations dropped. */
 export const englishLesson = <T extends LessonLike>(l: T, en: string[]): T => {
@@ -73,6 +82,10 @@ export const englishLessonAsync = async <T extends LessonLike>(l: T): Promise<T>
   const en = await fetchEnglishTexts(l.id, textsOf(l));
   return en ? englishLesson(l, en) : l;
 };
+let staticSync: Record<string, { sig: string; texts: string[] }> | null = null;
+if (typeof window !== 'undefined') { const warm = () => { void loadStaticEnglish().then(d => { staticSync = d; }); }; if (getExplainLang() === 'en') warm(); window.addEventListener(EVT, () => { if (getExplainLang() === 'en') warm(); }); }
+const viewCache = new WeakMap<object, any>();
+const syncView = <T extends LessonLike>(l: T): T | null => { const hit = viewCache.get(l); if (hit) return hit; const s = staticSync?.[l.id]; const t = textsOf(l); if (!(s && s.sig === lessonSig(t) && s.texts.length === t.length)) return null; const v = englishLesson(l, s.texts); viewCache.set(l, v); return v; };
 export const useLessonView = <T extends LessonLike>(l: T | null, lang: ExplainLang): { view: T | null; loading: boolean; failed: boolean } => {
   const [st, setSt] = useState<{ id: string; view: T | null; failed: boolean } | null>(null);
   useEffect(() => {
@@ -82,6 +95,7 @@ export const useLessonView = <T extends LessonLike>(l: T | null, lang: ExplainLa
     return () => { live = false; };
   }, [l, lang]);
   if (!l || !l.content || lang !== 'en') return { view: l, loading: false, failed: false };
+  if (!st || st.id !== l.id) { const v = syncView(l); if (v) return { view: v, loading: false, failed: false }; }
   if (!st || st.id !== l.id) return { view: l, loading: true, failed: false };
   return { view: st.view || l, loading: false, failed: st.failed };
 };
