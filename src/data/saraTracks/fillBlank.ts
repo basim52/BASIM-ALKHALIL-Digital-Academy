@@ -1,3 +1,4 @@
+import { SARA_FILL_BLANK_MORE } from './fillBlankMore';
 /**
  * Sara "Complete the sentence" (fill the blank) — new exercise type on the tutor board.
  * Each card: English sentence with one blank + Arabic meaning + 3 option chips.
@@ -30,7 +31,7 @@ export const FILL_BLANK_LEVELS = [
 
 export const FILL_BLANK_TRACK_ID = 'fill_blank';
 
-export const FILL_BLANK_LESSONS: SaraBlankLesson[] = [
+const FILL_BLANK_BASE: SaraBlankLesson[] = [
   {
     id: 'fill-blank-01', order: 1, icon: '🧩',
     titleAr: 'حروف الجر مع me', titleEn: 'Prepositions with me',
@@ -272,3 +273,6 @@ export const FILL_BLANK_LESSONS: SaraBlankLesson[] = [
     ],
   },
 ];
+
+/** Lessons 1-10 above + 11-30 (levels 2-3). Order/ids only grow → stored progress (unlocked order) stays valid. */
+export const FILL_BLANK_LESSONS: SaraBlankLesson[] = [...FILL_BLANK_BASE, ...SARA_FILL_BLANK_MORE];
