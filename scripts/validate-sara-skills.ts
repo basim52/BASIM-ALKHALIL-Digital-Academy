@@ -101,7 +101,7 @@ track = 'fillBlank';
     if (l.order !== i + 1) err(`${l.id}: order ${l.order} != ${i + 1}`);
     if (ids.has(l.id)) err(`${l.id}: duplicate id`); ids.add(l.id);
     if (!l.titleAr || !l.titleEn || !l.introAr || !l.introEn) err(`${l.id}: missing title/intro`);
-    if (l.cards.length < 4) err(`${l.id}: ${l.cards.length} cards`);
+    if (l.cards.length !== 8) err(`${l.id}: ${l.cards.length} cards (need 8)`);
     const seenEn = new Set<string>(), seenAr = new Set<string>();
     l.cards.forEach((c, k) => {
       const id = `${l.id} card${k + 1}`;
@@ -114,10 +114,11 @@ track = 'fillBlank';
       opts(id, c.options, c.options.indexOf(c.answer), 3);
       if (c.options.length !== 3) err(`${id}: needs exactly 3 options`);
       const blanked = c.en.replace(new RegExp(`\\b${c.answer}\\b`), '...');
-      if (c.sayAsk !== `${blanked}. Which word is missing?`) err(`${id}: sayAsk ≠ blanked sentence: ${c.sayAsk}`);
-      if (c.sayAsk.includes(` ${c.answer} `)) err(`${id}: sayAsk gives the answer away`);
-      if (c.sayRight !== `Excellent! ${c.en}.`) err(`${id}: sayRight mismatch`);
-      if (c.sayReveal !== `The answer is ${c.answer}. ${c.en}.`) err(`${id}: sayReveal mismatch`);
+      const end = /[?!.]$/.test(c.en) ? '' : '.';
+      if (c.sayAsk !== `${blanked}${end} Which word is missing?`) err(`${id}: sayAsk ≠ blanked sentence: ${c.sayAsk}`);
+      if (` ${blanked} `.replace(/[?!.,]/g, ' ').includes(` ${c.answer} `)) err(`${id}: sayAsk gives the answer away`);
+      if (c.sayRight !== `Excellent! ${c.en}${end}`) err(`${id}: sayRight mismatch`);
+      if (c.sayReveal !== `The answer is ${c.answer}. ${c.en}${end}`) err(`${id}: sayReveal mismatch`);
       // ≥2 word trigrams so the no-token lesson-voice allow-list accepts each spoken line
       for (const s of [c.sayAsk, c.sayRight, c.sayReveal]) if (textTrigrams(s).length < 2) err(`${id}: spoken line too short for allow-list: ${s}`);
     });

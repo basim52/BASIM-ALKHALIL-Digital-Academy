@@ -7,6 +7,7 @@ import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
 import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
 import { TUTOR_TRACKS } from '../data/tutorTracks';
+import { FILL_BLANK_LESSONS, FILL_BLANK_TRACK_ID } from '../data/saraTracks/fillBlank';
 import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
 
 /**
@@ -49,6 +50,12 @@ export async function loadSaraReport(uid: string): Promise<SaraReport | null> {
     if (own) un = Math.max(un, localUnlocked(`sara_track_${t.id}_${uid}`));
     return { id: t.id, titleAr: t.titleAr, titleEn: t.titleEn, total: t.lessons.length, passed: Math.max(0, Math.min(t.lessons.length, un - 1)) };
   });
+  { // "Complete the sentence with Sara" (fill_blank) — same stored progress shape (unlocked order), read-only
+    let un = Number(sp[FILL_BLANK_TRACK_ID]) || 1;
+    if (own) un = Math.max(un, localUnlocked(`sara_track_${FILL_BLANK_TRACK_ID}_${uid}`));
+    const total = FILL_BLANK_LESSONS.length;
+    sara.push({ id: FILL_BLANK_TRACK_ID, titleAr: 'أكمل الجملة مع سارة', titleEn: 'Complete the Sentence with Sara', total, passed: Math.max(0, Math.min(total, un - 1)) });
+  }
   const tutors = TUTOR_TRACKS.map(t => {
     let un = Number(tp[t.id]) || 1;
     if (own) un = Math.max(un, localUnlocked(`tutor_track_${t.id}_${uid}`));
