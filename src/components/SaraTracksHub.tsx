@@ -10,6 +10,8 @@ import { CONVERSATION_TRACK } from '../data/saraTracks/conversation';
 import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
 import type { SaraTrack } from '../data/saraTracks/foundations';
+import { SaraFillBlankPlayer } from './SaraFillBlankPlayer';
+import { FILL_BLANK_LESSONS } from '../data/saraTracks/fillBlank';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean; filter?: 'all' | 'grammar' | 'conversation' | 'reading' | 'writing' }
 
@@ -17,6 +19,7 @@ interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?
 export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll, filter = 'all' }) => {
   const t = useT(); const T = (o: { titleAr: string; titleEn?: string }) => t(o.titleAr, o.titleEn || o.titleAr);
   const [active, setActive] = useState<SaraTrack | null>(null);
+  const [blankOpen, setBlankOpen] = useState(false);
   const [, setSyncTick] = useState(0);
   // Pull cloud progress (other device / reinstall) when the hub opens; push anything newer from this device.
   useEffect(() => {
@@ -30,6 +33,7 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
   const advancedOpen = !!unlockAll || readUnlocked(FOUNDATIONS_TRACK.id, uid) >= 2;
   // 💬, 📖 and ✍️ each have a single track: open it directly (its list shows the level sections) once unlocked.
   const direct = filter === 'conversation' || ((filter === 'reading' || filter === 'writing') && advancedOpen); // conversation is always open
+  if (blankOpen) return <SaraFillBlankPlayer isOpen onClose={() => setBlankOpen(false)} uid={uid} unlockAll={unlockAll} />;
   if (active || direct) {
     const t = active || (filter === 'reading' ? READING_TRACK : filter === 'writing' ? WRITING_TRACK : CONVERSATION_TRACK);
     return <SaraTrackPlayer isOpen onClose={() => (direct && !active ? onClose() : setActive(null))} track={t} uid={uid} unlockAll={unlockAll} />;
@@ -70,6 +74,16 @@ export const SaraTracksHub: React.FC<Props> = ({ isOpen, onClose, uid, unlockAll
               {!c.open && <Lock size={16} className="text-slate-400" />}
             </button>
           ))}
+          {(filter === 'all' || filter === 'grammar') && (
+            <button data-testid="open-fill-blank" onClick={() => setBlankOpen(true)}
+              className="w-full min-w-0 overflow-hidden flex items-center gap-3 p-3 rounded-2xl border-2 text-start bg-[#002147] border-[#C49E3A] shadow-sm">
+              <span className="text-2xl">🧩</span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[14px] font-black text-amber-300">{t('أكمل الجملة مع سارة', 'Complete the Sentence with Sara')}</span>
+                <span className="block text-[11px] text-white/80">{t(`${FILL_BLANK_LESSONS.length} درس · اختر الكلمة الناقصة قبل ما تقولها سارة`, `${FILL_BLANK_LESSONS.length} lesson${FILL_BLANK_LESSONS.length > 1 ? 's' : ''} · pick the missing word before Sara says it`)}</span>
+              </span>
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,9 @@ import { LISTENING_LESSONS } from '../src/data/saraTracks/listening';
 import { PRONUNCIATION_LESSONS } from '../src/data/saraTracks/pronunciation';
 import { VOCAB_LESSONS } from '../src/data/saraTracks/vocabulary';
 import { DAILY_LESSONS } from '../src/data/saraTracks/dailyLife';
-const per: Record<string, number> = { listening: 0, pronunciation: 0, vocabulary: 0, daily: 0 };
+import { FILL_BLANK_LESSONS } from '../src/data/saraTracks/fillBlank';
+import { textTrigrams } from '../src/server/lessonTextNorm';
+const per: Record<string, number> = { listening: 0, pronunciation: 0, vocabulary: 0, daily: 0, fillBlank: 0 };
 let track = '';
 const err = (m: string) => { per[track]++; console.log('ERROR', track, m); };
 const AR = /[\u0600-\u06FF]/, SYM = /[↗↘→←_\/ˈˌ]/;
@@ -93,6 +95,35 @@ DAILY_LESSONS.forEach(l => {
   const bs = l.dialogue.filter(d => d.sp === 'B').map(d => norm(d.en));
   if (new Set(bs).size !== bs.length) err(`${l.id}: duplicate B replies`);
 });
+track = 'fillBlank';
+{ const ids = new Set<string>();
+  FILL_BLANK_LESSONS.forEach((l, i) => {
+    if (l.order !== i + 1) err(`${l.id}: order ${l.order} != ${i + 1}`);
+    if (ids.has(l.id)) err(`${l.id}: duplicate id`); ids.add(l.id);
+    if (!l.titleAr || !l.titleEn || !l.introAr || !l.introEn) err(`${l.id}: missing title/intro`);
+    if (l.cards.length < 4) err(`${l.id}: ${l.cards.length} cards`);
+    const seenEn = new Set<string>(), seenAr = new Set<string>();
+    l.cards.forEach((c, k) => {
+      const id = `${l.id} card${k + 1}`;
+      if (AR.test(c.en) || AR.test(c.sayAsk) || AR.test(c.sayRight) || AR.test(c.sayReveal)) err(`${id}: Arabic in English`);
+      if (!AR.test(c.ar)) err(`${id}: missing Arabic meaning`);
+      if (seenEn.has(norm(c.en))) err(`${id}: duplicate sentence`); seenEn.add(norm(c.en));
+      if (seenAr.has(c.ar.trim())) err(`${id}: duplicate meaning`); seenAr.add(c.ar.trim());
+      const hits = c.en.split(/\s+/).filter(w => w === c.answer).length;
+      if (hits !== 1) err(`${id}: answer "${c.answer}" must appear once in "${c.en}"`);
+      opts(id, c.options, c.options.indexOf(c.answer), 3);
+      if (c.options.length !== 3) err(`${id}: needs exactly 3 options`);
+      const blanked = c.en.replace(new RegExp(`\\b${c.answer}\\b`), '...');
+      if (c.sayAsk !== `${blanked}. Which word is missing?`) err(`${id}: sayAsk ≠ blanked sentence: ${c.sayAsk}`);
+      if (c.sayAsk.includes(` ${c.answer} `)) err(`${id}: sayAsk gives the answer away`);
+      if (c.sayRight !== `Excellent! ${c.en}.`) err(`${id}: sayRight mismatch`);
+      if (c.sayReveal !== `The answer is ${c.answer}. ${c.en}.`) err(`${id}: sayReveal mismatch`);
+      // ≥2 word trigrams so the no-token lesson-voice allow-list accepts each spoken line
+      for (const s of [c.sayAsk, c.sayRight, c.sayReveal]) if (textTrigrams(s).length < 2) err(`${id}: spoken line too short for allow-list: ${s}`);
+    });
+  });
+  console.log(`fillBlank: lessons ${FILL_BLANK_LESSONS.length}, cards ${FILL_BLANK_LESSONS.reduce((a, l) => a + l.cards.length, 0)}`);
+}
 console.log('errors per track:', JSON.stringify(per));
 const total = Object.values(per).reduce((a, b) => a + b, 0);
 console.log('errors:', total); process.exit(total ? 1 : 0);
