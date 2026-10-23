@@ -3,7 +3,7 @@ import { LISTENING_LESSONS } from '../src/data/saraTracks/listening';
 import { PRONUNCIATION_LESSONS } from '../src/data/saraTracks/pronunciation';
 import { VOCAB_LESSONS } from '../src/data/saraTracks/vocabulary';
 import { DAILY_LESSONS } from '../src/data/saraTracks/dailyLife';
-import { FILL_BLANK_LESSONS } from '../src/data/saraTracks/fillBlank';
+import { ALL_FILL_BLANK_TRACKS } from '../src/data/fillBlankTracks';
 import { textTrigrams } from '../src/server/lessonTextNorm';
 const per: Record<string, number> = { listening: 0, pronunciation: 0, vocabulary: 0, daily: 0, fillBlank: 0 };
 let track = '';
@@ -96,8 +96,9 @@ DAILY_LESSONS.forEach(l => {
   if (new Set(bs).size !== bs.length) err(`${l.id}: duplicate B replies`);
 });
 track = 'fillBlank';
-{ const ids = new Set<string>();
-  FILL_BLANK_LESSONS.forEach((l, i) => {
+{ const ids = new Set<string>(), allEn = new Map<string, string>();
+ for (const T of ALL_FILL_BLANK_TRACKS) {
+  T.lessons.forEach((l, i) => {
     if (l.order !== i + 1) err(`${l.id}: order ${l.order} != ${i + 1}`);
     if (ids.has(l.id)) err(`${l.id}: duplicate id`); ids.add(l.id);
     if (!l.titleAr || !l.titleEn || !l.introAr || !l.introEn) err(`${l.id}: missing title/intro`);
@@ -108,6 +109,7 @@ track = 'fillBlank';
       if (AR.test(c.en) || AR.test(c.sayAsk) || AR.test(c.sayRight) || AR.test(c.sayReveal)) err(`${id}: Arabic in English`);
       if (!AR.test(c.ar)) err(`${id}: missing Arabic meaning`);
       if (seenEn.has(norm(c.en))) err(`${id}: duplicate sentence`); seenEn.add(norm(c.en));
+      if (allEn.has(norm(c.en)) && allEn.get(norm(c.en)) !== l.id) err(`${id}: sentence already used in ${allEn.get(norm(c.en))}`); allEn.set(norm(c.en), l.id);
       if (seenAr.has(c.ar.trim())) err(`${id}: duplicate meaning`); seenAr.add(c.ar.trim());
       const hits = c.en.split(/\s+/).filter(w => w === c.answer).length;
       if (hits !== 1) err(`${id}: answer "${c.answer}" must appear once in "${c.en}"`);
@@ -123,7 +125,8 @@ track = 'fillBlank';
       for (const s of [c.sayAsk, c.sayRight, c.sayReveal]) if (textTrigrams(s).length < 2) err(`${id}: spoken line too short for allow-list: ${s}`);
     });
   });
-  console.log(`fillBlank: lessons ${FILL_BLANK_LESSONS.length}, cards ${FILL_BLANK_LESSONS.reduce((a, l) => a + l.cards.length, 0)}`);
+  console.log(`fillBlank ${T.id}: lessons ${T.lessons.length}, cards ${T.lessons.reduce((a, l) => a + l.cards.length, 0)}`);
+ }
 }
 console.log('errors per track:', JSON.stringify(per));
 const total = Object.values(per).reduce((a, b) => a + b, 0);

@@ -19,6 +19,15 @@ export interface SaraBlankCard {
 }
 export interface SaraBlankLesson { id: string; order: number; titleAr: string; titleEn: string; icon: string; introAr: string; introEn: string; cards: SaraBlankCard[] }
 
+/** A complete-the-sentence track for one tutor. Lessons unlock in order; every 10 lessons form a level. */
+export interface FillBlankTrack { id: string; store: 'sara' | 'tutor'; personaId: 'sara' | 'grammar' | 'business' | 'exams'; voice: string; titleAr: string; titleEn: string; lessons: SaraBlankLesson[] }
+export const fillBlankLevel = (order: number) => Math.min(3, Math.ceil(order / 10));
+export const FILL_BLANK_LEVELS = [
+  { ar: 'المستوى الأول: مبتدئ', en: 'Level 1: Beginner' },
+  { ar: 'المستوى الثاني: متوسط', en: 'Level 2: Intermediate' },
+  { ar: 'المستوى الثالث: متقدم', en: 'Level 3: Advanced' },
+];
+
 export const FILL_BLANK_TRACK_ID = 'fill_blank';
 
 export const FILL_BLANK_LESSONS: SaraBlankLesson[] = [

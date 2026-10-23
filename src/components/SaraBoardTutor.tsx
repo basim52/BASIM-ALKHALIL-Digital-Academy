@@ -12,6 +12,8 @@ const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 import TutorTrackPlayer from './TutorTrackPlayer';
 import { TUTOR_TRACKS, type TutorTrack } from '../data/tutorTracks';
 import { SaraTracksHub } from './SaraTracksHub';
+import { TUTOR_FILL_BLANK_TRACKS } from '../data/fillBlankTracks';
+const FillBlankPlayer = lazy(() => import('./SaraFillBlankPlayer').then(m => ({ default: m.FillBlankPlayer })));
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -63,6 +65,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const voice = usePersonaVoice();
   const [track, setTrack] = useState<TutorTrack | null>(null);
   const [saraHub, setSaraHub] = useState(false);
+  const [fbOpen, setFbOpen] = useState(false);
   const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
 
   const ask = async () => {
@@ -92,6 +95,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
 
   if (track) return <TutorTrackPlayer track={track} uid={uid} onBack={() => setTrack(null)} />;
   const personaTrack = TUTOR_TRACKS.find(t => t.personaId === persona.id);
+  const fbTrack = TUTOR_FILL_BLANK_TRACKS.find(t => t.personaId === persona.id);
 
   if (step === 'pick') return shell(<>
     <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[11px] text-amber-200/90 font-bold">{L("اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.", "Pick a teacher and type what you want to learn; they explain it on the board.")}</p><ExplainLangToggle /></div>
@@ -127,6 +131,14 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
         <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L(`دروس ${persona.nameAr}`, `${persona.nameEn}'s lessons`)}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L(personaTrack.titleAr, personaTrack.titleEn)} · {personaTrack.lessons.length} {L("درس", "lessons")}</span></span>
       </button>
     )}
+    {fbTrack && (
+      <button onClick={() => { voice.stop(); setFbOpen(true); }} data-testid="tutor-fill-blank-open"
+        className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
+        <span className="text-[20px]">🧩</span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L(fbTrack.titleAr, fbTrack.titleEn)}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L("اختر الكلمة الناقصة", "Pick the missing word")} · {fbTrack.lessons.length} {L("درس", "lessons")}</span></span>
+      </button>
+    )}
+    {fbOpen && fbTrack && <Suspense fallback={null}><FillBlankPlayer isOpen track={fbTrack} uid={uid} onClose={() => setFbOpen(false)} /></Suspense>}
     <div className="flex-1" />
     <button onClick={() => void ask()} disabled={!topic.trim() || busy} data-testid="board-ask"
       className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{busy ? L(`${persona.nameAr} ${persona.gender === 'female' ? 'تجهّز' : 'يجهّز'} السبورة…`, `${persona.nameEn} is preparing the board…`) : L('اشرح لي على السبورة', 'Explain it on the board')}</button>

@@ -1,8 +1,7 @@
 import { useT } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Volume2, Square, Lock, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { readTutorUnlocked, saveTutorUnlocked } from '../lib/tutorProgress';
 import { TtsDebugOverlay, longPressDebug } from './TtsDebugOverlay';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator, saraLastReason } from './SaraTrackPlayer';
 import { toToolCalls } from '../lib/boardActions';
@@ -14,13 +13,8 @@ import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
 import type { SaraChoiceQuestion } from '../data/saraTracks/foundations';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 
-/** Tutor progress lives under its OWN key (localStorage + users/{uid}.tutorTrackProgress.{trackId}); Sara's progress is never read or written. */
-const key = (trackId: string, uid?: string) => `tutor_track_${trackId}_${uid || 'guest'}`;
-export const readTutorUnlocked = (trackId: string, uid?: string) => { try { return Math.max(1, Number(localStorage.getItem(key(trackId, uid))) || 1); } catch { return 1; } };
-const saveUnlocked = (trackId: string, uid: string | undefined, n: number) => {
-  try { localStorage.setItem(key(trackId, uid), String(n)); } catch { /* ignore */ }
-  if (uid) void updateDoc(doc(db, 'users', uid), { [`tutorTrackProgress.${trackId}`]: n }).catch(() => {});
-};
+const saveUnlocked = saveTutorUnlocked;
+export { readTutorUnlocked };
 
 type Step = { k: 'board' } | { k: 'explain' } | { k: 'check' } | { k: 'ex'; i: number } | { k: 'done' };
 

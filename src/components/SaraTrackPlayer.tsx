@@ -596,4 +596,4 @@ export const saraStopNarrator = stopNarrator;
 export const saraUnlockNarrator = unlockNarrator;
 export const saraLastReason = () => lastNarrateReason || 'unknown';
 /** Warm the per-text cache (same cached GET) so the next spoken line starts without waiting. */
-export const saraPrefetchLine = (text: string) => { void fetchLessonAudio(text, narratorToken); };
+export const saraPrefetchLine = (text: string, voice = 'Kore') => { void fetchLessonAudio(text, narratorToken, voice); };
