@@ -24,6 +24,16 @@ import { UserProfile, MASTER_ADMINS } from '../types';
 import { auth, db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { managedSpeak } from '../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface Story {
   id: string;
@@ -168,7 +178,7 @@ export const STORIES: Story[] = [
 ];
 
 export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBack, initialStoryId }: { lang: Language, profile: UserProfile, onUpdateProfile: (p: UserProfile) => void, onNavigate: (v: any) => void, onBack: () => void, initialStoryId?: string | null }) => {
-  const t = translations[lang];
+  const t = Object.assign((ar: string, en: string) => (lang === 'ar' ? ar : en), translations[lang]);
   const isRtl = lang === 'ar';
   
   const [selectedStory, setSelectedStory] = useState<Story | null>(() => {
@@ -180,37 +190,28 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
 
   const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
 
-  const getCoverGradient = (level: string) => {
-    switch (level) {
-      case 'A1': return 'from-[#002147] via-[#083b70] to-[#1cb0f6]';
-      case 'A2': return 'from-[#004d40] via-[#00695c] to-[#00897b]';
-      case 'B1': return 'from-[#4a148c] via-[#6a1b9a] to-[#8e24aa]';
-      case 'B2': return 'from-[#b71c1c] via-[#c62828] to-[#e53935]';
-      case 'C1': return 'from-[#1b5e20] via-[#2e7d32] to-[#388e3c]';
-      case 'C2': default: return 'from-[#002147] via-[#1a237e] to-[#C49E3A]';
-    }
+  const getCoverGradient = (_level: string) => {
+    return 'bg-[#002147]';
   };
 
   const renderFallbackCover = (story: Story) => (
-    <div className={`w-full h-full bg-gradient-to-br ${getCoverGradient(story.level)} flex flex-col justify-between p-4 text-white select-none relative overflow-hidden shadow-inner`}>
-      {/* Decorative Book Spine & Shapes */}
-      <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-black/25 border-r border-white/20" />
-      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none" />
-      <div className="absolute right-3 top-3 opacity-15 text-white">
+    <div className={`w-full h-full ${getCoverGradient(story.level)} flex flex-col justify-between p-4 text-white select-none relative overflow-hidden`}>
+      <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-[#001a38] border-r border-[#C49E3A]/40" />
+      <div className="absolute right-3 top-3 opacity-15 text-[#E6C36A]">
         <BookOpen size={44} />
       </div>
 
       <div className="flex items-center justify-between z-10 pl-2">
-        <span className="bg-[#C49E3A] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black shadow-md uppercase tracking-wider">
+        <span className="bg-[#C49E3A] text-[#002147] px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider">
           {story.level}
         </span>
-        <span className="bg-black/30 backdrop-blur-sm text-white/90 text-[9px] font-bold px-2 py-0.5 rounded-md">
-          {story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}
+        <span className="bg-[#001a38] text-[#E6C36A] text-[9px] font-bold px-2 py-0.5 rounded-md border border-[#C49E3A]/30">
+          {story.content.split(' ').length} {t('كلمة', 'words')}
         </span>
       </div>
 
       <div className="z-10 pl-2 pr-1 my-auto text-center py-1">
-        <h3 className="font-black text-base md:text-lg leading-snug drop-shadow-md text-amber-100">
+        <h3 className="font-black text-base md:text-lg leading-snug text-[#E6C36A]">
           {isRtl ? story.titleAr : story.titleEn}
         </h3>
         <p className="text-[10px] text-white/80 font-bold mt-1 line-clamp-1 italic">
@@ -218,7 +219,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
         </p>
       </div>
 
-      <div className="z-10 pl-2 flex items-center justify-between text-[8px] text-white/70 font-mono tracking-widest uppercase border-t border-white/10 pt-1.5">
+      <div className="z-10 pl-2 flex items-center justify-between text-[8px] text-[#E6C36A]/80 font-mono tracking-widest uppercase border-t border-[#C49E3A]/20 pt-1.5">
         <span>Alkhalil Audio</span>
         <span>📖 Audio Story</span>
       </div>
@@ -301,7 +302,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
 
   const toggleRecording = () => {
     if (!recognition) {
-       alert(isRtl ? 'عذراً، متصفحك لا يدعم التعرف على الكلام.' : 'Sorry, your browser does not support speech recognition.');
+       alert(t('عذراً، متصفحك لا يدعم التعرف على الكلام.', 'Sorry, your browser does not support speech recognition.'));
        return;
     }
 
@@ -468,36 +469,49 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
   };
 
   if (selectedStory) {
+    const words = selectedStory.content.split(' ');
+    let sentenceStart = -1;
+    let sentenceEnd = -1;
+    if (activeWordIndex !== null && activeWordIndex >= 0 && activeWordIndex < words.length) {
+      sentenceStart = activeWordIndex;
+      while (sentenceStart > 0 && !/[.!?]$/.test(words[sentenceStart - 1])) {
+        sentenceStart--;
+      }
+      sentenceEnd = activeWordIndex;
+      while (sentenceEnd < words.length - 1 && !/[.!?]$/.test(words[sentenceEnd])) {
+        sentenceEnd++;
+      }
+    }
+
     return (
-      <div className={`p-8 max-w-4xl mx-auto w-full ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <button 
-          onClick={() => {
-            stopSpeak();
-            setSelectedStory(null);
-            setIsTestMode(false);
-            setTestResult(null);
-          }}
-          className="flex items-center gap-2 text-slate-400 hover:text-[#002147] transition-colors mb-8 font-bold"
-        >
-          <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} />
-          {isRtl ? 'العودة للمكتبة' : 'Back to Library'}
-        </button>
+      <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={`pb-28 ${isRtl ? 'font-arabic' : 'font-sans'}`}>
+        <div className="flex items-center justify-between">
+          <GhostButton 
+            onClick={() => {
+              stopSpeak();
+              setSelectedStory(null);
+              setIsTestMode(false);
+              setTestResult(null);
+            }}
+          >
+            <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+            {t('العودة للمكتبة', 'Back to Library')}
+          </GhostButton>
+        </div>
 
         {isTestMode ? (
-          <div className="bg-white rounded-3xl p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
-             
-             <header className="mb-12 text-center relative z-10">
-                <div className="w-20 h-20 bg-[#C49E3A]/10 text-[#9a7a2c] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                   <Mic size={40} className={isRecording ? 'animate-pulse' : ''} />
+          <GoldCard className="p-5 sm:p-8 relative overflow-hidden">
+             <header className="mb-6 text-center relative z-10">
+                <div className="w-14 h-14 bg-[#fdfaf3] text-[#C49E3A] border border-[#C49E3A]/40 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+                   <Mic size={28} className={isRecording ? 'animate-pulse' : ''} />
                 </div>
-                <h2 className="text-3xl font-black text-[#002147] mb-2">{isRtl ? 'اختبار مهارة القراءة' : 'Reading Fluency Test'}</h2>
-                <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">{isRtl ? 'قم بقراءة النص بوضوح للميكروفون' : 'Read the text clearly into your microphone'}</p>
+                <h2 className="text-xl sm:text-2xl font-black text-[#002147] mb-1">{t('اختبار مهارة القراءة', 'Reading Fluency Test')}</h2>
+                <p className="text-[#002147]/70 font-bold text-xs uppercase tracking-wider">{t('قم بقراءة النص بوضوح للميكروفون', 'Read the text clearly into your microphone')}</p>
              </header>
 
-             <div className="bg-slate-50 rounded-3xl p-8 mb-8 border border-slate-100 relative z-10">
-                <p className="text-xl md:text-2xl font-serif leading-relaxed text-slate-700 italic">
-                   {selectedStory.content.split(' ').map((word, idx) => {
+             <div className="bg-[#fdfaf3] rounded-2xl p-5 sm:p-6 mb-6 border border-[#C49E3A]/40 relative z-10">
+                <p className="text-lg sm:text-xl leading-loose text-[#002147]">
+                   {words.map((word, idx) => {
                      const clean = word.toLowerCase().replace(/[.,!?;:]/g, '');
                      const isWrong = testResult?.mistakes.includes(clean);
                      const isCorrect = testResult && !isWrong;
@@ -505,7 +519,7 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
                      return (
                        <span 
                          key={idx} 
-                         className={`mx-1 ${isWrong ? 'text-red-500 line-through' : isCorrect ? 'text-emerald-600 font-bold' : ''}`}
+                         className={`mx-0.5 ${isWrong ? 'text-red-600 line-through' : isCorrect ? 'text-green-700 font-bold' : ''}`}
                        >
                          {word}{' '}
                        </span>
@@ -516,131 +530,124 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
 
              {testResult ? (
                 <motion.div 
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-[#002147] text-white p-8 rounded-3xl text-center mb-8 relative z-10 shadow-2xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-[#002147] text-white p-6 rounded-2xl border-2 border-[#C49E3A] text-center mb-6 relative z-10 shadow-sm"
                 >
-                   <div className="flex items-center justify-center gap-6 mb-6">
-                      <div className="w-24 h-24 rounded-full border-4 border-[#C49E3A]/60 flex flex-col items-center justify-center bg-white/5">
-                         <span className="text-3xl font-black">{testResult.score}%</span>
-                         <span className="text-[10px] font-black uppercase">{isRtl ? 'النتيجة' : 'SCORE'}</span>
+                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-5">
+                      <div className="w-20 h-20 rounded-full border-2 border-[#C49E3A] flex flex-col items-center justify-center bg-[#001a38]">
+                         <span className="text-2xl font-black text-[#E6C36A]">{testResult.score}%</span>
+                         <span className="text-[10px] font-black uppercase text-white/80">{t('النتيجة', 'SCORE')}</span>
                       </div>
-                      <div className="text-left">
-                         <p className="text-xl font-black mb-1">{testResult.score > 80 ? (isRtl ? 'أداء ممتاز!' : 'Excellent Performance!') : (isRtl ? 'أداء جيد، حاول مجدداً' : 'Good job, keep practicing!')}</p>
-                         <p className="text-[#E4C77A] text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                      <div className={isRtl ? 'text-center sm:text-right' : 'text-center sm:text-left'}>
+                         <p className="text-lg font-black text-white mb-1">{testResult.score > 80 ? t('أداء ممتاز!', 'Excellent Performance!') : t('أداء جيد، حاول مجدداً', 'Good job, keep practicing!')}</p>
+                         <p className="text-[#E6C36A] text-xs font-bold flex items-center justify-center sm:justify-start gap-1.5">
                             <RefreshCcw size={14} /> 
                             {isRtl ? `لديك ${testResult.mistakes.length} أخطاء نطق` : `You had ${testResult.mistakes.length} pronunciation mistakes`}
                          </p>
                       </div>
                    </div>
-                   <button 
+                   <PrimaryButton 
                      onClick={() => {
                        setTestResult(null);
                        setRecordedText("");
                      }}
-                     className="bg-[#C49E3A] text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform"
                    >
-                     {isRtl ? 'إعادة الاختبار' : 'Retake Test'}
-                   </button>
+                     {t('إعادة الاختبار', 'Retake Test')}
+                   </PrimaryButton>
                 </motion.div>
              ) : (
-                <div className="flex flex-col items-center gap-6 relative z-10">
-                   <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center gap-4 relative z-10">
+                   <div className="flex flex-wrap items-center justify-center gap-3">
                       {isRecording ? (
                          <>
-                           <button 
+                           <GhostButton 
                              onClick={pauseRecording}
-                             className="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-100 transition-colors shadow-sm"
-                             title={isRtl ? 'توقف مؤقت' : 'Pause'}
+                             title={t('توقف مؤقت', 'Pause')}
                            >
-                             <Pause size={24} />
-                           </button>
-                           <button 
+                             <Pause size={18} />
+                             <span>{t('توقف مؤقت', 'Pause')}</span>
+                           </GhostButton>
+                           <PrimaryButton 
                              onClick={toggleRecording}
-                             className="w-24 h-24 rounded-full bg-red-500 text-white flex items-center justify-center shadow-2xl shadow-red-200 hover:scale-110 transition-transform pulse-animation"
+                             className="bg-red-600 hover:bg-red-700 text-white border-red-700"
                            >
-                             <Square size={32} fill="currentColor" />
-                           </button>
+                             <Square size={18} fill="currentColor" />
+                             <span>{t('إيقاف وحساب النتيجة', 'Stop & Score')}</span>
+                           </PrimaryButton>
                          </>
                       ) : recordingPaused ? (
                         <>
-                           <button 
-                             onClick={resumeRecording}
-                             className="w-24 h-24 rounded-full bg-[#002147] text-white flex items-center justify-center shadow-2xl shadow-emerald-200 hover:scale-110 transition-transform"
-                           >
-                             <Play size={32} fill="currentColor" />
-                           </button>
-                           <button 
+                           <PrimaryButton onClick={resumeRecording}>
+                             <Play size={18} fill="currentColor" />
+                             <span>{t('استكمال', 'Resume')}</span>
+                           </PrimaryButton>
+                           <GhostButton 
                              onClick={() => {
                                setRecordedText("");
                                setRecordingPaused(false);
                                calculateScore();
                              }}
-                             className="w-16 h-16 rounded-full bg-[#C49E3A]/10 text-[#9a7a2c] flex items-center justify-center hover:bg-[#C49E3A]/10 transition-colors shadow-sm"
                            >
-                             <CheckCircle2 size={24} />
-                           </button>
+                             <CheckCircle2 size={18} />
+                             <span>{t('اعتماد النتيجة', 'Finish')}</span>
+                           </GhostButton>
                         </>
                       ) : (
-                        <button 
-                          onClick={toggleRecording}
-                          className="px-12 py-6 rounded-3xl bg-[#002147] text-white font-black text-lg uppercase tracking-widest flex items-center gap-4 shadow-2xl shadow-[#C49E3A]/30 hover:bg-[#002147] transition-all group"
-                        >
-                          <Mic size={32} />
-                          {isRtl ? 'ابدأ القراءة الآن' : 'Start Reading Now'}
-                        </button>
+                        <PrimaryButton onClick={toggleRecording} className="px-6 py-3">
+                          <Mic size={20} />
+                          <span>{t('ابدأ القراءة الآن', 'Start Reading Now')}</span>
+                        </PrimaryButton>
                       )}
                    </div>
                    
                    {isRecording && (
-                     <motion.div 
-                       initial={{ opacity: 0 }}
-                       animate={{ opacity: [0.5, 1, 0.5] }}
-                       transition={{ repeat: Infinity, duration: 1.5 }}
-                       className="text-red-500 font-black text-sm uppercase tracking-[0.2em] flex items-center gap-2"
-                     >
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                        {isRtl ? 'جاري الاستماع...' : 'Listening...'}
-                     </motion.div>
+                     <div className="text-red-600 font-black text-xs uppercase tracking-wider flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                        {t('جاري الاستماع...', 'Listening...')}
+                     </div>
                    )}
                 </div>
              )}
 
-             <button 
-               onClick={() => {
-                 setIsTestMode(false);
-                 setRecordedText("");
-                 setTestResult(null);
-               }}
-               className="mt-12 text-slate-400 hover:text-slate-600 font-bold text-xs uppercase tracking-widest block mx-auto py-4 underline underline-offset-4"
-             >
-                {isRtl ? 'الخروج من وضع الاختبار' : 'Exit Test Mode'}
-             </button>
-          </div>
+             <div className="mt-6 flex justify-center">
+               <GhostButton 
+                 onClick={() => {
+                   setIsTestMode(false);
+                   setRecordedText("");
+                   setTestResult(null);
+                 }}
+               >
+                 {t('الخروج من وضع الاختبار', 'Exit Test Mode')}
+               </GhostButton>
+             </div>
+          </GoldCard>
         ) : (
-          <div className="bg-white rounded-3xl p-10 md:p-16 border border-slate-200 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 -z-0" />
-            
-            <header className="mb-12 text-center relative z-10">
-              <span className="bg-[#C49E3A]/10 text-[#9a7a2c] px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block">{selectedStory.level}</span>
-              <h2 className="text-4xl font-black text-[#002147] mb-4">{isRtl ? selectedStory.titleAr : selectedStory.titleEn}</h2>
-              <div className="flex items-center justify-center gap-4 text-slate-400 font-bold text-xs uppercase tracking-widest">
-                 <span className="flex items-center gap-2"><BookOpen size={14} /> {selectedStory.content.split(' ').length} words</span>
-                 <span className="w-1 h-1 bg-slate-200 rounded-full" />
-                 <span className="text-[#9a7a2c]">{t.clickWordHint}</span>
+          <GoldCard className="p-5 sm:p-8 relative overflow-hidden">
+            <header className="mb-6 text-center relative z-10">
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
+                <ProgressPill>📖 {selectedStory.level}</ProgressPill>
+                <ProgressPill>{words.length} {t('كلمة', 'words')}</ProgressPill>
               </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#002147] mb-2">{isRtl ? selectedStory.titleAr : selectedStory.titleEn}</h2>
+              <p className="text-xs font-bold text-[#C49E3A]">{t.clickWordHint}</p>
             </header>
 
-            <div className="relative z-10">
-              <div className={`text-xl md:text-2xl font-serif leading-[2.5] text-slate-700 select-text ${isRtl ? 'text-right' : 'text-left'}`}>
-                {selectedStory.content.split(' ').map((word, idx) => {
+            <div className="relative z-10 bg-[#fdfaf3] rounded-2xl p-4 sm:p-6 border border-[#C49E3A]/30">
+              <div className="text-lg sm:text-xl leading-[2.2] text-[#002147] select-text text-left" dir="ltr">
+                {words.map((word, idx) => {
                   const isActive = activeWordIndex === idx;
+                  const inActiveSentence = activeWordIndex !== null && idx >= sentenceStart && idx <= sentenceEnd;
                   return (
                     <span 
                       key={idx}
                       onClick={() => handleWordClick(word)}
-                      className={`px-1.5 py-0.5 rounded-lg hover:bg-[#C49E3A]/10 hover:text-[#9a7a2c] cursor-pointer transition-all border border-transparent inline-block ${
-                        isActive ? 'bg-amber-100 text-[#002147] font-extrabold border-amber-300 scale-105 shadow-xs' : 'hover:border-[#C49E3A]/30'
+                      className={`px-1 py-0.5 rounded-lg cursor-pointer transition-colors border inline-block ${
+                        isActive
+                          ? 'bg-[#E6C36A] text-[#002147] font-black border-[#C49E3A]'
+                          : inActiveSentence
+                          ? 'bg-[#E6C36A]/35 text-[#002147] font-bold border-[#C49E3A]/40'
+                          : 'border-transparent hover:bg-[#E6C36A]/20 hover:border-[#C49E3A]/40'
                       }`}
                     >
                       {word}{' '}
@@ -650,170 +657,129 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-12">
-              <button 
-                onClick={() => toggleSpeak(selectedStory.content)}
-                className={`bg-[#002147] text-white px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#C49E3A] transition-all shadow-xl shadow-[#C49E3A]/30 ${isPaused || !isSpeaking ? 'bg-[#002147]' : 'bg-emerald-600'}`}
-              >
-                {isSpeaking && !isPaused ? <Pause size={24} /> : <Play size={24} />}
-                {isSpeaking && !isPaused 
-                  ? (isRtl ? 'إيقاف مؤقت' : 'Pause Audio') 
-                  : (isPaused ? (isRtl ? 'استكمال' : 'Resume Story') : (isRtl ? 'استمع للقصة' : 'Listen to Story'))}
-              </button>
+            <div className="flex flex-wrap items-center justify-center gap-2.5 mt-6">
+              <PrimaryButton onClick={() => toggleSpeak(selectedStory.content)}>
+                {isSpeaking && !isPaused ? <Pause size={18} /> : <Play size={18} />}
+                <span>
+                  {isSpeaking && !isPaused 
+                    ? t('إيقاف مؤقت', 'Pause Audio') 
+                    : (isPaused ? t('استكمال', 'Resume Story') : t('استمع للقصة', 'Listen to Story'))}
+                </span>
+              </PrimaryButton>
 
-              <button 
-                onClick={handleStartTest}
-                className="bg-[#C49E3A] text-white px-8 py-5 rounded-3xl font-black text-sm uppercase tracking-widest flex items-center gap-4 hover:bg-[#002147] transition-all shadow-xl shadow-amber-100"
-              >
-                <Mic size={24} />
-                {isRtl ? 'اختبار القراءة' : 'Reading Test'}
-              </button>
+              <GhostButton onClick={handleStartTest}>
+                <Mic size={18} />
+                <span>{t('اختبار القراءة', 'Reading Test')}</span>
+              </GhostButton>
 
               {isSpeaking && (
-                <button 
-                  onClick={stopSpeak}
-                  className="w-16 h-16 rounded-3xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-lg"
-                >
-                  <Square size={24} fill="currentColor" />
-                </button>
+                <GhostButton onClick={stopSpeak} aria-label={t('إيقاف', 'Stop')}>
+                  <Square size={16} fill="currentColor" />
+                </GhostButton>
               )}
             </div>
-          </div>
+          </GoldCard>
         )}
 
         {/* Word Detail Popup */}
         <AnimatePresence>
           {wordData && (
             <motion.div 
-              initial={{ y: 100, opacity: 0 }}
+              initial={{ y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              className="fixed bottom-12 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:max-w-xl z-50"
+              exit={{ y: 40, opacity: 0 }}
+              className="fixed bottom-20 left-3 right-3 md:left-1/2 md:-translate-x-1/2 md:max-w-lg z-50"
             >
-              <div className="bg-[#002147] text-white p-8 rounded-3xl shadow-2xl border-4 border-white flex items-center justify-between gap-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-1">
-                    <h4 className="text-3xl font-black text-white">{wordData.word}</h4>
+              <div className="bg-[#002147] text-white p-5 rounded-2xl shadow-md border-2 border-[#C49E3A] flex items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h4 className="text-xl sm:text-2xl font-black text-white truncate">{wordData.word}</h4>
                     {loadingWord ? (
-                      <div className="w-5 h-5 border-2 border-[#C49E3A]/60 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#C49E3A] border-t-transparent rounded-full animate-spin shrink-0" />
                     ) : (
                       <button onClick={() => {
                         window.speechSynthesis.cancel();
                         const utt = new SpeechSynthesisUtterance(wordData.word);
                         utt.lang = 'en-US';
                         managedSpeak(utt);
-                      }} className="text-[#E4C77A] hover:text-white transition-colors">
-                        <Volume2 size={20} />
+                      }} className="text-[#E6C36A] hover:text-white transition-colors shrink-0">
+                        <Volume2 size={18} />
                       </button>
                     )}
                   </div>
-                  <p className="text-[#E4C77A] text-xs font-bold uppercase tracking-widest mb-4 italic">/ {wordData.pronunciation || '...'} /</p>
-                  <div className="bg-white/10 px-4 py-2 rounded-xl inline-block">
-                    <p className="text-xl font-black text-[#C49E3A]">{wordData.translation || '...'}</p>
+                  <p className="text-[#E6C36A] text-xs font-bold mb-2 italic">/ {wordData.pronunciation || '...'} /</p>
+                  <div className="bg-[#001a38] border border-[#C49E3A]/40 px-3 py-1.5 rounded-xl inline-block">
+                    <p className="text-base font-black text-[#E6C36A]">{wordData.translation || '...'}</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setWordData(null)}
-                  className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                  className="w-9 h-9 bg-[#001a38] hover:bg-[#C49E3A] hover:text-[#002147] border border-[#C49E3A]/40 rounded-xl flex items-center justify-center transition-colors shrink-0"
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </SectionShell>
     );
   }
 
   return (
-    <div className={`p-4 md:p-8 pb-32 md:pb-40 max-w-7xl mx-auto w-full min-w-0 ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
-      <header className="mb-12">
-        <h2 className="text-3xl font-black text-[#002147]">{t.storyLibrary}</h2>
-        <p className="text-slate-400 mt-1 font-medium">{isRtl ? 'طور مهارات القراءة والاستماع عبر مكتبة من القصص العالمية' : 'Develop reading and listening skills through a library of global stories'}</p>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={`pb-28 ${isRtl ? 'font-arabic' : 'font-sans'}`}>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
         {STORIES.map((story, sIdx) => (
-          <motion.div 
+          <LessonTile
             key={`story-card-${story.id || sIdx}`}
-            whileHover={{ y: -10 }}
+            order={sIdx + 1}
+            title={isRtl ? story.titleAr : story.titleEn}
+            subtitle={`${story.content.split(' ').length} ${t('كلمة', 'words')}`}
+            emoji="📖"
+            level={story.level}
             onClick={() => handleSelectStory(story)}
-            className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm group cursor-pointer relative"
-          >
-            <div className="h-48 relative overflow-hidden bg-slate-900 flex items-center justify-center text-slate-300">
-               {!story.image || brokenImages[story.id] ? (
-                 renderFallbackCover(story)
-               ) : (
-                 <>
-                   <ImageIcon size={48} className="absolute opacity-20" />
-                   <img 
-                     src={story.image} 
-                     alt={story.titleEn} 
-                     referrerPolicy="no-referrer"
-                     loading="lazy"
-                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-10" 
-                     onError={() => {
-                       setBrokenImages(prev => ({ ...prev, [story.id]: true }));
-                     }}
-                   />
-                   <div className="absolute top-4 left-4 z-20">
-                      <span className="bg-[#C49E3A] text-white px-3 py-1 rounded-full text-[10px] font-black shadow-lg">{story.level}</span>
-                   </div>
-                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end p-6 z-20">
-                      <div className="text-white">
-                        <h3 className="font-black text-xl mb-1 leading-tight">{isRtl ? story.titleAr : story.titleEn}</h3>
-                        <p className="text-[#E4C77A] text-[10px] font-bold uppercase tracking-widest">{story.content.split(' ').length} {isRtl ? 'كلمة' : 'words'}</p>
-                      </div>
-                   </div>
-                 </>
-               )}
-            </div>
-            <div className="p-6">
-              <p className="text-slate-500 text-sm line-clamp-2 mb-6 font-medium leading-relaxed italic">"{story.content}"</p>
-              <div className="flex items-center justify-between">
-                <button className="bg-slate-50 text-[#002147] px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-100 group-hover:border-[#C49E3A]/60 group-hover:text-[#9a7a2c] transition-all flex items-center gap-2">
-                  <Play size={12} fill="currentColor" />
-                  {t.readNow}
-                </button>
-                <button className="text-slate-300 hover:text-red-500 transition-colors">
-                  <Heart size={20} />
-                </button>
-              </div>
-            </div>
-          </motion.div>
+          />
         ))}
       </div>
 
-      <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
-         <div className="bg-gradient-to-br from-[#002147] to-[#002147] rounded-3xl p-10 text-white shadow-xl relative overflow-hidden">
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mb-20" />
-            <Languages size={40} className="mb-6 text-[#E4C77A] opacity-50" />
-            <h4 className="text-2xl font-black mb-4">{isRtl ? 'مساعد الترجمة الفوري' : 'Instant Translation Assistant'}</h4>
-            <p className="text-[#E4C77A] text-sm leading-relaxed mb-8 flex-1">
-              {isRtl 
-                ? 'لا تتوقف عند الكلمات الصعبة. اضغط على أي كلمة للحصول على ترجمة فورية ونطق صوتي دقيق مدعوم بالذكاء الاصطناعي.' 
-                : "Don't stop at hard words. Click any word for instant translation and accurate AI-powered audio pronunciation."}
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-black text-[10px]">1</div>
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-black text-[10px]">2</div>
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-black text-[10px]">3</div>
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+         <GoldCard className="flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="text-xl">🌐</span>
+                <h4 className="text-base sm:text-lg font-black text-[#002147]">{t('مساعد الترجمة الفوري', 'Instant Translation Assistant')}</h4>
+              </div>
+              <p className="text-[#002147]/75 text-xs sm:text-sm leading-relaxed mb-4">
+                {t(
+                  'لا تتوقف عند الكلمات الصعبة. اضغط على أي كلمة للحصول على ترجمة فورية ونطق صوتي دقيق مدعوم بالذكاء الاصطناعي.',
+                  "Don't stop at hard words. Click any word for instant translation and accurate AI-powered audio pronunciation."
+                )}
+              </p>
             </div>
-         </div>
+            <div className="flex items-center gap-2">
+              <ProgressPill>1</ProgressPill>
+              <ProgressPill>2</ProgressPill>
+              <ProgressPill>3</ProgressPill>
+            </div>
+         </GoldCard>
 
-         <div className="bg-white rounded-3xl p-10 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-3xl flex items-center justify-center mb-6">
-               <Search size={32} />
+         <GoldCard className="flex flex-col items-center justify-center text-center">
+            <div className="flex items-center gap-2 mb-1">
+               <span className="text-xl">🔍</span>
+               <h4 className="text-base sm:text-lg font-black text-[#002147]">{t('ابحث عن قصتك المفضلة', 'Search Your Favorite Story')}</h4>
             </div>
-            <h4 className="text-xl font-black text-[#002147] mb-2">{isRtl ? 'ابحث عن قصتك المفضلة' : 'Search Your Favorite Story'}</h4>
-            <p className="text-slate-400 text-sm mb-8">{isRtl ? 'نظام البحث الذكي سيساعدك في إيجاد المحتوى المناسب لمستواك.' : 'Smart search will help you find content matching your level.'}</p>
+            <p className="text-[#002147]/70 text-xs mb-4">{t('نظام البحث الذكي سيساعدك في إيجاد المحتوى المناسب لمستواك.', 'Smart search will help you find content matching your level.')}</p>
             <div className="w-full max-w-md relative">
-              <input type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-4 px-12 focus:outline-none focus:border-[#C49E3A]/60 transition-all font-medium text-sm" placeholder={isRtl ? 'ابحث هنا...' : 'Search here...'} />
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+              <input
+                type="text"
+                className="w-full bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-xl py-2.5 px-10 focus:outline-none focus:ring-2 focus:ring-[#C49E3A] transition-all font-bold text-xs sm:text-sm text-[#002147]"
+                placeholder={t('ابحث هنا...', 'Search here...')}
+              />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C49E3A]" size={16} />
             </div>
-         </div>
+         </GoldCard>
       </div>
-    </div>
+    </SectionShell>
   );
 };
+

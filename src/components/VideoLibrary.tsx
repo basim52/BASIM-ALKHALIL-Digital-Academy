@@ -53,6 +53,16 @@ import {
 import { PRODUCED_VIDEO_LESSONS, ProducedVideoLesson } from '../data/producedVideoLessons';
 import { ProducedVideoPlayer } from './ProducedVideoPlayer';
 import { AiVideoStudioModal } from './AiVideoStudioModal';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface VideoLesson {
   id: string;
@@ -161,7 +171,7 @@ function extractYoutubeId(urlOrId: string): string {
 }
 
 const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
-const VIDEO_THUMB = 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%234f46e5%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%237c3aed%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E';
+const VIDEO_THUMB = 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23002147%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23001a38%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E';
 
 export const VideoLibrary = ({ 
   lang, 
@@ -178,7 +188,7 @@ export const VideoLibrary = ({
   onBack: () => void,
   enabled?: boolean
 }) => {
-  const t = translations[lang];
+  const t = Object.assign((ar: string, en: string) => (lang === 'ar' ? ar : en), translations[lang]);
   const isRtl = lang === 'ar';
   
   // Real-time custom lists
@@ -401,7 +411,7 @@ export const VideoLibrary = ({
       setQuizStarted(true);
     } catch (err) {
       console.warn("Error generating quiz:", String(err));
-      setErrorText(isRtl ? 'تعذر إنشاء اختبار الفيديو من الخادم حالياً، يُرجى المحاولة بعد قليل.' : 'Unable to generate video quiz from server, please try again later.');
+      setErrorText(t('تعذر إنشاء اختبار الفيديو من الخادم حالياً، يُرجى المحاولة بعد قليل.', 'Unable to generate video quiz from server, please try again later.'));
     } finally {
       setQuizLoading(false);
     }
@@ -432,7 +442,7 @@ export const VideoLibrary = ({
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('video/')) {
-        setErrorText(isRtl ? 'الرجاء اختيار ملف فيديو صالح فقط!' : 'Please select a valid video file only!');
+        setErrorText(t('الرجاء اختيار ملف فيديو صالح فقط!', 'Please select a valid video file only!'));
         return;
       }
       setVideoFile(file);
@@ -464,7 +474,7 @@ export const VideoLibrary = ({
 
         if (directSourceMode === 'link') {
           if (!directLinkUrl.trim()) {
-            setErrorText(isRtl ? 'الرجاء إدخال رابط الفيديو المباشر الأول.' : 'Please enter the direct video URL first.');
+            setErrorText(t('الرجاء إدخال رابط الفيديو المباشر الأول.', 'Please enter the direct video URL first.'));
             setActionLoading(false);
             return;
           }
@@ -473,24 +483,24 @@ export const VideoLibrary = ({
           finalFileSize = 'Persistent Web Link';
         } else {
           if (!videoFile) {
-            setErrorText(isRtl ? 'الرجاء اختيار ملف فيديو للتحميل المباشر.' : 'Please select a video file to proceed with direct upload.');
+            setErrorText(t('الرجاء اختيار ملف فيديو للتحميل المباشر.', 'Please select a video file to proceed with direct upload.'));
             setActionLoading(false);
             return;
           }
           const okType = /^video\/(mp4|webm|quicktime|ogg)$/.test(videoFile.type);
           if (!okType) {
-            setErrorText(isRtl ? 'نوع الملف غير مدعوم. استخدم MP4 أو WebM أو MOV.' : 'Unsupported file type. Use MP4, WebM or MOV.');
+            setErrorText(t('نوع الملف غير مدعوم. استخدم MP4 أو WebM أو MOV.', 'Unsupported file type. Use MP4, WebM or MOV.'));
             setActionLoading(false);
             return;
           }
           if (videoFile.size > MAX_VIDEO_BYTES) {
-            setErrorText(isRtl ? 'حجم الفيديو أكبر من 500 ميجابايت.' : 'Video is larger than 500 MB.');
+            setErrorText(t('حجم الفيديو أكبر من 500 ميجابايت.', 'Video is larger than 500 MB.'));
             setActionLoading(false);
             return;
           }
           const uid = auth.currentUser?.uid;
           if (!uid) {
-            setErrorText(isRtl ? 'سجّل الدخول أولاً لرفع الفيديو.' : 'Please sign in to upload.');
+            setErrorText(t('سجّل الدخول أولاً لرفع الفيديو.', 'Please sign in to upload.'));
             setActionLoading(false);
             return;
           }
@@ -521,12 +531,12 @@ export const VideoLibrary = ({
           createdAt: serverTimestamp()
         });
 
-        setSuccessText(isRtl ? '🎉 تم إضافة الفيديو المباشر بنجاح وتأمينه للتشغيل الفوري!' : '🎉 Direct HD video added and secured successfully!');
+        setSuccessText(t('🎉 تم إضافة الفيديو المباشر بنجاح وتأمينه للتشغيل الفوري!', '🎉 Direct HD video added and secured successfully!'));
       } else {
         // YouTube alternative
         const youtubeId = extractYoutubeId(inputUrl);
         if (!youtubeId) {
-          setErrorText(isRtl ? 'الرجاء إدخال رابط يوتيوب صالح.' : 'Please enter a valid YouTube link.');
+          setErrorText(t('الرجاء إدخال رابط يوتيوب صالح.', 'Please enter a valid YouTube link.'));
           setActionLoading(false);
           return;
         }
@@ -541,7 +551,7 @@ export const VideoLibrary = ({
           createdAt: serverTimestamp()
         });
 
-        setSuccessText(isRtl ? '🎉 تم إضافة رابط يوتيوب بنجاح!' : '🎉 YouTube video link added successfully!');
+        setSuccessText(t('🎉 تم إضافة رابط يوتيوب بنجاح!', '🎉 YouTube video link added successfully!'));
       }
 
       // Reset state
@@ -562,8 +572,8 @@ export const VideoLibrary = ({
       console.warn(String(err));
       const code = String(err?.code || '');
       setErrorText(code.includes('unauthorized')
-        ? (isRtl ? 'لا تملك صلاحية الرفع. تأكد من نشر قواعد التخزين.' : 'Upload not permitted. Check storage rules.')
-        : (isRtl ? 'تعذّر حفظ الفيديو. حاول مرة أخرى.' : 'Could not save the video. Please try again.'));
+        ? t('لا تملك صلاحية الرفع. تأكد من نشر قواعد التخزين.', 'Upload not permitted. Check storage rules.')
+        : t('تعذّر حفظ الفيديو. حاول مرة أخرى.', 'Could not save the video. Please try again.'));
       setUploadProgress(null);
     } finally {
       setActionLoading(false);
@@ -595,7 +605,7 @@ export const VideoLibrary = ({
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
           } else {
-            setErrorText(isRtl ? 'هذا الفيديو القديم غير متاح للتنزيل. أعد رفعه.' : 'This legacy video is unavailable. Please re-upload it.');
+            setErrorText(t('هذا الفيديو القديم غير متاح للتنزيل. أعد رفعه.', 'This legacy video is unavailable. Please re-upload it.'));
           }
         }
       } else if (video.youtubeId) {
@@ -632,7 +642,7 @@ Key Learning Objectives:
 
   const handleDeleteVideo = async (vidId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!window.confirm(isRtl ? 'هل تريد بالتأكيد حذف درس الفيديو هذا بشكل نهائي؟' : 'Are you sure you want to permanently delete this video lesson?')) {
+    if (!window.confirm(t('هل تريد بالتأكيد حذف درس الفيديو هذا بشكل نهائي؟', 'Are you sure you want to permanently delete this video lesson?'))) {
       return;
     }
 
@@ -671,9 +681,9 @@ Key Learning Objectives:
   if (selectedVideo) {
     const isDirect = !!selectedVideo.directUrl;
     return (
-      <div className={`p-4 sm:p-6 md:p-8 pb-32 md:pb-40 max-w-4xl mx-auto w-full min-w-0 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7] overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="flex items-center justify-between mb-8">
-          <button 
+      <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={`pb-28 ${isRtl ? 'font-arabic' : 'font-sans'} overflow-x-hidden`}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <GhostButton 
             onClick={() => {
               setSelectedVideo(null);
               setQuizStarted(false);
@@ -683,162 +693,164 @@ Key Learning Objectives:
               setSelectedOptionIdx(null);
               setHasChecked(false);
             }}
-            className="flex items-center gap-2 text-slate-400 hover:text-[#58cc02] transition-colors font-black text-sm uppercase tracking-wider bg-white px-5 py-2.5 rounded-full border border-[#002147]/20 shadow-sm w-fit active:scale-95 duration-100"
           >
             <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
-            {isRtl ? 'العودة للمكتبة' : 'Back to Library'}
-          </button>
+            {t('العودة للمكتبة', 'Back to Library')}
+          </GhostButton>
 
-          <button
+          <PrimaryButton
             onClick={(e) => handleDownloadVideo(selectedVideo, e)}
             disabled={downloadingId === selectedVideo.id}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-xl border border-slate-200 transition-all active:scale-95"
           >
             {downloadingId === selectedVideo.id ? (
-              <div className="w-4 h-4 border-2 border-slate-700 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[#E6C36A] border-t-transparent rounded-full animate-spin" />
             ) : (
               <Download size={15} />
             )}
-            <span>{isRtl ? 'تحميل الفيديو / الملف' : 'Download Video / Guide'}</span>
-          </button>
+            <span>{t('تحميل الفيديو / الملف', 'Download Video / Guide')}</span>
+          </PrimaryButton>
         </div>
 
-        <div className="max-w-3xl mx-auto">
-          <div className="aspect-video rounded-3xl overflow-hidden shadow-md bg-black mb-8 border-4 border-white relative">
-            {isDirect ? (
-              <div className="w-full h-full relative">
-                {activePlayUrl ? (
-                  <video 
-                    controls
-                    autoPlay
-                    className="w-full h-full object-contain"
-                    src={activePlayUrl}
-                    poster={selectedVideo.thumbnail}
-                    onError={() => {
-                      console.warn("HTML5 playback error handled safely");
-                      setHasVideoPlayError(true);
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center">
-                    <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-
-                {hasVideoPlayError && (
-                  <div className="absolute inset-0 bg-slate-950/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-25 animate-fade-in font-sans">
-                    <div className="w-12 h-12 bg-rose-500/10 text-rose-400 rounded-2xl flex items-center justify-center mb-3 border border-rose-500/20">
-                      <AlertCircle size={24} />
+        <div className="max-w-3xl mx-auto space-y-4">
+          {/* Player in a navy card with a gold frame */}
+          <div className="rounded-2xl bg-[#002147] p-2.5 sm:p-3 border-2 border-[#C49E3A] shadow-sm">
+            <div className="aspect-video rounded-xl overflow-hidden bg-[#001a38] border border-[#C49E3A]/40 relative">
+              {isDirect ? (
+                <div className="w-full h-full relative">
+                  {activePlayUrl ? (
+                    <video 
+                      controls
+                      autoPlay
+                      className="w-full h-full object-contain"
+                      src={activePlayUrl}
+                      poster={selectedVideo.thumbnail}
+                      onError={() => {
+                        console.warn("HTML5 playback error handled safely");
+                        setHasVideoPlayError(true);
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#001a38] flex flex-col items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-[#C49E3A] border-t-transparent rounded-full animate-spin" />
                     </div>
-                    <h5 className="text-[13px] font-black mb-1 px-4 leading-normal text-rose-400">
-                      {isRtl ? 'عذراً، تعذر تشغيل ملف الفيديو المباشر في المتصفح' : 'Direct video stream cannot be loaded'}
-                    </h5>
-                    <p className="text-[10px] text-slate-400 font-bold mb-4 max-w-md px-4 leading-relaxed">
-                      {isRtl 
-                        ? `نظراً لإمكانية إعادة تشغيل خادم التطبيق السحابي المؤقت أو القيود المفروضة على IndexedDB بالمتصفح، قد لا يكون الملف متاحاً. يرجى إعادة اختيار ملف الفيديو [ ${selectedVideo.fileName || 'ملف الدرس'} ] من جهازك لرفعه للجميع واسترجاع البث فوراً!`
-                        : `Due to ephemeral cloud server restarts or browser sandbox storage limits, the video file might be off. Re-select [ ${selectedVideo.fileName || 'the lesson file'} ] to link it and stream instantly!`}
-                    </p>
-                    
-                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                      <label className="px-4 py-2 bg-[#58cc02] border-b-4 border-[#3c8c01] rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-[#6be60c] transition-all cursor-pointer select-none inline-flex items-center gap-1 active:scale-95 duration-100 text-white leading-none">
-                        <FileVideo size={12} />
-                        {isRtl ? 'اختر ملف الفيديو لإصلاحه 📁' : 'Choose Local File to Restore 📁'}
-                        <input 
-                          type="file" 
-                          accept="video/*" 
-                          className="hidden" 
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setSavingRequiredFile(true);
-                              try {
-                                try {
-                                  await storeVideoFile(selectedVideo.id, file);
-                                } catch (idbErr) {
-                                  console.warn("IndexedDB store fail within sandboxed iframe", String(idbErr));
-                                }
+                  )}
 
-
-                                const url = URL.createObjectURL(file);
-                                setHasVideoPlayError(false);
-                                setActivePlayUrl(url);
-                                await refreshLocalVideosMap();
-                              } catch (err) {
-                                console.warn("Failed to store and upload selected file:", String(err));
-                              } finally {
-                                setSavingRequiredFile(false);
-                              }
-                            }
-                          }}
-                        />
-                      </label>
+                  {hasVideoPlayError && (
+                    <div className="absolute inset-0 bg-[#001a38]/95 flex flex-col items-center justify-center p-4 sm:p-6 text-center text-white z-25 font-sans">
+                      <div className="w-10 h-10 bg-red-600/20 text-red-400 rounded-xl flex items-center justify-center mb-2 border border-red-500/40">
+                        <AlertCircle size={20} />
+                      </div>
+                      <h5 className="text-xs sm:text-sm font-black mb-1 px-2 text-[#E6C36A]">
+                        {t('عذراً، تعذر تشغيل ملف الفيديو المباشر في المتصفح', 'Direct video stream cannot be loaded')}
+                      </h5>
+                      <p className="text-[11px] text-white/80 font-bold mb-3 max-w-md px-2 leading-relaxed">
+                        {isRtl 
+                          ? `نظراً لإمكانية إعادة تشغيل خادم التطبيق السحابي المؤقت أو القيود المفروضة على IndexedDB بالمتصفح، قد لا يكون الملف متاحاً. يرجى إعادة اختيار ملف الفيديو [ ${selectedVideo.fileName || 'ملف الدرس'} ] من جهازك لرفعه للجميع واسترجاع البث فوراً!`
+                          : `Due to ephemeral cloud server restarts or browser sandbox storage limits, the video file might be off. Re-select [ ${selectedVideo.fileName || 'the lesson file'} ] to link it and stream instantly!`}
+                      </p>
                       
-                      <button 
-                        onClick={() => {
-                          setHasVideoPlayError(false);
-                          const originalUrl = activePlayUrl;
-                          setActivePlayUrl('');
-                          setTimeout(() => setActivePlayUrl(originalUrl), 50);
-                        }}
-                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 transition-colors rounded-xl text-[9px] font-black uppercase tracking-wider text-slate-300"
-                      >
-                        {isRtl ? 'تخطي وإعادة المحاولة 🔄' : 'Ignore & Retry 🔄'}
-                      </button>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        <label className="px-3.5 py-2 bg-[#C49E3A] text-[#002147] rounded-xl text-xs font-black cursor-pointer select-none inline-flex items-center gap-1.5 active:scale-95 transition-transform">
+                          <FileVideo size={14} />
+                          {t('اختر ملف الفيديو لإصلاحه 📁', 'Choose Local File to Restore 📁')}
+                          <input 
+                            type="file" 
+                            accept="video/*" 
+                            className="hidden" 
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setSavingRequiredFile(true);
+                                try {
+                                  try {
+                                    await storeVideoFile(selectedVideo.id, file);
+                                  } catch (idbErr) {
+                                    console.warn("IndexedDB store fail within sandboxed iframe", String(idbErr));
+                                  }
+
+                                  const url = URL.createObjectURL(file);
+                                  setHasVideoPlayError(false);
+                                  setActivePlayUrl(url);
+                                  await refreshLocalVideosMap();
+                                } catch (err) {
+                                  console.warn("Failed to store and upload selected file:", String(err));
+                                } finally {
+                                  setSavingRequiredFile(false);
+                                }
+                              }
+                            }}
+                          />
+                        </label>
+                        
+                        <button 
+                          onClick={() => {
+                            setHasVideoPlayError(false);
+                            const originalUrl = activePlayUrl;
+                            setActivePlayUrl('');
+                            setTimeout(() => setActivePlayUrl(originalUrl), 50);
+                          }}
+                          className="px-3.5 py-2 bg-[#002147] border border-[#C49E3A] rounded-xl text-xs font-black text-[#E6C36A] active:scale-95 transition-transform"
+                        >
+                          {t('تخطي وإعادة المحاولة 🔄', 'Ignore & Retry 🔄')}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {savingRequiredFile && (
-                  <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-30 animate-fade-in">
-                    <div className="w-8 h-8 border-3 border-[#58cc02] border-t-transparent rounded-full animate-spin" />
-                    <span className="text-[10px] uppercase font-black tracking-wider text-slate-300">{isRtl ? 'جاري تحسين وتهيئة الفيديو وحفظه فورا...' : 'Buffering & caching locally...'}</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <iframe 
-                width="100%" 
-                height="100%" 
-                src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`} 
-                title="YouTube video player" 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-              />
-            )}
-          </div>
-
-          <div className="bg-white rounded-3xl p-6 border-2 border-b-4 border-slate-200 relative">
-            <div className="flex flex-wrap items-center gap-2.5 mb-4">
-              <span className="bg-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black">{selectedVideo.level}</span>
-              <span className="bg-[#58cc02] text-white px-3 py-1 rounded-full text-[10px] font-black flex items-center gap-1">
-                {isDirect ? (isRtl ? 'تحميل فيديو مباشر 📁' : 'Direct Video HD 📁') : 'YouTube HD'}
-              </span>
-              {selectedVideo.fileSize && (
-                <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-black">{selectedVideo.fileSize}</span>
+                  {savingRequiredFile && (
+                    <div className="absolute inset-0 bg-[#001a38]/90 flex flex-col items-center justify-center space-y-2 z-30">
+                      <div className="w-8 h-8 border-2 border-[#C49E3A] border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs font-black text-[#E6C36A]">{t('جاري تحسين وتهيئة الفيديو وحفظه فورا...', 'Buffering & caching locally...')}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`} 
+                  title="YouTube video player" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                />
               )}
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-slate-800 mb-2 leading-tight">
+          </div>
+
+          <GoldCard>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <ProgressPill>{selectedVideo.level}</ProgressPill>
+              <ProgressPill>
+                {isDirect ? t('تحميل فيديو مباشر 📁', 'Direct Video HD 📁') : 'YouTube HD'}
+              </ProgressPill>
+              {selectedVideo.fileSize && (
+                <ProgressPill>{selectedVideo.fileSize}</ProgressPill>
+              )}
+            </div>
+            <h2 className="text-lg sm:text-xl font-black text-[#002147] mb-2 leading-tight">
               {isRtl ? selectedVideo.titleAr : selectedVideo.titleEn}
             </h2>
             {isDirect && !activePlayUrl && (
-              <div className="p-4 bg-amber-50 border-2 border-amber-200 text-amber-700 rounded-2xl text-xs font-bold flex items-center gap-3 mt-4">
-                <AlertCircle size={18} className="shrink-0 text-amber-500" />
+              <div className="p-3.5 bg-[#fdfaf3] border border-[#C49E3A] text-[#002147] rounded-xl text-xs font-bold flex items-center gap-2.5 mt-3">
+                <AlertCircle size={18} className="shrink-0 text-[#C49E3A]" />
                 <span>
-                  {isRtl 
-                    ? 'يتطلب تشغيل هذا الملف اختيار ملف الفيديو المباشر من جهازك لمرة واحدة فقط ليقوم المتصفح بحفظه واستدعاءه تلقائياً دائماً.' 
-                    : 'Playing this file requires selecting the direct video file from your device once so your browser can recall and load it automatically.'}
+                  {t(
+                    'يتطلب تشغيل هذا الملف اختيار ملف الفيديو المباشر من جهازك لمرة واحدة فقط ليقوم المتصفح بحفظه واستدعاءه تلقائياً دائماً.',
+                    'Playing this file requires selecting the direct video file from your device once so your browser can recall and load it automatically.'
+                  )}
                 </span>
               </div>
             )}
-            <p className="text-slate-500 text-xs md:text-sm leading-relaxed font-bold mt-4">
-              {isRtl 
-                ? 'شاهد الفيديو واستمتع بالتعلم وتطوير مهارات الإستماع والتحدث بطلاقة وثقة.' 
-                : 'Watch the video and enjoy learning to develop premium listening, pronunciation, and speaking skills.'}
+            <p className="text-[#002147]/75 text-xs sm:text-sm leading-relaxed font-bold mt-2">
+              {t(
+                'شاهد الفيديو واستمتع بالتعلم وتطوير مهارات الإستماع والتحدث بطلاقة وثقة.',
+                'Watch the video and enjoy learning to develop premium listening, pronunciation, and speaking skills.'
+              )}
             </p>
-          </div>
+          </GoldCard>
         </div>
-      </div>
+      </SectionShell>
     );
   }
 
@@ -850,80 +862,65 @@ Key Learning Objectives:
   });
 
   return (
-    <div className={`p-4 md:p-8 pb-32 md:pb-40 max-w-7xl mx-auto w-full min-w-0 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7] overflow-x-hidden`} dir={isRtl ? 'rtl' : 'ltr'}>
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={`pb-28 ${isRtl ? 'font-arabic' : 'font-sans'} overflow-x-hidden`}>
       
-      {/* HEADER SECTION */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 min-w-0">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-800 leading-none">{t.videoLibrary}</h2>
-            <div className="bg-gradient-to-r from-[#58cc02] to-[#1cb0f6] text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider animate-pulse leading-none shadow-sm shrink-0">
-              {isRtl ? 'إنتاج بالصوت والصورة 🎬🪄' : 'Audiovisual Production 🎬'}
-            </div>
-          </div>
-          <p className="text-slate-400 mt-2 font-bold text-xs">
-            {isRtl 
-              ? 'دروس مرئية ناطقة بالصوت والصورة وحركة الشخصيات، مع إمكانية إنتاج فيديوهات جديدة وتحميل الفيديوهات والملخصات' 
-              : 'Interactive narrated video lessons with audio, animation, AI production, and instant video downloading'}
-          </p>
-        </div>
+      {/* Action Controls Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <p className="text-[#002147]/75 font-bold text-xs">
+          {t(
+            'دروس مرئية ناطقة بالصوت والصورة وحركة الشخصيات، مع إمكانية إنتاج فيديوهات جديدة وتحميل الفيديوهات والملخصات',
+            'Interactive narrated video lessons with audio, animation, AI production, and instant video downloading'
+          )}
+        </p>
 
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {/* AI VIDEO GENERATOR BUTTON */}
-          <button
-            onClick={() => setShowAiStudioModal(true)}
-            className="px-5 py-3.5 bg-gradient-to-r from-[#002147] to-[#002147] hover:brightness-105 text-white font-black text-xs uppercase tracking-wider rounded-2xl border-b-4 border-[#C49E3A] active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-[#58cc02]/25"
-          >
-            <Wand2 size={16} />
-            <span>{isRtl ? 'إنتاج فيديو بالذكاء الاصطناعي 🪄' : 'AI Video Producer Studio 🪄'}</span>
-          </button>
+          <PrimaryButton onClick={() => setShowAiStudioModal(true)}>
+            <Wand2 size={15} />
+            <span>{t('إنتاج فيديو بالذكاء الاصطناعي 🪄', 'AI Video Producer Studio 🪄')}</span>
+          </PrimaryButton>
 
           {/* SIMULATION SWITCH */}
           {!isAdminUser && (
-            <button 
+            <GhostButton 
+              active={forceAdminMode}
               onClick={() => setForceAdminMode(!forceAdminMode)}
-              className={`px-3 py-2 rounded-xl text-[10px] font-black border uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                forceAdminMode 
-                  ? 'bg-amber-100 text-amber-700 border-amber-300' 
-                  : 'bg-white text-slate-400 border-slate-200 hover:text-slate-600'
-              }`}
             >
-              <Sparkle size={12} className={forceAdminMode ? 'animate-spin-slow text-amber-600' : ''} />
-              <span>{forceAdminMode ? (isRtl ? 'وضع المدير نشط' : 'Admin Mode') : (isRtl ? 'محاكاة وضع المدير' : 'Simulate Admin')}</span>
-            </button>
+              <Sparkle size={12} />
+              <span>{forceAdminMode ? t('وضع المدير نشط', 'Admin Mode') : t('محاكاة وضع المدير', 'Simulate Admin')}</span>
+            </GhostButton>
           )}
 
           {isEffectiveAdmin && (
-            <button 
+            <GhostButton 
+              active={showAddForm}
               onClick={() => {
                 setShowAddForm(!showAddForm);
                 setErrorText('');
                 setSuccessText('');
               }}
-              className="px-4 py-3 duo-btn-white border-2 border-slate-200 flex items-center justify-center gap-2 text-xs uppercase font-black"
             >
-              <Plus size={16} strokeWidth={3} />
-              <span>{isRtl ? 'إضافة فيديو يدوي' : 'Upload Manual Video'}</span>
-            </button>
+              <Plus size={15} />
+              <span>{t('إضافة فيديو يدوي', 'Upload Manual Video')}</span>
+            </GhostButton>
           )}
         </div>
-      </header>
+      </div>
 
       {/* TOP TABS SELECTOR (Produced Audiovisual vs Direct Uploads) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8 bg-white p-2 rounded-2xl border-2 border-slate-200 shadow-sm max-w-full min-w-0 overflow-hidden">
+      <GoldCard className="p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 max-w-full min-w-0 overflow-hidden">
         <button
           onClick={() => setLibraryTab('produced')}
-          className={`w-full sm:flex-1 min-w-0 py-3 px-3 sm:px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+          className={`w-full sm:flex-1 min-w-0 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-transform active:scale-95 border ${
             libraryTab === 'produced'
-              ? 'bg-[#002147] text-white shadow-md shadow-[#58cc02]/20'
-              : 'text-slate-500 hover:bg-slate-100'
+              ? 'bg-[#002147] text-[#E6C36A] border-[#C49E3A] shadow-sm'
+              : 'bg-white text-[#002147] border-[#C49E3A]/40 hover:bg-[#fdfaf3]'
           }`}
         >
-          <Film size={18} />
-          <span className="truncate">{isRtl ? 'الدروس المرئية المنتجة (بالصوت والصورة) 🎬' : 'Produced Audiovisual Video Lessons 🎬'}</span>
+          <Film size={16} className="shrink-0" />
+          <span className="truncate">{t('الدروس المرئية المنتجة (بالصوت والصورة) 🎬', 'Produced Audiovisual Video Lessons 🎬')}</span>
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${
-            libraryTab === 'produced' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+            libraryTab === 'produced' ? 'bg-[#C49E3A] text-[#002147]' : 'bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/40'
           }`}>
             {producedLessons.length}
           </span>
@@ -931,29 +928,29 @@ Key Learning Objectives:
 
         <button
           onClick={() => setLibraryTab('uploads')}
-          className={`w-full sm:flex-1 min-w-0 py-3 px-3 sm:px-4 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+          className={`w-full sm:flex-1 min-w-0 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-transform active:scale-95 border ${
             libraryTab === 'uploads'
-              ? 'bg-[#1cb0f6] text-white shadow-md shadow-[#1cb0f6]/20'
-              : 'text-slate-500 hover:bg-slate-100'
+              ? 'bg-[#002147] text-[#E6C36A] border-[#C49E3A] shadow-sm'
+              : 'bg-white text-[#002147] border-[#C49E3A]/40 hover:bg-[#fdfaf3]'
           }`}
         >
-          <HardDriveDownload size={18} />
-          <span className="truncate">{isRtl ? 'مكتبة التحميل المباشر واليوتيوب 📁' : 'Direct Uploads & YouTube Library 📁'}</span>
+          <HardDriveDownload size={16} className="shrink-0" />
+          <span className="truncate">{t('مكتبة التحميل المباشر واليوتيوب 📁', 'Direct Uploads & YouTube Library 📁')}</span>
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-black shrink-0 ${
-            libraryTab === 'uploads' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+            libraryTab === 'uploads' ? 'bg-[#C49E3A] text-[#002147]' : 'bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/40'
           }`}>
             {allVideos.length}
           </span>
         </button>
-      </div>
+      </GoldCard>
 
       {/* ================= PRODUCED AUDIOVISUAL LESSONS TAB ================= */}
       {libraryTab === 'produced' && (
-        <div className="space-y-6 min-w-0">
+        <div className="space-y-4 min-w-0">
           {/* Filters Bar */}
-          <div className="bg-white p-4 rounded-2xl border-2 border-slate-200/80 flex flex-col lg:flex-row lg:items-center justify-between gap-4 min-w-0 max-w-full">
-            {/* Category Filter */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 lg:pb-0 text-xs no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full min-w-0 max-w-full">
+          <GoldCard className="p-3 sm:p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3 min-w-0 max-w-full">
+            {/* Category Filter: pills with gold border (navy when active) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 text-xs no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full min-w-0 max-w-full">
               {[
                 { id: 'all', labelAr: 'الكل 🌟', labelEn: 'All 🌟' },
                 { id: 'conversation', labelAr: 'محادثات 💬', labelEn: 'Conversation 💬' },
@@ -966,10 +963,10 @@ Key Learning Objectives:
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-xl font-black whitespace-nowrap transition-all shrink-0 ${
+                  className={`px-3 py-1.5 rounded-xl font-black whitespace-nowrap transition-transform active:scale-95 shrink-0 border ${
                     selectedCategory === cat.id
-                      ? 'bg-slate-800 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                      ? 'bg-[#002147] text-[#E6C36A] border-[#C49E3A] shadow-sm'
+                      : 'bg-white text-[#002147] border-[#C49E3A] hover:bg-[#fdfaf3]'
                   }`}
                 >
                   {isRtl ? cat.labelAr : cat.labelEn}
@@ -978,111 +975,109 @@ Key Learning Objectives:
             </div>
 
             {/* Level Filter */}
-            <div className="flex items-center gap-1 shrink-0 bg-slate-100 p-1 rounded-xl overflow-x-auto max-w-full no-scrollbar">
-              <span className="text-[10px] font-black text-slate-400 px-2 uppercase shrink-0">{isRtl ? 'المستوى:' : 'Level:'}</span>
+            <div className="flex items-center gap-1 shrink-0 bg-[#fdfaf3] border border-[#C49E3A]/40 p-1 rounded-xl overflow-x-auto max-w-full no-scrollbar">
+              <span className="text-[10px] font-black text-[#002147]/70 px-2 uppercase shrink-0">{t('المستوى:', 'Level:')}</span>
               {['all', 'A1', 'A2', 'B1', 'B2', 'C1'].map((lvl) => (
                 <button
                   key={`lvl-${lvl}`}
                   onClick={() => setSelectedLevelFilter(lvl)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all shrink-0 ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-black transition-transform active:scale-95 shrink-0 border ${
                     selectedLevelFilter === lvl
-                      ? 'bg-[#002147] text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-800'
+                      ? 'bg-[#002147] text-[#E6C36A] border-[#C49E3A] shadow-sm'
+                      : 'bg-transparent border-transparent text-[#002147]/70 hover:text-[#002147]'
                   }`}
                 >
-                  {lvl === 'all' ? (isRtl ? 'الكل' : 'All') : lvl}
+                  {lvl === 'all' ? t('الكل', 'All') : lvl}
                 </button>
               ))}
             </div>
-          </div>
+          </GoldCard>
 
           {/* Grid of Produced Video Lessons */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0">
             {filteredProducedLessons.map((lesson) => (
-              <motion.div
+              <GoldCard
                 key={lesson.id}
-                whileHover={{ y: -6 }}
-                className="bg-white rounded-3xl overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-[#58cc02] transition-all flex flex-col justify-between group shadow-sm min-w-0"
+                className="p-0 overflow-hidden flex flex-col justify-between group min-w-0"
               >
                 <div>
                   {/* Thumbnail / Header Stage */}
-                  <div className="aspect-video relative overflow-hidden bg-slate-950 flex items-center justify-center">
+                  <div className="aspect-video relative overflow-hidden bg-[#001a38] flex items-center justify-center border-b border-[#C49E3A]/30">
                     <img
                       src={lesson.thumbnail}
                       alt={lesson.titleEn}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+                      className="w-full h-full object-cover opacity-85"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%2310b981%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%230d9488%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E';
+                        (e.target as HTMLImageElement).src = VIDEO_THUMB;
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute inset-0 bg-[#001a38]/35" />
 
                     {/* Badge */}
-                    <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[10px] font-black flex items-center gap-1 border border-white/20">
-                      <Sparkles size={11} className="text-amber-400" />
+                    <div className="absolute top-3 left-3 bg-[#002147]/90 text-[#E6C36A] px-2.5 py-1 rounded-full text-[10px] font-black flex items-center gap-1 border border-[#C49E3A]/60">
                       <span>{getTranslatedBadge(lesson.badge, isRtl)}</span>
                     </div>
 
                     {/* Level & Duration */}
-                    <div className="absolute bottom-3 right-3 flex items-center gap-2">
-                      <span className="bg-[#1cb0f6] text-white px-2.5 py-0.5 rounded-full text-[10px] font-black shadow-sm">
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+                      <span className="bg-[#002147] text-[#E6C36A] border border-[#C49E3A] px-2.5 py-0.5 rounded-full text-[10px] font-black shadow-sm">
                         {lesson.level}
                       </span>
-                      <span className="bg-black/60 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-[10px] font-black">
+                      <span className="bg-[#001a38]/90 text-white border border-[#C49E3A]/40 px-2.5 py-0.5 rounded-full text-[10px] font-black">
                         {lesson.duration}
                       </span>
                     </div>
 
-                    {/* Play Button Overlay */}
+                    {/* Gold Play Badge Overlay */}
                     <button
                       onClick={() => setSelectedProducedLesson(lesson)}
-                      className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform"
+                      className="absolute inset-0 flex items-center justify-center active:scale-95 transition-transform"
                     >
-                      <div className="w-14 h-14 bg-[#58cc02] text-white rounded-full flex items-center justify-center shadow-xl border-4 border-white">
-                        <Play size={24} fill="currentColor" className="ml-1" />
+                      <div className="w-13 h-13 bg-[#C49E3A] text-[#002147] rounded-full flex items-center justify-center shadow-md border-2 border-[#E6C36A]">
+                        <Play size={22} fill="currentColor" className="ml-0.5" />
                       </div>
                     </button>
                   </div>
 
                   {/* Content Details */}
-                  <div className="p-5 space-y-3">
+                  <div className="p-4 sm:p-5 space-y-2.5">
                     <div>
-                      <h3 className="text-base font-black text-slate-800 line-clamp-1 group-hover:text-[#58cc02] transition-colors">
+                      <h3 className="text-base font-black text-[#002147] line-clamp-1">
                         {isRtl ? lesson.titleAr : lesson.titleEn}
                       </h3>
-                      <p className="text-xs text-slate-400 font-bold line-clamp-1 mt-0.5">
+                      <p className="text-xs text-[#002147]/65 font-bold line-clamp-1 mt-0.5">
                         {isRtl ? lesson.titleEn : lesson.titleAr}
                       </p>
                     </div>
 
-                    <p className="text-xs text-slate-600 font-medium line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-[#002147]/80 font-medium line-clamp-2 leading-relaxed">
                       {isRtl ? lesson.summaryAr : lesson.summaryEn}
                     </p>
 
-                    <div className="flex items-center gap-3 pt-2 text-[11px] text-slate-400 font-bold border-t border-slate-100">
-                      <span className="flex items-center gap-1 text-slate-600">
-                        <Film size={13} className="text-[#58cc02]" />
-                        {lesson.scenes.length} {isRtl ? 'مشاهد مصورة' : 'Scenes'}
+                    <div className="flex items-center gap-3 pt-2 text-[11px] text-[#002147]/75 font-bold border-t border-[#C49E3A]/20">
+                      <span className="flex items-center gap-1">
+                        <Film size={13} className="text-[#C49E3A]" />
+                        {lesson.scenes.length} {t('مشاهد مصورة', 'Scenes')}
                       </span>
-                      <span className="flex items-center gap-1 text-slate-600">
-                        <BookOpen size={13} className="text-[#1cb0f6]" />
-                        {lesson.vocabulary.length} {isRtl ? 'مفردات أساسية' : 'Vocab'}
+                      <span className="flex items-center gap-1">
+                        <BookOpen size={13} className="text-[#C49E3A]" />
+                        {lesson.vocabulary.length} {t('مفردات أساسية', 'Vocab')}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Action Buttons */}
-                <div className="p-5 pt-0 flex items-center gap-2">
-                  <button
+                <div className="p-4 sm:p-5 pt-0 flex items-center gap-2">
+                  <PrimaryButton
                     onClick={() => setSelectedProducedLesson(lesson)}
-                    className="flex-1 py-3 bg-[#002147] hover:bg-[#64e404] text-white font-black text-xs uppercase tracking-wider rounded-xl border-b-3 border-[#3b8702] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="flex-1"
                   >
                     <Play size={14} fill="currentColor" />
-                    <span>{isRtl ? 'مشاهدة الدرس بالصوت والصورة' : 'Play Audiovisual Lesson'}</span>
-                  </button>
+                    <span className="truncate">{t('مشاهدة الدرس بالصوت والصورة', 'Play Audiovisual Lesson')}</span>
+                  </PrimaryButton>
 
-                  <button
+                  <GhostButton
                     onClick={(e) => {
                       e.stopPropagation();
                       // Download structured study sheet
@@ -1115,13 +1110,13 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                       document.body.removeChild(a);
                       URL.revokeObjectURL(url);
                     }}
-                    title={isRtl ? 'تحميل ملخص الدرس والمفردات' : 'Download Lesson Package'}
-                    className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl border border-slate-200 transition-all active:scale-95 shrink-0"
+                    title={t('تحميل ملخص الدرس والمفردات', 'Download Lesson Package')}
+                    className="p-2.5 shrink-0"
                   >
                     <Download size={16} />
-                  </button>
+                  </GhostButton>
                 </div>
-              </motion.div>
+              </GoldCard>
             ))}
           </div>
         </div>
@@ -1129,7 +1124,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
 
       {/* ================= DIRECT UPLOADS & YOUTUBE TAB ================= */}
       {libraryTab === 'uploads' && (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* DYNAMIC UPLOAD FORM (Direct Video Support) */}
           <AnimatePresence>
             {isEffectiveAdmin && showAddForm && (
@@ -1139,34 +1134,34 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                 exit={{ height: 0, opacity: 0 }}
                 className="overflow-hidden"
               >
-                <div className="bg-white rounded-3xl p-6 border-2 border-b-[6px] border-[#58cc02] shadow-sm">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-6 border-b-2 border-slate-100">
+                <GoldCard>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-5 border-b border-[#C49E3A]/30">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-[#58cc02]/10 text-[#58cc02] rounded-xl flex items-center justify-center">
+                      <div className="w-10 h-10 bg-[#002147] text-[#E6C36A] border border-[#C49E3A] rounded-xl flex items-center justify-center shrink-0">
                         <Video size={20} />
                       </div>
                       <div>
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">{isRtl ? 'تحميل مباشر للفيديوهات عالية الجودة' : 'HD Direct Video Upload Engine'}</h3>
-                        <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'سعة استيعابية كاملة لتحميل أي فيديو .mp4 بدقة عالية جداً!' : 'Zero-compression playback for local highly precise media files'}</p>
+                        <h3 className="text-sm font-black text-[#002147] uppercase tracking-wider">{t('تحميل مباشر للفيديوهات عالية الجودة', 'HD Direct Video Upload Engine')}</h3>
+                        <p className="text-[10px] text-[#002147]/70 font-bold">{t('سعة استيعابية كاملة لتحميل أي فيديو .mp4 بدقة عالية جداً!', 'Zero-compression playback for local highly precise media files')}</p>
                       </div>
                     </div>
 
                     {/* TABS for Upload Source */}
-                    <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+                    <div className="flex items-center bg-[#fdfaf3] border border-[#C49E3A]/40 p-1 rounded-xl">
                       <button 
                         type="button"
                         onClick={() => { setUploadTab('direct'); setErrorText(''); }}
                         className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
-                          uploadTab === 'direct' ? 'bg-white text-[#58cc02] shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                          uploadTab === 'direct' ? 'bg-[#002147] text-[#E6C36A] shadow-sm' : 'text-[#002147]/70 hover:text-[#002147]'
                         }`}
                       >
-                        {isRtl ? 'فيديو مباشر (لا يحتاج رابط)' : 'Direct Video File'}
+                        {t('فيديو مباشر (لا يحتاج رابط)', 'Direct Video File')}
                       </button>
                       <button 
                         type="button"
                         onClick={() => { setUploadTab('youtube'); setErrorText(''); }}
                         className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
-                          uploadTab === 'youtube' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                          uploadTab === 'youtube' ? 'bg-[#002147] text-[#E6C36A] shadow-sm' : 'text-[#002147]/70 hover:text-[#002147]'
                         }`}
                       >
                         YouTube Link
@@ -1174,39 +1169,39 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                     </div>
                   </div>
 
-                  <form onSubmit={handleAddVideo} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <form onSubmit={handleAddVideo} className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div className="space-y-4">
                         {uploadTab === 'direct' ? (
-                          <div className="space-y-4">
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">
-                              {isRtl ? 'مصدر ملف الفيديو لتجنب الحذف الفجائي' : 'Video File Source (Prevents Ephemeral Erasing)'}
+                          <div className="space-y-3">
+                            <label className="block text-[10px] font-black text-[#002147]/70 uppercase tracking-wider">
+                              {t('مصدر ملف الفيديو لتجنب الحذف الفجائي', 'Video File Source (Prevents Ephemeral Erasing)')}
                             </label>
-                            <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                            <div className="grid grid-cols-2 gap-2 bg-[#fdfaf3] border border-[#C49E3A]/40 p-1 rounded-xl">
                               <button
                                 type="button"
                                 onClick={() => { setDirectSourceMode('link'); setErrorText(''); }}
                                 className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
-                                  directSourceMode === 'link' ? 'bg-[#002147] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                  directSourceMode === 'link' ? 'bg-[#002147] text-[#E6C36A] shadow-sm' : 'text-[#002147]/70 hover:text-[#002147]'
                                 }`}
                               >
-                                {isRtl ? 'رابط ملف مباشر دائم (مستحسن ⚡)' : 'Persistent Direct URL (Recommended ⚡)'}
+                                {t('رابط ملف مباشر دائم (مستحسن ⚡)', 'Persistent Direct URL (Recommended ⚡)')}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => { setDirectSourceMode('file'); setErrorText(''); }}
                                 className={`py-1.5 rounded-lg text-[10px] font-black transition-all ${
-                                  directSourceMode === 'file' ? 'bg-[#002147] text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                                  directSourceMode === 'file' ? 'bg-[#002147] text-[#E6C36A] shadow-sm' : 'text-[#002147]/70 hover:text-[#002147]'
                                 }`}
                               >
-                                {isRtl ? 'رفع ملف فيديو (خادم مؤقت 📁)' : 'Upload Video File (Ephemeral 📁)'}
+                                {t('رفع ملف فيديو (خادم مؤقت 📁)', 'Upload Video File (Ephemeral 📁)')}
                               </button>
                             </div>
 
                             {directSourceMode === 'link' ? (
-                              <div className="animate-fade-in">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                                  {isRtl ? 'رابط الفيديو المباشر المستضاف (تشغيل فوري دائم للجميع)' : 'Persistent Cloud Hosting Direct Link (Permanent Stream)'}
+                              <div>
+                                <label className="block text-[10px] font-black text-[#002147]/70 uppercase tracking-wider mb-1.5">
+                                  {t('رابط الفيديو المباشر المستضاف (تشغيل فوري دائم للجميع)', 'Persistent Cloud Hosting Direct Link (Permanent Stream)')}
                                 </label>
                                 <input
                                   type="text"
@@ -1216,22 +1211,22 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                                     setDirectLinkUrl(e.target.value);
                                     setErrorText('');
                                   }}
-                                  placeholder={isRtl ? 'https://example.com/videos/lesson1.mp4 (رابط Dropbox أو Drive أو استضافة خارجية)' : 'e.g., dropbox direct link, static server url, etc'}
-                                  className="w-full text-xs font-semibold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors placeholder-slate-300"
+                                  placeholder={t('https://example.com/videos/lesson1.mp4 (رابط Dropbox أو Drive أو استضافة خارجية)', 'e.g., dropbox direct link, static server url, etc')}
+                                  className="w-full text-xs font-semibold bg-[#fdfaf3] border border-[#C49E3A]/40 focus:ring-2 focus:ring-[#C49E3A] outline-none rounded-xl p-3 text-[#002147]"
                                 />
-                                <p className="text-[9px] text-amber-600 font-bold mt-2 leading-relaxed">
-                                  {isRtl 
-                                    ? '⚠️ ملاحظة هامة: نظراً لطبيعة الخادم السحابي المؤقت، يُنصح بشدة بوضع الفيديوهات على Dropbox أو Google Drive ووضع الرابط المباشر هنا لضمان تشغيله بشكل دائم وثابت للطلاب دون الخوف من المسح المستقبلي.'
-                                    : '⚠️ Highly recommended: Cloud links ensure steady, zero-touch perpetual views since the ephemeral server resets will not erase external files.'
-                                  }
+                                <p className="text-[10px] text-[#002147]/70 font-bold mt-2 leading-relaxed">
+                                  {t(
+                                    '⚠️ ملاحظة هامة: نظراً لطبيعة الخادم السحابي المؤقت، يُنصح بشدة بوضع الفيديوهات على Dropbox أو Google Drive ووضع الرابط المباشر هنا لضمان تشغيله بشكل دائم وثابت للطلاب دون الخوف من المسح المستقبلي.',
+                                    '⚠️ Highly recommended: Cloud links ensure steady, zero-touch perpetual views since the ephemeral server resets will not erase external files.'
+                                  )}
                                 </p>
                               </div>
                             ) : (
-                              <div className="animate-fade-in">
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                                  {isRtl ? 'اختر ملف الفيديو عالي الدقة (MP4, MOV, WEBM) 📂' : 'Select HD Video File (MP4, MOV, WEBM) 📂'}
+                              <div>
+                                <label className="block text-[10px] font-black text-[#002147]/70 uppercase tracking-wider mb-1.5">
+                                  {t('اختر ملف الفيديو عالي الدقة (MP4, MOV, WEBM) 📂', 'Select HD Video File (MP4, MOV, WEBM) 📂')}
                                 </label>
-                                <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 bg-slate-50 text-center hover:bg-slate-100/50 transition-colors cursor-pointer group">
+                                <div className="relative border-2 border-dashed border-[#C49E3A]/50 rounded-xl p-5 bg-[#fdfaf3] text-center hover:border-[#C49E3A] transition-colors cursor-pointer group">
                                   <input 
                                     type="file" 
                                     accept="video/*" 
@@ -1239,12 +1234,12 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                                     onChange={handleFileChange}
                                     className="absolute inset-0 opacity-0 cursor-pointer"
                                   />
-                                  <UploadCloud size={32} className="mx-auto text-slate-400 group-hover:text-[#58cc02] transition-colors mb-2" />
-                                  <p className="text-xs font-black text-slate-700">
-                                    {videoFile ? videoFile.name : (isRtl ? 'اسحب ملف الفيديو هنا أو اضغط للتصفح' : 'Drag video file here or browse files')}
+                                  <UploadCloud size={28} className="mx-auto text-[#C49E3A] mb-2" />
+                                  <p className="text-xs font-black text-[#002147]">
+                                    {videoFile ? videoFile.name : t('اسحب ملف الفيديو هنا أو اضغط للتصفح', 'Drag video file here or browse files')}
                                   </p>
-                                  <p className="text-[9px] text-slate-400 mt-1 font-bold">
-                                    {videoFile ? `${(videoFile.size / (1024*1024)).toFixed(1)} MB` : (isRtl ? 'ملفات يتم حفظها محلياً ومؤقتاً' : 'No size boundaries - Local & Ephemeral Server Storage')}
+                                  <p className="text-[10px] text-[#002147]/65 mt-1 font-bold">
+                                    {videoFile ? `${(videoFile.size / (1024*1024)).toFixed(1)} MB` : t('ملفات يتم حفظها محلياً ومؤقتاً', 'No size boundaries - Local & Ephemeral Server Storage')}
                                   </p>
                                 </div>
                               </div>
@@ -1252,7 +1247,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                           </div>
                         ) : (
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'رابط يوتيوب أو رمز الفيديو' : 'YouTube Link or Video ID'}</label>
+                            <label className="block text-[10px] font-black text-[#002147]/70 uppercase tracking-wider mb-1.5">{t('رابط يوتيوب أو رمز الفيديو', 'YouTube Link or Video ID')}</label>
                             <input 
                               type="text" 
                               required
@@ -1261,49 +1256,49 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                                 setInputUrl(e.target.value);
                                 setErrorText('');
                               }}
-                              placeholder={isRtl ? 'مثال: https://www.youtube.com/watch?v=j7u280G6W3E' : 'e.g., https://www.youtube.com/watch?v=j7u280G6W3E'}
-                              className="w-full text-xs font-medium border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors placeholder-slate-300"
+                              placeholder={t('مثال: https://www.youtube.com/watch?v=j7u280G6W3E', 'e.g., https://www.youtube.com/watch?v=j7u280G6W3E')}
+                              className="w-full text-xs font-medium bg-[#fdfaf3] border border-[#C49E3A]/40 focus:ring-2 focus:ring-[#C49E3A] outline-none rounded-xl p-3 text-[#002147]"
                             />
                           </div>
                         )}
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'العنوان بالإنجليزية' : 'Title (English)'}</label>
+                            <label className="block text-[10px] font-black text-[#002147]/70 uppercase tracking-wider mb-1.5">{t('العنوان بالإنجليزية', 'Title (English)')}</label>
                             <input 
                               type="text" 
                               required
                               value={inputTitleEn}
                               onChange={(e) => setInputTitleEn(e.target.value)}
                               placeholder="e.g. Conversation Mastery"
-                              className="w-full text-xs font-bold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors"
+                              className="w-full text-xs font-bold bg-[#fdfaf3] border border-[#C49E3A]/40 focus:ring-2 focus:ring-[#C49E3A] outline-none rounded-xl p-3 text-[#002147]"
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'العنوان بالعربية' : 'Title (Arabic)'}</label>
+                            <label className="block text-[10px] font-black text-[#002147]/70 uppercase tracking-wider mb-1.5">{t('العنوان بالعربية', 'Title (Arabic)')}</label>
                             <input 
                               type="text" 
                               required
                               value={inputTitleAr}
                               onChange={(e) => setInputTitleAr(e.target.value)}
                               placeholder="مثال: إتقان المحادثات الحيوية"
-                              className="w-full text-xs font-bold border-2 border-slate-200 focus:border-[#58cc02] outline-none rounded-xl p-3.5 transition-colors"
+                              className="w-full text-xs font-bold bg-[#fdfaf3] border border-[#C49E3A]/40 focus:ring-2 focus:ring-[#C49E3A] outline-none rounded-xl p-3 text-[#002147]"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">{isRtl ? 'المستوى التعليمي المستهدف' : 'Target Educational Level'}</label>
-                          <div className="grid grid-cols-6 gap-1 bg-slate-50 border-2 border-slate-200 p-1.5 rounded-xl">
+                          <label className="block text-[10px] font-black text-[#002147]/70 uppercase tracking-wider mb-1.5">{t('المستوى التعليمي المستهدف', 'Target Educational Level')}</label>
+                          <div className="grid grid-cols-6 gap-1 bg-[#fdfaf3] border border-[#C49E3A]/40 p-1.5 rounded-xl">
                             {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
                               <button
                                 type="button"
                                 key={lvl}
                                 onClick={() => setInputLevel(lvl)}
-                                className={`py-1 bg-white font-extrabold text-[10px] rounded-lg border transition-all ${
+                                className={`py-1 font-extrabold text-[10px] rounded-lg border transition-all ${
                                   inputLevel === lvl 
-                                    ? 'border-[#C49E3A] text-[#58cc02] scale-105 shadow-sm' 
-                                    : 'border-slate-100 text-slate-400 hover:text-slate-600'
+                                    ? 'bg-[#002147] border-[#C49E3A] text-[#E6C36A] shadow-sm' 
+                                    : 'bg-white border-[#C49E3A]/30 text-[#002147]/70 hover:text-[#002147]'
                                 }`}
                               >
                                 {lvl}
@@ -1314,38 +1309,38 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                       </div>
 
                       {/* Thumbnail / Video Preview Area */}
-                      <div className="flex flex-col justify-center items-center bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 relative min-h-[160px]">
+                      <div className="flex flex-col justify-center items-center bg-[#fdfaf3] border-2 border-dashed border-[#C49E3A]/40 rounded-2xl p-5 relative min-h-[160px]">
                         {uploadTab === 'direct' && videoFileUrl ? (
-                          <div className="w-full text-center space-y-3">
-                            <div className="aspect-video relative rounded-xl overflow-hidden border-2 border-slate-200/50 bg-black shadow-inner">
+                          <div className="w-full text-center space-y-2">
+                            <div className="aspect-video relative rounded-xl overflow-hidden border border-[#C49E3A] bg-[#001a38]">
                               <video 
                                 src={videoFileUrl}
                                 className="w-full h-full object-contain"
                                 controls
                               />
                             </div>
-                            <p className="text-[10px] text-slate-400 font-bold truncate">
-                              {isRtl ? 'جاهز للمشاهدة المباشرة بوضوح فائق 🚀' : 'HD direct playback buffer ready 🚀'}
+                            <p className="text-[10px] text-[#002147]/75 font-bold truncate">
+                              {t('جاهز للمشاهدة المباشرة بوضوح فائق 🚀', 'HD direct playback buffer ready 🚀')}
                             </p>
                           </div>
                         ) : uploadTab === 'youtube' && previewId ? (
-                          <div className="w-full max-w-[280px] text-center space-y-3">
-                            <div className="aspect-video relative rounded-xl overflow-hidden border-2 border-slate-200/50 bg-black">
+                          <div className="w-full max-w-[280px] text-center space-y-2">
+                            <div className="aspect-video relative rounded-xl overflow-hidden border border-[#C49E3A] bg-[#001a38]">
                               <img 
                                 src={`https://img.youtube.com/vi/${previewId}/hqdefault.jpg`} 
                                 alt="" 
                                 className="w-full h-full object-cover"
                               />
                             </div>
-                            <p className="text-[10px] text-slate-400 font-bold truncate">
+                            <p className="text-[10px] text-[#002147]/75 font-bold truncate">
                               Detected ID: {previewId}
                             </p>
                           </div>
                         ) : (
-                          <div className="text-center text-slate-300 space-y-2">
-                            <FileVideo size={44} strokeWidth={1.5} className="mx-auto" />
-                            <div className="text-[10px] text-slate-400 font-bold max-w-[200px] leading-relaxed">
-                              {isRtl ? 'اختر ملف فيديو أو يوتيوب لمعاينة البث والوضوح فائق الدقة تلقائياً ❤️' : 'Select video resources to activate smart direct cover previews instantly ❤️'}
+                          <div className="text-center text-[#C49E3A] space-y-2">
+                            <FileVideo size={40} strokeWidth={1.5} className="mx-auto" />
+                            <div className="text-[10px] text-[#002147]/70 font-bold max-w-[200px] leading-relaxed">
+                              {t('اختر ملف فيديو أو يوتيوب لمعاينة البث والوضوح فائق الدقة تلقائياً ❤️', 'Select video resources to activate smart direct cover previews instantly ❤️')}
                             </div>
                           </div>
                         )}
@@ -1354,69 +1349,66 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
 
                     {/* Info response statuses */}
                     {errorText && (
-                      <div className="flex items-center gap-2 p-3.5 bg-rose-50 border-2 border-rose-200 text-rose-600 rounded-xl text-xs font-bold">
+                      <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-300 text-red-700 rounded-xl text-xs font-bold">
                         <AlertCircle size={16} />
                         <span>{errorText}</span>
                       </div>
                     )}
 
                     {successText && (
-                      <div className="flex items-center gap-2 p-3.5 bg-[#58cc02]/15 border border-[#58cc02]/30 text-[#46a302] rounded-xl text-xs font-black">
+                      <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-300 text-green-800 rounded-xl text-xs font-black">
                          <CheckCircle2 size={16} />
                          <span>{successText}</span>
                       </div>
                     )}
 
                     {/* Form Footer Buttons */}
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-slate-100">
-                      <button 
+                    <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#C49E3A]/30">
+                      <GhostButton 
                         type="button"
                         onClick={() => {
                           setShowAddForm(false);
                           setVideoFile(null);
                           setErrorText('');
                         }}
-                        className="px-5 py-3.5 duo-btn-white text-xs text-slate-500 uppercase font-black"
                       >
-                        {isRtl ? 'إلغاء الأمر' : 'Cancel'}
-                      </button>
-                      <button 
+                        {t('إلغاء الأمر', 'Cancel')}
+                      </GhostButton>
+                      <PrimaryButton 
                         type="submit"
                         disabled={actionLoading}
-                        className="px-6 py-3.5 duo-btn-green text-xs text-white uppercase font-black disabled:opacity-50"
                       >
                         {actionLoading ? (
                           uploadProgress !== null ? (
                             <span>{isRtl ? `جارٍ الرفع ${uploadProgress}%` : `Uploading ${uploadProgress}%`}</span>
                           ) : (
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+                            <div className="w-4 h-4 border-2 border-[#E6C36A] border-t-transparent rounded-full animate-spin mx-auto" />
                           )
                         ) : (
-                          isRtl ? 'تحميل ونشر الدرس 🚀' : 'Upload & Publish Lesson 🚀'
+                          t('تحميل ونشر الدرس 🚀', 'Upload & Publish Lesson 🚀')
                         )}
-                      </button>
+                      </PrimaryButton>
                     </div>
                   </form>
-                </div>
+                </GoldCard>
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* DYNAMIC VIDEOS GRID SECTION */}
           {dbLoading ? (
-            <div className="py-20 flex flex-col items-center justify-center space-y-4">
-              <div className="w-10 h-10 border-4 border-[#58cc02] border-t-transparent rounded-full animate-spin" />
-              <span className="text-slate-400 font-extrabold text-xs tracking-wider uppercase">{isRtl ? 'جاري الفرز والتحميل من السحابة...' : 'Analyzing and fetching videos...'}</span>
-            </div>
+            <GoldCard className="py-16 flex flex-col items-center justify-center space-y-3">
+              <div className="w-8 h-8 border-3 border-[#C49E3A] border-t-transparent rounded-full animate-spin" />
+              <span className="text-[#002147]/70 font-black text-xs uppercase">{t('جاري الفرز والتحميل من السحابة...', 'Analyzing and fetching videos...')}</span>
+            </GoldCard>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {allVideos.map((video, vIdx) => {
                 const isDirectFile = !!video.directUrl;
                 return (
-                  <motion.div 
+                  <GoldCard 
                     key={`video-card-${video.id || vIdx}`}
-                    whileHover={enabled || isEffectiveAdmin ? { y: -6 } : {}}
-                    className={`bg-white rounded-3xl overflow-hidden border-2 border-b-[6px] border-slate-200 hover:border-slate-300 transition-all cursor-pointer relative group flex flex-col justify-between ${
+                    className={`p-0 overflow-hidden cursor-pointer relative group flex flex-col justify-between ${
                       !(enabled || isEffectiveAdmin) ? 'grayscale opacity-70 cursor-not-allowed' : ''
                     }`}
                     onClick={() => handleSelectVideo(video)}
@@ -1425,84 +1417,83 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
                     {isEffectiveAdmin && (
                       <button 
                         onClick={(e) => handleDeleteVideo(video.id, e)}
-                        className="absolute top-3 right-3 z-30 w-8 h-8 rounded-lg bg-red-500 text-white flex items-center justify-center border-b-2 border-red-700 hover:bg-red-600 active:scale-90 transition-all shadow-md cursor-pointer"
-                        title={isRtl ? 'حذف الدرس' : 'Delete Lesson'}
+                        className="absolute top-3 right-3 z-30 w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center border border-red-800 hover:bg-red-700 active:scale-95 transition-transform shadow-sm cursor-pointer"
+                        title={t('حذف الدرس', 'Delete Lesson')}
                       >
                         <Trash2 size={14} strokeWidth={2.5} />
                       </button>
                     )}
 
                     {/* Direct File or Youtube Source badge */}
-                    <span className={`absolute top-3 left-3 z-35 text-white px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-sm border-b-2 ${
-                      isDirectFile ? 'bg-[#58cc02] border-[#439b02]' : 'bg-[#1cb0f6] border-[#139ddb]'
-                    }`}>
-                      {isDirectFile ? (isRtl ? 'مباشر 📁' : 'Direct file 📁') : (isRtl ? 'يوتيوب 📺' : 'YouTube 📺')}
+                    <span className="absolute top-3 left-3 z-30 bg-[#002147] text-[#E6C36A] border border-[#C49E3A] px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider shadow-sm">
+                      {isDirectFile ? t('مباشر 📁', 'Direct file 📁') : t('يوتيوب 📺', 'YouTube 📺')}
                     </span>
 
-                    <div className="aspect-[4/3] relative overflow-hidden bg-slate-900 flex items-center justify-center text-slate-300 border-b-2 border-slate-200">
-                      <ImageIcon size={48} className="absolute opacity-20" />
+                    <div className="aspect-[4/3] relative overflow-hidden bg-[#001a38] flex items-center justify-center border-b border-[#C49E3A]/30">
+                      <ImageIcon size={40} className="absolute text-[#E6C36A]/20" />
                       <img 
                         src={video.thumbnail} 
                         alt="" 
                         referrerPolicy="no-referrer"
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 relative z-10" 
+                        className="w-full h-full object-cover relative z-10" 
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.opacity = '0.3';
                         }}
                       />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
-                         <div className="w-12 h-12 bg-white/25 backdrop-blur-md rounded-full flex items-center justify-center text-white scale-90 group-hover:scale-100 transition-transform">
-                           <Play fill="currentColor" size={20} />
+                      {/* Gold Play Badge Overlay */}
+                      <div className="absolute inset-0 bg-[#001a38]/25 flex items-center justify-center z-20">
+                         <div className="w-11 h-11 bg-[#C49E3A] text-[#002147] border-2 border-[#E6C36A] rounded-full flex items-center justify-center shadow-md group-active:scale-95 transition-transform">
+                           <Play fill="currentColor" size={18} className="ml-0.5" />
                          </div>
                       </div>
-                      <div className="absolute bottom-3 left-3 right-3 flex justify-between items-center z-20">
-                        <span className="bg-black/60 backdrop-blur-[2px] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black">{video.duration}</span>
-                        <span className="bg-[#1cb0f6] border-b-2 border-[#1292ce] text-white px-2.5 py-0.5 rounded-full text-[9px] font-black shadow-sm">{video.level}</span>
+                      <div className="absolute bottom-2.5 left-2.5 right-2.5 flex justify-between items-center z-20">
+                        <span className="bg-[#001a38]/90 text-white border border-[#C49E3A]/40 px-2.5 py-0.5 rounded-full text-[9px] font-black">{video.duration}</span>
+                        <span className="bg-[#002147] border border-[#C49E3A] text-[#E6C36A] px-2.5 py-0.5 rounded-full text-[9px] font-black shadow-sm">{video.level}</span>
                       </div>
                     </div>
 
-                    <div className="p-5 flex flex-col justify-between flex-1">
+                    <div className="p-4 flex flex-col justify-between flex-1">
                       <div>
-                        <h3 className="font-extrabold text-sm text-slate-800 line-clamp-2 mb-2 leading-snug group-hover:text-[#58cc02] transition-colors">
+                        <h3 className="font-black text-sm text-[#002147] line-clamp-2 mb-2 leading-snug">
                           {isRtl ? video.titleAr : video.titleEn}
                         </h3>
                         {isDirectFile && (
-                          <div className="mb-3 flex items-center gap-1.5 text-[10px] font-black">
+                          <div className="mb-2.5 flex items-center gap-1.5 text-[10px] font-black">
                             {localVideoStatusMap[video.id] ? (
-                              <span className="text-[#58cc02] bg-green-50 px-2 py-0.5 rounded-lg border border-green-200 shadow-sm">
-                                {isRtl ? '⚡ جاهز للتشغيل' : '⚡ Cached'}
-                              </span>
+                              <ProgressPill className="py-0.5 px-2 text-[10px]">
+                                {t('⚡ جاهز للتشغيل', '⚡ Cached')}
+                              </ProgressPill>
                             ) : (
-                              <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 shadow-sm">
-                                {isRtl ? '📁 ملف مباشر' : '📁 Direct file'}
-                              </span>
+                              <ProgressPill className="py-0.5 px-2 text-[10px]">
+                                {t('📁 ملف مباشر', '📁 Direct file')}
+                              </ProgressPill>
                             )}
                           </div>
                         )}
                       </div>
 
                       <div className="flex items-center gap-2 mt-2">
-                        <button className="flex-1 duo-btn-white py-2.5 text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 font-black">
-                          {t.watchNow}
+                        <PrimaryButton className="flex-1 py-2 text-xs">
+                          <span>{t.watchNow}</span>
                           <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
-                        </button>
+                        </PrimaryButton>
 
-                        <button
+                        <GhostButton
                           onClick={(e) => handleDownloadVideo(video, e)}
-                          title={isRtl ? 'تحميل الفيديو' : 'Download Video'}
+                          title={t('تحميل الفيديو', 'Download Video')}
                           disabled={downloadingId === video.id}
-                          className="p-2.5 bg-slate-100 hover:bg-[#002147] hover:text-white text-slate-600 rounded-xl transition-all border border-slate-200 shrink-0"
+                          className="p-2 shrink-0"
                         >
                           {downloadingId === video.id ? (
                             <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                           ) : (
                             <Download size={14} />
                           )}
-                        </button>
+                        </GhostButton>
                       </div>
                     </div>
-                  </motion.div>
+                  </GoldCard>
                 );
               })}
             </div>
@@ -1511,34 +1502,35 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
       )}
 
       {/* FOOTER INFO BANNER */}
-      <footer className="mt-14 p-8 bg-white border-2 border-b-[6px] border-slate-200 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
-          <div className="relative flex items-center gap-5">
-            <div className="w-16 h-16 bg-[#58cc02] rounded-[1.5rem] flex items-center justify-center text-3xl shadow-md rotate-3 shrink-0 border-b-4 border-[#46a302]">
-              🦉
+      <GoldCard className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-[#002147] text-[#E6C36A] rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0 border-2 border-[#C49E3A]">
+              🎬
             </div>
             <div>
-              <h4 className="text-lg font-black text-slate-800">{isRtl ? 'مسارات تعلم تفاعلية متكاملة بالصوت والصورة' : 'Unlimited Immersive Audiovisual Curriculums'}</h4>
-              <p className="text-slate-400 text-xs font-bold mt-1 max-w-lg leading-relaxed">
-                {isRtl 
-                  ? 'تم ترقية الأكاديمية بالكامل لدعم إنتاج دروس فيديو تعليمية ناطقة بالصوت وحركات الشخصيات مع تصدير الفيديو والملخصات وتحميل الملفات المباشرة دون قيود.' 
-                  : 'Fully upgraded with AI-powered audiovisual character-narrated video production, offline study guides, and instant video download workflows.'}
+              <h4 className="text-sm sm:text-base font-black text-[#002147]">{t('مسارات تعلم تفاعلية متكاملة بالصوت والصورة', 'Unlimited Immersive Audiovisual Curriculums')}</h4>
+              <p className="text-[#002147]/70 text-xs font-bold mt-1 max-w-lg leading-relaxed">
+                {t(
+                  'تم ترقية الأكاديمية بالكامل لدعم إنتاج دروس فيديو تعليمية ناطقة بالصوت وحركات الشخصيات مع تصدير الفيديو والملخصات وتحميل الملفات المباشرة دون قيود.',
+                  'Fully upgraded with AI-powered audiovisual character-narrated video production, offline study guides, and instant video download workflows.'
+                )}
               </p>
             </div>
           </div>
-          <div className="bg-slate-50 border-2 border-slate-200 px-6 py-4 rounded-2xl relative shrink-0">
-             <div className="flex items-center gap-4">
-                <Sparkle className="text-[#ff9600] animate-spin-slow" />
+          <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 px-4 py-3 rounded-xl shrink-0">
+             <div className="flex items-center gap-3">
+                <Sparkle className="text-[#C49E3A]" size={18} />
                 <div>
-                  <span className="block text-xl font-black text-slate-800 leading-none">
+                  <span className="block text-lg font-black text-[#002147] leading-none">
                     {libraryTab === 'produced' ? producedLessons.length : allVideos.length}
                   </span>
-                  <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest block mt-1">
-                    {libraryTab === 'produced' ? (isRtl ? 'دروس منتجة ناطقة' : 'Produced Lessons') : (isRtl ? 'فيديوهات بالمكتبة' : 'Library Videos')}
+                  <span className="text-[10px] text-[#002147]/70 font-black uppercase tracking-wider block mt-0.5">
+                    {libraryTab === 'produced' ? t('دروس منتجة ناطقة', 'Produced Lessons') : t('فيديوهات بالمكتبة', 'Library Videos')}
                   </span>
                 </div>
              </div>
           </div>
-      </footer>
+      </GoldCard>
 
       {/* AI VIDEO STUDIO MODAL */}
       <AiVideoStudioModal
@@ -1551,6 +1543,7 @@ ${s.dialogues.map(d => `• ${d.speaker}: "${d.textEn}" [${d.phonetics || ''}] -
           setSelectedProducedLesson(newLesson);
         }}
       />
-    </div>
+    </SectionShell>
   );
 };
+
