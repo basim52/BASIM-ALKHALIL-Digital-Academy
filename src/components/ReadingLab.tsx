@@ -1,29 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  Volume2, 
-  Play, 
-  Pause, 
-  Sparkles, 
-  CheckCircle2, 
-  XCircle, 
-  ArrowRight, 
-  ArrowLeft, 
-  Trophy, 
-  RefreshCw, 
-  Flame, 
-  Clock, 
-  Search, 
-  ChevronRight, 
-  Bookmark, 
-  Share2, 
-  HelpCircle,
-  Eye,
-  Sliders
+import React, { useState } from 'react';
+import {
+  Volume2,
+  Play,
+  Pause,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Language } from '../lib/translations';
+import { useT } from '../lib/explainLang';
+import { toEnglish } from '../lib/domTranslate';
 import { managedSpeak } from '../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface ReadingLabProps {
   lang: Language;
@@ -68,7 +65,7 @@ const PRESET_PASSAGES: ReadingPassage[] = [
     level: 'B1',
     category: 'Technology & AI',
     emoji: '🤖',
-    bgGradient: 'from-blue-600 to-indigo-700',
+    bgGradient: '',
     estimatedMinutes: 3,
     paragraphs: [
       {
@@ -124,7 +121,7 @@ const PRESET_PASSAGES: ReadingPassage[] = [
     level: 'B2',
     category: 'Environment & Saudi Arabia',
     emoji: '🌿',
-    bgGradient: 'from-emerald-600 to-teal-700',
+    bgGradient: '',
     estimatedMinutes: 4,
     paragraphs: [
       {
@@ -168,7 +165,7 @@ const PRESET_PASSAGES: ReadingPassage[] = [
     level: 'A2',
     category: 'Space & Exploration',
     emoji: '🚀',
-    bgGradient: 'from-amber-600 to-rose-700',
+    bgGradient: '',
     estimatedMinutes: 2,
     paragraphs: [
       {
@@ -202,12 +199,40 @@ const PRESET_PASSAGES: ReadingPassage[] = [
   }
 ];
 
-export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel, onXPAdded }) => {
-  const isRtl = lang === 'ar';
+const READING_EN_MAP: Record<string, string> = {
+  'يحدث ثورة وتغييراً جذرياً': 'Brings about a radical transformation',
+  'فروق دقيقة وتفاصيل خفية': 'Subtle differences and fine details',
+  'تثبيت وحفظ المعلومات في الذاكرة': 'Keeping and retaining information in memory',
+  'غامرة وتفاعلية وشاملة': 'Engaging, interactive, and all-encompassing',
+  'طموح وعالي الهمة': 'Having a strong desire and determination to succeed',
+  'التنوع البيولوجي والأحيائي': 'The variety of plant and animal life in an environment',
+  'قاحل وشديد الجفاف': 'Extremely dry, with little or no rain',
+  'مسعى وجهد عظيم': 'A purposeful or industrious undertaking',
+  'الخيال والإبداع': 'The ability of the mind to be creative and resourceful',
+  'حاسم وضروري للغاية': 'Of great importance; decisive or critical',
+  'بكفاءة وفاعلية عالية': 'In a well-organized and productive way',
+  'أوضح النص أن الطلاب يستطيعون الآن التحدث والتفاعل مع معلمين افتراضيين مخصصين في أي وقت على مدار الساعة.':
+    'The passage states that learners can practice active conversations with personalized virtual tutors at any hour of the day.',
+  'ذكر النص في الفقرة الثانية صراحة أنها تحلل تفاصيل النطق وتحدد الثغرات النحوية بدقة.':
+    'Paragraph 2 explicitly notes that smart systems analyze pronunciation nuances and identify specific grammar gaps in real time.',
+  'تستهدف المبادرة استعادة الأراضي المتدهورة ومكافحة التغير المناخي عبر زراعة الأشجار والحفاظ على البيئة.':
+    'The initiative seeks to restore degraded lands and counteract climate change by planting billions of trees.',
+  'ذكر النص في الفقرة الثانية أنهم يتعلمون زراعة الطعام الطازج وإعادة تدوير الهواء لرحلات الفضاء الطويلة.':
+    'Paragraph 2 mentions that astronauts learn how to grow fresh food and recycle air efficiently for deep-space journeys.',
+};
+
+export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onXPAdded }) => {
+  const tHook = useT();
+  const isEnMode = lang === 'en' || tHook('ar', 'en') === 'en';
+  const isRtl = !isEnMode;
+  const t = (ar: string, en: string) => (isEnMode ? en : ar);
+  const tr = (ar: string) => t(ar, READING_EN_MAP[ar] || toEnglish(ar));
+
   const [selectedPassage, setSelectedPassage] = useState<ReadingPassage>(PRESET_PASSAGES[0]);
   const [activeTab, setActiveTab] = useState<'read' | 'vocab' | 'quiz' | 'generator'>('read');
   const [showArabicTranslation, setShowArabicTranslation] = useState(true);
-  
+  const [completedPassages, setCompletedPassages] = useState<string[]>([]);
+
   // Audio Playback states
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [currentParagraphIndex, setCurrentParagraphIndex] = useState<number | null>(null);
@@ -230,7 +255,7 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel,
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
       utterance.rate = audioSpeed;
-      
+
       utterance.onstart = () => {
         setIsPlayingAudio(true);
         setCurrentParagraphIndex(pIdx);
@@ -286,6 +311,7 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel,
     });
     setQuizScore(score);
     setIsQuizSubmitted(true);
+    setCompletedPassages(prev => (prev.includes(selectedPassage.id) ? prev : [...prev, selectedPassage.id]));
     if (onXPAdded) {
       const calculatedXP = score * 30 + 20;
       onXPAdded(calculatedXP, {
@@ -312,7 +338,7 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel,
         })
       });
       const data = await res.json();
-      
+
       if (data && data.paragraphs) {
         const newPassage: ReadingPassage = {
           id: `custom-${Date.now()}`,
@@ -321,7 +347,7 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel,
           level: data.level || 'B1',
           category: data.category || 'Custom Story',
           emoji: '✨',
-          bgGradient: 'from-purple-600 to-indigo-700',
+          bgGradient: '',
           estimatedMinutes: data.estimatedMinutes || 3,
           paragraphs: data.paragraphs.map((p: any) => ({
             en: p.text || p.en || '',
@@ -342,467 +368,419 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onBack, userLevel,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/30 p-3 sm:p-6 lg:p-8 font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-emerald-100 shadow-sm">
-          <div className="flex items-center gap-3 sm:gap-4">
-            {onBack && (
-              <button
-                onClick={onBack}
-                className="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-600 flex items-center justify-center transition-all cursor-pointer border border-slate-200"
-              >
-                {isRtl ? <ArrowRight size={20} /> : <ArrowLeft size={20} />}
-              </button>
-            )}
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
-              <BookOpen size={26} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  {isRtl ? 'مختبر القراءة الفصيحة والفهم الاستيعابي' : 'Active Reading & Comprehension Lab'}
-                </h1>
-                <span className="bg-emerald-50 text-emerald-700 text-xs font-black px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  {isRtl ? 'قراءة ناطقة متزامنة 🎧' : 'Synchronized Audio 🎧'}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-                {isRtl
-                  ? 'قصص ومقالات متدرجة المستويات مع نطق صوتي متزامن، بنك مفردات تفاعلي، واختبارات قياس الفهم المقروء'
-                  : 'Level-graded stories with synchronized audio, clickable vocabulary notes, and interactive comprehension quizzes.'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 text-xs font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-              <Trophy size={16} />
-              {isRtl ? 'نقاط القراءة:' : 'Reading XP:'} 920
-            </span>
-          </div>
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} data-testid="reading-lab">
+      {/* Top Progress Pill Row */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <ProgressPill>
+            📖 {selectedPassage.category} • CEFR {selectedPassage.level}
+          </ProgressPill>
+          <ProgressPill>
+            🏆 {t('نقاط القراءة:', 'Reading XP:')} 920
+          </ProgressPill>
         </div>
+        <GhostButton onClick={() => setActiveTab('generator')}>
+          <Sparkles size={14} />
+          {t('توليد نص مخصص', 'AI Custom Passage')}
+        </GhostButton>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Passage Library */}
-        <div className="lg:col-span-4 space-y-4">
-          <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider">
-                {isRtl ? 'مكتبة النصوص والمقالات' : 'Reading Passages'}
-              </h3>
-              <button
-                onClick={() => setActiveTab('generator')}
-                className="text-[11px] font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1 cursor-pointer transition-colors"
-              >
-                <Sparkles size={12} />
-                {isRtl ? 'توليد نص مخصص' : 'AI Custom Passage'}
-              </button>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left Column: Passage Library with LessonTile */}
+        <div className="lg:col-span-4">
+          <GoldCard className="space-y-2.5">
+            <h3 className="text-xs font-black text-[#002147]/70 uppercase tracking-wider">
+              {t('مكتبة النصوص والمقالات', 'Reading Passages')}
+            </h3>
+            <div className="space-y-2">
+              {PRESET_PASSAGES.map((passage, idx) => (
+                <LessonTile
+                  key={passage.id}
+                  order={idx + 1}
+                  emoji={passage.emoji}
+                  title={t(passage.titleAr, passage.titleEn)}
+                  subtitle={`${passage.category} • ${passage.estimatedMinutes} ${t('دقائق', 'mins')}`}
+                  level={passage.level}
+                  active={selectedPassage.id === passage.id}
+                  done={completedPassages.includes(passage.id)}
+                  onClick={() => handleSelectPassage(passage)}
+                />
+              ))}
             </div>
-
-            <div className="space-y-2.5">
-              {PRESET_PASSAGES.map((passage) => {
-                const isSelected = selectedPassage.id === passage.id;
-                return (
-                  <button
-                    key={passage.id}
-                    onClick={() => handleSelectPassage(passage)}
-                    className={`w-full text-start p-3.5 rounded-2xl border transition-all flex items-start gap-3 cursor-pointer ${
-                      isSelected
-                        ? 'bg-emerald-50/80 border-emerald-400 shadow-xs ring-2 ring-emerald-500/20'
-                        : 'bg-white hover:bg-slate-50 border-slate-150 text-slate-700'
-                    }`}
-                  >
-                    <span className="text-2xl shrink-0 p-1.5 bg-white rounded-xl shadow-xs border border-slate-100">
-                      {passage.emoji}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <h4 className="font-black text-xs sm:text-sm text-slate-900 truncate">
-                          {isRtl ? passage.titleAr : passage.titleEn}
-                        </h4>
-                        <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 shrink-0">
-                          {passage.level}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500 font-medium">
-                        <span>{passage.category}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-0.5">
-                          <Clock size={12} />
-                          {passage.estimatedMinutes} {isRtl ? 'دقائق' : 'mins'}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          </GoldCard>
         </div>
 
         {/* Right Column: Reading Studio & Player */}
-        <div className="lg:col-span-8 space-y-4">
-          {/* Navigation Sub-Tabs */}
-          <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-1 overflow-x-auto">
+        <div className="lg:col-span-8 space-y-3">
+          {/* Navigation Sub-Tabs as Sara Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
             {[
               { id: 'read', labelAr: '📖 القراءة والاستماع', labelEn: '📖 Read & Listen' },
               { id: 'vocab', labelAr: '📚 بنك المفردات والسياق', labelEn: '📚 Vocabulary Bank' },
               { id: 'quiz', labelAr: '⚡ اختبار الفهم والاستيعاب', labelEn: '⚡ Comprehension Quiz' },
               { id: 'generator', labelAr: '✨ صانع المقالات الذكي', labelEn: '✨ AI Generator' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {isRtl ? tab.labelAr : tab.labelEn}
-              </button>
-            ))}
+            ].map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex-1 py-2 px-3.5 rounded-full text-xs font-black whitespace-nowrap active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer ${
+                    active
+                      ? 'bg-[#002147] text-[#E6C36A] border border-[#C49E3A] shadow-sm'
+                      : 'bg-white text-[#002147] border border-[#C49E3A]/40 hover:border-[#C49E3A]'
+                  }`}
+                >
+                  {t(tab.labelAr, tab.labelEn)}
+                </button>
+              );
+            })}
           </div>
 
-          {/* TAB 1: READ & LISTEN */}
-          {activeTab === 'read' && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200 shadow-xs space-y-6"
-            >
-              {/* Story Banner */}
-              <div className={`p-6 rounded-3xl bg-gradient-to-r ${selectedPassage.bgGradient} text-white space-y-3 shadow-md`}>
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-xs font-black bg-white/20 px-3 py-1 rounded-full backdrop-blur-md">
-                    {selectedPassage.category} • CEFR {selectedPassage.level}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {/* Audio Speed Selector */}
-                    <div className="flex items-center bg-black/20 rounded-xl p-1 text-[11px] font-bold">
-                      {[0.8, 1.0, 1.2].map((speed) => (
-                        <button
-                          key={speed}
-                          onClick={() => setAudioSpeed(speed)}
-                          className={`px-2 py-0.5 rounded-lg transition-colors cursor-pointer ${
-                            audioSpeed === speed ? 'bg-white text-slate-900 font-black' : 'text-white/80 hover:text-white'
-                          }`}
-                        >
-                          {speed}x
-                        </button>
-                      ))}
-                    </div>
-
-                    <button
-                      onClick={() => setShowArabicTranslation(!showArabicTranslation)}
-                      className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-                        showArabicTranslation
-                          ? 'bg-white text-slate-900 border-white'
-                          : 'bg-white/10 text-white border-white/30 hover:bg-white/20'
-                      }`}
-                    >
-                      {showArabicTranslation ? (isRtl ? 'إخفاء الترجمة' : 'Hide Arabic') : (isRtl ? 'إظهار الترجمة' : 'Show Arabic')}
-                    </button>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.18 }}
+          >
+            {/* TAB 1: READ & LISTEN */}
+            {activeTab === 'read' && (
+              <div className="space-y-3">
+                {/* Passage Header -> Navy Card with Gold Title */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-[#002147] border-2 border-[#C49E3A] text-white space-y-2 shadow-sm">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="text-[11px] font-black bg-[#001a38] text-[#E6C36A] border border-[#C49E3A]/60 px-3 py-0.5 rounded-full">
+                      {selectedPassage.category} • CEFR {selectedPassage.level}
+                    </span>
+                    <span className="text-[11px] font-black text-[#E6C36A]">
+                      ⏱ {selectedPassage.estimatedMinutes} {t('دقائق', 'mins')}
+                    </span>
                   </div>
-                </div>
 
-                <h2 className="text-xl sm:text-2xl font-black">
-                  {selectedPassage.titleEn}
-                </h2>
-                <div className="text-emerald-100 font-medium text-sm">
-                  {selectedPassage.titleAr}
-                </div>
-
-                <div className="pt-2 flex items-center gap-3">
-                  {!isPlayingAudio ? (
-                    <button
-                      onClick={playFullStory}
-                      className="px-5 py-2.5 bg-white hover:bg-emerald-50 text-emerald-800 rounded-xl font-black text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-                    >
-                      <Play size={16} fill="currentColor" />
-                      {isRtl ? 'تشغيل القراءة الصوتية الكاملة' : 'Play Full Audio'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={stopAudio}
-                      className="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-black text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer"
-                    >
-                      <Pause size={16} fill="currentColor" />
-                      {isRtl ? 'إيقاف مؤقت للصوت' : 'Pause Audio'}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Paragraphs with Synchronized Reading Focus */}
-              <div className="space-y-4">
-                {selectedPassage.paragraphs.map((p, pIdx) => {
-                  const isCurrent = currentParagraphIndex === pIdx;
-                  return (
-                    <div
-                      key={pIdx}
-                      className={`p-5 rounded-2xl border transition-all space-y-3 ${
-                        isCurrent
-                          ? 'bg-emerald-50/70 border-emerald-400 shadow-sm ring-2 ring-emerald-500/20'
-                          : 'bg-slate-50/70 hover:bg-slate-50 border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="text-base sm:text-lg font-serif text-slate-900 leading-relaxed font-normal" dir="ltr">
-                          {p.en}
-                        </p>
-                        <button
-                          onClick={() => playParagraph(p.en, pIdx)}
-                          className="w-8 h-8 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-xs"
-                        >
-                          <Volume2 size={16} />
-                        </button>
-                      </div>
-
-                      {showArabicTranslation && (
-                        <p className="text-xs sm:text-sm text-slate-600 font-medium pt-2 border-t border-slate-200/60 leading-relaxed">
-                          {p.ar}
-                        </p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <h2 className="text-lg sm:text-xl font-black text-[#E6C36A]" dir="ltr">
+                        {selectedPassage.titleEn}
+                      </h2>
+                      {isRtl && (
+                        <div className="text-white/85 font-bold text-xs sm:text-sm">
+                          {selectedPassage.titleAr}
+                        </div>
                       )}
                     </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* TAB 2: VOCABULARY BANK */}
-          {activeTab === 'vocab' && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200 shadow-xs space-y-4"
-            >
-              <h3 className="text-base font-black text-slate-900">
-                {isRtl ? 'بنك المفردات المستهدفة وسياقها في النص' : 'Target Vocabulary & Contextual Usages'}
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {selectedPassage.keywords.map((kw, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-300 transition-all space-y-2 group">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-base font-black text-emerald-800 group-hover:text-emerald-600 transition-colors">
-                        {kw.word}
-                      </h4>
-                      <button
-                        onClick={() => {
-                          if ('speechSynthesis' in window) {
-                            const u = new SpeechSynthesisUtterance(kw.word);
-                            u.lang = 'en-US';
-                            managedSpeak(u);
-                          }
-                        }}
-                        className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors cursor-pointer"
-                      >
-                        <Volume2 size={14} />
-                      </button>
-                    </div>
-
-                    <div className="text-xs text-slate-400 font-mono">
-                      {kw.ipa}
-                    </div>
-
-                    <div className="text-sm font-bold text-slate-800">
-                      {kw.meaningAr}
-                    </div>
-
-                    <div className="text-[11px] text-slate-500 bg-white p-2 rounded-xl border border-slate-100 font-medium">
-                      "{kw.context}"
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* TAB 3: COMPREHENSION QUIZ */}
-          {activeTab === 'quiz' && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200 shadow-xs space-y-6"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div>
-                  <h3 className="text-base font-black text-slate-900">
-                    {isRtl ? 'اختبار الفهم والاستيعاب القرائي' : 'Reading Comprehension Check'}
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    {isRtl ? 'أجب عن الأسئلة بناءً على فهمك للنص السابق' : 'Answer the questions based on the text above.'}
-                  </p>
-                </div>
-                {isQuizSubmitted && (
-                  <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                    {isRtl ? `الدرجة: ${quizScore} من ${selectedPassage.comprehensionQuiz.length}` : `Score: ${quizScore}/${selectedPassage.comprehensionQuiz.length}`}
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-6">
-                {selectedPassage.comprehensionQuiz.map((q, qIdx) => (
-                  <div key={qIdx} className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                    <div className="text-sm sm:text-base font-black text-slate-900" dir="ltr">
-                      {qIdx + 1}. {q.question}
-                    </div>
-                    {isRtl && (
-                      <div className="text-xs text-slate-600 font-medium">
-                        {q.questionAr}
+                    {/* Small Sara TutorFace while the passage is being read aloud */}
+                    {isPlayingAudio && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <TutorFace tutor="sara" size="sm" isSpeaking={isPlayingAudio} />
                       </div>
                     )}
+                  </div>
+                </div>
 
-                    <div className="space-y-2 pt-1">
-                      {q.options.map((opt, optIdx) => {
-                        const isSelected = quizAnswers[qIdx] === optIdx;
-                        const isCorrect = optIdx === q.correctIndex;
-                        
-                        let optStyle = "bg-white border-slate-200 text-slate-700 hover:border-emerald-300";
-                        if (isSelected && !isQuizSubmitted) {
-                          optStyle = "bg-emerald-50 border-emerald-500 text-emerald-900 ring-2 ring-emerald-500/20";
-                        } else if (isQuizSubmitted) {
-                          if (isCorrect) {
-                            optStyle = "bg-emerald-50 border-emerald-500 text-emerald-900 font-bold";
-                          } else if (isSelected && !isCorrect) {
-                            optStyle = "bg-rose-50 border-rose-500 text-rose-900 font-bold";
-                          }
-                        }
+                {/* Compact Toolbar with GhostButtons for Audio, Speed, and Translate */}
+                <GoldCard className="!p-2.5 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {!isPlayingAudio ? (
+                      <GhostButton onClick={playFullStory}>
+                        <Play size={14} fill="currentColor" />
+                        {t('تشغيل القراءة الصوتية الكاملة', 'Play Full Audio')}
+                      </GhostButton>
+                    ) : (
+                      <GhostButton active onClick={stopAudio}>
+                        <Pause size={14} fill="currentColor" />
+                        {t('إيقاف مؤقت للصوت', 'Pause Audio')}
+                      </GhostButton>
+                    )}
 
+                    {[0.8, 1.0, 1.2].map((speed) => (
+                      <GhostButton
+                        key={speed}
+                        active={audioSpeed === speed}
+                        onClick={() => setAudioSpeed(speed)}
+                      >
+                        {speed}x
+                      </GhostButton>
+                    ))}
+                  </div>
+
+                  {isRtl && (
+                    <GhostButton
+                      active={showArabicTranslation}
+                      onClick={() => setShowArabicTranslation(!showArabicTranslation)}
+                    >
+                      {showArabicTranslation
+                        ? t('إخفاء الترجمة', 'Hide Arabic')
+                        : t('إظهار الترجمة', 'Show Arabic')}
+                    </GhostButton>
+                  )}
+                </GoldCard>
+
+                {/* Passage Text on a White GoldCard, 17px; active paragraph gets light gold highlight */}
+                <GoldCard className="space-y-3">
+                  {selectedPassage.paragraphs.map((p, pIdx) => {
+                    const isCurrent = currentParagraphIndex === pIdx;
+                    return (
+                      <div
+                        key={pIdx}
+                        className={`p-4 rounded-2xl border transition-colors space-y-2.5 ${
+                          isCurrent
+                            ? 'bg-[#E6C36A]/25 border-[#C49E3A] ring-2 ring-[#C49E3A]/40'
+                            : 'bg-[#fdfaf3]/60 border-[#C49E3A]/30'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <p
+                            className="text-[17px] font-bold text-[#002147] leading-relaxed"
+                            dir="ltr"
+                          >
+                            {p.en}
+                          </p>
+                          <GhostButton
+                            active={isCurrent && isPlayingAudio}
+                            onClick={() => playParagraph(p.en, pIdx)}
+                            aria-label={t('استماع', 'Listen')}
+                          >
+                            <Volume2 size={15} />
+                          </GhostButton>
+                        </div>
+
+                        {isRtl && showArabicTranslation && (
+                          <p className="text-xs sm:text-sm text-[#002147]/80 font-bold pt-2 border-t border-[#C49E3A]/25 leading-relaxed">
+                            {p.ar}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </GoldCard>
+              </div>
+            )}
+
+            {/* TAB 2: VOCABULARY BANK */}
+            {activeTab === 'vocab' && (
+              <GoldCard className="space-y-4">
+                <h3 className="text-base font-black text-[#002147]">
+                  {t('بنك المفردات المستهدفة وسياقها في النص', 'Target Vocabulary & Contextual Usages')}
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {selectedPassage.keywords.map((kw, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-base font-black text-[#002147]" dir="ltr">
+                          {kw.word}
+                        </h4>
+                        <GhostButton
+                          onClick={() => {
+                            if ('speechSynthesis' in window) {
+                              const u = new SpeechSynthesisUtterance(kw.word);
+                              u.lang = 'en-US';
+                              managedSpeak(u);
+                            }
+                          }}
+                          aria-label={t('استماع', 'Listen')}
+                        >
+                          <Volume2 size={14} />
+                        </GhostButton>
+                      </div>
+
+                      <div className="text-xs text-[#C49E3A] font-mono font-bold" dir="ltr">
+                        {kw.ipa}
+                      </div>
+
+                      <div className="text-sm font-black text-[#002147]">
+                        {tr(kw.meaningAr)}
+                      </div>
+
+                      <div className="text-[11px] text-[#002147]/75 bg-white p-2 rounded-xl border border-[#C49E3A]/30 font-bold" dir="ltr">
+                        "{kw.context}"
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </GoldCard>
+            )}
+
+            {/* TAB 3: COMPREHENSION QUIZ */}
+            {activeTab === 'quiz' && (
+              <GoldCard className="space-y-5">
+                <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-[#C49E3A]/25">
+                  <div>
+                    <h3 className="text-base font-black text-[#002147]">
+                      {t('اختبار الفهم والاستيعاب القرائي', 'Reading Comprehension Check')}
+                    </h3>
+                    <p className="text-xs font-bold text-[#002147]/70">
+                      {t('أجب عن الأسئلة بناءً على فهمك للنص السابق', 'Answer the questions based on the text above.')}
+                    </p>
+                  </div>
+                  {isQuizSubmitted && (
+                    <ProgressPill>
+                      {t(
+                        `الدرجة: ${quizScore} من ${selectedPassage.comprehensionQuiz.length}`,
+                        `Score: ${quizScore}/${selectedPassage.comprehensionQuiz.length}`
+                      )}
+                    </ProgressPill>
+                  )}
+                </div>
+
+                <div className="space-y-5">
+                  {selectedPassage.comprehensionQuiz.map((q, qIdx) => (
+                    <div
+                      key={qIdx}
+                      className="p-4 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 space-y-3"
+                    >
+                      <div className="text-sm sm:text-base font-black text-[#002147]" dir="ltr">
+                        {qIdx + 1}. {q.question}
+                      </div>
+                      {isRtl && (
+                        <div className="text-xs text-[#002147]/75 font-bold">
+                          {q.questionAr}
+                        </div>
+                      )}
+
+                      <div className="space-y-2 pt-1" dir="ltr">
+                        {q.options.map((opt, optIdx) => {
+                          const isSelected = quizAnswers[qIdx] === optIdx;
+                          const isCorrect = optIdx === q.correctIndex;
+                          const state = !isQuizSubmitted
+                            ? 'normal'
+                            : isCorrect
+                            ? 'correct'
+                            : isSelected
+                            ? 'wrong'
+                            : 'normal';
+
+                          return (
+                            <AnswerOption
+                              key={optIdx}
+                              label={opt}
+                              dir="ltr"
+                              selected={isSelected && !isQuizSubmitted}
+                              state={state}
+                              disabled={isQuizSubmitted}
+                              onClick={() => handleSelectQuizOption(qIdx, optIdx)}
+                            />
+                          );
+                        })}
+                      </div>
+
+                      {isQuizSubmitted && (
+                        <div className="p-3 bg-white rounded-xl text-xs text-[#002147] border border-[#C49E3A]/30 font-bold">
+                          <strong className="text-[#002147] block mb-0.5">
+                            {t('التوضيح:', 'Explanation:')}
+                          </strong>
+                          {tr(q.explanationAr)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  {!isQuizSubmitted ? (
+                    <PrimaryButton onClick={handleSubmitQuiz}>
+                      {t('تسليم الإجابات والحصول على النقاط 🏆', 'Submit Answers & Earn XP 🏆')}
+                    </PrimaryButton>
+                  ) : (
+                    <GhostButton
+                      onClick={() => {
+                        setQuizAnswers({});
+                        setIsQuizSubmitted(false);
+                        setQuizScore(0);
+                      }}
+                    >
+                      {t('إعادة الاختبار 🔄', 'Retake Quiz 🔄')}
+                    </GhostButton>
+                  )}
+                </div>
+              </GoldCard>
+            )}
+
+            {/* TAB 4: AI CUSTOM PASSAGE GENERATOR */}
+            {activeTab === 'generator' && (
+              <GoldCard className="space-y-5">
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-[#002147]">
+                    {t('صانع المقالات والقصص الذكي بالذكاء الاصطناعي', 'AI Dynamic Passage Creator')}
+                  </h3>
+                  <p className="text-xs font-bold text-[#002147]/70 mt-1">
+                    {t(
+                      'اكتب أي موضوع ترغب في القراءة عنه (مثلاً: ريادة الأعمال، تاريخ الطيران، الذكاء الاصطناعي في الطب) وسيقوم النظام بتوليد نص متدرج مع بنك مفردات واختبار فهم استيعابي.',
+                      'Generate custom reading passages tailored to your personal interests and proficiency level instantly.'
+                    )}
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-black text-[#002147] mb-1.5">
+                      {t('الموضوع المطلوب:', 'Desired Topic:')}
+                    </label>
+                    <input
+                      type="text"
+                      value={customTopic}
+                      onChange={(e) => setCustomTopic(e.target.value)}
+                      placeholder={t(
+                        'مثال: The History of Deep Sea Diving',
+                        'e.g. The Future of Electric Aviation'
+                      )}
+                      className="w-full p-3.5 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 text-sm font-bold text-[#002147] focus:border-[#C49E3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black text-[#002147] mb-1.5">
+                      {t('المستوى المستهدف (CEFR):', 'Target CEFR Level:')}
+                    </label>
+                    <div className="flex gap-2">
+                      {['A1', 'A2', 'B1', 'B2', 'C1'].map((lvl) => {
+                        const active = customLevel === lvl;
                         return (
                           <button
-                            key={optIdx}
-                            disabled={isQuizSubmitted}
-                            onClick={() => handleSelectQuizOption(qIdx, optIdx)}
-                            className={`w-full p-3 rounded-xl border text-start text-xs sm:text-sm font-medium transition-all flex items-center justify-between cursor-pointer ${optStyle}`}
+                            key={lvl}
+                            type="button"
+                            onClick={() => setCustomLevel(lvl)}
+                            className={`flex-1 py-2 rounded-full text-xs font-black active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer ${
+                              active
+                                ? 'bg-[#002147] text-[#E6C36A] border border-[#C49E3A]'
+                                : 'bg-white text-[#002147] border border-[#C49E3A]/40 hover:border-[#C49E3A]'
+                            }`}
                           >
-                            <span>{opt}</span>
-                            {isQuizSubmitted && isCorrect && <CheckCircle2 size={16} className="text-emerald-600" />}
-                            {isQuizSubmitted && isSelected && !isCorrect && <XCircle size={16} className="text-rose-600" />}
+                            {lvl}
                           </button>
                         );
                       })}
                     </div>
-
-                    {isQuizSubmitted && (
-                      <div className="p-3 bg-white rounded-xl text-xs text-slate-700 border border-slate-200 font-medium">
-                        <strong className="text-emerald-700 block mb-0.5">{isRtl ? 'التوضيح:' : 'Explanation:'}</strong>
-                        {q.explanationAr}
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
 
-              <div className="flex justify-end pt-2">
-                {!isQuizSubmitted ? (
-                  <button
-                    onClick={handleSubmitQuiz}
-                    className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer"
-                  >
-                    {isRtl ? 'تسليم الإجابات والحصول على النقاط 🏆' : 'Submit Answers & Earn XP 🏆'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setQuizAnswers({});
-                      setIsQuizSubmitted(false);
-                      setQuizScore(0);
-                    }}
-                    className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer"
-                  >
-                    {isRtl ? 'إعادة الاختبار 🔄' : 'Retake Quiz 🔄'}
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* TAB 4: AI CUSTOM PASSAGE GENERATOR */}
-          {activeTab === 'generator' && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-5 sm:p-7 rounded-3xl border border-slate-200 shadow-xs space-y-6"
-            >
-              <div>
-                <h3 className="text-lg font-black text-slate-900">
-                  {isRtl ? 'صانع المقالات والقصص الذكي بالذكاء الاصطناعي' : 'AI Dynamic Passage Creator'}
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  {isRtl
-                    ? 'اكتب أي موضوع ترغب في القراءة عنه (مثلاً: ريادة الأعمال، تاريخ الطيران، الذكاء الاصطناعي في الطب) وسيقوم النظام بتوليد نص متدرج مع بنك مفردات واختبار فهم استيعابي.'
-                    : 'Generate custom reading passages tailored to your personal interests and proficiency level instantly.'}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {isRtl ? 'الموضوع المطلوب:' : 'Desired Topic:'}
-                  </label>
-                  <input
-                    type="text"
-                    value={customTopic}
-                    onChange={(e) => setCustomTopic(e.target.value)}
-                    placeholder={isRtl ? 'مثال: The History of Deep Sea Diving' : 'e.g. The Future of Electric Aviation'}
-                    className="w-full p-3.5 rounded-2xl border border-slate-200 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    {isRtl ? 'المستوى المستهدف (CEFR):' : 'Target CEFR Level:'}
-                  </label>
-                  <div className="flex gap-2">
-                    {['A1', 'A2', 'B1', 'B2', 'C1'].map((lvl) => (
-                      <button
-                        key={lvl}
-                        onClick={() => setCustomLevel(lvl)}
-                        className={`flex-1 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                          customLevel === lvl
-                            ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        {lvl}
-                      </button>
-                    ))}
+                  <div className="flex justify-end pt-1">
+                    <PrimaryButton
+                      disabled={!customTopic.trim() || isGenerating}
+                      onClick={handleGenerateCustomStory}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <RefreshCw size={15} className="animate-spin" />
+                          {t('جاري تأليف النص التفاعلي...', 'Generating...')}
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={15} />
+                          {t('توليد النص والقراءة الصوتية 🚀', 'Generate Passage & Audio 🚀')}
+                        </>
+                      )}
+                    </PrimaryButton>
                   </div>
                 </div>
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    disabled={!customTopic.trim() || isGenerating}
-                    onClick={handleGenerateCustomStory}
-                    className={`px-6 py-3 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                      customTopic.trim() && !isGenerating
-                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md'
-                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                    }`}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <RefreshCw size={16} className="animate-spin" />
-                        {isRtl ? 'جاري تأليف النص التفاعلي...' : 'Generating...'}
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles size={16} />
-                        {isRtl ? 'توليد النص والقراءة الصوتية 🚀' : 'Generate Passage & Audio 🚀'}
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
+              </GoldCard>
+            )}
+          </motion.div>
         </div>
       </div>
-    </div>
+    </SectionShell>
   );
 };
