@@ -429,9 +429,6 @@ export const GrammarAcademy: React.FC<GrammarAcademyProps> = ({ lang, onXPAdded 
           <ProgressPill>
             📐 {t(currentCatObj.labelAr, currentCatObj.labelEn)} • {selectedTopic.level}
           </ProgressPill>
-          <ProgressPill>
-            🏆 {t('نقاط القواعد:', 'Grammar XP:')} 850
-          </ProgressPill>
         </div>
 
         {/* Category Filter Pills */}

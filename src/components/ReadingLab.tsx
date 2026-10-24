@@ -375,9 +375,6 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onXPAdded }) => {
           <ProgressPill>
             📖 {selectedPassage.category} • CEFR {selectedPassage.level}
           </ProgressPill>
-          <ProgressPill>
-            🏆 {t('نقاط القراءة:', 'Reading XP:')} 920
-          </ProgressPill>
         </div>
         <GhostButton onClick={() => setActiveTab('generator')}>
           <Sparkles size={14} />
@@ -478,36 +475,57 @@ export const ReadingLab: React.FC<ReadingLabProps> = ({ lang, onXPAdded }) => {
                   </div>
                 </div>
 
-                {/* Compact Toolbar with GhostButtons for Audio, Speed, and Translate */}
-                <GoldCard className="!p-2.5 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-1.5">
+                {/* Compact single-row Toolbar: Play button + Navy/Gold segmented speed control + Translate */}
+                <GoldCard className="!p-2 flex items-center justify-between gap-1.5 flex-nowrap overflow-x-auto no-scrollbar">
+                  <div className="flex items-center gap-1.5 flex-nowrap shrink-0">
                     {!isPlayingAudio ? (
-                      <GhostButton onClick={playFullStory}>
-                        <Play size={14} fill="currentColor" />
-                        {t('تشغيل القراءة الصوتية الكاملة', 'Play Full Audio')}
+                      <GhostButton
+                        onClick={playFullStory}
+                        className="!px-2.5 !py-1.5 whitespace-nowrap shrink-0"
+                      >
+                        <Play size={13} fill="currentColor" />
+                        <span>{t('تشغيل الصوت', 'Play Audio')}</span>
                       </GhostButton>
                     ) : (
-                      <GhostButton active onClick={stopAudio}>
-                        <Pause size={14} fill="currentColor" />
-                        {t('إيقاف مؤقت للصوت', 'Pause Audio')}
+                      <GhostButton
+                        active
+                        onClick={stopAudio}
+                        className="!px-2.5 !py-1.5 whitespace-nowrap shrink-0"
+                      >
+                        <Pause size={13} fill="currentColor" />
+                        <span>{t('إيقاف مؤقت', 'Pause')}</span>
                       </GhostButton>
                     )}
 
-                    {[0.8, 1.0, 1.2].map((speed) => (
-                      <GhostButton
-                        key={speed}
-                        active={audioSpeed === speed}
-                        onClick={() => setAudioSpeed(speed)}
-                      >
-                        {speed}x
-                      </GhostButton>
-                    ))}
+                    <div
+                      dir="ltr"
+                      className="inline-flex items-center flex-nowrap rounded-xl border border-[#C49E3A] bg-[#fdfaf3] p-0.5 shrink-0"
+                    >
+                      {[0.8, 1.0, 1.2].map((speed) => {
+                        const active = audioSpeed === speed;
+                        return (
+                          <button
+                            key={speed}
+                            type="button"
+                            onClick={() => setAudioSpeed(speed)}
+                            className={`px-2 py-1 rounded-lg text-[11px] font-black transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer ${
+                              active
+                                ? 'bg-[#002147] text-[#E6C36A]'
+                                : 'text-[#002147] hover:bg-[#E6C36A]/20'
+                            }`}
+                          >
+                            {speed}x
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {isRtl && (
                     <GhostButton
                       active={showArabicTranslation}
                       onClick={() => setShowArabicTranslation(!showArabicTranslation)}
+                      className="!px-2.5 !py-1.5 whitespace-nowrap shrink-0"
                     >
                       {showArabicTranslation
                         ? t('إخفاء الترجمة', 'Hide Arabic')
