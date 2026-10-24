@@ -8,7 +8,7 @@ interface LandingPageProps {
   onGetStarted: () => void;
 }
 
-/** Light public landing: hero + 4 tutors + features + 3 steps + short FAQ + footer. No animation libs, one small image. */
+/** Light public landing: hero + 8 tutors («من الصفر» track included) + features + 3 steps + short FAQ + footer. No animation libs, one small image. */
 export const LandingPage: React.FC<LandingPageProps> = ({ lang, onToggleLang, onGetStarted }) => {
   const ar = lang === 'ar';
   const [open, setOpen] = useState<number | null>(null);
@@ -21,9 +21,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang, onToggleLang, on
     { img: '/tutors/business.webp', a: 'محمد', e: 'Mohammed', ra: 'إنجليزية الأعمال والمقابلات', re: 'Business English and interviews' },
     { img: '/tutors/exams.webp', a: 'علي', e: 'Ali', ra: 'التحضير للاختبارات (IELTS)', re: 'Exam prep (IELTS)' },
   ];
+  /** «من الصفر — للصغار والكبار»: 4 levels × 30 board lessons + 120 fill-blank lessons each (src/data/tutorTracks). */
+  const zero = [
+    { img: '/tutors/lama.webp', a: 'لمى', e: 'Lama', ra: 'الحروف والأصوات، ثم قراءة الكلمات والجمل القصيرة', re: 'Letters and sounds, then reading short words and sentences' },
+    { img: '/tutors/reem.webp', a: 'ريم', e: 'Reem', ra: 'كلمات كل يوم بالصور: البيت والأكل والمدينة والعمل', re: 'Everyday words with pictures: home, food, the city and work' },
+    { img: '/tutors/haya.webp', a: 'هيا', e: 'Haya', ra: 'جمل أساسية من I am حتى الماضي والمستقبل', re: 'Basic sentences from I am to the past and future' },
+    { img: '/tutors/jana.webp', a: 'جنى', e: 'Jana', ra: 'تمارين ومراجعة، وكل مستوى ينتهي بدروس مراجعة', re: 'Exercises and review; every level ends with review lessons' },
+  ];
   const features = [
     { icon: '📚', a: 'دروس قصيرة على سبورة', e: 'Short whiteboard lessons', da: 'قواعد ومحادثة ومفردات وقراءة وكتابة، كل درس يشرحه معلمك بصوته.', de: 'Grammar, conversation, vocabulary, reading and writing, each lesson explained in your tutor’s voice.' },
-    { icon: '🧩', a: 'أكمل الجملة: 120 درس', e: 'Fill the blank: 120 lessons', da: '30 درس مع كل معلم في 3 مستويات، تنفتح بالترتيب ويُحفظ تقدمك.', de: '30 lessons with each tutor in 3 levels, unlocked in order with your progress saved.' },
+    { icon: '🧩', a: 'أكمل الجملة: 600 درس', e: 'Fill the blank: 600 lessons', da: '30 درس مع كل من سارة ونورة ومحمد وعلي، و120 درس مع كل معلمة من معلمات «من الصفر» في 4 مستويات. تنفتح بالترتيب ويُحفظ تقدمك.', de: '30 lessons with each of Sara, Noura, Mohammed and Ali, and 120 with each «from zero» teacher in 4 levels. Unlocked in order with your progress saved.' },
     { icon: '📞', a: 'مكالمة صوتية مع سارة', e: 'Voice calls with Sara', da: 'تتكلم بالإنجليزي وترد عليك، وتصحح أخطاءك بلطف أثناء المحادثة.', de: 'Speak English and she replies, gently modelling the correct form.' },
     { icon: '📷', a: 'السبورة تقرأ الصور', e: 'The board reads images', da: 'حط صورة على السبورة والمعلم يشرح محتواها.', de: 'Put an image on the board and your tutor explains it.' },
     { icon: '🇬🇧', a: 'وضع الإنجليزي الكامل', e: 'Full English mode', da: 'بدّل الشرح والواجهة للإنجليزي بالكامل متى ما كنت جاهز.', de: 'Switch explanations and the interface fully to English when you are ready.' },
@@ -33,12 +40,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang, onToggleLang, on
   const steps = [
     { a: 'سجّل دخولك', e: 'Sign in', da: 'بحساب Google أو بالبريد.', de: 'With Google or email.' },
     { a: 'حدّد مستواك', e: 'Find your level', da: 'اختبار قصير يقترح لك من أين تبدأ.', de: 'A short test suggests where to start.' },
-    { a: 'تعلّم مع معلمك', e: 'Learn with your tutor', da: 'اختر سارة أو نورة أو محمد أو علي: دروس وتمارين ومراجعة.', de: 'Pick Sara, Noura, Mohammed or Ali: lessons, practice and review.' },
+    { a: 'تعلّم مع معلمك', e: 'Learn with your tutor', da: 'اختر سارة أو نورة أو محمد أو علي، أو ابدأ من الصفر مع لمى وريم وهيا وجنى.', de: 'Pick Sara, Noura, Mohammed or Ali, or start from zero with Lama, Reem, Haya and Jana.' },
   ];
   const faq = [
     { qa: 'هل أحتاج تحميل تطبيق؟', qe: 'Do I need an app?', aa: 'لا، الموقع يعمل من متصفح الجوال أو الكمبيوتر، وتقدر تضيفه للشاشة الرئيسية.', ae: 'No. It runs in the browser on phone or computer, and can be added to the home screen.' },
-    { qa: 'لمن تناسب الأكاديمية؟', qe: 'Who is it for?', aa: 'للمتعلمين الناطقين بالعربية، من المبتدئ حتى المستويات المتقدمة.', ae: 'Arabic-speaking learners, from beginner to advanced levels.' },
-    { qa: 'هل المعلمين أشخاص حقيقيين؟', qe: 'Are the tutors real people?', aa: 'سارة ونورة ومحمد وعلي معلمين ذكاء اصطناعي بأصوات ووجوه فيديو، ممكن يخطئون أحياناً، والدروس نفسها مكتوبة ومراجعة مسبقاً.', ae: 'Sara, Noura, Mohammed and Ali are AI tutors with voices and video faces; they can make mistakes, and the lessons themselves are pre-written.' },
+    { qa: 'لمن تناسب الأكاديمية؟', qe: 'Who is it for?', aa: 'للمتعلمين الناطقين بالعربية، من الصفر حتى المستويات المتقدمة. ومسار «من الصفر» مع لمى وريم وهيا وجنى يناسب الصغار والكبار.', ae: 'Arabic-speaking learners, from zero to advanced levels. The «from zero» track with Lama, Reem, Haya and Jana suits children and adults.' },
+    { qa: 'هل المعلمين أشخاص حقيقيين؟', qe: 'Are the tutors real people?', aa: 'كل المعلمين (سارة ونورة ومحمد وعلي ولمى وريم وهيا وجنى) معلمين ذكاء اصطناعي بأصوات خاصة فيهم، ممكن يخطئون أحياناً، والدروس نفسها مكتوبة ومراجعة مسبقاً.', ae: 'All the tutors (Sara, Noura, Mohammed, Ali, Lama, Reem, Haya and Jana) are AI tutors with their own voices; they can make mistakes, and the lessons themselves are pre-written.' },
     { qa: 'هل يقدر ولي الأمر يتابع؟', qe: 'Can parents follow progress?', aa: 'نعم، يربط ولي الأمر حسابه بحساب الطالب ويشوف تقرير تقدمه في الدروس.', ae: 'Yes. A parent links their account to the student’s and sees a report of lesson progress.' },
   ];
   const focus = 'focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E6C36A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#002147]';
@@ -59,9 +66,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang, onToggleLang, on
               <img src="/icon-192.png" width={96} height={96} alt={t('شعار أكاديمية باسم الخليل الرقمية', 'Basim Al-Khalil Digital Academy logo')} fetchPriority="high"
                 className="mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-3xl ring-2 ring-[#C49E3A] shadow-xl shadow-black/40" />
               <h1 className="mt-5 text-3xl sm:text-5xl font-black leading-tight">{t('أكاديمية باسم الخليل الرقمية', 'Basim Al-Khalil Digital Academy')}</h1>
-              <p className="mt-3 text-lg sm:text-xl font-bold text-[#E6C36A]">{t('تعلّم الإنجليزية مع 4 معلمين أذكياء: سارة، نورة، محمد، علي', 'Learn English with 4 AI tutors: Sara, Noura, Mohammed and Ali')}</p>
-              <ul className="mt-5 flex justify-center gap-3 sm:gap-4" aria-label={t('المعلمون', 'Tutors')}>
-                {tutors.map(m => (
+              <p className="mt-3 text-lg sm:text-xl font-bold text-[#E6C36A]">{t('تعلّم الإنجليزية مع 8 معلمين أذكياء، من الصفر حتى IELTS', 'Learn English with 8 AI tutors, from zero to IELTS')}</p>
+              <ul className="mt-5 mx-auto max-w-md sm:max-w-none flex flex-wrap justify-center gap-x-3 gap-y-2 sm:gap-4" aria-label={t('المعلمون', 'Tutors')}>
+                {[...tutors, ...zero].map(m => (
                   <li key={m.e} className="flex flex-col items-center gap-1">
                     <img src={m.img} width={64} height={64} alt={t(m.a, m.e)} loading="lazy" decoding="async" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-[#C49E3A]" />
                     <span className="text-xs font-bold text-white/90">{t(m.a, m.e)}</span>
@@ -87,6 +94,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang, onToggleLang, on
                   <h3 className="font-black">{t(m.a, m.e)}</h3>
                   <p className="text-[15px] text-slate-700">{t(m.ra, m.re)}</p>
                   <p className="mt-1 text-xs font-bold text-[#8a6d1f]">{t('🎙️ صوت ووجه بالفيديو · 🧩 30 درس أكمل الجملة', '🎙️ Voice and video face · 🧩 30 fill-blank lessons')}</p>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section aria-labelledby="zero-h" data-testid="landing-from-zero" className="mx-auto max-w-5xl px-5 pt-12" style={{ contentVisibility: 'auto', containIntrinsicSize: '600px' }}>
+          <h2 id="zero-h" className="text-2xl font-black text-center">{t('من الصفر — للصغار والكبار', 'From Zero — for Children and Adults')}</h2>
+          <p className="mt-2 text-center text-[15px] text-slate-700">{t('أربع معلمات يبدأن معك من الحروف حتى الجمل اليومية، بكروت فيها صورة وكلمة إنجليزية ومعناها بالعربي.', 'Four teachers who start with you from letters to everyday sentences, with picture cards showing the English word and its Arabic meaning.')}</p>
+          <ul className="mt-6 grid gap-3 grid-cols-1 sm:grid-cols-2">
+            {zero.map(m => (
+              <li key={m.e} className="rounded-2xl bg-white border border-[#C49E3A]/40 p-4 flex gap-3 items-center">
+                <img src={m.img} width={72} height={72} alt="" loading="lazy" decoding="async" className="w-16 h-16 shrink-0 rounded-2xl object-cover ring-1 ring-[#C49E3A]" />
+                <span>
+                  <h3 className="font-black">{t(m.a, m.e)}</h3>
+                  <p className="text-[15px] text-slate-700">{t(m.ra, m.re)}</p>
+                  <p className="mt-1 text-xs font-bold text-[#8a6d1f]">{t('📚 4 مستويات × 30 درس على السبورة · 🧩 120 درس أكمل الجملة', '📚 4 levels × 30 board lessons · 🧩 120 fill-blank lessons')}</p>
                 </span>
               </li>
             ))}

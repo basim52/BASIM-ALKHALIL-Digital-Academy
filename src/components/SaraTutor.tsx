@@ -540,6 +540,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
   const [saraTool, setSaraTool] = useState<SaraToolId | null>(null);
+  const BOARD_TEACHERS: [string, string, string][] = [['sara', 'سارة', 'Sara'], ['grammar', 'نورة', 'Noura'], ['business', 'محمد', 'Mohammed'], ['exams', 'علي', 'Ali'], ['lama', 'لمى', 'Lama'], ['reem', 'ريم', 'Reem'], ['haya', 'هيا', 'Haya'], ['jana', 'جنى', 'Jana']];
   /** 🧑‍🏫 فصل المعلمين — long navy & gold banner: fills the empty space under the سارة / التدريب rows (desktop, inside the wrapped toolbar) or sits full-width under the toolbar (phone/tablet). */
   const renderTeachersBanner = (where: 'desk' | 'mob') => (
           <button
@@ -560,14 +561,15 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 </span>
                 <span className="block text-[10.5px] sm:text-[11px] font-bold text-white/75 truncate">{isRtl ? 'دروس على السبورة' : 'Lessons on the board'}<span className="hidden sm:inline">{isRtl ? ' بصوت كل معلم' : " in each teacher's voice"}</span></span>
               </span>
-              <span className="flex items-center gap-1 sm:gap-1.5 shrink-0" data-testid="sara-board-teachers">
-                {(isRtl ? [['👩‍💼', 'سارة'], ['👩‍🏫', 'نورة'], ['👨‍💼', 'محمد'], ['🧑‍🎓', 'علي']] : [['👩‍💼', 'Sara'], ['👩‍🏫', 'Noura'], ['👨‍💼', 'Mohammed'], ['🧑‍🎓', 'Ali']]).map(([e, n]) => (
-                  <span key={n} className="flex flex-col items-center gap-0.5 w-[38px] sm:w-[46px]">
-                    <span className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0a2d5c] border border-[#C49E3A]/70 flex items-center justify-center text-[15px] sm:text-[17px] group-hover:border-[#C49E3A] transition-colors">{e}</span>
-                    <span className="text-[9.5px] sm:text-[10px] font-black text-amber-200 leading-none">{n}</span>
-                  </span>
-                ))}
-              </span>
+            </span>
+            {/* 8 teacher portraits: one row of equal cells, so it always fits (phone 320px → desktop) without overflow. */}
+            <span className="relative mt-2 grid grid-cols-8 gap-1 sm:gap-1.5" data-testid="sara-board-teachers">
+              {BOARD_TEACHERS.map(([img, a, e]) => (
+                <span key={img} className="min-w-0 flex flex-col items-center gap-0.5">
+                  <img src={`/tutors/${img}.webp`} alt="" width={36} height={36} loading="lazy" decoding="async" className="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-cover bg-[#0a2d5c] border border-[#C49E3A]/70 group-hover:border-[#C49E3A] transition-colors" />
+                  <span className="max-w-full truncate text-[9px] sm:text-[10px] font-black text-amber-200 leading-none">{isRtl ? a : e}</span>
+                </span>
+              ))}
             </span>
           </button>
   );

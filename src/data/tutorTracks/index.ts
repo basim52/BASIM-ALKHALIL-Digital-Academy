@@ -68,8 +68,9 @@ export const LAMA_TRACK: TutorTrack = {
   titleAr: 'الحروف والأصوات مع لمى', titleEn: 'Letters and Sounds with Lama',
   levels: [
     { id: 'l1', titleAr: 'المستوى الأول: الحروف وأصواتها', titleEn: 'Level 1: Letters and Their Sounds' },
-    { id: 'l2', titleAr: 'المستوى الثاني: الحروف المتحركة القصيرة والطويلة', titleEn: 'Level 2: Short and Long Vowels' },
-    { id: 'l3', titleAr: 'المستوى الثالث: أصوات مركبة وقراءة', titleEn: 'Level 3: Sound Blends and Reading' },
+    { id: 'l2', titleAr: 'المستوى الثاني: قراءة الكلمات القصيرة', titleEn: 'Level 2: Reading Short Words' },
+    { id: 'l3', titleAr: 'المستوى الثالث: كلمات البصر في جمل', titleEn: 'Level 3: Sight Words in Sentences' },
+    { id: 'l4', titleAr: 'المستوى الرابع: قصص قصيرة للقراءة', titleEn: 'Level 4: Short Stories to Read' },
   ],
   lessons: LAMA_LESSONS,
 };
@@ -77,9 +78,10 @@ export const REEM_TRACK: TutorTrack = {
   id: 'tutor-reem', personaId: 'reem',
   titleAr: 'كلمات كل يوم مع ريم', titleEn: 'Everyday Words with Reem',
   levels: [
-    { id: 'l1', titleAr: 'المستوى الأول: أنا وبيتي', titleEn: 'Level 1: Me and My Home' },
-    { id: 'l2', titleAr: 'المستوى الثاني: الأكل والحيوانات والوقت', titleEn: 'Level 2: Food, Animals and Time' },
-    { id: 'l3', titleAr: 'المستوى الثالث: كلمات كل يوم برا البيت', titleEn: 'Level 3: Everyday Words Outside' },
+    { id: 'l1', titleAr: 'المستوى الأول: كلماتي الأولى', titleEn: 'Level 1: My First Words' },
+    { id: 'l2', titleAr: 'المستوى الثاني: بيتي ومدينتي وأكلي', titleEn: 'Level 2: My Home, My City and My Food' },
+    { id: 'l3', titleAr: 'المستوى الثالث: أفعال وصفات ومواقف', titleEn: 'Level 3: Actions, Describing Words and Places' },
+    { id: 'l4', titleAr: 'المستوى الرابع: كلمات الحياة والعمل', titleEn: 'Level 4: Words for Life and Work' },
   ],
   lessons: REEM_LESSONS,
 };
@@ -87,9 +89,10 @@ export const HAYA_TRACK: TutorTrack = {
   id: 'tutor-haya', personaId: 'haya',
   titleAr: 'جمل أساسية مع هيا', titleEn: 'Basic Sentences with Haya',
   levels: [
-    { id: 'l1', titleAr: 'المستوى الأول: أنا وأشيائي', titleEn: 'Level 1: Me and My Things' },
-    { id: 'l2', titleAr: 'المستوى الثاني: أقدر وأبي وفيه', titleEn: 'Level 2: I Can, I Want, There Is' },
-    { id: 'l3', titleAr: 'المستوى الثالث: جمل الحياة اليومية', titleEn: 'Level 3: Sentences for Daily Life' },
+    { id: 'l1', titleAr: 'المستوى الأول: جملي الأولى', titleEn: 'Level 1: My First Sentences' },
+    { id: 'l2', titleAr: 'المستوى الثاني: المضارع البسيط والأسئلة', titleEn: 'Level 2: Present Simple and Questions' },
+    { id: 'l3', titleAr: 'المستوى الثالث: الماضي والمستقبل', titleEn: 'Level 3: Past and Future' },
+    { id: 'l4', titleAr: 'المستوى الرابع: جمل للحياة اليومية', titleEn: 'Level 4: Sentences for Everyday Life' },
   ],
   lessons: HAYA_LESSONS,
 };
@@ -98,8 +101,9 @@ export const JANA_TRACK: TutorTrack = {
   titleAr: 'تمارين ومراجعة مع جنى', titleEn: 'Practice and Review with Jana',
   levels: [
     { id: 'l1', titleAr: 'المستوى الأول: تمارين البداية', titleEn: 'Level 1: First Practice' },
-    { id: 'l2', titleAr: 'المستوى الثاني: تمارين الجمل', titleEn: 'Level 2: Sentence Practice' },
-    { id: 'l3', titleAr: 'المستوى الثالث: تمارين ومراجعة شاملة', titleEn: 'Level 3: Practice and Full Review' },
+    { id: 'l2', titleAr: 'المستوى الثاني: تمارين الحاضر والقواعد', titleEn: 'Level 2: Present and Grammar Practice' },
+    { id: 'l3', titleAr: 'المستوى الثالث: تمارين الماضي والمستقبل', titleEn: 'Level 3: Past and Future Practice' },
+    { id: 'l4', titleAr: 'المستوى الرابع: تمارين شاملة نحو A2', titleEn: 'Level 4: Mixed Practice towards A2' },
   ],
   lessons: JANA_LESSONS,
 };

@@ -11,7 +11,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { TutorVideoFace } from './tutor3d/TutorVideoFace';
 import './tutor3d/tutorBoard.css';
-import { type SaraBlankLesson, type SaraBlankCard, type FillBlankTrack, fillBlankLevel, FILL_BLANK_LEVELS } from '../data/saraTracks/fillBlank';
+import { type SaraBlankLesson, type SaraBlankCard, type FillBlankTrack, trackFillBlankLevel, FILL_BLANK_LEVELS } from '../data/saraTracks/fillBlank';
 import { SARA_FILL_BLANK } from '../data/fillBlankTracks';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
@@ -230,7 +230,7 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
             {LESSONS.map((l, i) => {
               const open = l.order <= unlocked;
-              const lv = fillBlankLevel(l.order), head = i === 0 || fillBlankLevel(LESSONS[i - 1].order) !== lv ? LV[Math.min(lv, LV.length) - 1] : null;
+              const lv = trackFillBlankLevel(track, l.order), head = i === 0 || trackFillBlankLevel(track, LESSONS[i - 1].order) !== lv ? LV[Math.min(lv, LV.length) - 1] : null;
               return (
                 <React.Fragment key={l.id}>
                   {head && <p data-testid="fill-blank-level" className="mt-1 px-1 text-[12px] font-black text-[#002147] border-b-2 border-[#C49E3A]/50 pb-0.5">{t(head.ar, head.en)}</p>}
