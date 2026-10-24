@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   Search,
-  Lock,
   Sparkles,
   RotateCcw,
 } from 'lucide-react';
@@ -438,33 +437,6 @@ const MODERN_MODULES: CurriculumModule[] = [
   },
 ];
 
-const UPCOMING_LOCKED_UNITS = [
-  {
-    id: 'locked_vr',
-    en: 'Speaking Lab VR',
-    ar: 'مختبر المحادثة الافتراضي',
-    level: 'B2',
-  },
-  {
-    id: 'locked_ielts',
-    en: 'IELTS Intensive',
-    ar: 'معسكر الآيلتس المكثف',
-    level: 'C1',
-  },
-  {
-    id: 'locked_biz',
-    en: 'Business English',
-    ar: 'إنجليزية الأعمال والشركات',
-    level: 'B2',
-  },
-  {
-    id: 'locked_toefl',
-    en: 'TOEFL Prep',
-    ar: 'التحضير لاختبار التوفل',
-    level: 'C1',
-  },
-];
-
 const CATEGORY_EMOJI: Record<CurriculumModule['category'], string> = {
   reading: '📖',
   grammar: '📐',
@@ -563,9 +535,6 @@ export const ModernCurriculumHome: React.FC<ModernCurriculumHomeProps> = ({
           </ProgressPill>
           <ProgressPill>
             🎯 {selectedLevel === 'ALL' ? 'A1–C2' : selectedLevel}
-          </ProgressPill>
-          <ProgressPill>
-            🔒 {UPCOMING_LOCKED_UNITS.length} {t('مسارات قادمة', 'Upcoming Tracks')}
           </ProgressPill>
         </div>
       </div>
@@ -693,36 +662,6 @@ export const ModernCurriculumHome: React.FC<ModernCurriculumHomeProps> = ({
             ))}
           </div>
         )}
-
-        {/* Locked / Upcoming Units Dimmed with a Gold Lock */}
-        <div className="pt-4 border-t border-[#C49E3A]/30 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-[#002147] text-[#C49E3A] flex items-center justify-center shrink-0">
-                <Lock size={13} />
-              </span>
-              <h4 className="text-sm sm:text-base font-black text-[#002147]">
-                {t('مسارات متقدمة قيد الإطلاق (مقفلة)', 'Upcoming Advanced Tracks (Locked)')}
-              </h4>
-            </div>
-            <ProgressPill>
-              🔒 {UPCOMING_LOCKED_UNITS.length} {t('قريباً', 'Coming Soon')}
-            </ProgressPill>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            {UPCOMING_LOCKED_UNITS.map((item, idx) => (
-              <LessonTile
-                key={item.id}
-                order={filteredModules.length + idx + 1}
-                title={t(item.ar, item.en)}
-                subtitle={t('قريباً ضمن التحديث القادم', 'Coming Soon')}
-                level={item.level}
-                locked={true}
-              />
-            ))}
-          </div>
-        </div>
       </GoldCard>
     </SectionShell>
   );

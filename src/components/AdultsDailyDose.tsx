@@ -13,7 +13,7 @@ import {
   Languages,
 } from 'lucide-react';
 import { DailyDoseLesson, ADULTS_DAILY_DOSES } from '../data/adultsDailyDose';
-import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { speakAcademyText, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import { useT } from '../lib/explainLang';
 import {
   SectionShell,
@@ -324,7 +324,7 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
 
   const playRecordedVoice = () => {
     if (!recordedAudioUrl) return;
-    const audio = new Audio(recordedAudioUrl);
+    const audio = createManagedAudio(recordedAudioUrl);
     audio.play();
   };
 
