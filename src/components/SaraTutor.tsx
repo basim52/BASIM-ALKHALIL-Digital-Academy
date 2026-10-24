@@ -57,7 +57,8 @@ import { MessageCircle,
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AppView, SaraBoardData, SaraChatResponse, TutorMemoryDoc, proficiencyLevel, CurriculumCategory, StudyPlan, LearningStyleType, LearningPacingType } from '../types';
 import { Language, translations } from '../lib/translations';
-import { auth, db } from '../lib/firebase';
+import { auth, db, googleProvider } from '../lib/firebase';
+import { signInWithPopup, signInWithRedirect } from 'firebase/auth';
 import { savePlacementLevel } from '../lib/placement';
 import { doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, getDocs, query, orderBy, limit, increment, where, deleteDoc } from 'firebase/firestore';
 import { speakAcademyText, playDirectSaraAudio, cancelAllSpeech, playSchoolBellChime } from '../lib/audio';
@@ -101,6 +102,10 @@ interface MessageItem {
   board?: SaraBoardData;
   actions?: { type: 'open_section'; sectionId: string }[];
   timestamp: number;
+  /** Local-only status bubble (sign-in needed / retry). Never sent to the model. */
+  notice?: 'auth' | 'retry';
+  retryText?: string;
+  retryOfId?: string;
 }
 
 export interface DiagnosticQuestion {
@@ -1233,7 +1238,78 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // 💾 Chat Persistence & Welcome Handlers
   // ==========================================
 
-  const fallbackWelcome = () => {
+  // 🔐 Chat auth: wait for Firebase to restore the session before reading the token (tablet/local sessions race on mount).
+  const getChatIdToken = async (): Promise<string> => {
+    try { await (auth as any).authStateReady?.(); } catch { /* ignore */ }
+    try { return auth.currentUser ? await auth.currentUser.getIdToken() : ''; } catch { return ''; }
+  };
+  const isWelcomeMsgId = (id?: string) => !!id && (id.startsWith('msg_sara_init') || id.startsWith('msg_sara_fallback') || id.startsWith('msg_welcome_'));
+  const sortByTime = (list: MessageItem[]) => [...list].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+  const buildAuthNotice = (retryText?: string, retryOfId?: string): MessageItem => ({
+    id: `msg_sara_auth_${Date.now()}`,
+    role: 'sara',
+    text: isRtl
+      ? 'عشان أقدر أرد عليك سجّل دخولك أولاً 🔐 اضغط الزر تحت وبعدها نكمل سوا.'
+      : 'Please sign in first so I can reply to you 🔐 Tap the button below and we will continue.',
+    notice: 'auth',
+    retryText,
+    retryOfId,
+    timestamp: Date.now()
+  });
+  const buildRetryNotice = (kind: 'rate' | 'offline' | 'error', retryText: string, retryOfId?: string): MessageItem => ({
+    id: `msg_sara_err_${Date.now()}`,
+    role: 'sara',
+    text: isRtl
+      ? (kind === 'rate'
+          ? 'ارسلت رسائل كثيرة بسرعة 😅 انتظر دقيقة وبعدها اضغط «أعد المحاولة».'
+          : kind === 'offline'
+            ? '📶 يبدو أن الإنترنت منقطع. تأكد من الاتصال واضغط «أعد المحاولة».'
+            : 'صار خلل بسيط وما وصلني ردك 🙏 اضغط «أعد المحاولة».')
+      : (kind === 'rate'
+          ? 'Too many messages at once 😅 wait a minute, then tap Retry.'
+          : kind === 'offline'
+            ? '📶 You seem to be offline. Check your connection and tap Retry.'
+            : 'Something went wrong and I could not reply 🙏 Tap Retry.'),
+    notice: 'retry',
+    retryText,
+    retryOfId,
+    timestamp: Date.now()
+  });
+  const [isChatSigningIn, setIsChatSigningIn] = useState(false);
+
+  const handleRetryNotice = (notice: MessageItem) => {
+    if (!notice.retryText) return;
+    setMessages(prev => prev.filter(m => m.id !== notice.id && m.id !== notice.retryOfId));
+    const t = notice.retryText;
+    setTimeout(() => { if (isMountedRef.current) handleSendMessage(t); }, 0);
+  };
+
+  const handleChatSignIn = async (notice: MessageItem) => {
+    if (isChatSigningIn) return;
+    setIsChatSigningIn(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      if (!result?.user || !isMountedRef.current) return;
+      const onlyNotices = messages.every(m => m.notice === 'auth' || isWelcomeMsgId(m.id));
+      if (notice.retryText) {
+        handleRetryNotice(notice);
+      } else if (onlyNotices) {
+        setMessages(prev => prev.filter(m => m.notice !== 'auth'));
+        initWelcome();
+      } else {
+        setMessages(prev => prev.filter(m => m.id !== notice.id));
+      }
+    } catch (error: any) {
+      console.error('Sara chat sign-in error:', error?.code, error?.message);
+      if (error?.code === 'auth/popup-blocked') {
+        try { await signInWithRedirect(auth, googleProvider); return; } catch (e) { console.error('signInWithRedirect fallback error:', e); }
+      }
+    } finally {
+      if (isMountedRef.current) setIsChatSigningIn(false);
+    }
+  };
+
+  const fallbackWelcome = (startedAt: number = Date.now()) => {
     if (!isMountedRef.current) return;
     const text = isRtl
       ? 'أهلاً بك! أنا سارة 🌸 جاهز نبدأ نتعلم إنجليزي اليوم؟'
@@ -1252,9 +1328,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       actions: [
         { type: 'open_section', sectionId: 'grammar-academy' }
       ],
-      timestamp: Date.now()
+      timestamp: startedAt
     };
-    setMessages([welcomeMsg]);
+    setMessages(prev => sortByTime([welcomeMsg, ...prev.filter(m => !isWelcomeMsgId(m.id) && m.notice !== 'auth')]));
     setActiveBoard(welcomeMsg.board || null);
     if (voiceEnabled && isMountedRef.current) {
       playSaraVoice(text);
@@ -1263,9 +1339,17 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   const initWelcome = async () => {
     if (!isMountedRef.current) return;
+    const startedAt = Date.now();
     setLoading(true);
     isThinkingRef.current = true;
     try {
+      const idToken = await getChatIdToken();
+      if (!isMountedRef.current) return;
+      if (!idToken) {
+        // No Firebase session (e.g. cached local session on a tablet): say so instead of staying silent.
+        setMessages(prev => sortByTime([{ ...buildAuthNotice(), timestamp: startedAt }, ...prev.filter(m => !isWelcomeMsgId(m.id) && m.notice !== 'auth')]));
+        return;
+      }
       const snapshot = {
         name: profile.displayName,
         level: (profile as any).level || tutorMemory.level || 'A1',
@@ -1284,7 +1368,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         crossSessionHook: tutorMemory.crossSessionHook || ''
       };
 
-      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
       const res = await fetch('/api/sara/chat', {
         method: 'POST',
         headers: {
@@ -1312,9 +1395,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           text: conciseGreeting,
           board: data.board,
           actions: data.actions,
-          timestamp: Date.now()
+          timestamp: startedAt
         };
-        setMessages([welcomeMsg]);
+        setMessages(prev => sortByTime([welcomeMsg, ...prev.filter(m => !isWelcomeMsgId(m.id) && m.notice !== 'auth')]));
         if (data.board) {
           setActiveBoard(data.board);
           if (data.board.openWhiteboard) {
@@ -1327,13 +1410,15 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         if (data.memory) {
           syncMemoryToFirestore(data.memory, data.sessionDone, data.board?.title || 'Daily Session');
         }
+      } else if (res.status === 401) {
+        setMessages(prev => sortByTime([{ ...buildAuthNotice(), timestamp: startedAt }, ...prev.filter(m => !isWelcomeMsgId(m.id) && m.notice !== 'auth')]));
       } else {
-        fallbackWelcome();
+        fallbackWelcome(startedAt);
       }
     } catch (e) {
       console.warn('Welcome call error:', e);
       if (isMountedRef.current) {
-        fallbackWelcome();
+        fallbackWelcome(startedAt);
       }
     } finally {
       if (isMountedRef.current) {
@@ -1343,69 +1428,93 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     }
   };
 
-  // Restore chat on mount (LocalStorage first, then Firestore) or initialize fresh
+  /** Save a previous live chat into the archive (same stores as the manual archive) without touching the live view. */
+  const archivePriorChatSilently = (prior: MessageItem[], board: SaraBoardData | null) => {
+    const clean = (prior || []).filter(m => m && typeof m.text === 'string' && !m.notice);
+    if (!clean.some(m => m.role === 'user' && m.text.trim())) return; // greetings only: nothing worth archiving
+    const now = new Date();
+    const firstUser = clean.find(m => m.role === 'user' && m.text.trim());
+    const snippet = (firstUser?.text || '').replace(/[*#_`]/g, '').trim().slice(0, 140);
+    const sessionData = buildSaraSessionArchiveDoc({
+      date: now.toLocaleDateString(isRtl ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      dateYmd: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+      archivedAt: now.toISOString(),
+      lessonTitle: null,
+      lessonName: null,
+      snippet,
+      messages: sortByTime(clean),
+      activeBoard: board,
+      status: 'auto_archived_on_open'
+    });
+    const targetUid = auth.currentUser?.uid || profile.uid;
+    const newLocalDoc = { id: `sess_auto_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`, ...sessionData, createdAt: now.toISOString() };
+    const keysToSave = Array.from(new Set([
+      `sara_archived_sessions_${profile.uid || 'guest'}`,
+      targetUid ? `sara_archived_sessions_${targetUid}` : null,
+      'sara_archived_sessions_global'
+    ].filter(Boolean))) as string[];
+    keysToSave.forEach(k => {
+      try {
+        const existing: any[] = JSON.parse(localStorage.getItem(k) || '[]');
+        existing.unshift(newLocalDoc);
+        localStorage.setItem(k, JSON.stringify(existing.slice(0, 100)));
+      } catch (e) {
+        console.warn(`LocalStorage auto-archive error for ${k}:`, e);
+      }
+    });
+    setArchivedSessions(prev => [newLocalDoc, ...prev.filter(x => x.id !== newLocalDoc.id)]);
+    if (targetUid && !targetUid.startsWith('sim_') && auth.currentUser) {
+      addDoc(collection(db, 'users', targetUid, 'saraSessions'), { ...sessionData, createdAt: serverTimestamp() })
+        .catch(err => console.debug('Firestore auto-archive note:', err));
+    }
+  };
+
+  // Open chat: archive any previous live chat silently, then start fresh with one greeting
   useEffect(() => {
     isMountedRef.current = true;
 
     const restoreConversation = async () => {
-      let restored = false;
+      // Every opening starts clean: one fresh greeting. Any previous live chat is archived
+      // silently (local + cloud) so nothing the student wrote is lost, but it is not piled into the live view.
       const key = SARA_STORAGE_KEY(profile.uid);
-
-      // 1. Check local storage first (instant, works offline if internet is disconnected!)
+      const priors: { messages: MessageItem[]; activeBoard?: SaraBoardData | null }[] = [];
+      let restoredPlacement: any = null;
       try {
         const localRaw = localStorage.getItem(key);
         if (localRaw) {
           const parsed = JSON.parse(localRaw);
           if (parsed && Array.isArray(parsed.messages) && parsed.messages.length > 0) {
-            setMessages(parsed.messages);
-            if (parsed.activeBoard) setActiveBoard(parsed.activeBoard);
-            if (parsed.placementState) setPlacementState({ ...parsed.placementState, isActive: false });
-            hasInitializedWelcomeRef.current = true;
-            restored = true;
-            setIsRestoredSession(true);
-            setIsSavedBadgeVisible(true);
-            setTimeout(() => {
-              if (isMountedRef.current) setIsSavedBadgeVisible(false);
-            }, 3000);
+            priors.push({ messages: parsed.messages, activeBoard: parsed.activeBoard || null });
+            if (parsed.placementState) restoredPlacement = parsed.placementState;
           }
         }
       } catch (err) {
         console.warn('Error reading chat from localStorage:', err);
       }
-
-      // 2. If no local chat, check Firestore cloud backup
-      if (!restored && profile.uid) {
+      try { await (auth as any).authStateReady?.(); } catch { /* ignore */ }
+      if (profile.uid) {
         try {
           const chatDoc = await getDoc(doc(db, 'users', profile.uid, 'saraChat', 'current'));
-          if (chatDoc.exists()) {
-            const data = chatDoc.data();
-            if (data && Array.isArray(data.messages) && data.messages.length > 0) {
-              setMessages(data.messages);
-              if (data.activeBoard) setActiveBoard(data.activeBoard);
-              if (data.placementState) setPlacementState({ ...data.placementState, isActive: false });
-              hasInitializedWelcomeRef.current = true;
-              restored = true;
-              setIsRestoredSession(true);
-              // Save to localStorage for offline readiness
-              localStorage.setItem(key, JSON.stringify({
-                messages: data.messages,
-                activeBoard: data.activeBoard,
-                placementState: data.placementState,
-                savedAt: Date.now()
-              }));
-              setIsSavedBadgeVisible(true);
-              setTimeout(() => {
-                if (isMountedRef.current) setIsSavedBadgeVisible(false);
-              }, 3000);
-            }
+          const data = chatDoc.exists() ? chatDoc.data() : null;
+          if (data && Array.isArray(data.messages) && data.messages.length > 0) {
+            const lastCloud = data.messages[data.messages.length - 1];
+            const dup = priors.some(pr => {
+              const last = pr.messages[pr.messages.length - 1];
+              return last && lastCloud && last.id === lastCloud.id && pr.messages.length === data.messages.length;
+            });
+            if (!dup) priors.push({ messages: data.messages, activeBoard: data.activeBoard || null });
+            if (!restoredPlacement && data.placementState) restoredPlacement = data.placementState;
           }
         } catch (dbErr) {
           console.warn('Error loading chat from Firestore:', dbErr);
         }
       }
+      if (!isMountedRef.current) return;
+      if (restoredPlacement) setPlacementState({ ...restoredPlacement, isActive: false });
+      priors.forEach(pr => archivePriorChatSilently(pr.messages, pr.activeBoard || null));
+      try { localStorage.removeItem(key); } catch { /* ignore */ }
 
-      // 3. If no existing chat found anywhere, start fresh welcome session
-      if (!restored && !hasInitializedWelcomeRef.current) {
+      if (!hasInitializedWelcomeRef.current) {
         hasInitializedWelcomeRef.current = true;
         initWelcome();
       }
@@ -2775,14 +2884,22 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         crossSessionHook: tutorMemory.crossSessionHook || ''
       };
 
-      // Compact history formatted as role + text (last 12)
-      const compactHistory = newHistory.slice(-12).map(m => ({
+      // Compact history formatted as role + text (last 12); local status bubbles are never sent
+      const compactHistory = newHistory.filter(m => !m.notice).slice(-12).map(m => ({
         role: m.role === 'sara' ? 'model' : 'user',
         text: m.text
       }));
 
-      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : '';
+      const idToken = await getChatIdToken();
+      if (!isMountedRef.current) return;
+      if (!idToken) {
+        setMessages(prev => [...prev.filter(m => m.notice !== 'auth'), buildAuthNotice(text, userMsg.id)]);
+        return;
+      }
+      const chatAbort = new AbortController();
+      const chatAbortTimer = setTimeout(() => chatAbort.abort(), 60000);
       const response = await fetch('/api/sara/chat', {
+        signal: chatAbort.signal,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2814,14 +2931,25 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         })
       });
 
+      clearTimeout(chatAbortTimer);
+      if (!isMountedRef.current) return;
+      if (response.status === 401) {
+        setMessages(prev => [...prev.filter(m => m.notice !== 'auth'), buildAuthNotice(text, userMsg.id)]);
+        return;
+      }
+      if (response.status === 429) {
+        setMessages(prev => [...prev, buildRetryNotice('rate', text, userMsg.id)]);
+        return;
+      }
       if (!response.ok) {
         throw new Error(`Chat error status: ${response.status}`);
       }
 
-      if (!isMountedRef.current) return;
-
       const data: SaraChatResponse = await response.json();
       if (!isMountedRef.current) return;
+      if (!data || typeof data.reply !== 'string' || !data.reply.trim()) {
+        throw new Error('Chat returned an empty reply');
+      }
 
       const saraMsg: MessageItem = {
         id: `msg_sara_${Date.now()}`,
@@ -2878,17 +3006,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       if (!isMountedRef.current) return;
       console.error('Sara chat error:', err);
       const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
-      const fallbackMsg: MessageItem = {
-        id: `msg_sara_err_${Date.now()}`,
-        role: 'sara',
-        text: isRtl 
-          ? (isOffline 
-              ? '📶 يبدو أن اتصال الإنترنت ضعيف أو منقطع مؤقتاً. لا تقلق، محادثتك بالكامل محفوظة بأمان على جهازك وستتمكن من إكمالها فور عودة الاتصال! 💾' 
-              : 'أعتذر منك يا بطل! واجهت مشكلة بسيطة في الاتصال، ومحادثتك محفوظة بأمان. تفضل بالمحاولة مرة ثانية 🌟')
-          : 'Network connection issue. Your conversation is safely stored offline and ready to continue anytime! 💾',
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, fallbackMsg]);
+      setMessages(prev => [...prev, buildRetryNotice(isOffline ? 'offline' : 'error', text, userMsg.id)]);
     } finally {
       if (isMountedRef.current) {
         setLoading(false);
@@ -5605,7 +5723,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           {/* Active Placement Test Step Indicator */}
           
 
-          {messages.map((msg) => {
+          {sortByTime(messages).map((msg) => {
             const isSara = msg.role === 'sara';
 
             return (
@@ -5631,6 +5749,27 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   <p className="leading-relaxed whitespace-pre-wrap font-medium">
                     {msg.text}
                   </p>
+
+                  {isSara && msg.notice === 'auth' && (
+                    <button
+                      onClick={() => handleChatSignIn(msg)}
+                      disabled={isChatSigningIn}
+                      className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#002147] hover:bg-[#0a2d5c] text-white font-black text-xs shadow-sm border border-[#C49E3A] transition-all cursor-pointer active:scale-95 disabled:opacity-60"
+                    >
+                      <span>🔐</span>
+                      <span>{isChatSigningIn ? (isRtl ? 'جارٍ تسجيل الدخول...' : 'Signing in...') : (isRtl ? 'سجّل الدخول عبر Google' : 'Sign in with Google')}</span>
+                    </button>
+                  )}
+                  {isSara && msg.notice === 'retry' && msg.retryText && (
+                    <button
+                      onClick={() => handleRetryNotice(msg)}
+                      disabled={loading}
+                      className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#C49E3A] hover:bg-[#d4b04f] text-[#002147] font-black text-xs shadow-sm transition-all cursor-pointer active:scale-95 disabled:opacity-60"
+                    >
+                      <span>↻</span>
+                      <span>{isRtl ? 'أعد المحاولة' : 'Retry'}</span>
+                    </button>
+                  )}
 
                   {/* 📐 Smart Whiteboard Card inside Message Bubble */}
                   {false && isSara && msg.board && (
