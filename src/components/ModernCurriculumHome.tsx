@@ -1,741 +1,731 @@
-
-import React from 'react';
-import { motion } from 'motion/react';
-import { 
-  BookOpen, 
-  ChevronRight, 
-  Sparkles, 
-  GraduationCap,
-  ArrowLeft,
-  Trophy,
-  Star,
-  Zap,
-  MessageSquare,
-  PenTool
+import React, { useState, useMemo } from 'react';
+import {
+  Search,
+  Lock,
+  Sparkles,
+  RotateCcw,
 } from 'lucide-react';
+import { useT } from '../lib/explainLang';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
+
+interface ModernCurriculumHomeProps {
+  lang: 'en' | 'ar';
+  onBack: () => void;
+  onNavigate: (view: any, level?: any) => void;
+}
 
 interface CurriculumModule {
   id: string;
   titleEn: string;
   titleAr: string;
-  descriptionEn: string;
-  descriptionAr: string;
-  color: string;
-  lightColor: string;
-  icon: any;
+  descEn: string;
+  descAr: string;
+  category: 'reading' | 'grammar' | 'conversation' | 'writing' | 'expression';
+  level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
+  unitsCount: number;
+  badgeEn: string;
+  badgeAr: string;
   targetView: string;
-  level: string;
 }
 
 const MODERN_MODULES: CurriculumModule[] = [
+  // READING
   {
-    id: 'reading-a1',
-    titleEn: 'Elite Reading A1',
-    titleAr: 'منهج القراءة المطور A1',
-    descriptionEn: 'Advanced literacy foundation with visual semantic mapping.',
-    descriptionAr: 'تأسيس لغوي متقدم يعتمد على الخرائط الدلالية المرئية وكشف الرموز.',
-    color: 'bg-emerald-600',
-    lightColor: 'bg-emerald-50',
-    icon: BookOpen,
+    id: 'reading_a1',
+    titleEn: 'Reading Companion (Level A1)',
+    titleAr: 'رفيق القراءة (المستوى التأسيسي A1)',
+    descEn: 'Master foundational phonics, sight words, and simple sentence decoding with interactive audio support.',
+    descAr: 'أتقن الصوتيات التأسيسية، الكلمات البصرية، وفك شفرات الجمل البسيطة مع دعم صوتي تفاعلي.',
+    category: 'reading',
+    level: 'A1',
+    unitsCount: 5,
+    badgeEn: 'Foundational',
+    badgeAr: 'تأسيسي',
     targetView: 'reading-curriculum',
-    level: 'A1'
   },
   {
-    id: 'reading-a2',
-    titleEn: 'Elite Reading A2',
-    titleAr: 'منهج القراءة المطور A2',
-    descriptionEn: 'Narrative expansion and communicative social literacy.',
-    descriptionAr: 'التوسع في السرد والثقافة الاجتماعية التواصلية.',
-    color: 'bg-cyan-600',
-    lightColor: 'bg-cyan-50',
-    icon: BookOpen,
+    id: 'reading_a2',
+    titleEn: 'Reading Companion (Level A2)',
+    titleAr: 'رفيق القراءة (المستوى المبتدئ المتقدم A2)',
+    descEn: 'Explore workplace culture, trade dialogues, and narrative sequences with guided comprehension.',
+    descAr: 'استكشف ثقافة العمل، الحوارات التجارية، والتسلسل القصصي مع تمارين استيعاب موجهة.',
+    category: 'reading',
+    level: 'A2',
+    unitsCount: 5,
+    badgeEn: 'Elementary',
+    badgeAr: 'مبتدئ متقدم',
     targetView: 'reading-curriculum',
-    level: 'A2'
   },
   {
-    id: 'reading-b1',
-    titleEn: 'Elite Reading B1',
-    titleAr: 'منهج القراءة المطور B1',
-    descriptionEn: 'Functional independence and analytical comprehension.',
-    descriptionAr: 'الاستقلالية الوظيفية والفهم التحليلي المتقدم.',
-    color: 'bg-indigo-600',
-    lightColor: 'bg-indigo-50',
-    icon: BookOpen,
+    id: 'reading_b1',
+    titleEn: 'Reading Companion (Level B1)',
+    titleAr: 'رفيق القراءة (المستوى المتوسط B1)',
+    descEn: 'Analyze subtextual inference, fact vs. opinion, cultural heritage, and modern journalism.',
+    descAr: 'حلل الاستنتاجات الضمنية، الحقيقة مقابل الرأي، التراث الثقافي، والصحافة الحديثة.',
+    category: 'reading',
+    level: 'B1',
+    unitsCount: 5,
+    badgeEn: 'Intermediate',
+    badgeAr: 'متوسط',
     targetView: 'reading-curriculum',
-    level: 'B1'
   },
   {
-    id: 'reading-b2',
-    titleEn: 'Elite Reading B2',
-    titleAr: 'منهج القراءة المطور B2',
-    descriptionEn: 'Critical analysis, logic, and expert-level reasoning.',
-    descriptionAr: 'التحليل النقدي والمنطق والاستنتاج بمستوى الخبراء.',
-    color: 'bg-blue-600',
-    lightColor: 'bg-blue-50',
-    icon: BookOpen,
+    id: 'reading_b2',
+    titleEn: 'Reading Companion (Level B2)',
+    titleAr: 'رفيق القراءة (المستوى فوق المتوسط B2)',
+    descEn: 'Deconstruct rhetorical structures, executive reports, critical perspectives, and persuasion.',
+    descAr: 'فكك البنى البلاغية، التقارير التنفيذية، وجهات النظر النقدية، وأساليب الإقناع.',
+    category: 'reading',
+    level: 'B2',
+    unitsCount: 5,
+    badgeEn: 'Upper-Intermediate',
+    badgeAr: 'فوق المتوسط',
     targetView: 'reading-curriculum',
-    level: 'B2'
   },
   {
-    id: 'reading-c1',
-    titleEn: 'Elite Reading C1',
-    titleAr: 'منهج القراءة المطور C1',
-    descriptionEn: 'Strategic literacy and complex technical synthesis.',
-    descriptionAr: 'الطلاقة الاستراتيجية والتركيب التقني والخطاب المعقد.',
-    color: 'bg-purple-600',
-    lightColor: 'bg-purple-50',
-    icon: BookOpen,
+    id: 'reading_c1',
+    titleEn: 'Reading Companion (Level C1)',
+    titleAr: 'رفيق القراءة (المستوى المتقدم C1)',
+    descEn: 'Engage with academic abstracts, legal texts, philosophical inquiry, and technical innovation.',
+    descAr: 'تفاعل مع الملخصات الأكاديمية، النصوص القانونية، الفكر الفلسفي، والابتكار التقني.',
+    category: 'reading',
+    level: 'C1',
+    unitsCount: 5,
+    badgeEn: 'Advanced',
+    badgeAr: 'متقدم',
     targetView: 'reading-curriculum',
-    level: 'C1'
   },
   {
-    id: 'reading-c2',
-    titleEn: 'Elite Reading C2',
-    titleAr: 'منهج القراءة المطور C2',
-    descriptionEn: 'Mastery, nuance, and philosophical expert discourse.',
-    descriptionAr: 'الإتقان والبراعة والخطاب الفلسفي المعمق.',
-    color: 'bg-slate-900',
-    lightColor: 'bg-slate-50',
-    icon: BookOpen,
+    id: 'reading_c2',
+    titleEn: 'Reading Companion (Level C2)',
+    titleAr: 'رفيق القراءة (مستوى الإتقان C2)',
+    descEn: 'Master etymological nuances, cross-disciplinary synthesis, and classical literary critique.',
+    descAr: 'أتقن الدقائق الاشتقاقية، التركيب المعرفي متعدد التخصصات، والنقد الأدبي الكلاسيكي.',
+    category: 'reading',
+    level: 'C2',
+    unitsCount: 5,
+    badgeEn: 'Mastery',
+    badgeAr: 'إتقان تام',
     targetView: 'reading-curriculum',
-    level: 'C2'
   },
+
+  // GRAMMAR
   {
-    id: 'grammar-a1',
-    titleEn: 'Elite Grammar A1',
-    titleAr: 'منهج القواعد المطور A1',
-    descriptionEn: 'Linguistic scaffolding and the syntax of existence.',
-    descriptionAr: 'السقالات اللغوية وبناء جمل الوجود الأساسية.',
-    color: 'bg-emerald-700',
-    lightColor: 'bg-emerald-50',
-    icon: Zap,
+    id: 'grammar_a1',
+    titleEn: 'Grammar Companion (Level A1)',
+    titleAr: 'رفيق القواعد (المستوى التأسيسي A1)',
+    descEn: 'Build rock-solid sentences using parts of speech, present simple, plurals, and articles.',
+    descAr: 'ابنِ جملاً متينة باستخدام أقسام الكلام، المضارع البسيط، الجموع، وأدوات التعريف.',
+    category: 'grammar',
+    level: 'A1',
+    unitsCount: 5,
+    badgeEn: 'Core Rules',
+    badgeAr: 'قواعد أساسية',
     targetView: 'grammar-curriculum',
-    level: 'A1'
   },
   {
-    id: 'grammar-a2',
-    titleEn: 'Elite Grammar A2',
-    titleAr: 'منهج القواعد المطور A2',
-    descriptionEn: 'Temporal mechanics and chronological anchoring.',
-    descriptionAr: 'ميكانيكا الزمن والاستناد الزمني في الماضي والمستقبل.',
-    color: 'bg-purple-700',
-    lightColor: 'bg-purple-50',
-    icon: Zap,
+    id: 'grammar_a2',
+    titleEn: 'Grammar Companion (Level A2)',
+    titleAr: 'رفيق القواعد (المستوى المبتدئ المتقدم A2)',
+    descEn: 'Master past simple, future plans, comparative adjectives, and everyday modal verbs.',
+    descAr: 'أتقن الماضي البسيط، الخطط المستقبلية، صفات المقارنة، والأفعال الناقصة اليومية.',
+    category: 'grammar',
+    level: 'A2',
+    unitsCount: 5,
+    badgeEn: 'Essential Structure',
+    badgeAr: 'تراكيب ضرورية',
     targetView: 'grammar-curriculum',
-    level: 'A2'
   },
   {
-    id: 'grammar-b1',
-    titleEn: 'Elite Grammar B1',
-    titleAr: 'منهج القواعد المطور B1',
-    descriptionEn: 'Synergistic connections and structural flexibility.',
-    descriptionAr: 'الروابط التآزرية والحرية الهيكلية في صياغة الأفكار.',
-    color: 'bg-amber-700',
-    lightColor: 'bg-amber-50',
-    icon: Zap,
+    id: 'grammar_b1',
+    titleEn: 'Grammar Companion (Level B1)',
+    titleAr: 'رفيق القواعد (المستوى المتوسط B1)',
+    descEn: 'Conquer present perfect, relative clauses, passive voice, and conditional sentences.',
+    descAr: 'تمكّن من المضارع التام، جمل الوصل، المبني للمجهول، والجمل الشرطية.',
+    category: 'grammar',
+    level: 'B1',
+    unitsCount: 5,
+    badgeEn: 'Intermediate Logic',
+    badgeAr: 'منطق متوسط',
     targetView: 'grammar-curriculum',
-    level: 'B1'
   },
   {
-    id: 'grammar-b2',
-    titleEn: 'Elite Grammar B2',
-    titleAr: 'منهج القواعد المطور B2',
-    descriptionEn: 'Complex synthesis and the art of emphasis.',
-    descriptionAr: 'التركيب المعقد وفن التأكيد اللغوي المتقدم.',
-    color: 'bg-indigo-700',
-    lightColor: 'bg-indigo-50',
-    icon: Zap,
+    id: 'grammar_b2',
+    titleEn: 'Grammar Companion (Level B2)',
+    titleAr: 'رفيق القواعد (المستوى فوق المتوسط B2)',
+    descEn: 'Command narrative tenses, mixed conditionals, reported speech, and advanced passives.',
+    descAr: 'تحكم في أزمنة السرد، الشرطيات المركبة، الكلام المنقول، والمبني للمجهول المتقدم.',
+    category: 'grammar',
+    level: 'B2',
+    unitsCount: 5,
+    badgeEn: 'Fluency Syntax',
+    badgeAr: 'نحو الطلاقة',
     targetView: 'grammar-curriculum',
-    level: 'B2'
   },
   {
-    id: 'grammar-c1',
-    titleEn: 'Elite Grammar C1',
-    titleAr: 'منهج القواعد المطور C1',
-    descriptionEn: 'Syntactic mastery and professional linguistic edge.',
-    descriptionAr: 'الإتقان النحوي والبراعة اللغوية الاحترافية.',
-    color: 'bg-slate-900',
-    lightColor: 'bg-slate-50',
-    icon: Zap,
+    id: 'grammar_c1',
+    titleEn: 'Grammar Companion (Level C1)',
+    titleAr: 'رفيق القواعد (المستوى المتقدم C1)',
+    descEn: 'Elevate your style with negative inversion, cleft sentences, participle clauses, and subjunctive.',
+    descAr: 'ارتقِ بأسلوبك عبر القلب النحوي، الجمل المنقسمة، عبارات اسم الفاعل، وصيغة الشرط والالتزام.',
+    category: 'grammar',
+    level: 'C1',
+    unitsCount: 5,
+    badgeEn: 'Academic Syntax',
+    badgeAr: 'نحو أكاديمي',
     targetView: 'grammar-curriculum',
-    level: 'C1'
   },
   {
-    id: 'grammar-c2',
-    titleEn: 'Elite Grammar C2',
-    titleAr: 'منهج القواعد المطور C2',
-    descriptionEn: 'Philosophical precision and fluid expert discourse.',
-    descriptionAr: 'الدقة الفلسفية والسيولة اللغوية بمستوى الخبراء.',
-    color: 'bg-zinc-950',
-    lightColor: 'bg-zinc-50',
-    icon: Zap,
+    id: 'grammar_c2',
+    titleEn: 'Grammar Companion (Level C2)',
+    titleAr: 'رفيق القواعد (مستوى الإتقان C2)',
+    descEn: 'Achieve native-like precision with stylistic inversion, nominalization, and register shifts.',
+    descAr: 'حقق دقة المتحدث الأصلي عبر القلب البلاغي، المصدرية الأكاديمية، والتحول المقامي.',
+    category: 'grammar',
+    level: 'C2',
+    unitsCount: 5,
+    badgeEn: 'Native Precision',
+    badgeAr: 'دقة احترافية',
     targetView: 'grammar-curriculum',
-    level: 'C2'
   },
+
+  // CONVERSATION
   {
-    id: 'conversation-a1',
-    titleEn: 'Elite Conversation A1',
-    titleAr: 'منهج المحادثة المطور A1',
-    descriptionEn: 'Linguistic scaffolding and social architecture.',
-    descriptionAr: 'السقالات اللغوية والهندسة الاجتماعية للحوار.',
-    color: 'bg-emerald-700',
-    lightColor: 'bg-emerald-50',
-    icon: MessageSquare,
+    id: 'conv_a1',
+    titleEn: 'Conversation Companion (Level A1)',
+    titleAr: 'رفيق المحادثة (المستوى التأسيسي A1)',
+    descEn: 'Speak confidently in daily greetings, family introductions, cafes, shopping, and routines.',
+    descAr: 'تحدث بثقة في التحيات اليومية، التعريف بالعائلة، المقاهي، التسوق، والروتين اليومي.',
+    category: 'conversation',
+    level: 'A1',
+    unitsCount: 5,
+    badgeEn: 'Daily Speech',
+    badgeAr: 'تحدث يومي',
     targetView: 'conversation-curriculum',
-    level: 'A1'
   },
   {
-    id: 'conversation-a2',
-    titleEn: 'Elite Conversation A2',
-    titleAr: 'منهج المحادثة المطور A2',
-    descriptionEn: 'Daily dynamics and transactional fluency.',
-    descriptionAr: 'الديناميكيات اليومية والطلاقة في المعاملات.',
-    color: 'bg-purple-700',
-    lightColor: 'bg-purple-50',
-    icon: MessageSquare,
+    id: 'conv_a2',
+    titleEn: 'Conversation Companion (Level A2)',
+    titleAr: 'رفيق المحادثة (المستوى المبتدئ المتقدم A2)',
+    descEn: 'Make social plans, describe people, navigate travel airports, and discuss health & hobbies.',
+    descAr: 'رتب خططاً اجتماعية، صِف الأشخاص، تحدث في المطارات والسفر، وناقش الصحة والهوايات.',
+    category: 'conversation',
+    level: 'A2',
+    unitsCount: 5,
+    badgeEn: 'Social Fluency',
+    badgeAr: 'طلاقة اجتماعية',
     targetView: 'conversation-curriculum',
-    level: 'A2'
   },
   {
-    id: 'conversation-b1',
-    titleEn: 'Elite Conversation B1',
-    titleAr: 'منهج المحادثة المطور B1',
-    descriptionEn: 'Social synergy and flexible discursive reasoning.',
-    descriptionAr: 'التآزر الاجتماعي والمنطق النقاشي المرن.',
-    color: 'bg-amber-700',
-    lightColor: 'bg-amber-50',
-    icon: MessageSquare,
+    id: 'conv_b1',
+    titleEn: 'Conversation Companion (Level B1)',
+    titleAr: 'رفيق المحادثة (المستوى المتوسط B1)',
+    descEn: 'Give structured advice, express opinions, succeed in job interviews, and share ambitions.',
+    descAr: 'قدم نصائح منظمة، عبّر عن آرائك، انجح في مقابلات العمل، وشارك طموحاتك.',
+    category: 'conversation',
+    level: 'B1',
+    unitsCount: 5,
+    badgeEn: 'Active Dialogue',
+    badgeAr: 'حوار فعّال',
     targetView: 'conversation-curriculum',
-    level: 'B1'
   },
   {
-    id: 'conversation-b2',
-    titleEn: 'Elite Conversation B2',
-    titleAr: 'منهج المحادثة المطور B2',
-    descriptionEn: 'Strategic discourse and the art of persuasion.',
-    descriptionAr: 'الخطاب الاستراتيجي وفن الإقناع المتقدم.',
-    color: 'bg-indigo-700',
-    lightColor: 'bg-indigo-50',
-    icon: MessageSquare,
+    id: 'conv_b2',
+    titleEn: 'Conversation Companion (Level B2)',
+    titleAr: 'رفيق المحادثة (المستوى فوق المتوسط B2)',
+    descEn: 'Lead business meetings, debate complex topics, resolve conflicts, and analyze media news.',
+    descAr: 'قُد اجتماعات العمل، ناقش القضايا المعقدة، حل المشكلات، وحلل الأخبار الإعلامية.',
+    category: 'conversation',
+    level: 'B2',
+    unitsCount: 5,
+    badgeEn: 'Professional Talk',
+    badgeAr: 'تحدث مهني',
     targetView: 'conversation-curriculum',
-    level: 'B2'
   },
   {
-    id: 'conversation-c1',
-    titleEn: 'Elite Conversation C1',
-    titleAr: 'منهج المحادثة المطور C1',
-    descriptionEn: 'Philosophical depth and analytical speaking edge.',
-    descriptionAr: 'العمق الفلسفي والبراعة التحليلية في التحدث.',
-    color: 'bg-slate-900',
-    lightColor: 'bg-slate-50',
-    icon: MessageSquare,
+    id: 'conv_c1',
+    titleEn: 'Conversation Companion (Level C1)',
+    titleAr: 'رفيق المحادثة (المستوى المتقدم C1)',
+    descEn: 'Deliver persuasive presentations, negotiate strategically, and discuss abstract concepts.',
+    descAr: 'قدم عروضاً مقنعة، تفاوض بذكاء استراتيجي، وناقش المفاهيم المجردة بطلاقة.',
+    category: 'conversation',
+    level: 'C1',
+    unitsCount: 5,
+    badgeEn: 'Executive Oratory',
+    badgeAr: 'خطابة تنفيذية',
     targetView: 'conversation-curriculum',
-    level: 'C1'
   },
   {
-    id: 'conversation-c2',
-    titleEn: 'Elite Conversation C2',
-    titleAr: 'منهج المحادثة المطور C2',
-    descriptionEn: 'Rhetorical mastery and cultural resonance.',
-    descriptionAr: 'الإتقان البلاغي والرنين الثقافي بمستوى الخبراء.',
-    color: 'bg-zinc-950',
-    lightColor: 'bg-zinc-50',
-    icon: MessageSquare,
+    id: 'conv_c2',
+    titleEn: 'Conversation Companion (Level C2)',
+    titleAr: 'رفيق المحادثة (مستوى الإتقان C2)',
+    descEn: 'Command idiomatic precision, subtle humour, high-stakes diplomacy, and philosophical debate.',
+    descAr: 'امتلك الدقة الاصطلاحية، الدعابة الذكية، الدبلوماسية الرفيعة، والمناظرة الفلسفية.',
+    category: 'conversation',
+    level: 'C2',
+    unitsCount: 5,
+    badgeEn: 'Rhetorical Mastery',
+    badgeAr: 'براعة بلاغية',
     targetView: 'conversation-curriculum',
-    level: 'C2'
   },
+
+  // WRITING
   {
-    id: 'writing-a1',
-    titleEn: 'Elite Writing A1',
-    titleAr: 'منهج الكتابة المطور A1',
-    descriptionEn: 'Syntactic foundations and sentence architecture.',
-    descriptionAr: 'الأساسيات النحوية وهندسة الجملة.',
-    color: 'bg-emerald-700',
-    lightColor: 'bg-emerald-50',
-    icon: PenTool,
+    id: 'writing_a1',
+    titleEn: 'Writing Companion (Level A1)',
+    titleAr: 'رفيق الكتابة (المستوى التأسيسي A1)',
+    descEn: 'Master the alphabet, basic sentence building, punctuation rules, and personal notes.',
+    descAr: 'أتقن الأبجدية، بناء الجمل الأساسية، علامات الترقيم، وكتابة الملاحظات الشخصية.',
+    category: 'writing',
+    level: 'A1',
+    unitsCount: 5,
+    badgeEn: 'Foundational Writing',
+    badgeAr: 'كتابة تأسيسية',
     targetView: 'writing-curriculum',
-    level: 'A1'
   },
   {
-    id: 'writing-a2',
-    titleEn: 'Elite Writing A2',
-    titleAr: 'منهج الكتابة المطور A2',
-    descriptionEn: 'Narrative structure and descriptive depth.',
-    descriptionAr: 'الهيكل السردي والعمق الوصفي في التعبير.',
-    color: 'bg-purple-700',
-    lightColor: 'bg-purple-50',
-    icon: PenTool,
+    id: 'writing_a2',
+    titleEn: 'Writing Companion (Level A2)',
+    titleAr: 'رفيق الكتابة (المستوى المبتدئ المتقدم A2)',
+    descEn: 'Use linking words, describe your day, write social posts, and compose short emails.',
+    descAr: 'استخدم أدوات الربط، صِف يومك، اكتب منشورات قصيرة، وصِغ رسائل بريد إلكتروني مبسطة.',
+    category: 'writing',
+    level: 'A2',
+    unitsCount: 5,
+    badgeEn: 'Practical Writing',
+    badgeAr: 'كتابة عملية',
     targetView: 'writing-curriculum',
-    level: 'A2'
   },
   {
-    id: 'writing-b1',
-    titleEn: 'Elite Writing B1',
-    titleAr: 'منهج الكتابة المطور B1',
-    descriptionEn: 'Complex synthesis and technical clarity.',
-    descriptionAr: 'التركيب المعقد والوضوح الفني في الكتابة.',
-    color: 'bg-amber-700',
-    lightColor: 'bg-amber-50',
-    icon: PenTool,
+    id: 'writing_b1',
+    titleEn: 'Writing Companion (Level B1)',
+    titleAr: 'رفيق الكتابة (المستوى المتوسط B1)',
+    descEn: 'Structure cohesive paragraphs, craft engaging stories, and write formal emails.',
+    descAr: 'ابنِ فقرات متماسكة، صِغ قصصاً مشوقة، واكتب رسائل بريد إلكتروني رسمية.',
+    category: 'writing',
+    level: 'B1',
+    unitsCount: 5,
+    badgeEn: 'Structured Composition',
+    badgeAr: 'إنشاء منظم',
     targetView: 'writing-curriculum',
-    level: 'B1'
   },
   {
-    id: 'writing-b2',
-    titleEn: 'Elite Writing B2',
-    titleAr: 'منهج الكتابة المطور B2',
-    descriptionEn: 'Persuasive architecture and argumentative logic.',
-    descriptionAr: 'هندسة الإقناع والمنطق الجدلي في المقالات.',
-    color: 'bg-indigo-700',
-    lightColor: 'bg-indigo-50',
-    icon: PenTool,
+    id: 'writing_b2',
+    titleEn: 'Writing Companion (Level B2)',
+    titleAr: 'رفيق الكتابة (المستوى فوق المتوسط B2)',
+    descEn: 'Write analytical essays, executive summaries, critical reviews, and smooth transitions.',
+    descAr: 'اكتب مقالات تحليلية، ملخصات تنفيذية، مراجعات نقدية، وانتقالات سلسة بين الأفكار.',
+    category: 'writing',
+    level: 'B2',
+    unitsCount: 5,
+    badgeEn: 'Essay & Reports',
+    badgeAr: 'مقالات وتقارير',
     targetView: 'writing-curriculum',
-    level: 'B2'
   },
   {
-    id: 'writing-c1',
-    titleEn: 'Elite Writing C1',
-    titleAr: 'منهج الكتابة المطور C1',
-    descriptionEn: 'Professional synthesis and academic precision.',
-    descriptionAr: 'التركيب المهني والدقة الأكاديمية الاحترافية.',
-    color: 'bg-slate-900',
-    lightColor: 'bg-slate-50',
-    icon: PenTool,
+    id: 'writing_c1',
+    titleEn: 'Writing Companion (Level C1)',
+    titleAr: 'رفيق الكتابة (المستوى المتقدم C1)',
+    descEn: 'Design academic theses, professional proposals, and nuanced critical analyses.',
+    descAr: 'صمم أطروحات أكاديمية، مقترحات مهنية، وتحليلات نقدية دقيقة الأسلوب.',
+    category: 'writing',
+    level: 'C1',
+    unitsCount: 5,
+    badgeEn: 'Academic & Corporate',
+    badgeAr: 'أكاديمي ومؤسسي',
     targetView: 'writing-curriculum',
-    level: 'C1'
   },
   {
-    id: 'writing-c2',
-    titleEn: 'Elite Writing C2',
-    titleAr: 'منهج الكتابة المطور C2',
-    descriptionEn: 'Literary mastery and unique authorial voice.',
-    descriptionAr: 'الإتقان الأدبي والصوت الكتابي الفريد والبراعة.',
-    color: 'bg-zinc-950',
-    lightColor: 'bg-zinc-50',
-    icon: PenTool,
+    id: 'writing_c2',
+    titleEn: 'Writing Companion (Level C2)',
+    titleAr: 'رفيق الكتابة (مستوى الإتقان C2)',
+    descEn: 'Achieve stylistic mastery, research logic, and syntactic precision in complex discourse.',
+    descAr: 'حقق السيادة الأسلوبية، المنطق البحثي، والدقة التركيبية في الخطابات المعقدة.',
+    category: 'writing',
+    level: 'C2',
+    unitsCount: 5,
+    badgeEn: 'Authorial Mastery',
+    badgeAr: 'إتقان تأليفي',
     targetView: 'writing-curriculum',
-    level: 'C2'
+  },
+
+  // EXPRESSION
+  {
+    id: 'exp_a1',
+    titleEn: 'Expression Companion (Level A1)',
+    titleAr: 'رفيق التعبير (المستوى التأسيسي A1)',
+    descEn: 'Express feelings, family bonds, colors, daily habits, and personal likes & dislikes.',
+    descAr: 'عبّر عن المشاعر، الروابط العائلية، الألوان، العادات اليومية، وما تحبه أو تفضله.',
+    category: 'expression',
+    level: 'A1',
+    unitsCount: 5,
+    badgeEn: 'Self Expression',
+    badgeAr: 'تعبير ذاتي',
+    targetView: 'expression-curriculum',
   },
   {
-    id: 'expression-a1',
-    titleEn: 'Elite Expression A1',
-    titleAr: 'منهج التعبير المطور A1',
-    descriptionEn: 'Internalizing feelings and emotional foundations.',
-    descriptionAr: 'استيعاب المشاعر والأسس الوجدانبة للتعبير.',
-    color: 'bg-rose-700',
-    lightColor: 'bg-rose-50',
-    icon: Sparkles,
+    id: 'exp_a2',
+    titleEn: 'Expression Companion (Level A2)',
+    titleAr: 'رفيق التعبير (المستوى المبتدئ المتقدم A2)',
+    descEn: 'Share hobbies, tell personal anecdotes, give directions, and express future intentions.',
+    descAr: 'شارك هواياتك، اروِ مواقفك الشخصية، صِف الاتجاهات، وعبّر عن نواياك المستقبلية.',
+    category: 'expression',
+    level: 'A2',
+    unitsCount: 5,
+    badgeEn: 'Creative Voice',
+    badgeAr: 'صوت إبداعي',
     targetView: 'expression-curriculum',
-    level: 'A1'
   },
   {
-    id: 'expression-a2',
-    titleEn: 'Elite Expression A2',
-    titleAr: 'منهج التعبير المطور A2',
-    descriptionEn: 'Sensory painting and experiential storytelling.',
-    descriptionAr: 'الرسم الحسي والسرد التجريبي للقصص.',
-    color: 'bg-amber-700',
-    lightColor: 'bg-amber-50',
-    icon: Sparkles,
+    id: 'exp_b1',
+    titleEn: 'Expression Companion (Level B1)',
+    titleAr: 'رفيق التعبير (المستوى المتوسط B1)',
+    descEn: 'Articulate cultural experiences, reasoned opinions, life ambitions, and logical arguments.',
+    descAr: 'عبّر بوضوح عن التجارب الثقافية، الآراء المعللة، طموحات الحياة، والحجج المنطقية.',
+    category: 'expression',
+    level: 'B1',
+    unitsCount: 5,
+    badgeEn: 'Articulate Thought',
+    badgeAr: 'فكر فصيح',
     targetView: 'expression-curriculum',
-    level: 'A2'
   },
   {
-    id: 'expression-b1',
-    titleEn: 'Elite Expression B1',
-    titleAr: 'منهج التعبير المطور B1',
-    descriptionEn: 'Abstract thinking and value articulation.',
-    descriptionAr: 'التفكير المجرد وصياغة القيم الإنسانية.',
-    color: 'bg-cyan-700',
-    lightColor: 'bg-cyan-50',
-    icon: Sparkles,
+    id: 'exp_b2',
+    titleEn: 'Expression Companion (Level B2)',
+    titleAr: 'رفيق التعبير (المستوى فوق المتوسط B2)',
+    descEn: 'Engage in abstract debates, hypothetical scenarios, social issues, and environmental discourse.',
+    descAr: 'خُض نقاشات مجردة، سيناريوهات افتراضية، قضايا اجتماعية، وخطابات بيئية معمقة.',
+    category: 'expression',
+    level: 'B2',
+    unitsCount: 5,
+    badgeEn: 'Critical Expression',
+    badgeAr: 'تعبير نقدي',
     targetView: 'expression-curriculum',
-    level: 'B1'
   },
   {
-    id: 'expression-b2',
-    titleEn: 'Elite Expression B2',
-    titleAr: 'منهج التعبير المطور B2',
-    descriptionEn: 'Strategic rhetoric and leadership resonance.',
-    descriptionAr: 'البلاغة الاستراتيجية والرنين القيادي للكلمة.',
-    color: 'bg-indigo-700',
-    lightColor: 'bg-indigo-50',
-    icon: Sparkles,
+    id: 'exp_c1',
+    titleEn: 'Expression Companion (Level C1)',
+    titleAr: 'رفيق التعبير (المستوى المتقدم C1)',
+    descEn: 'Explore ethics, aesthetics, diplomatic nuance, strategic thinking, and global advocacy.',
+    descAr: 'استكشف الأخلاقيات، الجماليات، الدبلوماسية الدقيقة، التفكير الاستراتيجي، والمناصرة العالمية.',
+    category: 'expression',
+    level: 'C1',
+    unitsCount: 5,
+    badgeEn: 'High Rhetoric',
+    badgeAr: 'بيان رفيع',
     targetView: 'expression-curriculum',
-    level: 'B2'
   },
   {
-    id: 'expression-c1',
-    titleEn: 'Elite Expression C1',
-    titleAr: 'منهج التعبير المطور C1',
-    descriptionEn: 'Cultural critique and meta-analysis of society.',
-    descriptionAr: 'النقد الثقافي والتحليل العميق للمجتمع.',
-    color: 'bg-slate-900',
-    lightColor: 'bg-slate-50',
-    icon: Sparkles,
+    id: 'exp_c2',
+    titleEn: 'Expression Companion (Level C2)',
+    titleAr: 'رفيق التعبير (مستوى الإتقان C2)',
+    descEn: 'Synthesize macroeconomic audits, existential inquiry, and supreme linguistic fluidity.',
+    descAr: 'اجمع بين التحليل الكلي، التساؤل الفلسفي، والانسيابية اللغوية الفائقة.',
+    category: 'expression',
+    level: 'C2',
+    unitsCount: 5,
+    badgeEn: 'Supreme Eloquence',
+    badgeAr: 'فصاحة عليا',
     targetView: 'expression-curriculum',
-    level: 'C1'
   },
-  {
-    id: 'expression-c2',
-    titleEn: 'Elite Expression C2',
-    titleAr: 'منهج التعبير المطور C2',
-    descriptionEn: 'Universal truths and poetic intellectual mastery.',
-    descriptionAr: 'الحقائق الكونية والإتقان الفكري الشاعري.',
-    color: 'bg-black',
-    lightColor: 'bg-zinc-50',
-    icon: Sparkles,
-    targetView: 'expression-curriculum',
-    level: 'C2'
-  }
 ];
 
-export const ModernCurriculumHome = ({ lang, onBack, onNavigate }: { lang: 'en' | 'ar', onBack: () => void, onNavigate: (view: any, level?: any) => void }) => {
+const UPCOMING_LOCKED_UNITS = [
+  {
+    id: 'locked_vr',
+    en: 'Speaking Lab VR',
+    ar: 'مختبر المحادثة الافتراضي',
+    level: 'B2',
+  },
+  {
+    id: 'locked_ielts',
+    en: 'IELTS Intensive',
+    ar: 'معسكر الآيلتس المكثف',
+    level: 'C1',
+  },
+  {
+    id: 'locked_biz',
+    en: 'Business English',
+    ar: 'إنجليزية الأعمال والشركات',
+    level: 'B2',
+  },
+  {
+    id: 'locked_toefl',
+    en: 'TOEFL Prep',
+    ar: 'التحضير لاختبار التوفل',
+    level: 'C1',
+  },
+];
+
+const CATEGORY_EMOJI: Record<CurriculumModule['category'], string> = {
+  reading: '📖',
+  grammar: '📐',
+  conversation: '💬',
+  writing: '✍️',
+  expression: '🎭',
+};
+
+export const ModernCurriculumHome: React.FC<ModernCurriculumHomeProps> = ({
+  lang,
+  onNavigate,
+}) => {
+  const t = useT();
   const isRtl = lang === 'ar';
 
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedLevel, setSelectedLevel] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const categories = [
+    { id: 'all', labelEn: 'All Pathways', labelAr: 'جميع المسارات', emoji: '🏛️' },
+    { id: 'reading', labelEn: 'Reading', labelAr: 'القراءة', emoji: '📖' },
+    { id: 'grammar', labelEn: 'Grammar', labelAr: 'القواعد', emoji: '📐' },
+    { id: 'conversation', labelEn: 'Conversation', labelAr: 'المحادثة', emoji: '💬' },
+    { id: 'writing', labelEn: 'Writing', labelAr: 'الكتابة', emoji: '✍️' },
+    { id: 'expression', labelEn: 'Expression', labelAr: 'التعبير', emoji: '🎭' },
+  ];
+
+  const levels = ['ALL', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+
+  const filteredModules = useMemo(() => {
+    return MODERN_MODULES.filter((m) => {
+      const matchesCat = selectedCategory === 'all' || m.category === selectedCategory;
+      const matchesLvl = selectedLevel === 'ALL' || m.level === selectedLevel;
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        m.titleEn.toLowerCase().includes(q) ||
+        m.titleAr.toLowerCase().includes(q) ||
+        m.descEn.toLowerCase().includes(q) ||
+        m.descAr.toLowerCase().includes(q);
+      return matchesCat && matchesLvl && matchesSearch;
+    });
+  }, [selectedCategory, selectedLevel, searchQuery]);
+
+  const totalUnitsVisible = useMemo(
+    () => filteredModules.reduce((sum, m) => sum + m.unitsCount, 0),
+    [filteredModules]
+  );
+
   return (
-    <div className="flex-1 bg-[#f8fafc] min-h-screen font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 px-6 py-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center text-[#002147] transition-all active:scale-95"
-          >
-            <ArrowLeft className={isRtl ? 'rotate-180' : ''} />
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#C49E3A] text-white rounded-xl shadow-lg shadow-[#C49E3A]/20">
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <h1 className="text-lg font-black text-[#002147] leading-none uppercase tracking-tighter">
-                {isRtl ? 'المناهج المطورة' : 'Elite Curriculums'}
-              </h1>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                {isRtl ? 'الجيل القادم من التعليم' : 'Next-Gen Learning Experience'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex flex-col items-end">
-            <div className="flex items-center gap-1">
-              <Star className="text-[#C49E3A] fill-[#C49E3A]" size={12} />
-              <span className="text-xs font-black text-[#002147]">Exclusive Access</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="p-6 md:p-12 max-w-7xl mx-auto space-y-12">
-        <section className="relative overflow-hidden bg-[#002147] rounded-[3rem] p-8 md:p-16 text-white shadow-2xl">
-           <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-           <div className="relative z-10 space-y-6 max-w-3xl">
-              <div className="inline-flex items-center gap-2 bg-[#C49E3A] px-3 py-1 rounded-full">
-                 <Sparkles size={12} className="text-[#002147]" />
-                 <span className="text-[10px] font-black text-[#002147] uppercase tracking-widest leading-none">Powered by Elite AI</span>
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-tighter">
-                {isRtl ? 'مستقبل التعليم الرقمي بين يديك' : 'The Future of Elite Digital Education'}
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Hero Area: Navy Card with Gold Frame (no gradient or blur blob) */}
+      <div className="rounded-2xl bg-[#002147] border-2 border-[#C49E3A] p-5 sm:p-6 shadow-sm text-white space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+            <TutorFace tutor="sara" size="sm" />
+            <div className="min-w-0">
+              <span className="inline-block text-[11px] font-black text-[#E6C36A] uppercase tracking-wider">
+                🏛️ {t('الإطار الأوروبي المرجعي CEFR (A1 – C2)', 'CEFR Academic Curriculum (A1 – C2)')}
+              </span>
+              <h2 className="text-lg sm:text-2xl font-black text-white leading-snug mt-0.5">
+                {t(
+                  'منصة المسارات الأكاديمية الشاملة',
+                  'Comprehensive Academic Pathways Hub'
+                )}
               </h2>
-              <p className="text-white/60 text-lg md:text-xl font-medium leading-relaxed">
-                {isRtl 
-                  ? 'مناهج حصرية صممتها أكاديمية باسم الخليل لتوفير أقصى درجات الفعالية في التعلم السريع والمستدام.' 
-                  : 'Exclusive curricula designed by Basim Al-Khalil Digital Academy to provide maximum effectiveness in rapid and sustainable learning.'}
+              <p className="text-xs sm:text-sm font-bold text-[#E6C36A]/90 mt-1 leading-relaxed">
+                {t(
+                  'اختر المهارة والمستوى المناسب لتبدأ وحداتك التفاعلية في القراءة، القواعد، المحادثة، الكتابة، والتعبير.',
+                  'Select your skill and CEFR level to launch interactive units across Reading, Grammar, Conversation, Writing, and Expression.'
+                )}
               </p>
-           </div>
-        </section>
+            </div>
+          </div>
 
-        <div className="space-y-16">
-          {/* Reading Section */}
-          <section className="space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
-                <BookOpen size={24} />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black text-[#002147] tracking-tight">
-                  {isRtl ? 'قسم القراءة المطور' : 'Elite Reading Section'}
-                </h3>
-                <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">
-                  {isRtl ? 'ستة مستويات من الإتقان القرائي' : 'Six Levels of Reading Mastery'}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {MODERN_MODULES.filter(m => m.targetView === 'reading-curriculum').map((module, idx) => (
-                <motion.div
-                  key={module.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => onNavigate(module.targetView, module.level)}
-                  className="group bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer relative overflow-hidden"
-                >
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${module.color} opacity-5 rounded-bl-[4rem] group-hover:scale-125 transition-transform`} />
-                    <div className={`${module.lightColor} ${module.color.replace('bg-', 'text-')} w-16 h-16 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform shadow-sm`}>
-                      <module.icon size={28} />
-                    </div>
-                    <h3 className="text-2xl font-black text-[#002147] mb-3 group-hover:text-[#C49E3A] transition-colors">
-                      {isRtl ? module.titleAr : module.titleEn}
-                    </h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-6">Platinum Standard</p>
-                    <p className="text-slate-500 font-medium leading-relaxed mb-10">
-                      {isRtl ? module.descriptionAr : module.descriptionEn}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                          <div className="px-3 py-1 bg-slate-50 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">{module.level} - Mastery</div>
-                      </div>
-                      <div className="p-3 bg-[#002147] text-white rounded-2xl group-hover:bg-[#C49E3A] transition-all">
-                          <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
-                      </div>
-                    </div>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-
-          {/* Grammar Section */}
-          <section className="space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
-                <Zap size={24} />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black text-[#002147] tracking-tight">
-                  {isRtl ? 'قسم القواعد المطور' : 'Elite Grammar Section'}
-                </h3>
-                <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">
-                  {isRtl ? 'هندسة اللغة والقواعد الذكية' : 'Linguistic Engineering & Smart Grammar'}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {MODERN_MODULES.filter(m => m.targetView === 'grammar-curriculum').map((module, idx) => (
-                <motion.div
-                  key={module.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => onNavigate(module.targetView, module.level)}
-                  className="group bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer relative overflow-hidden"
-                >
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${module.color} opacity-5 rounded-bl-[4rem] group-hover:scale-125 transition-transform`} />
-                    <div className={`${module.lightColor} ${module.color.replace('bg-', 'text-')} w-16 h-16 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform shadow-sm`}>
-                      <module.icon size={28} />
-                    </div>
-                    <h3 className="text-2xl font-black text-[#002147] mb-3 group-hover:text-[#C49E3A] transition-colors">
-                      {isRtl ? module.titleAr : module.titleEn}
-                    </h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-6">Platinum Standard</p>
-                    <p className="text-slate-500 font-medium leading-relaxed mb-10">
-                      {isRtl ? module.descriptionAr : module.descriptionEn}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                          <div className="px-3 py-1 bg-slate-50 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">{module.level} - Mastery</div>
-                      </div>
-                      <div className="p-3 bg-[#002147] text-white rounded-2xl group-hover:bg-[#C49E3A] transition-all">
-                          <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
-                      </div>
-                    </div>
-                </motion.div>
-              ))}
-
-              {/* Placeholder for future modules */}
-              <div className="bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center opacity-60 h-full min-h-[300px]">
-                <div className="w-16 h-16 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 mb-6">
-                  <GraduationCap size={28} />
-                </div>
-                <h4 className="text-lg font-black text-[#002147]/40 mb-2">{isRtl ? 'قريباً: المزيد من القواعد' : 'Coming Soon: Advanced Grammar'}</h4>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed">Level C2+ Developed</p>
-              </div>
-            </div>
-          </section>
-          
-          {/* Conversation Section */}
-          <section className="space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600">
-                <MessageSquare size={24} />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black text-[#002147] tracking-tight">
-                  {isRtl ? 'قسم المحادثة المطور' : 'Elite Conversation Section'}
-                </h3>
-                <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">
-                  {isRtl ? 'بناء الشخصية والحوار الذكي' : 'Personality Building & Smart Dialogue'}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {MODERN_MODULES.filter(m => m.targetView === 'conversation-curriculum').map((module, idx) => (
-                <motion.div
-                  key={module.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => onNavigate(module.targetView, module.level)}
-                  className="group bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer relative overflow-hidden"
-                >
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${module.color} opacity-5 rounded-bl-[4rem] group-hover:scale-125 transition-transform`} />
-                    <div className={`${module.lightColor} ${module.color.replace('bg-', 'text-')} w-16 h-16 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform shadow-sm`}>
-                      <module.icon size={28} />
-                    </div>
-                    <h3 className="text-2xl font-black text-[#002147] mb-3 group-hover:text-rose-600 transition-colors">
-                      {isRtl ? module.titleAr : module.titleEn}
-                    </h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-6">Platinum Standard</p>
-                    <p className="text-slate-500 font-medium leading-relaxed mb-10">
-                      {isRtl ? module.descriptionAr : module.descriptionEn}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                          <div className="px-3 py-1 bg-slate-50 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">{module.level} - Mastery</div>
-                      </div>
-                      <div className="p-3 bg-[#002147] text-white rounded-2xl group-hover:bg-rose-600 transition-all">
-                          <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
-                      </div>
-                    </div>
-                </motion.div>
-              ))}
-
-              {/* Placeholder for future modules */}
-              <div className="bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center opacity-60 h-full min-h-[300px]">
-                <div className="w-16 h-16 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 mb-6">
-                  <GraduationCap size={28} />
-                </div>
-                <h4 className="text-lg font-black text-[#002147]/40 mb-2">{isRtl ? 'قريباً: المحادثة المتقدمة' : 'Coming Soon: Advanced Conversation'}</h4>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed">Level C2+ Specialized</p>
-              </div>
-            </div>
-          </section>
-          
-          {/* Writing Section */}
-          <section className="space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
-                <PenTool size={24} />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black text-[#002147] tracking-tight">
-                  {isRtl ? 'قسم الكتابة المطور' : 'Elite Writing Section'}
-                </h3>
-                <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">
-                  {isRtl ? 'هندسة النصوص والبراعة الكتابية' : 'Text Engineering & Composition Mastery'}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {MODERN_MODULES.filter(m => m.targetView === 'writing-curriculum').map((module, idx) => (
-                <motion.div
-                  key={module.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => onNavigate(module.targetView, module.level)}
-                  className="group bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer relative overflow-hidden"
-                >
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${module.color} opacity-5 rounded-bl-[4rem] group-hover:scale-125 transition-transform`} />
-                    <div className={`${module.lightColor} ${module.color.replace('bg-', 'text-')} w-16 h-16 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform shadow-sm`}>
-                      <module.icon size={28} />
-                    </div>
-                    <h3 className="text-2xl font-black text-[#002147] mb-3 group-hover:text-indigo-600 transition-colors">
-                      {isRtl ? module.titleAr : module.titleEn}
-                    </h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-6">Platinum Standard</p>
-                    <p className="text-slate-500 font-medium leading-relaxed mb-10">
-                      {isRtl ? module.descriptionAr : module.descriptionEn}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                          <div className="px-3 py-1 bg-slate-50 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">{module.level} - Mastery</div>
-                      </div>
-                      <div className="p-3 bg-[#002147] text-white rounded-2xl group-hover:bg-indigo-600 transition-all">
-                          <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
-                      </div>
-                    </div>
-                </motion.div>
-              ))}
-
-              {/* Placeholder for future modules */}
-              <div className="bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center opacity-60 h-full min-h-[300px]">
-                <div className="w-16 h-16 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 mb-6">
-                  <GraduationCap size={28} />
-                </div>
-                <h4 className="text-lg font-black text-[#002147]/40 mb-2">{isRtl ? 'قريباً: التأليف الإبداعي' : 'Coming Soon: Creative Authorship'}</h4>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed">Level C2+ Specialized</p>
-              </div>
-            </div>
-          </section>
-          
-          {/* Expression Section */}
-          <section className="space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
-                <Sparkles size={24} />
-              </div>
-              <div>
-                <h3 className="text-3xl font-black text-[#002147] tracking-tight">
-                  {isRtl ? 'قسم التعبير المطور' : 'Elite Expression Section'}
-                </h3>
-                <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">
-                  {isRtl ? 'الفصاحة البلاغية والبراعة الوجدانية' : 'Rhetorical Eloquence & Emotional Brilliance'}
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {MODERN_MODULES.filter(m => m.targetView === 'expression-curriculum').map((module, idx) => (
-                <motion.div
-                  key={module.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => onNavigate(module.targetView, module.level)}
-                  className="group bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer relative overflow-hidden"
-                >
-                    <div className={`absolute top-0 right-0 w-32 h-32 ${module.color} opacity-5 rounded-bl-[4rem] group-hover:scale-125 transition-transform`} />
-                    <div className={`${module.lightColor} ${module.color.replace('bg-', 'text-')} w-16 h-16 rounded-2xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform shadow-sm`}>
-                      <module.icon size={28} />
-                    </div>
-                    <h3 className="text-2xl font-black text-[#002147] mb-3 group-hover:text-amber-600 transition-colors">
-                      {isRtl ? module.titleAr : module.titleEn}
-                    </h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-6">Platinum Standard</p>
-                    <p className="text-slate-500 font-medium leading-relaxed mb-10">
-                      {isRtl ? module.descriptionAr : module.descriptionEn}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                          <div className="px-3 py-1 bg-slate-50 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">{module.level} - Mastery</div>
-                      </div>
-                      <div className="p-3 bg-[#002147] text-white rounded-2xl group-hover:bg-amber-600 transition-all">
-                          <ChevronRight size={20} className={isRtl ? 'rotate-180' : ''} />
-                      </div>
-                    </div>
-                </motion.div>
-              ))}
-
-              {/* Placeholder for future modules */}
-              <div className="bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center opacity-60 h-full min-h-[300px]">
-                <div className="w-16 h-16 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 mb-6">
-                  <GraduationCap size={28} />
-                </div>
-                <h4 className="text-lg font-black text-[#002147]/40 mb-2">{isRtl ? 'قريباً: التعبير القيادي' : 'Coming Soon: Leadership Expression'}</h4>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed">Level C2+ Beyond</p>
-              </div>
-            </div>
-          </section>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <PrimaryButton
+              onClick={() => onNavigate('reading-curriculum', 'A1')}
+              className="text-xs sm:text-sm"
+            >
+              <Sparkles size={15} />
+              <span>{t('ابدأ من A1', 'Start at A1')}</span>
+            </PrimaryButton>
+          </div>
         </div>
-      </main>
 
-      <footer className="py-20 text-center space-y-4">
-         <div className="w-12 h-1 bg-slate-200 mx-auto rounded-full" />
-         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Basim Alkhalil Academic Content © 2026</p>
-      </footer>
-    </div>
+        {/* Real Progress / Filter Summary Pills */}
+        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[#C49E3A]/30">
+          <ProgressPill>
+            📚 {filteredModules.length} / {MODERN_MODULES.length}{' '}
+            {t('مسار متاح', 'Active Tracks')}
+          </ProgressPill>
+          <ProgressPill>
+            📖 {totalUnitsVisible} {t('وحدة دراسية', 'Study Units')}
+          </ProgressPill>
+          <ProgressPill>
+            🎯 {selectedLevel === 'ALL' ? 'A1–C2' : selectedLevel}
+          </ProgressPill>
+          <ProgressPill>
+            🔒 {UPCOMING_LOCKED_UNITS.length} {t('مسارات قادمة', 'Upcoming Tracks')}
+          </ProgressPill>
+        </div>
+      </div>
+
+      {/* Filters & Search Card */}
+      <GoldCard className="space-y-4">
+        {/* Search Input */}
+        <div className="relative">
+          <Search
+            size={17}
+            className={`absolute top-1/2 -translate-y-1/2 text-[#C49E3A] ${
+              isRtl ? 'right-3.5' : 'left-3.5'
+            }`}
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t(
+              'ابحث عن مسار أو مهارة أو مستوى...',
+              'Search pathways, skills, or levels...'
+            )}
+            className={`w-full rounded-xl border border-[#C49E3A]/40 bg-[#fdfaf3] py-2.5 text-sm font-bold text-[#002147] placeholder:text-[#002147]/50 focus:outline-none focus:ring-2 focus:ring-[#C49E3A] ${
+              isRtl ? 'pr-10 pl-4' : 'pl-10 pr-4'
+            }`}
+          />
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap items-center gap-2">
+          {categories.map((cat) => {
+            const active = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3 py-2 rounded-xl text-xs font-black border transition-transform active:scale-95 cursor-pointer flex items-center gap-1.5 min-h-[40px] ${
+                  active
+                    ? 'bg-[#002147] text-[#E6C36A] border-[#C49E3A]'
+                    : 'bg-white text-[#002147] border-[#C49E3A]/40 hover:border-[#C49E3A]'
+                }`}
+              >
+                <span>{cat.emoji}</span>
+                <span>{t(cat.labelAr, cat.labelEn)}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* CEFR Level Filter Pills */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#C49E3A]/20">
+          <span className="text-xs font-black text-[#002147]">
+            🎓 {t('تصفية حسب المستوى (CEFR):', 'Filter by CEFR Level:')}
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5" dir="ltr">
+            {levels.map((lvl) => {
+              const active = selectedLevel === lvl;
+              return (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => setSelectedLevel(lvl)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black border transition-transform active:scale-95 cursor-pointer min-h-[36px] ${
+                    active
+                      ? 'bg-[#C49E3A] text-[#002147] border-[#002147]'
+                      : 'bg-[#fdfaf3] text-[#002147] border-[#C49E3A]/40 hover:border-[#C49E3A]'
+                  }`}
+                >
+                  {lvl === 'ALL' ? t('الكل', 'ALL') : lvl}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </GoldCard>
+
+      {/* Unit / Level Grid: LessonTile Grid (2 cols mobile, 3 desktop) */}
+      <GoldCard className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#C49E3A]/30 pb-3">
+          <h3 className="text-base sm:text-lg font-black text-[#002147]">
+            📂 {t('الوحدات والمستويات الدراسية', 'Units & CEFR Level Grid')}
+          </h3>
+          <div className="flex items-center gap-2">
+            <ProgressPill>
+              {filteredModules.length} {t('مسار', 'Tracks')}
+            </ProgressPill>
+            <ProgressPill>
+              {totalUnitsVisible} {t('وحدة', 'Units')}
+            </ProgressPill>
+          </div>
+        </div>
+
+        {filteredModules.length === 0 ? (
+          <div className="rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 p-6 text-center space-y-3">
+            <p className="text-sm font-black text-[#002147]">
+              🔍 {t('لا توجد مسارات مطابقة لبحثك الحالي', 'No pathways match your current filter')}
+            </p>
+            <GhostButton
+              onClick={() => {
+                setSelectedCategory('all');
+                setSelectedLevel('ALL');
+                setSearchQuery('');
+              }}
+            >
+              <RotateCcw size={15} />
+              <span>{t('إعادة ضبط الفلاتر', 'Reset Filters')}</span>
+            </GhostButton>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+            {filteredModules.map((module, idx) => (
+              <LessonTile
+                key={module.id}
+                order={idx + 1}
+                emoji={CATEGORY_EMOJI[module.category]}
+                title={t(module.titleAr, module.titleEn)}
+                subtitle={`${module.unitsCount} ${t('وحدات', 'Units')} • ${t(
+                  module.badgeAr,
+                  module.badgeEn
+                )}`}
+                level={module.level}
+                onClick={() => onNavigate(module.targetView, module.level)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Locked / Upcoming Units Dimmed with a Gold Lock */}
+        <div className="pt-4 border-t border-[#C49E3A]/30 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-[#002147] text-[#C49E3A] flex items-center justify-center shrink-0">
+                <Lock size={13} />
+              </span>
+              <h4 className="text-sm sm:text-base font-black text-[#002147]">
+                {t('مسارات متقدمة قيد الإطلاق (مقفلة)', 'Upcoming Advanced Tracks (Locked)')}
+              </h4>
+            </div>
+            <ProgressPill>
+              🔒 {UPCOMING_LOCKED_UNITS.length} {t('قريباً', 'Coming Soon')}
+            </ProgressPill>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+            {UPCOMING_LOCKED_UNITS.map((item, idx) => (
+              <LessonTile
+                key={item.id}
+                order={filteredModules.length + idx + 1}
+                title={t(item.ar, item.en)}
+                subtitle={t('قريباً ضمن التحديث القادم', 'Coming Soon')}
+                level={item.level}
+                locked={true}
+              />
+            ))}
+          </div>
+        </div>
+      </GoldCard>
+    </SectionShell>
   );
 };
+
+export default ModernCurriculumHome;

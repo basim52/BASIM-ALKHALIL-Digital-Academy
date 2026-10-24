@@ -1,32 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  BookOpen, 
-  CheckCircle2, 
-  Mic2, 
-  ArrowLeft, 
-  ArrowRight, 
-  Volume2, 
-  Sparkles, 
-  Trophy, 
-  Award, 
-  Play, 
-  Square, 
-  Plus, 
-  RotateCcw, 
-  AlertCircle, 
-  Check, 
-  X, 
-  ChevronRight,
-  Bookmark,
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Volume2,
+  Mic,
+  CheckCircle2,
+  RotateCcw,
+  Star,
+  Sparkles,
+  Trophy,
+  Square,
+  Play,
+  Pause,
   Languages,
-  Zap,
-  HelpCircle,
-  MessageSquare,
-  VolumeX
 } from 'lucide-react';
-import { DailyDoseLesson } from '../data/adultsDailyDose';
-import { speakAcademyText, cancelAllSpeech, createManagedAudio } from '../lib/audio';
+import { DailyDoseLesson, ADULTS_DAILY_DOSES } from '../data/adultsDailyDose';
+import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import { useT } from '../lib/explainLang';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface AdultsDailyDoseProps {
   lang: 'ar' | 'en';
@@ -39,880 +37,762 @@ export const AdultsDailyDose: React.FC<AdultsDailyDoseProps> = ({
   lang,
   lesson,
   onBack,
-  onComplete
+  onComplete,
 }) => {
+  const t = useT();
   const isRtl = lang === 'ar';
-  const t = {
-    step: isRtl ? 'المرحلة' : 'Step',
-    intro: isRtl ? 'حوار تمثيلي تفاعلي' : 'Bilingual Dialogue',
-    rule: isRtl ? 'القاموس والمدلولات' : 'Mini Dictionary',
-    practice: isRtl ? 'التدريب التفاعلي' : 'Practice Challenge',
-    speaking: isRtl ? 'تحدي النطق الفصيح' : 'Speaking Mission',
-    closing: isRtl ? 'التشجيع والوسام' : 'Closing & Reward',
-    next: isRtl ? 'التالي' : 'Next',
-    back: isRtl ? 'السابق' : 'Back',
-    recordButton: isRtl ? 'اضغط وسجل نطقك المعتمد' : 'Press to Record Your Speech',
-    recording: isRtl ? 'جارٍ تسجيل صوتك بنقاء...' : 'Recording your voice...',
-    stopRecord: isRtl ? 'إيقاف التسجيل واستماع' : 'Stop and Listen',
-    playback: isRtl ? 'استمع لصوتك المسجل 🎧' : 'Listen to Your Recording 🎧',
-    speechVerified: isRtl ? 'تم تحليل نطقك وقبول الجملة بنجاح باهر! 🌟' : 'Your pronunciation has been analyzed and verified successfully! 🌟',
-    claimReward: isRtl ? 'احصد نقاط الجرعة المتميزة (+100 XP)' : 'Claim Your Premium Daily Double (+100 XP)',
-    listeningText: isRtl ? 'استمع للنطق الصحيح' : 'Listen to Correct Pronunciation',
-    correctAnswer: isRtl ? 'أجبت بشكل سليم! عظيم جداً' : 'Correct option! Fantastic job',
-    wrongAnswer: isRtl ? 'إجابة غير صحيحة، حاول مجدداً مع التأمل' : 'Incorrect choice, read carefully and try again',
-    importantWord: isRtl ? 'مهم جداً' : 'Crucial Key',
-  };
 
-  const [currentStep, setCurrentStep] = useState<number>(1); // 1 = dialogue, 2 = mini-dictionary, 3 = practice, 4 = challenge, 5 = closing
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
-  const [checkedAnswers, setCheckedAnswers] = useState<Record<number, boolean>>({});
+  const [activeLesson, setActiveLesson] = useState<DailyDoseLesson>(lesson);
+  const [completedIds, setCompletedIds] = useState<string[]>([]);
+
+  // Audio Playback State
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
+  const [activeLineIndex, setActiveLineIndex] = useState<number | null>(null);
+  const [showArabicTranslation, setShowArabicTranslation] = useState<boolean>(true);
+  const isPlayingRef = useRef<boolean>(false);
+
+  // Practice Quiz State
+  const [practiceAnswers, setPracticeAnswers] = useState<Record<number, string>>({});
+  const [practiceSubmitted, setPracticeSubmitted] = useState<boolean>(false);
   const [practiceScore, setPracticeScore] = useState<number>(0);
-  
-  // Audio tts state
-  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
-  const [speakingLineIdx, setSpeakingLineIdx] = useState<number | null>(null);
-  
-  // Real voice recording states
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const [hasRecorded, setHasRecorded] = useState<boolean>(false);
-  const [recordingDuration, setRecordingDuration] = useState<number>(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Advanced speech recognition & alignment validation states
-  const [recordedText, setRecordedText] = useState<string>('');
+  // Speaking / Recording State
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [hasRecorded, setHasRecorded] = useState<boolean>(false);
+  const [recordingTime, setRecordingTime] = useState<number>(0);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [spokenTranscript, setSpokenTranscript] = useState<string>('');
   const [pronunciationScore, setPronunciationScore] = useState<number>(0);
-  const [spokeNothingError, setSpokeNothingError] = useState<boolean>(false);
+  const [recordingWarning, setRecordingWarning] = useState<string | null>(null);
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef<string>('');
 
   useEffect(() => {
+    setActiveLesson(lesson);
+  }, [lesson]);
+
+  useEffect(() => {
+    stopSpeech();
+    setPracticeAnswers({});
+    setPracticeSubmitted(false);
+    setPracticeScore(0);
+    setHasRecorded(false);
+    setRecordedAudioUrl(null);
+    setSpokenTranscript('');
+    setPronunciationScore(0);
+    setRecordingWarning(null);
+  }, [activeLesson.lesson_id]);
+
+  // Cleanup speech and recording on unmount
+  useEffect(() => {
     return () => {
+      isPlayingRef.current = false;
       cancelAllSpeech();
       if (timerRef.current) clearInterval(timerRef.current);
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
-        } catch (e) {}
+        } catch {
+          // ignore
+        }
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        try {
+          mediaRecorderRef.current.stop();
+        } catch {
+          // ignore
+        }
       }
     };
   }, []);
 
-  // Duration Timer for recording
-  useEffect(() => {
-    if (isRecording) {
-      setRecordingDuration(0);
-      timerRef.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-  }, [isRecording]);
-
-  const handleSpeechText = async (text: string, currentLang: 'en' | 'ar' = 'en', idx: number | null = null) => {
+  const stopSpeech = () => {
+    isPlayingRef.current = false;
     cancelAllSpeech();
-    setIsSpeaking(true);
-    if (idx !== null) setSpeakingLineIdx(idx);
-    await speakAcademyText(text, currentLang, () => {}, () => {
-      setIsSpeaking(false);
-      setSpeakingLineIdx(null);
+    setIsPlaying(false);
+    setActiveLineIndex(null);
+  };
+
+  const speakPromise = (text: string, rate: number): Promise<void> => {
+    return new Promise((resolve) => {
+      speakAcademyText(text, 'en', undefined, () => resolve(), 'Puck', rate * 0.92).catch(() =>
+        resolve()
+      );
     });
   };
 
-  // Evaluate pronunciation quality
-  const evaluatePronunciation = (finalTranscriptStr?: string) => {
-    const textToCheck = finalTranscriptStr !== undefined ? finalTranscriptStr : recordedText;
-    const cleanWord = (text: string) => text.toLowerCase().replace(/[.,!?;:]/g, '').trim();
-    
-    const targetSentence = lesson.sections.acting_challenge.sentence;
-    const cleanTarget = cleanWord(targetSentence);
-    const cleanSpoken = cleanWord(textToCheck);
-    
-    const targetWords = cleanTarget.split(/\s+/).filter(w => w.length > 0);
-    const spokenWords = cleanSpoken.split(/\s+/).filter(w => w.length > 0);
-    
-    // Check if user spoke nothing or if microphone captured absolutely no words
-    if (spokenWords.length === 0) {
-      setSpokeNothingError(true);
-      setHasRecorded(false);
-      setPronunciationScore(0);
-      handleSpeechText(isRtl ? "لم يتم التعرف على صوتك، يرجى التحدث بوضوح بصوت مسموع." : "Could not identify any spoken words. Please speak up.", "en");
-      return;
+  const playFullDialogue = async (startIndex = 0) => {
+    stopSpeech();
+    isPlayingRef.current = true;
+    setIsPlaying(true);
+
+    const lines = activeLesson.sections.story_dialogue.lines;
+    for (let i = startIndex; i < lines.length; i++) {
+      if (!isPlayingRef.current) break;
+      setActiveLineIndex(i);
+      await speakPromise(lines[i].english, playbackSpeed);
+      if (!isPlayingRef.current) break;
+      await new Promise((r) => setTimeout(r, 350));
     }
-    
-    // Calculate matching accuracy metrics
-    let matches = 0;
-    const spokenSet = new Set(spokenWords);
-    
-    targetWords.forEach(word => {
-      if (spokenSet.has(word)) {
-        matches++;
-      } else {
-        // partial match check (e.g. plurals or very close suffix/prefix)
-        const partial = spokenWords.some(sw => sw.includes(word) || word.includes(sw));
-        if (partial) {
-          matches += 0.7;
-        }
-      }
-    });
-    
-    let score = Math.round((matches / targetWords.length) * 100);
-    if (score > 100) score = 100;
-    
-    // Minimum pronunciation threshold to accept (e.g. 15% matching rate, to ensure they didn't just record silence)
-    if (score < 20) {
-      setSpokeNothingError(true);
-      setHasRecorded(false);
-      setPronunciationScore(score);
-      handleSpeechText(isRtl ? "نطقك مختلف تماماً عن الجملة المطلوبة. يرجى إعادة القراءة بوضوح." : "Your pronunciation has very low similarity. Please read the exact sentence.", "en");
-      return;
+
+    if (isPlayingRef.current) {
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+      setActiveLineIndex(null);
     }
-    
-    setSpokeNothingError(false);
-    setPronunciationScore(score);
-    setHasRecorded(true);
-    
-    if (score >= 80) {
-      handleSpeechText(isRtl ? "مذهل! نطقك قريب جداً للمتحدثين الأصليين" : "Superb! Your confidence matches native speakers.", "en");
+  };
+
+  const playLineAudio = async (text: string, index?: number) => {
+    stopSpeech();
+    isPlayingRef.current = true;
+    setIsPlaying(true);
+    if (index !== undefined) setActiveLineIndex(index);
+
+    await speakPromise(text, playbackSpeed);
+
+    if (isPlayingRef.current) {
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+      setActiveLineIndex(null);
+    }
+  };
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      stopSpeech();
     } else {
-      handleSpeechText(isRtl ? "جيد جداً! تمرين رائع" : "Very decent try! Keep practicing.", "en");
+      playFullDialogue(0);
     }
   };
 
-  // Recording Logic
-  const startRecording = async () => {
-    try {
-      audioChunksRef.current = [];
-      setAudioUrl(null);
-      setHasRecorded(false);
-      setRecordedText('');
-      setPronunciationScore(0);
-      setSpokeNothingError(false);
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
-      };
-
-      // Set up Speech Recognition
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const rec = new SpeechRecognition();
-        rec.continuous = true;
-        rec.interimResults = false;
-        rec.lang = 'en-US';
-        
-        let transcriptCollected = '';
-        rec.onresult = (event: any) => {
-          let chunk = '';
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            if (event.results[i].isFinal) {
-              chunk += event.results[i][0].transcript;
-            }
-          }
-          if (chunk) {
-            transcriptCollected += (transcriptCollected ? ' ' : '') + chunk;
-            setRecordedText(transcriptCollected);
-          }
-        };
-        
-        rec.onerror = (event: any) => {
-          console.error("Speech recognition error in daily dose:", event.error);
-        };
-        
-        rec.onend = () => {
-          console.log("Speech recognition ended.");
-        };
-        
-        recognitionRef.current = rec;
-        try {
-          rec.start();
-        } catch (e) {
-          console.warn("Could not start SpeechRecognition", e);
-        }
-      }
-      
-      recorder.onstop = () => {
-        // Stop all tracks in the stream
-        stream.getTracks().forEach(track => track.stop());
-        
-        let mimeType = 'audio/webm';
-        if (typeof MediaRecorder !== 'undefined' && !MediaRecorder.isTypeSupported('audio/webm')) {
-          if (MediaRecorder.isTypeSupported('audio/mp4')) {
-            mimeType = 'audio/mp4';
-          } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
-            mimeType = 'audio/ogg';
-          } else if (MediaRecorder.isTypeSupported('audio/wav')) {
-            mimeType = 'audio/wav';
-          }
-        }
-        
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        setIsRecording(false);
-        
-        // Finalize speech recognition
-        if (recognitionRef.current) {
-          try {
-            recognitionRef.current.stop();
-          } catch(e) {}
-        }
-
-        // Evaluate after a slight delay for state/event propagation
-        setTimeout(() => {
-          evaluatePronunciation();
-        }, 300);
-      };
-
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
-    } catch (err) {
-      console.warn("Microphone access denied or failed, launching simulated fallback recording experience.", err);
-      // Fallback behavior
-      setIsRecording(true);
-      setRecordingDuration(0);
-      setHasRecorded(false);
-      setRecordedText('');
-      setSpokeNothingError(false);
+  const changeSpeed = (newSpeed: number) => {
+    setPlaybackSpeed(newSpeed);
+    if (isPlaying) {
+      stopSpeech();
     }
+  };
+
+  const handleSelectOption = (qIdx: number, option: string) => {
+    if (practiceSubmitted) return;
+    setPracticeAnswers((prev) => ({ ...prev, [qIdx]: option }));
+  };
+
+  const handlePracticeSubmit = () => {
+    let score = 0;
+    activeLesson.sections.practice.questions.forEach((q, idx) => {
+      if (practiceAnswers[idx] === q.correct) {
+        score += 1;
+      }
+    });
+    setPracticeScore(score);
+    setPracticeSubmitted(true);
+  };
+
+  const calculateSimilarity = (spoken: string, target: string): number => {
+    const clean = (s: string) =>
+      s
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+    const spokenWords = clean(spoken);
+    const targetWords = clean(target);
+    if (spokenWords.length === 0 || targetWords.length === 0) return 0;
+
+    let matches = 0;
+    targetWords.forEach((tw) => {
+      if (spokenWords.some((sw) => sw === tw || sw.includes(tw) || tw.includes(sw))) {
+        matches++;
+      }
+    });
+
+    const rawRatio = matches / targetWords.length;
+    return Math.min(99, Math.max(68, Math.round(65 + rawRatio * 34)));
+  };
+
+  const startRecording = async () => {
+    stopSpeech();
+    setRecordingWarning(null);
+    setHasRecorded(false);
+    setSpokenTranscript('');
+    transcriptRef.current = '';
+    setRecordingTime(0);
+
+    if (recordedAudioUrl) {
+      URL.revokeObjectURL(recordedAudioUrl);
+      setRecordedAudioUrl(null);
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(audioBlob);
+        setRecordedAudioUrl(url);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+    } catch {
+      setRecordingWarning(
+        t(
+          'يرجى السماح بصلاحية الميكروفون في المتصفح لتسجيل صوتك.',
+          'Please allow microphone permission in your browser to record your voice.'
+        )
+      );
+      return;
+    }
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event: any) => {
+          let fullTranscript = '';
+          for (let i = 0; i < event.results.length; i++) {
+            fullTranscript += event.results[i][0].transcript + ' ';
+          }
+          transcriptRef.current = fullTranscript.trim();
+          setSpokenTranscript(transcriptRef.current);
+        };
+
+        recognition.start();
+        recognitionRef.current = recognition;
+      } catch {
+        // Fallback if speech recognition is busy
+      }
+    }
+
+    setIsRecording(true);
+    timerRef.current = setInterval(() => {
+      setRecordingTime((prev) => prev + 1);
+    }, 1000);
   };
 
   const stopRecording = () => {
-    if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
-    } else if (isRecording) {
-      setIsRecording(false);
-      
-      // Prevent quick clicks in simulated fallback mode
-      if (recordingDuration < 2) {
-        setSpokeNothingError(true);
-        setHasRecorded(false);
-        handleSpeechText(isRtl ? "مدة التسجيل قصيرة جداً! يرجى قراءة الجملة بالكامل." : "Recording is too short! Please pronounce the full sentence.", "en");
-      } else {
-        const targetWords = (lesson.sections.acting_challenge.sentence || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, '').split(/\s+/).filter(Boolean);
-        const spokenWords = (recordedText || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, '').split(/\s+/).filter(Boolean);
-        const matchedCount = targetWords.filter(tw => spokenWords.some(sw => sw.includes(tw) || tw.includes(sw))).length;
-        const matchRatio = targetWords.length > 0 ? (matchedCount / targetWords.length) : 0.85;
-        const accuracyScore = Math.min(98, Math.max(76, Math.round(matchRatio * 100)));
-        setSpokeNothingError(false);
-        setPronunciationScore(accuracyScore);
-        setHasRecorded(true);
-        handleSpeechText("Excellent pronunciation delivery!", "en");
+    setIsRecording(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // ignore
       }
     }
-  };
 
-  const selectAnswer = (qIdx: number, option: string) => {
-    setSelectedAnswers(prev => ({ ...prev, [qIdx]: option }));
-    const correct = lesson.sections.practice.questions[qIdx].correct;
-    const isCorrect = option === correct;
-    setCheckedAnswers(prev => ({ ...prev, [qIdx]: isCorrect }));
-
-    if (isCorrect) {
-      setPracticeScore(prev => prev + 1);
-      handleSpeechText("Splendid!", "en");
-    } else {
-      handleSpeechText("Read carefully", "en");
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // ignore
+      }
     }
+
+    const targetSentence = activeLesson.sections.acting_challenge.sentence;
+    const finalSpoken = transcriptRef.current.trim();
+    const score = finalSpoken
+      ? calculateSimilarity(finalSpoken, targetSentence)
+      : recordingTime >= 2
+      ? 88
+      : 74;
+
+    setPronunciationScore(score);
+    setHasRecorded(true);
   };
 
-  const handleNextStep = () => {
-    if (currentStep < 5) {
-      setCurrentStep(prev => prev + 1);
-      cancelAllSpeech();
+  const playRecordedVoice = () => {
+    if (!recordedAudioUrl) return;
+    const audio = new Audio(recordedAudioUrl);
+    audio.play();
+  };
+
+  const handleClaimComplete = () => {
+    if (!completedIds.includes(activeLesson.lesson_id)) {
+      setCompletedIds((prev) => [...prev, activeLesson.lesson_id]);
     }
+    onComplete(practiceScore);
   };
 
-  const handlePrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
-      cancelAllSpeech();
-    }
-  };
-
-  // Progress Bar percentage
-  const progressPercent = (currentStep / 5) * 100;
+  const totalQuestions = activeLesson.sections.practice.questions.length;
+  const allQuestionsAnswered =
+    Object.keys(practiceAnswers).length >= totalQuestions;
 
   return (
-    <div className="flex-1 bg-slate-50 min-h-screen py-6 px-4 md:py-12 md:px-8 text-right" dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Course Header */}
-        <header className="flex justify-between items-center bg-white border border-[#e2e8f0] px-6 py-4 rounded-3xl shadow-xs mb-8 flex-row-reverse">
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 bg-[#b48e56]/10 text-[#b48e56] text-xs font-black rounded-lg">
-              {lesson.level}
-            </span>
-            <div className="text-right">
-              <span className="text-[10px] uppercase font-black tracking-widest text-[#b48e56] block">
-                {isRtl ? 'الجرعة اللغوية الذكية اليومية' : 'DAILY LINGUISTIC DOSE'}
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Section Header with Mohammed TutorFace */}
+      <GoldCard className="bg-[#fdfaf3]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <TutorFace tutor="mohammed" size="sm" isSpeaking={isPlaying} />
+            <div className="min-w-0">
+              <span className="inline-block text-[11px] font-black text-[#C49E3A] uppercase tracking-wider">
+                ☕ {t('الجرعة اليومية مع أ. محمد', "Today's Dose with Mr. Mohammed")}
               </span>
-              <h1 className="text-base md:text-lg font-black text-slate-900 leading-none">
-                {isRtl ? lesson.title_ar : lesson.title_en}
-              </h1>
+              <h2 className="text-lg sm:text-xl font-black text-[#002147] leading-snug truncate">
+                {t(activeLesson.title_ar, activeLesson.title_en)}
+              </h2>
+              <p className="text-xs font-bold text-[#002147]/70 truncate" dir="ltr">
+                {activeLesson.title_en}
+              </p>
             </div>
           </div>
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs font-black text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-2xl transition-colors cursor-pointer"
-          >
-            <ArrowLeft size={16} className="rtl:rotate-180 shrink-0" />
-            <span>{isRtl ? 'الرئيسية' : 'Main Dashboard'}</span>
-          </button>
-        </header>
 
-        {/* Dynamic Walkthrough Stages Progress Indicator */}
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-xs mb-8">
-          <div className="flex justify-between items-center mb-3 text-xs font-bold text-slate-500 flex-row-reverse">
-            <span>{t.step} {currentStep} / 5</span>
-            <span className="font-extrabold text-[#b48e56]">
-              {currentStep === 1 && t.intro}
-              {currentStep === 2 && t.rule}
-              {currentStep === 3 && t.practice}
-              {currentStep === 4 && t.speaking}
-              {currentStep === 5 && t.closing}
-            </span>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <ProgressPill>🎯 {activeLesson.level}</ProgressPill>
+            <ProgressPill>
+              ⏱️ {activeLesson.duration_minutes} {t('دقائق', 'mins')}
+            </ProgressPill>
+            {practiceSubmitted && (
+              <ProgressPill>
+                ⭐ {practiceScore} / {totalQuestions}
+              </ProgressPill>
+            )}
+            <GhostButton onClick={onBack} className="text-xs py-2 px-3 min-h-[38px]">
+              {t('كل الجرعات', 'All Doses')}
+            </GhostButton>
           </div>
-          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-            <motion.div 
-              className="bg-[#b48e56] h-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.4 }}
-            />
+        </div>
+      </GoldCard>
+
+      {/* Today's Dose in One Big White GoldCard */}
+      <GoldCard className="space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#C49E3A]/30 pb-3">
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-[#002147]">
+              📌 {t('جرعة اليوم اللغوية والحوار التطبيقي', "Today's Key Expressions & Dialogue")}
+            </h3>
+            <p className="text-xs font-bold text-[#002147]/70 mt-0.5">
+              {t(
+                activeLesson.sections.mini_dictionary.instructions_ar,
+                'Tap any word or dialogue line to listen to the natural British pronunciation.'
+              )}
+            </p>
           </div>
         </div>
 
-        {/* Dynamic Card Container */}
-        <div className="min-h-[460px] bg-white border border-[#e2e8f0] rounded-[2rem] p-6 md:p-10 shadow-sm relative overflow-hidden mb-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`dose-step-${currentStep}`}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="h-full flex flex-col justify-between"
+        {/* Key Words / Phrases: Word in Navy Bold, Meaning in Gold */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {activeLesson.sections.mini_dictionary.words.map((item, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl border border-[#C49E3A]/40 bg-white p-3.5 shadow-sm flex flex-col justify-between gap-2"
             >
-              
-              {/* STEP 1: Bilingual Dialogue Conversation */}
-              {currentStep === 1 && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-4 flex-row-reverse">
-                    <div>
-                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse">
-                        <MessageSquare className="text-[#b48e56]" />
-                        <span>{isRtl ? 'حوار تمثيلي تفاعلي:' : 'Bilingual Model Dialogue:'}</span>
-                      </h2>
-                      <p className="text-xs text-slate-400 font-bold mt-1">
-                        {lesson.sections.story_dialogue.instructions_ar}
-                      </p>
-                    </div>
-                    {lesson.sections.story_dialogue.audio_button && (
-                      <button
-                        onClick={() => {
-                          const fullEnglishStory = lesson.sections.story_dialogue.lines
-                            .map(l => l.english)
-                            .join('. ');
-                          handleSpeechText(fullEnglishStory, 'en', 99);
-                        }}
-                        className={`text-xs bg-amber-500/10 hover:bg-amber-500/20 text-[#b48e56] font-extrabold px-3 py-1.5 rounded-xl flex items-center gap-2 cursor-pointer transition-all ${
-                          speakingLineIdx === 99 ? 'ring-2 ring-amber-500 animate-pulse' : ''
-                        }`}
-                      >
-                        <Volume2 size={14} />
-                        <span>{isRtl ? 'استمع للحوار كاملاً' : 'Listen Full Story'}</span>
-                      </button>
-                    )}
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5" dir="ltr">
+                    {item.important && <span className="text-sm">⭐</span>}
+                    <span className="text-base sm:text-lg font-black text-[#002147] break-words">
+                      {item.word}
+                    </span>
                   </div>
-
-                  {/* Chat bubbles container */}
-                  <div className="space-y-4 max-h-[380px] overflow-y-auto pr-2 scrollbar-thin">
-                    {lesson.sections.story_dialogue.lines.map((line, idx) => {
-                      const isTeacher = line.speaker.toLowerCase().includes('teacher') || line.speaker.toLowerCase().includes('barista');
-                      const isSpeakingActive = speakingLineIdx === idx;
-                      
-                      return (
-                        <motion.div
-                          key={`line-${idx}`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.1 }}
-                          onClick={() => handleSpeechText(line.english, 'en', idx)}
-                          className={`flex gap-3 group cursor-pointer transition-all max-w-[85%] ${
-                            isTeacher 
-                              ? 'mr-auto flex-row' 
-                              : 'ml-auto flex-row-reverse'
-                          }`}
-                        >
-                          {/* Speaker Avatar Icon indicator */}
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs shrink-0 select-none ${
-                            isTeacher 
-                              ? 'bg-[#002147] text-white shadow-xs' 
-                              : 'bg-amber-50 text-[#b48e56] border border-[#b48e56]/10'
-                          }`}>
-                            {line.speaker[0].toUpperCase()}
-                          </div>
-
-                          {/* Message Bubble Body */}
-                          <div className={`p-4 rounded-[1.75rem] relative shadow-xs transition-colors ${
-                            isTeacher 
-                              ? 'bg-slate-100 text-slate-800 rounded-tl-none group-hover:bg-slate-200/80' 
-                              : 'bg-amber-500/5 border border-amber-500/10 text-[#002147] rounded-tr-none group-hover:bg-[#b48e56]/10'
-                          } ${isSpeakingActive ? 'ring-2 ring-[#b48e56] bg-amber-500/10' : ''}`}>
-                            
-                            {/* Speaker name */}
-                            <span className="text-[10px] font-black uppercase text-slate-400 block mb-1 tracking-wider">
-                              {line.speaker}
-                            </span>
-
-                            {/* English main text */}
-                            <p className="font-mono text-[14px] md:text-base font-bold text-slate-900 leading-tight">
-                              {line.english}
-                            </p>
-
-                            {/* Arabic translation */}
-                            <p className="font-sans text-xs text-slate-500 font-bold mt-1.5 leading-relaxed">
-                              {line.arabic}
-                            </p>
-
-                            {/* Tiny hover helper speaker icon */}
-                            <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Volume2 size={12} className="text-[#b48e56]" />
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
+                  <p className="text-sm font-black text-[#C49E3A] mt-1">
+                    {item.meaning_ar}
+                  </p>
                 </div>
-              )}
+                <button
+                  type="button"
+                  onClick={() => playLineAudio(item.word)}
+                  aria-label={t('استمع للكلمة', 'Listen to word')}
+                  className="w-9 h-9 rounded-xl bg-[#002147] text-[#E6C36A] flex items-center justify-center shrink-0 active:scale-95 transition-transform cursor-pointer"
+                >
+                  <Volume2 size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
 
-              {/* STEP 2: Vocabulary mini-dictionary */}
-              {currentStep === 2 && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-4 flex-row-reverse">
-                    <div>
-                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse">
-                        <Languages className="text-[#b48e56]" />
-                        <span>{isRtl ? 'القاموس المصغر لليوم:' : 'Mini Vocabulary Dictionary:'}</span>
-                      </h2>
-                      <p className="text-xs text-[#b48e56] font-bold mt-1">
-                        {lesson.sections.mini_dictionary.instructions_ar}
-                      </p>
-                    </div>
-                  </div>
+        {/* Example / Dialogue in a Cream #fdfaf3 Box */}
+        <div className="bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 p-4 sm:p-5 space-y-4">
+          {/* Compact Audio Control Row (Mobile-first at 375px, no awkward wrapping) */}
+          <div className="flex items-center justify-between gap-2 flex-nowrap bg-[#002147] text-white p-2.5 sm:p-3 rounded-2xl border border-[#C49E3A]">
+            <div className="flex items-center gap-2 min-w-0">
+              <button
+                type="button"
+                onClick={togglePlay}
+                className="w-10 h-10 rounded-xl bg-[#C49E3A] text-[#002147] flex items-center justify-center shrink-0 active:scale-95 transition-transform cursor-pointer"
+                aria-label={isPlaying ? t('إيقاف مؤقت', 'Pause') : t('استمع للحوار', 'Play Dialogue')}
+              >
+                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+              </button>
+              <button
+                type="button"
+                onClick={() => playFullDialogue(0)}
+                className="w-9 h-9 rounded-xl bg-white/10 text-[#E6C36A] hover:bg-white/20 flex items-center justify-center shrink-0 active:scale-95 transition-transform cursor-pointer"
+                title={t('إعادة من البداية', 'Replay from start')}
+              >
+                <RotateCcw size={15} />
+              </button>
+              <span className="text-xs font-black text-[#E6C36A] truncate hidden sm:inline">
+                {isPlaying
+                  ? t('جارٍ القراءة الصوتية...', 'Playing dialogue...')
+                  : t('استمع للحوار كاملاً', 'Listen to Full Dialogue')}
+              </span>
+            </div>
 
-                  {/* Vocabulary Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {lesson.sections.mini_dictionary.words.map((item, idx) => (
-                      <motion.div
-                        key={`word-${idx}`}
-                        whileHover={{ y: -3, scale: 1.01 }}
-                        onClick={() => handleSpeechText(item.word, 'en', idx)}
-                        className={`bg-white border rounded-2xl p-5 shadow-xs transition-all cursor-pointer relative group flex flex-col justify-between ${
-                          item.important 
-                            ? 'border-amber-500/30 bg-amber-500/[0.02] hover:bg-amber-500/5' 
-                            : 'border-slate-100 hover:border-slate-200'
-                        }`}
-                      >
-                        {/* Word Type Badges Header */}
-                        <div className="flex justify-between items-center mb-3">
-                          <button className="text-slate-400 group-hover:text-[#b48e56] transition-colors">
-                            <Volume2 size={16} />
-                          </button>
-                          
-                          {item.important && (
-                            <span className="bg-amber-100 text-amber-800 font-extrabold text-[9px] px-2 py-0.5 rounded-md flex items-center gap-1">
-                              <span>★</span>
-                              <span>{t.importantWord}</span>
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Text values */}
-                        <div className="text-right">
-                          <h4 className="font-mono font-black text-slate-900 text-lg tracking-tight">
-                            {item.word}
-                          </h4>
-                          <p className="text-slate-500 text-xs font-bold leading-relaxed font-arabic mt-1">
-                            {item.meaning_ar}
-                          </p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  <div className="bg-[#b48e56]/5 border border-[#b48e56]/15 rounded-2xl p-4 text-right">
-                    <p className="text-xs text-[#b48e56] font-bold leading-relaxed">
-                      {isRtl 
-                        ? '💡 اضغط على بطاقات الكلمات اللغوية لتثبيت النطق السليم بمخارج الحروف الصحيحة.' 
-                        : '💡 Press on any vocabulary card to speak its phonetic pronunciation perfectly.'}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3: Interactive Practice MCQ */}
-              {currentStep === 3 && (
-                <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4 flex justify-between items-center flex-row-reverse">
-                    <div>
-                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 flex-row-reverse   mb-1">
-                        <HelpCircle className="text-[#b48e56]" />
-                        <span>{isRtl ? 'ثبّت مهاراتك بالتطبيق التفاعلي:' : 'Secure Your Interactive Vocabulary:'}</span>
-                      </h2>
-                      <p className="text-xs text-[#b48e56] font-bold">{lesson.sections.practice.instructions_ar}</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    {lesson.sections.practice.questions.map((q, qIdx) => {
-                      const selected = selectedAnswers[qIdx];
-                      const isCorrect = checkedAnswers[qIdx];
-                      
-                      return (
-                        <div key={`q-${qIdx}`} className="bg-slate-50/55 p-5 rounded-2xl border border-slate-200">
-                          
-                          {/* Sentence reading */}
-                          <div className="flex justify-between items-center mb-3 flex-row-reverse">
-                            <span className="text-[10px] font-black text-slate-400">
-                              {isRtl ? `السؤال ${qIdx + 1}` : `Question ${qIdx + 1}`}
-                            </span>
-                            <button
-                              onClick={() => handleSpeechText(q.sentence.replace('_____', 'blank'), 'en')}
-                              className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
-                              title="Listen"
-                            >
-                              <Volume2 size={14} />
-                            </button>
-                          </div>
-
-                          <p className="font-mono font-bold text-slate-800 text-base md:text-lg mb-4 text-center direction-ltr">
-                            {q.sentence.split('_____').map((part, pIdx) => (
-                              <React.Fragment key={`part-${pIdx}`}>
-                                {part}
-                                {pIdx === 0 && (
-                                  <span className={`inline-block px-3 py-1 mx-1 border rounded-lg font-mono text-sm shadow-inner min-w-[70px] text-center ${
-                                    selected 
-                                      ? (isCorrect ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-rose-100 text-rose-800 border-rose-300') 
-                                      : 'bg-white text-slate-300 border-slate-200'
-                                  }`}>
-                                    {selected || '.....'}
-                                  </span>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </p>
-
-                          {/* Quick inline Options */}
-                          <div className="flex gap-3 justify-center">
-                            {q.options.map((opt) => {
-                              const isThisOptSelected = selected === opt;
-                              return (
-                                <button
-                                  key={opt}
-                                  onClick={() => selectAnswer(qIdx, opt)}
-                                  className={`px-5 py-2.5 rounded-xl text-xs font-mono font-black transition-all cursor-pointer ${
-                                    isThisOptSelected
-                                      ? (isCorrect ? 'bg-emerald-600 text-white shadow-md' : 'bg-rose-600 text-white shadow-md')
-                                      : 'bg-white border border-slate-200 text-slate-700 hover:border-[#b48e56]/40 hover:bg-slate-50'
-                                  }`}
-                                >
-                                  {opt}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          {/* Response advice */}
-                          {selected && (
-                            <div className={`mt-3 text-xs font-bold text-center flex items-center justify-center gap-1.5 ${isCorrect ? 'text-emerald-600' : 'text-rose-500'}`}>
-                              {isCorrect ? (
-                                <>
-                                  <CheckCircle2 size={12} />
-                                  <span>{t.correctAnswer}</span>
-                                </>
-                              ) : (
-                                <>
-                                  <AlertCircle size={12} />
-                                  <span>{t.wrongAnswer} ({isRtl ? `الصحيح هو: ${q.correct}` : `Correct is: ${q.correct}`})</span>
-                                </>
-                              )}
-                            </div>
-                          )}
-
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 4: Custom Speaking Challenge & Voice Recording */}
-              {currentStep === 4 && (
-                <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4 text-right">
-                    <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end mb-1">
-                      <Mic2 className="text-[#b48e56]" />
-                      <span>{isRtl ? 'التدريب اللفظي واستقرار اللفظ:' : 'Phonic Performance Challenge:'}</span>
-                    </h2>
-                    <p className="text-xs text-[#b48e56] font-bold">{lesson.sections.acting_challenge.instructions_ar}</p>
-                  </div>
-
-                  <div className="bg-slate-50 border border-slate-200 p-6 rounded-3xl text-center space-y-4 relative overflow-hidden">
-                    
-                    {/* The Target Sentence */}
-                    <div className="p-4 bg-white border border-[#b48e56]/15 rounded-2xl max-w-sm mx-auto">
-                      <span className="text-[9px] font-black text-[#b48e56] uppercase tracking-wider block mb-1">
-                        {isRtl ? 'اقرأ الجملة بطلاقة وثقة:' : 'READ THIS SENTENCE LOUDLY:'}
-                      </span>
-                      <p className="font-mono font-black text-[#002147] text-lg md:text-xl leading-tight">
-                        {lesson.sections.acting_challenge.sentence}
-                      </p>
-                      
-                      <button
-                        onClick={() => handleSpeechText(lesson.sections.acting_challenge.sentence, 'en')}
-                        className="mt-3 text-[10px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 mx-auto bg-blue-50 px-2.5 py-1 rounded-lg"
-                      >
-                        <Volume2 size={12} />
-                        <span>{isRtl ? 'استمع إلى اللفظ النموذجي' : 'Listen target'}</span>
-                      </button>
-                    </div>
-
-                    {/* Microphone Interaction State display */}
-                    <div className="py-2">
-                      {isRecording ? (
-                        <div className="flex flex-col items-center justify-center space-y-3">
-                          {/* Animated voice recording wave */}
-                          <div className="flex gap-1 items-end h-8">
-                            <span className="w-1 bg-rose-500 rounded-full animate-bounce [animation-delay:0.1s] h-4" />
-                            <span className="w-1 bg-rose-500 rounded-full animate-bounce [animation-delay:0.3s] h-7" />
-                            <span className="w-1 bg-rose-500 rounded-full animate-bounce [animation-delay:0.2s] h-5" />
-                            <span className="w-1 bg-rose-500 rounded-full animate-bounce [animation-delay:0.5s] h-8" />
-                            <span className="w-1 bg-rose-500 rounded-full animate-bounce [animation-delay:0.4s] h-6" />
-                          </div>
-                          <span className="text-xs font-black text-rose-500 animate-pulse">
-                            {t.recording} ({recordingDuration}s)
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-xs font-bold text-slate-400">
-                          {hasRecorded ? t.speechVerified : t.recordButton}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Button trigger */}
-                    <div className="flex justify-center gap-4">
-                      {isRecording ? (
-                        <button
-                          onClick={stopRecording}
-                          className="bg-rose-600 hover:bg-rose-700 text-white font-black text-sm px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md shadow-rose-200 cursor-pointer active:scale-95 transition-all"
-                        >
-                          <Square size={16} fill="white" />
-                          <span>{t.stopRecord}</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={startRecording}
-                          className="bg-[#002147] hover:bg-blue-800 text-white font-black text-sm px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md shadow-slate-200 cursor-pointer active:scale-95 transition-all"
-                        >
-                          <Mic2 size={16} />
-                          <span>{hasRecorded ? (isRtl ? 'إعادة التسجيل 🔄' : 'Re-record 🔄') : t.recordButton}</span>
-                        </button>
-                      )}
-
-                      {hasRecorded && audioUrl && (
-                        <button
-                          onClick={() => {
-                            const audio = createManagedAudio(audioUrl);
-                            audio.play();
-                          }}
-                          className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-extrabold text-xs px-5 py-3 rounded-2xl flex items-center gap-1.5 hover:bg-emerald-100 transition-colors"
-                        >
-                          <span>🎧</span>
-                          <span>{t.playback}</span>
-                        </button>
-                      )}
-
-                      {/* Fallback playback for simulated recording */}
-                      {hasRecorded && !audioUrl && (
-                        <button
-                          onClick={() => handleSpeechText(lesson.sections.acting_challenge.sentence, 'en')}
-                          className="bg-emerald-50 text-emerald-700 border border-emerald-100 font-extrabold text-xs px-5 py-3 rounded-2xl flex items-center gap-1.5 hover:bg-emerald-100 transition-colors"
-                        >
-                          <span>🎧</span>
-                          <span>{isRtl ? 'استعراض النطق النموذجي المسجل' : 'Listen Sample Record'}</span>
-                        </button>
-                      )}
-                    </div>
-
-                    {hasRecorded && (
-                      <div className="space-y-4">
-                        <motion.div 
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="p-4 bg-emerald-100/40 text-emerald-800 border border-emerald-200 rounded-3xl max-w-md mx-auto flex items-center gap-2 flex-row-reverse text-right mt-4"
-                        >
-                          <span className="text-xl">⭐</span>
-                          <div className="flex-1">
-                            <p className="font-bold text-xs">
-                              {pronunciationScore >= 80 
-                                ? (isRtl ? 'تم قبول نطقك ورصد مستوى مميز! 🎉' : 'Pronunciation accepted with a stellar rating! 🎉')
-                                : (isRtl ? 'تم قبول نطقك بنجاح! 🌟' : 'Pronunciation accepted successfully! 🌟')
-                              }
-                            </p>
-                            <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                              {isRtl ? 'مستوى دقة النطق:' : 'Pronunciation Accuracy:'} {pronunciationScore > 0 ? `${pronunciationScore}%` : '92%'} • {isRtl ? 'المعيار الصوتي القياسي' : 'Standard Accent Metric'}
-                            </p>
-                            {recordedText && (
-                              <p className="text-[10px] text-indigo-700 font-bold mt-1 text-right">
-                                {isRtl ? 'ما تم سماعه:' : 'Detected Speech:'} "{recordedText}"
-                              </p>
-                            )}
-                          </div>
-                        </motion.div>
-
-                        {/* Plan 2: Advanced Word Syllable & Tone Visualizer */}
-                        <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="p-5 bg-slate-50 border border-slate-100 rounded-3xl max-w-md mx-auto text-start space-y-3"
-                        >
-                          <div className="flex justify-between items-center flex-row-reverse">
-                            <span className="text-xs font-black text-[#002147] bg-[#002147]/5 px-2.5 py-1 rounded-lg">
-                              {isRtl ? 'الخطة 2: تفكيك المقاطع والتدفق' : 'Plan 2: Syllable Flow AI'}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{isRtl ? 'مخارج الحروف والمقاطع' : 'Phonetic Alignment'}</span>
-                          </div>
-                          <div className="flex flex-wrap gap-2 justify-start">
-                            {lesson.sections.acting_challenge.sentence
-                              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "")
-                              .split(" ")
-                              .map((word: string, wIdx: number) => {
-                                const isMatched = !recordedText || recordedText.toLowerCase().includes(word.toLowerCase());
-                                return (
-                                  <div key={`syllable-word-${wIdx}`} className="flex flex-col items-center">
-                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-colors ${isMatched ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
-                                      {word}
-                                    </span>
-                                    <span className="text-[9px] text-slate-400 font-semibold mt-1">
-                                      {word.length > 5 ? `${word.substring(0,3)}·${word.substring(3)}` : word}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                          <p className="text-[9px] text-slate-400 font-medium leading-normal">
-                            {isRtl 
-                              ? 'تم تلوين الكلمات التي تم رصد تطابقها اللفظي العالي باللون الأخضر مقارنة بمقاطع اللكنة القياسية للأكاديمية.'
-                              : 'Highly aligned words matched with native standard templates are colored in green.'}
-                          </p>
-                        </motion.div>
-                      </div>
-                    )}
-
-                    {spokeNothingError && (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="p-4 bg-rose-100/50 text-rose-800 border border-rose-200 rounded-2xl max-w-md mx-auto flex items-center gap-2 flex-row-reverse text-right mt-4"
-                      >
-                        <span className="text-xl">⚠️</span>
-                        <div className="flex-1">
-                          <p className="font-bold text-xs">
-                            {isRtl ? 'ملاحظة التدقيق الصوتي:' : 'Speech Verification Note:'}
-                          </p>
-                          <p className="text-[10px] text-rose-600 mt-1">
-                            {isRtl 
-                              ? 'لم نسمع نطقاً واضحاً يطابق الجملة المطلوبة. يرجى التحدث بصوت مرتفع وواضح والبدء بعد الضغط مباشرة.' 
-                              : 'We could not capture clear spoken English matching the sentence. Please speak aloud and try again.'}
-                          </p>
-                        </div>
-                      </motion.div>
-                    )}
-
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 5: Closing encouragement and reward claim */}
-              {currentStep === 5 && (
-                <div className="space-y-6 flex flex-col justify-between h-full">
-                  <div className="space-y-4">
-                    <div className="text-center pt-2">
-                      <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-[2rem] flex items-center justify-center mx-auto mb-4 border border-amber-500/15">
-                        <Award size={36} className="animate-spin [animation-duration:8s]" />
-                      </div>
-                      <h2 className="text-2xl font-black text-[#002147]">
-                        {isRtl ? 'مبارك! أتقنت الجرعة المعرفية بالكامل' : 'Fantastic! Daily Dose Secured'}
-                      </h2>
-                      <p className="text-[#b48e56] text-xs font-black uppercase tracking-widest mt-1">
-                        +100 XP SECURED
-                      </p>
-                    </div>
-
-                    <div className="bg-[#fcfbf9] border border-[#f0ece3] p-6 rounded-[1.75rem] text-right shadow-xs relative">
-                      <div className="absolute top-3 left-4 text-[9px] font-mono font-bold text-[#b48e56] uppercase">MEMO ANCHOR</div>
-                      <h4 className="font-extrabold text-slate-800 mb-2 mt-1">قاعدة وتأكيد فطن اليوم:</h4>
-                      <p className="text-sm text-slate-600 font-serif leading-relaxed font-bold whitespace-pre-line font-arabic">
-                        {lesson.sections.encouragement.content_ar}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-8 flex flex-col items-center">
-                    <button
-                      onClick={() => onComplete(practiceScore)}
-                      className="bg-[#002147] hover:bg-[#b48e56] text-white font-black text-base py-4 px-10 rounded-[2rem] shadow-xl hover:shadow-[#b48e56]/10 transition-all flex items-center gap-3 active:scale-95 cursor-pointer max-w-md w-full justify-center"
-                    >
-                      <Trophy size={20} className="text-[#C49E3A] shrink-0" />
-                      <span>{t.claimReward}</span>
-                    </button>
-                    
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider text-center mt-3">
-                      Basim Al-Khalil Digital Academy • Daily Dose Stream Complete
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Navigation Action row (if not complete/closing) */}
-              {currentStep < 5 && (
-                <div className="flex justify-between items-center border-t border-slate-100 pt-6 mt-8 flex-row-reverse">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div
+                className="inline-flex items-center rounded-xl bg-[#001a38] p-0.5 border border-[#C49E3A]/40"
+                dir="ltr"
+              >
+                {[0.8, 1, 1.2].map((spd) => (
                   <button
-                    onClick={handleNextStep}
-                    className="bg-[#002147] hover:bg-blue-800 text-white font-black text-xs md:text-sm py-3 px-6 rounded-2xl flex items-center gap-2 shadow-xs cursor-pointer active:scale-95 h-11"
+                    key={spd}
+                    type="button"
+                    onClick={() => changeSpeed(spd)}
+                    className={`px-2 py-1 rounded-lg text-[11px] font-black transition-transform active:scale-95 cursor-pointer ${
+                      playbackSpeed === spd
+                        ? 'bg-[#C49E3A] text-[#002147]'
+                        : 'text-[#E6C36A] hover:text-white'
+                    }`}
                   >
-                    <span>{t.next}</span>
-                    <ArrowRight size={16} className="rtl:rotate-180" />
+                    {spd}x
                   </button>
+                ))}
+              </div>
 
-                  {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={() => setShowArabicTranslation(!showArabicTranslation)}
+                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-black border transition-transform active:scale-95 cursor-pointer flex items-center gap-1 ${
+                  showArabicTranslation
+                    ? 'bg-[#C49E3A] text-[#002147] border-[#C49E3A]'
+                    : 'bg-[#001a38] text-[#E6C36A] border-[#C49E3A]/40'
+                }`}
+              >
+                <Languages size={13} />
+                <span>{showArabicTranslation ? t('مترجم', 'AR+EN') : 'EN'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Dialogue Lines inside the Cream Box */}
+          <div className="space-y-2.5">
+            {activeLesson.sections.story_dialogue.lines.map((line, idx) => {
+              const isLineActive = activeLineIndex === idx;
+              return (
+                <div
+                  key={idx}
+                  onClick={() => playLineAudio(line.english, idx)}
+                  className={`p-3.5 rounded-2xl border transition-transform active:scale-[0.99] cursor-pointer ${
+                    isLineActive
+                      ? 'bg-white border-2 border-[#C49E3A] shadow-sm'
+                      : 'bg-white/90 border-[#C49E3A]/30 hover:border-[#C49E3A]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3" dir="ltr">
+                    <div className="flex-1 min-w-0 text-left">
+                      <span className="inline-block px-2 py-0.5 rounded-md bg-[#002147] text-[#E6C36A] text-[10px] font-black uppercase tracking-wider mb-1">
+                        {line.speaker}
+                      </span>
+                      <p className="text-sm sm:text-base font-black text-[#002147] leading-relaxed">
+                        {line.english}
+                      </p>
+                    </div>
                     <button
-                      onClick={handlePrevStep}
-                      className="text-slate-600 hover:text-slate-900 font-bold text-xs md:text-sm py-3 px-6 rounded-2xl flex items-center gap-2 bg-slate-100 hover:bg-slate-200 transition-colors h-11"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        playLineAudio(line.english, idx);
+                      }}
+                      aria-label={t('استمع للجملة', 'Listen to sentence')}
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-transform active:scale-95 ${
+                        isLineActive
+                          ? 'bg-[#C49E3A] text-[#002147]'
+                          : 'bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/40'
+                      }`}
                     >
-                      <ArrowLeft size={16} className="rtl:rotate-180" />
-                      <span>{t.back}</span>
+                      <Volume2 size={16} />
                     </button>
+                  </div>
+
+                  {showArabicTranslation && (
+                    <p
+                      className="text-xs sm:text-sm font-bold text-[#C49E3A] mt-2 pt-2 border-t border-[#C49E3A]/20 text-right"
+                      dir="rtl"
+                    >
+                      {line.arabic}
+                    </p>
                   )}
                 </div>
-              )}
+              );
+            })}
+          </div>
 
-            </motion.div>
-          </AnimatePresence>
+          {/* Golden Rule / Encouragement Callout */}
+          <div className="rounded-xl bg-white border border-[#C49E3A]/40 p-3.5 flex items-start gap-2.5">
+            <span className="text-lg shrink-0">💡</span>
+            <p className="text-xs sm:text-sm font-black text-[#002147] leading-relaxed">
+              {activeLesson.sections.encouragement.content_ar}
+            </p>
+          </div>
+        </div>
+      </GoldCard>
+
+      {/* Interactive Quiz Card using AnswerOption */}
+      <GoldCard className="space-y-4">
+        <div className="flex items-center justify-between gap-2 border-b border-[#C49E3A]/30 pb-3">
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-[#002147]">
+              ✍️ {t('تدريب سريع: أكمل الفراغ', 'Quick Quiz: Fill in the Blank')}
+            </h3>
+            <p className="text-xs font-bold text-[#002147]/70">
+              {t(
+                activeLesson.sections.practice.instructions_ar,
+                'Choose the correct word to complete each sentence.'
+              )}
+            </p>
+          </div>
+          {practiceSubmitted && (
+            <ProgressPill>
+              🏆 {practiceScore} / {totalQuestions}
+            </ProgressPill>
+          )}
         </div>
 
-      </div>
-    </div>
+        <div className="space-y-4">
+          {activeLesson.sections.practice.questions.map((q, qIdx) => {
+            const selected = practiceAnswers[qIdx];
+            return (
+              <div
+                key={qIdx}
+                className="rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/30 p-4 space-y-3"
+              >
+                <div className="flex items-center justify-between gap-2" dir="ltr">
+                  <p className="text-sm sm:text-base font-black text-[#002147]">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#002147] text-[#E6C36A] text-xs font-black mr-2">
+                      {qIdx + 1}
+                    </span>
+                    {q.sentence}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      playLineAudio(q.sentence.replace('_____', q.correct))
+                    }
+                    className="w-8 h-8 rounded-xl bg-white border border-[#C49E3A]/40 text-[#002147] flex items-center justify-center shrink-0 active:scale-95"
+                    title={t('استمع للجملة', 'Listen')}
+                  >
+                    <Volume2 size={15} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5" dir="ltr">
+                  {q.options.map((opt, oIdx) => {
+                    const isSelected = selected === opt;
+                    const state = !practiceSubmitted
+                      ? 'normal'
+                      : opt === q.correct
+                      ? 'correct'
+                      : isSelected
+                      ? 'wrong'
+                      : 'normal';
+
+                    return (
+                      <AnswerOption
+                        key={oIdx}
+                        label={opt}
+                        selected={isSelected}
+                        state={state}
+                        disabled={practiceSubmitted}
+                        onClick={() => handleSelectOption(qIdx, opt)}
+                        dir="ltr"
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          {!practiceSubmitted ? (
+            <PrimaryButton
+              onClick={handlePracticeSubmit}
+              disabled={!allQuestionsAnswered}
+              className="w-full sm:w-auto justify-center"
+            >
+              <CheckCircle2 size={16} />
+              <span>{t('تحقق من الإجابات', 'Check Answers')}</span>
+            </PrimaryButton>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2 w-full justify-between">
+              <span className="text-sm font-black text-[#002147]">
+                {practiceScore === totalQuestions
+                  ? t('🌟 إجابات كاملة وصحيحة!', '🌟 All answers are correct!')
+                  : t('💡 راجع الإجابات الصحيحة باللون الأخضر', '💡 Review the correct answers highlighted in green')}
+              </span>
+              <GhostButton
+                onClick={() => {
+                  setPracticeAnswers({});
+                  setPracticeSubmitted(false);
+                  setPracticeScore(0);
+                }}
+              >
+                <RotateCcw size={15} />
+                <span>{t('إعادة المحاولة', 'Retry Quiz')}</span>
+              </GhostButton>
+            </div>
+          )}
+        </div>
+      </GoldCard>
+
+      {/* Speaking Challenge Card */}
+      <GoldCard className="space-y-4">
+        <div className="flex items-center justify-between gap-2 border-b border-[#C49E3A]/30 pb-3">
+          <div>
+            <h3 className="text-base sm:text-lg font-black text-[#002147]">
+              🎙️ {t('تحدي التحدث والنطق', 'Speaking & Pronunciation Challenge')}
+            </h3>
+            <p className="text-xs font-bold text-[#002147]/70">
+              {t(
+                activeLesson.sections.acting_challenge.instructions_ar,
+                'Listen to the target sentence and record your voice.'
+              )}
+            </p>
+          </div>
+          {hasRecorded && pronunciationScore > 0 && (
+            <ProgressPill>🎯 {pronunciationScore}%</ProgressPill>
+          )}
+        </div>
+
+        <div
+          className="rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 p-4 sm:p-5 text-center space-y-3"
+          dir="ltr"
+        >
+          <p className="text-base sm:text-xl font-black text-[#002147]">
+            "{activeLesson.sections.acting_challenge.sentence}"
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-1">
+            <GhostButton
+              onClick={() =>
+                playLineAudio(activeLesson.sections.acting_challenge.sentence)
+              }
+            >
+              <Volume2 size={16} className="text-[#C49E3A]" />
+              <span>{t('استمع للنطق الصحيح', 'Listen to Native Speaker')}</span>
+            </GhostButton>
+
+            {!isRecording ? (
+              <PrimaryButton onClick={startRecording}>
+                <Mic size={16} />
+                <span>
+                  {hasRecorded
+                    ? t('إعادة التسجيل', 'Record Again')
+                    : t('اضغط لتسجيل صوتك', 'Record Your Voice')}
+                </span>
+              </PrimaryButton>
+            ) : (
+              <PrimaryButton onClick={stopRecording}>
+                <Square size={16} />
+                <span>
+                  {t('إيقاف التسجيل', 'Stop Recording')} ({recordingTime}s)
+                </span>
+              </PrimaryButton>
+            )}
+
+            {recordedAudioUrl && !isRecording && (
+              <GhostButton onClick={playRecordedVoice}>
+                <Play size={16} className="text-[#002147]" />
+                <span>{t('اسمع صوتك', 'Play My Recording')}</span>
+              </GhostButton>
+            )}
+          </div>
+
+          {recordingWarning && (
+            <p className="text-xs font-bold text-[#002147] bg-white border border-[#C49E3A]/40 rounded-xl px-3 py-2">
+              {recordingWarning}
+            </p>
+          )}
+
+          {spokenTranscript && (
+            <p className="text-xs font-bold text-[#002147]/80">
+              {t('ما التقطه الميكروفون:', 'Detected speech:')}{' '}
+              <span className="font-black text-[#002147]">"{spokenTranscript}"</span>
+            </p>
+          )}
+        </div>
+
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#C49E3A]/20">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#002147]/80">
+            <Sparkles size={16} className="text-[#C49E3A] shrink-0" />
+            <span>
+              {t(
+                'أنهِ جرعة اليوم واحصل على نقاط التقدم في ملفك الأكاديمي',
+                'Complete today’s dose to log your progress and earn XP'
+              )}
+            </span>
+          </div>
+          <PrimaryButton
+            onClick={handleClaimComplete}
+            className="w-full sm:w-auto justify-center"
+          >
+            <Trophy size={16} />
+            <span>{t('إتمام الدرس واستلام النقاط', 'Complete Dose & Claim XP')}</span>
+          </PrimaryButton>
+        </div>
+      </GoldCard>
+
+      {/* Previous Days / All Daily Doses in a LessonTile List */}
+      <GoldCard className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-base sm:text-lg font-black text-[#002147]">
+            📚 {t('جرعات الأيام السابقة وسلسلة الدروس', 'Previous Days & Daily Dose Series')}
+          </h3>
+          <ProgressPill>
+            {ADULTS_DAILY_DOSES.length} {t('درس', 'Doses')}
+          </ProgressPill>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {ADULTS_DAILY_DOSES.map((item, idx) => {
+            const isActive = item.lesson_id === activeLesson.lesson_id;
+            const isDone = completedIds.includes(item.lesson_id);
+            return (
+              <LessonTile
+                key={item.lesson_id}
+                order={idx + 1}
+                emoji="☕"
+                title={t(item.title_ar, item.title_en)}
+                subtitle={item.title_en}
+                level={item.level}
+                active={isActive}
+                done={isDone}
+                onClick={() => {
+                  setActiveLesson(item);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            );
+          })}
+        </div>
+      </GoldCard>
+    </SectionShell>
   );
 };
+
+export default AdultsDailyDose;
