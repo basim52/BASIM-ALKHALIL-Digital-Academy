@@ -194,19 +194,55 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
             {letters.map((letItem, idx) => {
               const isSelected = selectedLetter?.char === letItem.char;
               return (
-                <LessonTile
+                <div
                   key={letItem.char}
-                  order={idx + 1}
-                  title={letItem.char}
-                  subtitle={`${letItem.ipa} • ${letItem.exampleWord}`}
-                  active={isSelected}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => {
                     setSelectedLetter(letItem);
                     speakText(letItem.char, targetLang);
                     onPlayChime('message');
                   }}
-                  className="!px-2 !py-2.5"
-                />
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedLetter(letItem);
+                      speakText(letItem.char, targetLang);
+                      onPlayChime('message');
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between gap-1.5 px-2 py-2 sm:px-2.5 sm:py-2.5 rounded-2xl border text-start transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#fdfaf3] border-[#C49E3A] ring-2 ring-[#C49E3A]/40 shadow-sm'
+                      : 'bg-white border-[#C49E3A]/40 hover:border-[#C49E3A] shadow-sm'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+                    <span className="w-6 h-6 rounded-full bg-[#002147] text-[#E6C36A] text-[11px] font-black flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <span className="block text-xs sm:text-sm font-black text-[#002147] truncate">
+                        {letItem.char}
+                      </span>
+                      <span dir="ltr" className="block text-[10px] sm:text-[11px] font-bold text-[#002147]/65 truncate">
+                        {letItem.ipa} • {letItem.exampleWord}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      speakText(letItem.exampleWord, targetLang);
+                    }}
+                    className="w-6 h-6 rounded-lg bg-[#C49E3A]/20 hover:bg-[#C49E3A] text-[#002147] flex items-center justify-center transition-colors shrink-0"
+                    title={`Play ${letItem.exampleWord}`}
+                    aria-label={`Play ${letItem.exampleWord}`}
+                  >
+                    <Volume2 size={12} className="text-[#002147]" />
+                  </button>
+                </div>
               );
             })}
           </div>

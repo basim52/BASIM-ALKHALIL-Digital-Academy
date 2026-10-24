@@ -15,6 +15,7 @@ const TITLES: Record<string, [string, string]> = {
   'pronunciation-lab': ['معمل النطق 🎙️', 'Pronunciation Lab 🎙️'],
   'live-translate': ['المترجم المباشر 🌐', 'Live Translate 🌐'],
   'interactive-learning': ['تعليم تفاعلي ⚡', 'Interactive Learning ⚡'],
+  'lesson': ['الدرس التفاعلي 📖', 'Interactive Lesson 📖'],
   'educational-games': ['واحة الألعاب والآداب 🎮', 'Games & Manners 🎮'],
   'ai-curriculum': ['منهج الذكاء الاصطناعي 🧠', 'AI Curriculum 🧠'],
   'professional-development': ['دورات تطويرية 🎓', 'Professional Development 🎓'],
