@@ -730,15 +730,29 @@ export const StoryLibrary = ({ lang, profile, onUpdateProfile, onNavigate, onBac
     <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={`pb-28 ${isRtl ? 'font-arabic' : 'font-sans'}`}>
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
         {STORIES.map((story, sIdx) => (
-          <LessonTile
-            key={`story-card-${story.id || sIdx}`}
-            order={sIdx + 1}
-            title={isRtl ? story.titleAr : story.titleEn}
-            subtitle={`${story.content.split(' ').length} ${t('كلمة', 'words')}`}
-            emoji="📖"
-            level={story.level}
-            onClick={() => handleSelectStory(story)}
-          />
+          <div key={`story-card-${story.id || sIdx}`} className="flex flex-col rounded-2xl border border-[#C49E3A]/40 bg-white overflow-hidden shadow-sm">
+            <div onClick={() => handleSelectStory(story)} className="h-28 sm:h-36 w-full overflow-hidden bg-[#002147] cursor-pointer">
+              {brokenImages[story.id] ? (
+                renderFallbackCover(story)
+              ) : (
+                <img
+                  src={story.image}
+                  alt={isRtl ? story.titleAr : story.titleEn}
+                  onError={() => setBrokenImages(prev => ({ ...prev, [story.id]: true }))}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+            <LessonTile
+              order={sIdx + 1}
+              title={isRtl ? story.titleAr : story.titleEn}
+              subtitle={`${story.content.split(' ').length} ${t('كلمة', 'words')}`}
+              emoji="📖"
+              level={story.level}
+              onClick={() => handleSelectStory(story)}
+              className="!rounded-none !border-0 !shadow-none"
+            />
+          </div>
         ))}
       </div>
 

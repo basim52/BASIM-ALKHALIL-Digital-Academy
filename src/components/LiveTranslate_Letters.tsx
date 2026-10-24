@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Volume2, Award, Sparkles, Check, AlertCircle, RefreshCw, BookOpen, ChevronRight, HelpCircle } from 'lucide-react';
+import { Volume2, Award, Sparkles, Check, AlertCircle, RefreshCw, BookOpen } from 'lucide-react';
+import { GoldCard, LessonTile, PrimaryButton, GhostButton, AnswerOption, ProgressPill } from './ui/academy';
 
 interface LiveTranslateLettersProps {
   isRtl: boolean;
@@ -141,114 +142,71 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
     }
   };
 
+  const t = (ar: string, en: string) => (isRtl ? ar : en);
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Intro section */}
-      <div className="bg-gradient-to-br from-[#002147] to-[#0d3463] rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-xl border border-white/10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400 opacity-5 rounded-full blur-3xl -translate-y-12 translate-x-12"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400 opacity-5 rounded-full blur-3xl translate-y-12 -translate-x-12"></div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-3 text-right">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-black text-amber-300">
+      <GoldCard className="p-5 sm:p-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-2 text-right">
+            <ProgressPill>
               <Sparkles size={12} />
-              <span>{isRtl ? 'حروف اللغة والأنغام الفونيمية الكلاسيكية' : 'Phoneme Harmony & Alphabet'}</span>
-            </div>
-            <h3 className="text-xl md:text-2xl font-black tracking-tight leading-snug">
-              {isRtl ? 'مستودع الحروف والأصوات الحية 🔠' : 'Interactive Alphabets & Phonetics 🔠'}
+              <span>{t('حروف اللغة والأنغام الفونيمية الكلاسيكية', 'Phoneme Harmony & Alphabet')}</span>
+            </ProgressPill>
+            <h3 className="text-lg sm:text-xl font-black text-[#002147] tracking-tight leading-snug">
+              {t('مستودع الحروف والأصوات الحية 🔠', 'Interactive Alphabets & Phonetics 🔠')}
             </h3>
-            <p className="text-xs md:text-sm text-slate-200 leading-relaxed font-medium max-w-xl">
-              {isRtl 
-                ? 'استكشف الحروف الحية للغات العالمية ومخارج اللسان الفونيتيكية. استمع بوضوح تام، واكتشف النبر القياسي لتعزيز طلاقة نطقك وخروج الصوت السليم.' 
-                : 'Click any letter to trigger localized speech, explore phonetic IPA charts, and master precise mouth positions developed by expert linguists.'}
+            <p className="text-xs sm:text-sm text-[#002147]/75 leading-relaxed font-medium max-w-xl">
+              {t(
+                'استكشف الحروف الحية للغات العالمية ومخارج اللسان الفونيتيكية. استمع بوضوح تام، واكتشف النبر القياسي لتعزيز طلاقة نطقك وخروج الصوت السليم.',
+                'Click any letter to trigger localized speech, explore phonetic IPA charts, and master precise mouth positions developed by expert linguists.'
+              )}
             </p>
           </div>
-          
-          <div className="flex flex-col items-center justify-center p-4 bg-white/5 border border-white/10 backdrop-blur-sm rounded-2xl text-center min-w-[130px]">
-            <span className="text-[28px] animate-bounce">🎓</span>
-            <span className="text-white text-xs font-bold mt-1 block">
-              {isRtl ? 'علم الفونيمات' : 'Phonetic Science'}
+
+          <div className="flex flex-col items-center justify-center p-3.5 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-2xl text-center min-w-[120px] shrink-0">
+            <span className="text-2xl">🎓</span>
+            <span className="text-[#002147] text-xs font-black mt-1 block">
+              {t('علم الفونيمات', 'Phonetic Science')}
             </span>
-            <span className="text-amber-400 text-[10px] font-mono mt-0.5">
-              {isRtl ? 'تفاعل فوري مبارز' : 'Standard IPA guide'}
+            <span className="text-[#C49E3A] text-[10px] font-mono font-bold mt-0.5">
+              {t('تفاعل فوري مبارز', 'Standard IPA guide')}
             </span>
           </div>
         </div>
-      </div>
+      </GoldCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left column: letter matrix (8 columns on large, interactive grid) */}
+        {/* Left column: letter matrix (3 columns on mobile) */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex justify-between items-center px-1">
             <h4 className="text-xs font-black text-[#002147] tracking-wider uppercase flex items-center gap-1.5">
               <span className="w-1.5 h-3 bg-[#002147] rounded"></span>
-              {isRtl ? 'مصفوفة الحروف والنطق الصوتي:' : 'Letter Matrix & Phonetics:'}
+              {t('مصفوفة الحروف والنطق الصوتي:', 'Letter Matrix & Phonetics:')}
             </h4>
-            <span className="text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-0.5 rounded-full">
-              {letters.length} {isRtl ? 'عناصر صوتية رئيسية' : 'Key sounds'}
-            </span>
+            <ProgressPill>
+              {letters.length} {t('عناصر صوتية رئيسية', 'Key sounds')}
+            </ProgressPill>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-            {letters.map((letItem) => {
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-2.5">
+            {letters.map((letItem, idx) => {
               const isSelected = selectedLetter?.char === letItem.char;
               return (
-                <div
+                <LessonTile
                   key={letItem.char}
-                  role="button"
-                  tabIndex={0}
+                  order={idx + 1}
+                  title={letItem.char}
+                  subtitle={`${letItem.ipa} • ${letItem.exampleWord}`}
+                  active={isSelected}
                   onClick={() => {
                     setSelectedLetter(letItem);
                     speakText(letItem.char, targetLang);
                     onPlayChime('message');
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setSelectedLetter(letItem);
-                      speakText(letItem.char, targetLang);
-                      onPlayChime('message');
-                    }
-                  }}
-                  className={`p-4 rounded-2xl border text-right transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-[115px] group cursor-pointer ${
-                    isSelected 
-                      ? 'bg-amber-accent/15 border-[#C49E3A] ring-2 ring-[#C49E3A]/20 shadow-md transform scale-[1.02]' 
-                      : 'bg-white border-slate-200/80 hover:border-slate-300 hover:shadow-sm'
-                  }`}
-                >
-                  {/* Subtle decorative circle */}
-                  <div className={`absolute top-0 right-0 w-12 h-12 rounded-full -mr-3 -mt-3 transition-opacity ${
-                    isSelected ? 'bg-[#C49E3A]/10' : 'bg-slate-50 group-hover:bg-slate-100/80'
-                  }`}></div>
-
-                  <div className="flex items-center justify-between relative z-10 w-full mb-2">
-                    <span className="font-mono text-slate-400 text-[10px] font-black tracking-widest uppercase">
-                      {letItem.ipa}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        speakText(letItem.exampleWord, targetLang);
-                      }}
-                      className="p-1 rounded-lg bg-slate-100 hover:bg-amber-accent/20 hover:text-amber-800 transition text-slate-500"
-                      title="Play example"
-                    >
-                      <Volume2 size={11} />
-                    </button>
-                  </div>
-
-                  <div className="relative z-10 flex flex-col">
-                    <span className={`text-2xl font-black font-sans leading-none tracking-tight ${
-                      isSelected ? 'text-[#002147]' : 'text-slate-800 group-hover:text-[#002147]'
-                    }`}>
-                      {letItem.char}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-bold truncate mt-1">
-                      {letItem.exampleWord} ({letItem.exampleMeaning})
-                    </span>
-                  </div>
-                </div>
+                  className="!px-2 !py-2.5"
+                />
               );
             })}
           </div>
@@ -261,101 +219,96 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
             {selectedLetter ? (
               <motion.div
                 key={selectedLetter.char}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm text-right space-y-4 relative overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
-                {/* Active Accent Border */}
-                <div className="absolute top-0 right-0 left-0 h-1.5 bg-[#C49E3A]"></div>
-
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="px-2.5 py-1 bg-amber-50 text-[#C49E3A] border border-[#C49E3A]/10 rounded-full text-[9px] font-extrabold uppercase font-mono tracking-wider">
-                    {selectedLetter.ipa} - {isRtl ? 'الرمز الفونيتيكي' : 'IPA Symbol'}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
+                <GoldCard className="p-5 sm:p-6 text-right space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#C49E3A]/20 pb-3">
+                    <ProgressPill>
+                      {selectedLetter.ipa} - {t('الرمز الفونيتيكي', 'IPA Symbol')}
+                    </ProgressPill>
+                    <PrimaryButton
                       onClick={() => speakText(selectedLetter.char, targetLang)}
-                      className="px-3 py-1.5 bg-[#002147] hover:bg-[#0d3463] text-white rounded-xl text-[10px] font-bold transition flex items-center gap-1.5 cursor-pointer"
+                      className="!px-3 !py-1.5 !min-h-[36px] !text-xs"
                     >
-                      <Volume2 size={12} />
-                      <span>{isRtl ? 'اسمع الحرف 🎙️' : 'Hear Letter 🎙️'}</span>
-                    </button>
+                      <Volume2 size={13} />
+                      <span>{t('اسمع الحرف 🎙️', 'Hear Letter 🎙️')}</span>
+                    </PrimaryButton>
                   </div>
-                </div>
 
-                <div className="flex items-baseline justify-between">
-                  <div className="space-y-0.5">
-                    <span className="text-xs text-slate-400 font-bold block">{isRtl ? 'الكلمة والمثال:' : 'Word & Translation:'}</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-base font-black text-[#002147] font-sans">
-                        {selectedLetter.exampleWord}
-                      </span>
-                      <span className="text-xs text-slate-500 font-semibold bg-slate-100 px-1.5 py-0.5 rounded">
-                        {selectedLetter.exampleMeaning}
-                      </span>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <div className="space-y-1 min-w-0">
+                      <span className="text-xs text-[#002147]/70 font-bold block">{t('الكلمة والمثال:', 'Word & Translation:')}</span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-base font-black text-[#002147] font-sans">
+                          {selectedLetter.exampleWord}
+                        </span>
+                        <span className="text-xs text-[#002147] font-bold bg-[#fdfaf3] border border-[#C49E3A]/40 px-2 py-0.5 rounded-lg">
+                          {selectedLetter.exampleMeaning}
+                        </span>
+                      </div>
                     </div>
+                    <span className="text-4xl lg:text-5xl font-black text-[#002147] tracking-tight font-sans shrink-0">
+                      {selectedLetter.char}
+                    </span>
                   </div>
-                  <span className="text-4xl lg:text-5xl font-black text-rose-500 tracking-tight font-sans">
-                    {selectedLetter.char}
-                  </span>
-                </div>
 
-                {/* Arabic tips developed by academy */}
-                <div className="bg-[#002147]/5 border border-[#002147]/10 p-4 rounded-2xl space-y-2">
-                  <h5 className="text-[11px] font-extrabold text-[#002147] flex items-center justify-end gap-1.5">
-                    <span>💡 {isRtl ? 'كيف ينطق للعرب بامتياز؟' : 'Pronunciation Secrets for Arabs'}</span>
-                  </h5>
-                  <p className="text-[12px] text-slate-700 leading-relaxed font-bold">
-                    {selectedLetter.arabicTip}
-                  </p>
-                </div>
+                  {/* Arabic tips developed by academy */}
+                  <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-4 rounded-2xl space-y-2">
+                    <h5 className="text-[11px] font-black text-[#002147] flex items-center justify-end gap-1.5">
+                      <span>💡 {t('كيف ينطق للعرب بامتياز؟', 'Pronunciation Secrets for Arabs')}</span>
+                    </h5>
+                    <p className="text-xs text-[#002147] leading-relaxed font-bold">
+                      {selectedLetter.arabicTip}
+                    </p>
+                  </div>
 
-                {/* Professional explanation */}
-                <div className="space-y-1">
-                  <span className="text-[10px] text-slate-400 font-extrabold block">{isRtl ? 'شرح المخرج والأثر اللفظي:' : 'Articulation Details:'}</span>
-                  <p className="text-[11.5px] text-slate-600 leading-normal font-medium">
-                    {selectedLetter.description}
-                  </p>
-                </div>
+                  {/* Professional explanation */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-[#002147]/70 font-black block">{t('شرح المخرج والأثر اللفظي:', 'Articulation Details:')}</span>
+                    <p className="text-xs text-[#002147]/80 leading-normal font-medium">
+                      {selectedLetter.description}
+                    </p>
+                  </div>
 
-                <button
-                  type="button"
-                  onClick={() => speakText(`${selectedLetter.char}. for example. ${selectedLetter.exampleWord}`, targetLang)}
-                  className="w-full py-2 bg-slate-100 hover:bg-slate-200/80 transition text-[#002147] rounded-xl text-xs font-black flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Volume2 size={13} />
-                  <span>{isRtl ? 'تشغيل اللفظ الكامل للمصطلح' : 'Vocalize Example Sentence'}</span>
-                </button>
+                  <GhostButton
+                    onClick={() => speakText(`${selectedLetter.char}. for example. ${selectedLetter.exampleWord}`, targetLang)}
+                    className="w-full"
+                  >
+                    <Volume2 size={14} />
+                    <span>{t('تشغيل اللفظ الكامل للمصطلح', 'Vocalize Example Sentence')}</span>
+                  </GhostButton>
+                </GoldCard>
               </motion.div>
             ) : (
-              <div className="bg-slate-50 border border-slate-200 border-dashed rounded-3xl p-8 text-center text-slate-400 text-xs font-black py-16">
+              <GoldCard className="p-8 text-center py-12">
                 <span className="text-3xl block mb-2">👈</span>
-                {isRtl 
-                  ? 'من فضلك انقر فوق أي حرف من مصفوفة الأصوات الحية لتشغيل اللفظ ومشاهدة تفاصيل الشرح وتعديل حركات اللسان.' 
-                  : 'Please pick any phoneme or letter from the live list to trigger high-fidelity audio synthesis.'}
-              </div>
+                <p className="text-xs font-black text-[#002147]/75">
+                  {t(
+                    'من فضلك انقر فوق أي حرف من مصفوفة الأصوات الحية لتشغيل اللفظ ومشاهدة تفاصيل الشرح وتعديل حركات اللسان.',
+                    'Please pick any phoneme or letter from the live list to trigger high-fidelity audio synthesis.'
+                  )}
+                </p>
+              </GoldCard>
             )}
           </AnimatePresence>
 
           {/* Gamified Letter Sound Quiz */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-5 text-white shadow-md relative overflow-hidden border border-slate-700 text-right space-y-4">
-            <div className="absolute top-0 left-0 w-24 h-24 bg-amber-400/10 rounded-full blur-2xl"></div>
-            
-            <div className="flex items-center justify-between pb-2 border-b border-slate-700">
-              <span className="flex items-center gap-1 text-[10px] bg-amber-500/10 text-amber-300 px-2 py-0.5 border border-amber-300/10 rounded-full font-black">
+          <GoldCard className="p-5 text-right space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#C49E3A]/20">
+              <ProgressPill>
                 <Award size={11} />
                 <span>Score: {quizScore} pts</span>
-              </span>
-              <h5 className="text-xs font-black text-slate-300 flex items-center gap-1">
-                <span>🎯 {isRtl ? 'مسابقة النطق والسمع ومخارج الضاد' : 'Phonetic Sound Challenge'}</span>
+              </ProgressPill>
+              <h5 className="text-xs font-black text-[#002147] flex items-center gap-1">
+                <span>🎯 {t('مسابقة النطق والسمع ومخارج الضاد', 'Phonetic Sound Challenge')}</span>
               </h5>
             </div>
 
             {currentQuiz ? (
               <div className="space-y-4">
-                <div className="text-xs font-semibold text-slate-300 leading-normal bg-white/5 p-3 rounded-xl border border-white/5">
+                <div className="text-xs font-bold text-[#002147] leading-normal bg-[#fdfaf3] p-3.5 rounded-2xl border border-[#C49E3A]/40">
                   {currentQuiz.question}
                 </div>
 
@@ -365,51 +318,46 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
                     const isCorrect = option === currentQuiz.correctChar;
                     const hasAnswered = currentQuiz.userAnswer !== null;
 
-                    let btnStyle = "bg-white/10 hover:bg-white/15 border-slate-700 text-white";
-                    if (hasAnswered) {
-                      if (isCorrect) {
-                        btnStyle = "bg-emerald-500/20 border-emerald-500 text-emerald-300 ring-1 ring-emerald-500/30";
-                      } else if (isSelected) {
-                        btnStyle = "bg-rose-500/20 border-rose-500 text-rose-300 ring-1 ring-rose-500/30";
-                      } else {
-                        btnStyle = "bg-white/5 border-slate-800 text-slate-400 opacity-50";
-                      }
-                    }
+                    const optionState = !hasAnswered
+                      ? 'normal'
+                      : isCorrect
+                      ? 'correct'
+                      : isSelected
+                      ? 'wrong'
+                      : 'normal';
 
                     return (
-                      <button
+                      <AnswerOption
                         key={option}
-                        type="button"
+                        label={option}
+                        state={optionState}
+                        selected={isSelected}
                         disabled={hasAnswered}
                         onClick={() => handleAnswerOption(option)}
-                        className={`py-2 px-3 rounded-xl border text-center font-sans text-sm font-black transition-all ${btnStyle} ${!hasAnswered ? 'cursor-pointer active:scale-95' : 'cursor-default'}`}
-                      >
-                        {option}
-                      </button>
+                      />
                     );
                   })}
                 </div>
 
                 {currentQuiz.userAnswer && (
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      type="button"
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <PrimaryButton
                       onClick={startNewQuiz}
-                      className="px-3 py-1.5 bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black rounded-lg text-[10px] transition flex items-center gap-1 cursor-pointer"
+                      className="!px-3.5 !py-1.5 !min-h-[36px] !text-xs"
                     >
-                      <RefreshCw size={11} />
-                      <span>{isRtl ? 'التالي 🚀' : 'Next 🚀'}</span>
-                    </button>
-                    <div className="text-[10px] text-slate-300 font-bold flex items-center gap-1">
+                      <RefreshCw size={12} />
+                      <span>{t('التالي 🚀', 'Next 🚀')}</span>
+                    </PrimaryButton>
+                    <div className="text-[11px] font-black flex items-center gap-1 text-[#002147]">
                       {currentQuiz.userAnswer === currentQuiz.correctChar ? (
-                        <span className="text-emerald-400 flex items-center gap-1">
-                          <Check size={12} />
-                          {isRtl ? 'إجابة ممتازة فصيحة! (+15 نقطة)' : 'Perfect Pronunciation!'}
+                        <span className="flex items-center gap-1">
+                          <Check size={12} className="text-[#C49E3A]" />
+                          {t('إجابة ممتازة فصيحة! (+15 نقطة)', 'Perfect Pronunciation!')}
                         </span>
                       ) : (
-                        <span className="text-rose-400 flex items-center gap-1">
-                          <AlertCircle size={12} />
-                          {isRtl ? `الحرف الصحيح هو ${currentQuiz.correctChar}` : `Correct letter is ${currentQuiz.correctChar}`}
+                        <span className="flex items-center gap-1">
+                          <AlertCircle size={12} className="text-[#C49E3A]" />
+                          {t(`الحرف الصحيح هو ${currentQuiz.correctChar}`, `Correct letter is ${currentQuiz.correctChar}`)}
                         </span>
                       )}
                     </div>
@@ -418,24 +366,25 @@ export function LiveTranslate_Letters({ isRtl, targetLang, onPlayChime, speakTex
               </div>
             ) : (
               <div className="py-4 text-center space-y-3">
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  {isRtl 
-                    ? 'اختبر سمعك ودقتك اللغوية في التمييز السريع بين أصوات الحروف ومخارج الفونيمات العالمية بالذكاء الاصطناعي.'
-                    : 'Analyze custom challenges and match standard audio with their visual representations.'}
+                <p className="text-xs text-[#002147]/75 leading-relaxed font-medium">
+                  {t(
+                    'اختبر سمعك ودقتك اللغوية في التمييز السريع بين أصوات الحروف ومخارج الفونيمات العالمية بالذكاء الاصطناعي.',
+                    'Analyze custom challenges and match standard audio with their visual representations.'
+                  )}
                 </p>
-                <button
-                  type="button"
+                <PrimaryButton
                   onClick={startNewQuiz}
-                  className="px-4 py-2 bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black rounded-xl text-xs transition active:scale-95 cursor-pointer flex items-center gap-1.5 mx-auto"
+                  className="mx-auto"
                 >
-                  <BookOpen size={13} />
-                  <span>{isRtl ? 'ابدأ مسابقة السمع المخارج' : 'Launch Hearing Test'}</span>
-                </button>
+                  <BookOpen size={14} />
+                  <span>{t('ابدأ مسابقة السمع المخارج', 'Launch Hearing Test')}</span>
+                </PrimaryButton>
               </div>
             )}
-          </div>
+          </GoldCard>
         </div>
       </div>
     </div>
   );
 }
+

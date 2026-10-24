@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Volume2, BookOpen, Sparkles, RefreshCw, Check, ArrowRight, ClipboardList, HelpCircle, Flame, Target, Play 
+  Volume2, Sparkles, RefreshCw, ClipboardList, Target, Play 
 } from 'lucide-react';
+import { GoldCard, PrimaryButton, GhostButton, AnswerOption, ProgressPill } from './ui/academy';
 
 interface LiveTranslateVocabProps {
   isRtl: boolean;
@@ -189,300 +189,284 @@ export function LiveTranslate_Vocab({ isRtl, targetLang, onPlayChime, speakText 
   }, [selectedWord, selectedArabic]);
 
   const activeCard = cards[activeIndex] || cards[0];
+  const t = (ar: string, en: string) => (isRtl ? ar : en);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Subject Header */}
-      <div className="bg-gradient-to-tr from-rose-950/90 via-[#002147] to-[#002147] rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-xl border border-white/10 text-right">
-        <div className="absolute top-0 left-0 w-48 h-48 bg-[#C49E3A] opacity-10 rounded-full blur-3xl"></div>
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-black text-amber-300">
+      <GoldCard className="p-5 sm:p-6 text-right">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <ProgressPill>
               <ClipboardList size={11} />
-              <span>{isRtl ? 'قاموس المفردات الحية ومجمع الفلاش كاردز المعتمد' : 'Multilingual Vocab Labs'}</span>
-            </div>
-            <h3 className="text-xl md:text-2xl font-black tracking-tight leading-snug">
-              {isRtl ? 'مستكشف الكلمات الاحترافي ومولد الفلاش كاردز 📖' : 'Active Vocab Builder & Flipping Flashcards 📖'}
+              <span>{t('قاموس المفردات الحية ومجمع الفلاش كاردز المعتمد', 'Multilingual Vocab Labs')}</span>
+            </ProgressPill>
+            <h3 className="text-lg sm:text-xl font-black text-[#002147] tracking-tight leading-snug">
+              {t('مستكشف الكلمات الاحترافي ومولد الفلاش كاردز 📖', 'Active Vocab Builder & Flipping Flashcards 📖')}
             </h3>
-            <p className="text-xs md:text-sm text-slate-200 leading-relaxed font-semibold max-w-xl">
-              {isRtl 
-                ? 'طور مرونتك اللغوية بالتفاعل مع الفلاش كاردز الاحترافية بالذكاء الاصطناعي. أنشئ مجموعات مفردات فريدة لأي موضوع مخصص يخطر ببالك لتوسيع معجمك في فوانيس العلوم.' 
-                : 'Frictionless mental recall engine. Generate custom contextual vocab decks on demand, toggle phonetic audio streams, and complete tile matching assessments.'}
+            <p className="text-xs sm:text-sm text-[#002147]/75 leading-relaxed font-semibold max-w-xl">
+              {t(
+                'طور مرونتك اللغوية بالتفاعل مع الفلاش كاردز الاحترافية بالذكاء الاصطناعي. أنشئ مجموعات مفردات فريدة لأي موضوع مخصص يخطر ببالك لتوسيع معجمك في فوانيس العلوم.',
+                'Frictionless mental recall engine. Generate custom contextual vocab decks on demand, toggle phonetic audio streams, and complete tile matching assessments.'
+              )}
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 min-w-[200px]">
-            <span className="text-[10px] text-amber-300 block font-black uppercase tracking-wider mb-2">
-              {isRtl ? '✨ أنشئ قائمة مفردات مخصصة بالذكاء الاصطناعي:' : '✨ AI Custom Deck Builder:'}
+          <div className="w-full md:w-auto bg-[#fdfaf3] p-4 rounded-2xl border border-[#C49E3A]/40 min-w-[220px]">
+            <span className="text-[10px] text-[#002147] block font-black uppercase tracking-wider mb-2">
+              {t('✨ أنشئ قائمة مفردات مخصصة بالذكاء الاصطناعي:', '✨ AI Custom Deck Builder:')}
             </span>
-            <div className="relative flex items-center">
+            <div className="flex items-center gap-2">
               <input
                 type="text"
-                placeholder={isRtl ? 'مثال: مصطلحات طبية، الطيران...' : 'e.g. Astro Physics, Dining...'}
+                placeholder={t('مثال: مصطلحات طبية، الطيران...', 'e.g. Astro Physics, Dining...')}
                 value={customTopic}
                 onChange={(e) => setCustomTopic(e.target.value)}
-                className="w-full bg-black/20 text-white rounded-xl px-3 py-2 text-xs font-bold border border-white/10 focus:outline-none focus:border-amber-400 placeholder-white/30 text-right"
+                className="flex-1 bg-white text-[#002147] rounded-xl px-3 py-2 text-xs font-bold border border-[#C49E3A]/40 focus:outline-none focus:ring-2 focus:ring-[#C49E3A] placeholder-[#002147]/40 text-right"
               />
-              <button
-                type="button"
+              <PrimaryButton
                 disabled={isGeneratingDeck}
                 onClick={handleGenerateCustomDeck}
-                className="absolute left-1 p-1.5 bg-[#C49E3A] text-[#002147] rounded-lg hover:bg-[#b08c2f] transition cursor-pointer disabled:opacity-50"
+                className="!px-3 !py-2 !min-h-[36px]"
               >
                 {isGeneratingDeck ? (
-                  <RefreshCw size={11} className="animate-spin" />
+                  <RefreshCw size={13} className="animate-spin" />
                 ) : (
-                  <Sparkles size={11} />
+                  <Sparkles size={13} />
                 )}
-              </button>
+              </PrimaryButton>
             </div>
+            {deckErrorMessage && (
+              <p className="text-[10px] font-bold text-[#002147]/75 mt-1.5">{deckErrorMessage}</p>
+            )}
           </div>
         </div>
-      </div>
+      </GoldCard>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Flashcards Engine (cols 7) */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="flex justify-between items-center px-1">
+          <div className="flex flex-wrap justify-between items-center gap-2 px-1">
             <div className="flex gap-1.5">
               {(['A1', 'B2'] as const).map((lvl) => (
                 <button
                   key={lvl}
                   type="button"
                   onClick={() => handleLevelChange(lvl)}
-                  className={`px-3 py-1 rounded-full text-[10px] font-extrabold border transition ${
-                    selectedLevel === lvl 
-                      ? 'bg-[#002147] text-white border-[#002147]' 
-                      : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 cursor-pointer'
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-black border transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] ${
+                    selectedLevel === lvl
+                      ? 'bg-[#002147] text-[#E6C36A] border-[#C49E3A]'
+                      : 'bg-white text-[#002147] border-[#C49E3A] hover:bg-[#fdfaf3] cursor-pointer'
                   }`}
                 >
-                  {lvl} {isRtl ? 'مستوى' : 'Level'}
+                  {lvl} {t('مستوى', 'Level')}
                 </button>
               ))}
             </div>
             <h4 className="text-xs font-black text-[#002147] tracking-wider uppercase flex items-center gap-1.5">
               <span className="w-1.5 h-3 bg-[#002147] rounded"></span>
-              {isRtl ? 'بطاقات الذاكرة التفاعلية (انقر للقلب):' : 'Interactive Recall Cards (Flip on tap):'}
+              {t('بطاقات الذاكرة التفاعلية (انقر للقلب):', 'Interactive Recall Cards (Flip on tap):')}
             </h4>
           </div>
 
           {activeCard ? (
-            <div className="space-y-6">
-              {/* Premium 3D Flip Card Sandbox */}
-              <div 
+            <div className="space-y-4">
+              {/* Word Card in white GoldCard */}
+              <div
                 onClick={handleCardClick}
-                className="w-full h-[280px] perspective-1000 cursor-pointer group"
+                className="cursor-pointer transition-transform active:scale-95"
               >
-                <div className={`relative w-full h-full rounded-3xl transition-transform duration-700 transform-style-3d ${
-                  isFlipped ? 'rotate-y-180' : ''
-                }`}>
-                  {/* FRONT SIDE (Foreign word) */}
-                  <div className="absolute inset-0 backface-hidden bg-white border border-slate-200 shadow-lg rounded-3xl p-6 flex flex-col justify-between text-right">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                      <span className="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-full text-[9px] font-black uppercase font-mono tracking-wider">
-                        {activeCard.partOfSpeech}
-                      </span>
-                      <button
-                        type="button"
+                {!isFlipped ? (
+                  <GoldCard className="min-h-[260px] p-6 flex flex-col justify-between text-right">
+                    <div className="flex items-center justify-between border-b border-[#C49E3A]/20 pb-3">
+                      <ProgressPill>{activeCard.partOfSpeech}</ProgressPill>
+                      <GhostButton
                         onClick={(e) => { e.stopPropagation(); speakText(activeCard.word, targetLang); }}
-                        className="p-1.5 bg-slate-100 hover:bg-[#002147]/10 rounded-xl text-[#002147] transition cursor-pointer"
                         title="Vocalize word"
+                        className="!px-2.5 !py-1.5 !min-h-[34px]"
                       >
-                        <Volume2 size={13} />
-                      </button>
+                        <Volume2 size={14} />
+                      </GhostButton>
                     </div>
 
                     <div className="text-center py-6 space-y-2">
-                      <h1 className="text-3xl lg:text-4xl font-extrabold text-[#002147] font-sans tracking-tight leading-none">
+                      <h1 className="text-3xl lg:text-4xl font-black text-[#002147] font-sans tracking-tight leading-none">
                         {activeCard.word}
                       </h1>
-                      <p className="text-xs text-slate-400 font-bold font-mono">
+                      <p className="text-xs text-[#002147]/65 font-bold font-mono">
                         {activeCard.pronunciation}
+                      </p>
+                      <p className="text-lg font-black text-[#C49E3A] pt-1">
+                        {activeCard.meaningAr}
                       </p>
                     </div>
 
-                    <div className="text-center text-[10px] text-slate-400 font-extrabold bg-slate-50 py-2 rounded-2xl border border-slate-150 group-hover:bg-slate-100/70 transition-all">
-                      {isRtl ? '👇 انقر فوق البطاقة لإظهار المعنى والتصريف العربي المانع' : '👇 Click/tap tile to reveal semantic translation'}
+                    <div className="text-center text-[11px] text-[#002147] font-black bg-[#fdfaf3] py-2 px-3 rounded-xl border border-[#C49E3A]/40">
+                      {t('👇 انقر فوق البطاقة لإظهار المعنى والتصريف العربي المانع', '👇 Click/tap tile to reveal semantic translation')}
                     </div>
-                  </div>
-
-                  {/* BACK SIDE (Arabic Meaning & Tips) */}
-                  <div className="absolute inset-0 backface-hidden rotate-y-180 bg-[#002147] text-white shadow-lg rounded-3xl p-6 flex flex-col justify-between text-right">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                      <span className="px-2.5 py-1 bg-amber-400 text-slate-950 rounded-full text-[9px] font-black uppercase tracking-wider">
-                        {isRtl ? 'المعنى المعتمد' : 'Literal meaning'}
-                      </span>
-                      <button
-                        type="button"
+                  </GoldCard>
+                ) : (
+                  <GoldCard className="min-h-[260px] p-6 flex flex-col justify-between text-right">
+                    <div className="flex items-center justify-between border-b border-[#C49E3A]/20 pb-3">
+                      <ProgressPill>
+                        {t('المعنى المعتمد', 'Literal meaning')}
+                      </ProgressPill>
+                      <GhostButton
                         onClick={(e) => { e.stopPropagation(); speakText(activeCard.example, targetLang); }}
-                        className="p-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-white transition cursor-pointer"
                         title="Vocalize example"
+                        className="!px-2.5 !py-1.5 !min-h-[34px]"
                       >
-                        <Volume2 size={13} />
-                      </button>
+                        <Volume2 size={14} />
+                      </GhostButton>
                     </div>
 
                     <div className="space-y-3 py-2">
-                      <h2 className="text-2xl font-black text-amber-300">
-                        {activeCard.meaningAr}
-                      </h2>
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <span className="text-xl font-black text-[#002147] font-sans">
+                          {activeCard.word}
+                        </span>
+                        <h2 className="text-2xl font-black text-[#C49E3A]">
+                          {activeCard.meaningAr}
+                        </h2>
+                      </div>
                       <div className="space-y-1">
-                        <span className="text-[10px] text-slate-300 font-bold block">{isRtl ? 'مثال حي وعملي:' : 'Real-world usage context:'}</span>
-                        <p className="text-xs text-slate-100 font-sans font-semibold leading-relaxed">
+                        <span className="text-[10px] text-[#002147]/70 font-bold block">{t('مثال حي وعملي:', 'Real-world usage context:')}</span>
+                        <p className="text-xs text-[#002147] font-sans font-bold leading-relaxed" dir="ltr">
                           "{activeCard.example}"
                         </p>
-                        <p className="text-[11px] text-amber-300 font-bold">
+                        <p className="text-xs text-[#C49E3A] font-black">
                           ({activeCard.exampleAr})
                         </p>
                       </div>
                     </div>
 
-                    <div className="bg-white/10 border border-white/5 p-3 rounded-2xl space-y-0.5 text-right">
-                      <span className="text-[9px] text-amber-300 font-black block">💡 {isRtl ? 'سياق القواعد والاستخدام:' : 'Mentor tip:'}</span>
-                      <p className="text-[10.5px] text-slate-200 leading-normal font-bold">
+                    <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-3 rounded-xl space-y-0.5 text-right">
+                      <span className="text-[10px] text-[#C49E3A] font-black block">💡 {t('سياق القواعد والاستخدام:', 'Mentor tip:')}</span>
+                      <p className="text-xs text-[#002147] leading-normal font-bold">
                         {activeCard.conceptGrammar}
                       </p>
                     </div>
-                  </div>
-                </div>
+                  </GoldCard>
+                )}
               </div>
 
               {/* Slider steps indicators */}
-              <div className="flex items-center justify-between px-2">
-                <button
-                  type="button"
+              <div className="flex items-center justify-between gap-2 px-1">
+                <GhostButton
                   disabled={activeIndex === 0}
                   onClick={() => { setActiveIndex(prev => prev - 1); setIsFlipped(false); onPlayChime('message'); }}
-                  className="px-4 py-2 bg-white hover:bg-[#C49E3A]/10 text-[#002147] rounded-xl text-xs font-black border border-[#002147]/20 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
                 >
-                  {isRtl ? '← السابق' : '← Previous'}
-                </button>
-                <span className="text-xs text-slate-500 font-black">
+                  {t('← السابق', '← Previous')}
+                </GhostButton>
+                <ProgressPill>
                   {activeIndex + 1} / {cards.length}
-                </span>
-                <button
-                  type="button"
+                </ProgressPill>
+                <GhostButton
                   disabled={activeIndex === cards.length - 1}
                   onClick={() => { setActiveIndex(prev => prev + 1); setIsFlipped(false); onPlayChime('message'); }}
-                  className="px-4 py-2 bg-white hover:bg-[#C49E3A]/10 text-[#002147] rounded-xl text-xs font-black border border-[#002147]/20 transition active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center gap-1"
                 >
-                  {isRtl ? 'التالي →' : 'Next →'}
-                </button>
+                  {t('التالي →', 'Next →')}
+                </GhostButton>
               </div>
             </div>
           ) : (
-            <div className="py-16 text-center text-slate-400 text-xs font-bold border border-dashed border-slate-200 rounded-3xl">
-              {isRtl ? 'لا توجد بطاقات كلمات نشطة.' : 'No cards available.'}
-            </div>
+            <GoldCard className="py-12 text-center text-[#002147]/70 text-xs font-black">
+              {t('لا توجد بطاقات كلمات نشطة.', 'No cards available.')}
+            </GoldCard>
           )}
         </div>
 
         {/* Right Column: Timed Vocabulary Memory Matching Game (cols 5) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4 text-right">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <span className="flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 border border-emerald-100 rounded-full font-black">
+          <GoldCard className="p-5 space-y-4 text-right">
+            <div className="flex items-center justify-between border-b border-[#C49E3A]/20 pb-3">
+              <ProgressPill>
                 <Target size={11} />
                 <span>Score: {gameScore} pts</span>
-              </span>
+              </ProgressPill>
               <h5 className="text-xs font-black text-[#002147] flex items-center gap-1">
-                <span>🎮 {isRtl ? 'لعبة مقارنة واختبار الذاكرة السريعة' : 'Linguistic Word Matching Matrix'}</span>
+                <span>🎮 {t('لعبة مقارنة واختبار الذاكرة السريعة', 'Linguistic Word Matching Matrix')}</span>
               </h5>
             </div>
 
             {gameWords.length > 0 ? (
               <div className="space-y-4">
-                <p className="text-[10px] text-slate-400 font-bold leading-normal">
-                  {isRtl 
-                    ? 'طابق المصطلح الأجنبي الصحيح ببطاقة ترجمته العربية. انقر على الكلمة ثم الترجمة الصحيحة لكسب النقاط!' 
-                    : 'Tap a foreign word tile, then select its precise matching Arabic translation to sweep the matrix.'}
+                <p className="text-xs text-[#002147]/75 font-bold leading-normal">
+                  {t(
+                    'طابق المصطلح الأجنبي الصحيح ببطاقة ترجمته العربية. انقر على الكلمة ثم الترجمة الصحيحة لكسب النقاط!',
+                    'Tap a foreign word tile, then select its precise matching Arabic translation to sweep the matrix.'
+                  )}
                 </p>
 
-                <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
                   {gameWords.map((tile) => {
-                    if (tile.matched) {
-                      return (
-                        <div 
-                          key={tile.id} 
-                          className="py-2.5 px-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 rounded-xl text-center text-xs font-bold line-through flex items-center justify-center gap-1"
-                        >
-                          <Check size={11} className="text-emerald-600 font-black" />
-                          <span className="truncate max-w-[100px]">{tile.text}</span>
-                        </div>
-                      );
-                    }
-
                     const isWordSelected = selectedWord === tile.id;
                     const isArabSelected = selectedArabic === tile.id;
                     const isSelected = isWordSelected || isArabSelected;
 
-                    const tileStyle = isSelected
-                      ? 'bg-amber-accent/20 border-[#C49E3A] text-slate-950 font-black ring-1 ring-[#C49E3A]/40'
-                      : 'bg-slate-50 hover:bg-slate-100/90 border-slate-200 text-[#002147] font-semibold';
-
                     return (
-                      <button
+                      <AnswerOption
                         key={tile.id}
-                        type="button"
+                        label={tile.text}
+                        state={tile.matched ? 'correct' : 'normal'}
+                        selected={isSelected}
+                        disabled={tile.matched}
                         onClick={() => handleTileClick(tile.id, tile.type, tile.originalId)}
-                        className={`py-2 px-1.5 rounded-xl border text-center text-[11px] transition-all duration-200 cursor-pointer ${tileStyle}`}
-                      >
-                        {tile.text}
-                      </button>
+                        className="!px-3 !py-2.5 !text-xs"
+                      />
                     );
                   })}
                 </div>
 
                 {gameWords.every(w => w.matched) ? (
-                  <div className="bg-emerald-50 text-emerald-800 rounded-2xl p-4 text-center space-y-2 border border-emerald-100 animate-pulse">
-                    <span className="text-2xl">🏆</span>
-                    <h5 className="text-[14px] font-black">{isRtl ? 'مبروك! اجتزت التحدي بنجاح فائق!' : 'Linguistic Matrix Cleared!'}</h5>
-                    <p className="text-[10px] text-emerald-600 font-bold">
-                      {isRtl ? `حصلت على ${gameScore} درجة. استمر في توليد مجموعات كلمات جديدة بالذكاء الاصطناعي!` : `You accumulated ${gameScore} valuable points!`}
+                  <div className="bg-[#fdfaf3] text-[#002147] rounded-2xl p-4 text-center space-y-2 border border-[#C49E3A]">
+                    <span className="text-2xl block">🏆</span>
+                    <h5 className="text-sm font-black text-[#002147]">{t('مبروك! اجتزت التحدي بنجاح فائق!', 'Linguistic Matrix Cleared!')}</h5>
+                    <p className="text-xs text-[#002147]/80 font-bold">
+                      {t(`حصلت على ${gameScore} درجة. استمر في توليد مجموعات كلمات جديدة بالذكاء الاصطناعي!`, `You accumulated ${gameScore} valuable points!`)}
                     </p>
-                    <button
-                      type="button"
+                    <PrimaryButton
                       onClick={startMatchGame}
-                      className="px-4 py-1.5 bg-[#002147] hover:bg-[#0d3463] text-white text-[10px] font-black rounded-lg transition"
+                      className="mx-auto"
                     >
-                      {isRtl ? 'إعادة اللعب 🔁' : 'Play Again 🔁'}
-                    </button>
+                      {t('إعادة اللعب 🔁', 'Play Again 🔁')}
+                    </PrimaryButton>
                   </div>
                 ) : (
                   <div className="flex justify-between items-center pt-2">
-                    <button
-                      type="button"
+                    <GhostButton
                       onClick={() => { setGameScore(0); startMatchGame(); }}
-                      className="text-[10px] text-slate-500 hover:text-[#002147] font-bold underline"
+                      className="!px-3 !py-1.5 !min-h-[34px] !text-xs"
                     >
-                      {isRtl ? 'إعادة خلط وترتيب الكلمات' : 'Reshuffle Board'}
-                    </button>
-                    <span className="text-[9.5px] font-mono text-slate-400">
-                      {gameWords.filter(e => !e.matched).length / 2} {isRtl ? 'مستحقات معلقة' : 'pairs left'}
-                    </span>
+                      {t('إعادة خلط وترتيب الكلمات', 'Reshuffle Board')}
+                    </GhostButton>
+                    <ProgressPill>
+                      {gameWords.filter(e => !e.matched).length / 2} {t('مستحقات معلقة', 'pairs left')}
+                    </ProgressPill>
                   </div>
                 )}
               </div>
             ) : (
               <div className="py-6 text-center space-y-3">
-                <p className="text-[11px] text-slate-400 max-w-xs mx-auto leading-relaxed">
-                  {isRtl 
-                    ? 'اختبر مدى سرعة استيعابك للمفردات الحالية عبر لعبة الخلط والربط الثنائي لتنشيط الذاكرة قصيرة المدى.' 
-                    : 'Match vocabulary items dynamically and race against structural targets.'}
+                <p className="text-xs text-[#002147]/75 max-w-xs mx-auto leading-relaxed font-medium">
+                  {t(
+                    'اختبر مدى سرعة استيعابك للمفردات الحالية عبر لعبة الخلط والربط الثنائي لتنشيط الذاكرة قصيرة المدى.',
+                    'Match vocabulary items dynamically and race against structural targets.'
+                  )}
                 </p>
-                <button
-                  type="button"
+                <PrimaryButton
                   onClick={startMatchGame}
-                  className="px-4 py-2 bg-gradient-to-r from-[#002147] to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black rounded-xl text-xs transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 mx-auto shadow-md shadow-emerald-700/10"
+                  className="mx-auto"
                 >
-                  <Play size={12} className="fill-white" />
-                  <span>{isRtl ? 'ابدأ لعبة المطابقة الفورية' : 'Start Matrix Challenge'}</span>
-                </button>
+                  <Play size={13} className="fill-current" />
+                  <span>{t('ابدأ لعبة المطابقة الفورية', 'Start Matrix Challenge')}</span>
+                </PrimaryButton>
               </div>
             )}
-          </div>
+          </GoldCard>
         </div>
       </div>
     </div>
   );
 }
+
