@@ -1,4 +1,5 @@
 import { SARA_FILL_BLANK_MORE } from './fillBlankMore';
+import type { PersonaId } from '../saraBoardPersonas';
 /**
  * Sara "Complete the sentence" (fill the blank) — new exercise type on the tutor board.
  * Each card: English sentence with one blank + Arabic meaning + 3 option chips.
@@ -17,11 +18,13 @@ export interface SaraBlankCard {
   sayRight: string;
   /** Spoken after a wrong pick / no pick. */
   sayReveal: string;
+  /** Optional picture for the «من الصفر» teachers' cards. */
+  emoji?: string;
 }
 export interface SaraBlankLesson { id: string; order: number; titleAr: string; titleEn: string; icon: string; introAr: string; introEn: string; cards: SaraBlankCard[] }
 
 /** A complete-the-sentence track for one tutor. Lessons unlock in order; every 10 lessons form a level. */
-export interface FillBlankTrack { id: string; store: 'sara' | 'tutor'; personaId: 'sara' | 'grammar' | 'business' | 'exams'; voice: string; titleAr: string; titleEn: string; lessons: SaraBlankLesson[] }
+export interface FillBlankTrack { id: string; store: 'sara' | 'tutor'; personaId: PersonaId; voice: string; titleAr: string; titleEn: string; lessons: SaraBlankLesson[]; /** Optional own level titles (one per 10 lessons); default FILL_BLANK_LEVELS. */ levels?: { ar: string; en: string }[] }
 export const fillBlankLevel = (order: number) => Math.min(3, Math.ceil(order / 10));
 export const FILL_BLANK_LEVELS = [
   { ar: 'المستوى الأول: مبتدئ', en: 'Level 1: Beginner' },

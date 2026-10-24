@@ -6,7 +6,7 @@ import { cancelAllSpeech } from '../lib/audio';
 import { pushTrackProgress, markLastTrack, syncTrackProgress } from '../lib/saraProgressSync';
 import { readUnlocked, progressKey, saraNarrate, saraStopNarrator, saraUnlockNarrator, saraPrefetchLine } from './SaraTrackPlayer';
 import { readTutorUnlocked, saveTutorUnlocked, tutorProgressKey } from '../lib/tutorProgress';
-import { personaById } from '../data/saraBoardPersonas';
+import { personaById, type KidsTheme } from '../data/saraBoardPersonas';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { TutorVideoFace } from './tutor3d/TutorVideoFace';
@@ -20,14 +20,14 @@ type Phase = 'ask' | 'wait' | 'reveal';
 const THINK_MS = 3000;
 
 /** Sentence with the blank (or the filled word in gold). */
-const Sentence: React.FC<{ c: SaraBlankCard; filled: boolean }> = ({ c, filled }) => {
+const Sentence: React.FC<{ c: SaraBlankCard; filled: boolean; k?: KidsTheme }> = ({ c, filled, k }) => {
   const parts = c.en.split(new RegExp(`\\b${c.answer}\\b`));
   return (
-    <span dir="ltr" className="block text-start text-[17px] font-black text-[#002147]" style={{ direction: 'ltr' }}>
+    <span dir="ltr" className="block text-start text-[17px] font-black text-[#002147]" style={{ direction: 'ltr', ...(k ? { color: k.ink, fontSize: 19 } : {}) }}>
       {parts[0]}
       {filled
-        ? <span className="inline-block px-1.5 mx-0.5 rounded-md bg-[#002147] text-[#E8C468] animate-[pulse_0.6s_ease-out_1]">{c.answer}</span>
-        : <span className="inline-block w-12 mx-1 border-b-[3px] border-[#C49E3A] align-baseline">&nbsp;</span>}
+        ? <span className="inline-block px-1.5 mx-0.5 rounded-md bg-[#002147] text-[#E8C468] animate-[pulse_0.6s_ease-out_1]" style={k ? { background: k.accent, color: '#fff' } : undefined}>{c.answer}</span>
+        : <span className="inline-block w-12 mx-1 border-b-[3px] border-[#C49E3A] align-baseline" style={k ? { borderColor: k.accent, background: k.soft, borderRadius: 4 } : undefined}>&nbsp;</span>}
       {parts.slice(1).join(c.answer)}
     </span>
   );
@@ -35,7 +35,7 @@ const Sentence: React.FC<{ c: SaraBlankCard; filled: boolean }> = ({ c, filled }
 
 const Lesson: React.FC<{ l: SaraBlankLesson; track: FillBlankTrack; onBack: () => void; onDone: (score: number) => void; hasNext: boolean; onNext: () => void }> = ({ l, track, onBack, onDone, hasNext, onNext }) => {
   const t = useT();
-  const P = personaById(track.personaId), V = track.voice, NM = t(P.nameAr, P.nameEn);
+  const P = personaById(track.personaId), V = track.voice, NM = t(P.nameAr, P.nameEn), K = P.kids;
   const [started, setStarted] = useState(false);
   const [idx, setIdx] = useState(0);
   const [phase, setPhase] = useState<Phase>('ask');
@@ -117,7 +117,7 @@ const Lesson: React.FC<{ l: SaraBlankLesson; track: FillBlankTrack; onBack: () =
       <div className="flex-1 min-h-0 flex gap-2">
         {/* Sara's video face */}
         <div className="shrink-0 w-[30%] max-w-[150px] flex flex-col items-center gap-1.5 pt-1">
-          <div className={`relative w-full aspect-square rounded-full border-4 ${speaking ? 'border-amber-300 shadow-[0_0_18px_rgba(232,196,104,.6)]' : 'border-[#C49E3A]'}`}>
+          <div className={`relative w-full aspect-square rounded-full border-4 ${speaking ? 'border-amber-300 shadow-[0_0_18px_rgba(232,196,104,.6)]' : 'border-[#C49E3A]'}`} style={K ? { borderColor: K.accent, boxShadow: speaking ? `0 0 18px ${K.accent}` : undefined } : undefined}>
             <TutorVideoFace id={P.id} alt={NM} isSpeaking={speaking} onFail={() => {}} />
           </div>
           <span className="text-[12px] font-black text-amber-300">{NM}</span>
@@ -128,7 +128,7 @@ const Lesson: React.FC<{ l: SaraBlankLesson; track: FillBlankTrack; onBack: () =
         {/* Cards column */}
         <div ref={listRef} className="flex-1 min-w-0 overflow-y-auto flex flex-col gap-2 pb-2">
           {!started && (
-            <div className="rounded-2xl bg-white p-3 space-y-2 border-2 border-[#C49E3A]">
+            <div className="rounded-2xl bg-white p-3 space-y-2 border-2 border-[#C49E3A]" style={K ? { borderColor: K.accent, borderWidth: 4, background: K.soft } : undefined}>
               <p className="text-[15px] font-black text-[#002147]">{l.icon} {t(l.titleAr, l.titleEn)}</p>
               <p className="text-[13px] font-semibold text-slate-700 leading-relaxed">{t(l.introAr, l.introEn)}</p>
               <button data-testid="fill-blank-start" onClick={start} className="w-full py-2.5 rounded-xl bg-[#002147] text-amber-300 border-2 border-[#C49E3A] text-[14px] font-black">{t(`▶️ ابدأ مع ${P.nameAr}`, `▶️ Start with ${P.nameEn}`)}</button>
@@ -140,16 +140,23 @@ const Lesson: React.FC<{ l: SaraBlankLesson; track: FillBlankTrack; onBack: () =
             const p = picks[i];
             return (
               <div key={i} data-current={cur ? '1' : '0'} data-testid="fill-blank-card"
-                className={`rounded-2xl bg-white px-3 py-2 shadow-md transition-all ${cur ? 'ring-4 ring-amber-300/70' : 'opacity-90'}`}>
-                <Sentence c={c} filled={filled} />
+                className={`rounded-2xl bg-white px-3 py-2 shadow-md transition-all ${cur ? 'ring-4 ring-amber-300/70' : 'opacity-90'}`}
+                style={K ? { border: `3px solid ${K.accent}`, ...(cur ? { boxShadow: `0 0 0 4px ${K.soft}, 0 6px 14px rgba(0,0,0,.12)` } : {}) } : undefined}>
+                {c.emoji ? (
+                  <div className="flex items-center gap-2" dir="ltr">
+                    <span data-testid="fill-blank-emoji" className="shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-[30px]" style={{ background: K?.soft || '#fdfaf3' }} aria-hidden>{c.emoji}</span>
+                    <span className="flex-1 min-w-0"><Sentence c={c} filled={filled} k={K} /></span>
+                  </div>
+                ) : <Sentence c={c} filled={filled} k={K} />}
                 {t(c.ar, '') && <span className="block text-[12px] font-bold text-slate-500 text-end" dir="rtl">{c.ar}</span>}
                 {cur && (
                   <div className="mt-1.5 flex gap-1.5" dir="ltr">
                     {c.options.map(o => {
+                      const kidSt = K && phase === 'reveal' && o === c.answer ? { background: K.accent, borderColor: K.accent, color: '#fff' } : K && phase !== 'reveal' ? { borderColor: K.accent + '66', color: K.ink, background: K.soft } : undefined;
                       const st = phase !== 'reveal' ? 'bg-[#fdfaf3] border-[#002147]/20 text-[#002147]'
                         : o === c.answer ? 'bg-[#002147] border-[#C49E3A] text-[#E8C468]'
                         : o === p ? 'bg-rose-50 border-rose-300 text-rose-600' : 'bg-white border-slate-200 text-slate-400';
-                      return <button key={o} data-testid="fill-blank-option" disabled={phase === 'reveal'} onClick={() => pick(o)}
+                      return <button key={o} data-testid="fill-blank-option" disabled={phase === 'reveal'} onClick={() => pick(o)} style={kidSt}
                         className={`flex-1 py-1.5 rounded-full border-2 text-[14px] font-black active:scale-95 ${st}`}>{o}</button>;
                     })}
                   </div>
@@ -205,6 +212,7 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
     return next;
   });
   const close = () => { saraStopNarrator(); cancelAllSpeech(); setActive(null); onClose(); };
+  const LV = track.levels?.length ? track.levels : FILL_BLANK_LEVELS;
   const nextOf = (l: SaraBlankLesson) => LESSONS.find(x => x.order === l.order + 1);
   return (
     <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir={t('rtl', 'ltr')}>
@@ -222,7 +230,7 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
             {LESSONS.map((l, i) => {
               const open = l.order <= unlocked;
-              const lv = fillBlankLevel(l.order), head = i === 0 || fillBlankLevel(LESSONS[i - 1].order) !== lv ? FILL_BLANK_LEVELS[lv - 1] : null;
+              const lv = fillBlankLevel(l.order), head = i === 0 || fillBlankLevel(LESSONS[i - 1].order) !== lv ? LV[Math.min(lv, LV.length) - 1] : null;
               return (
                 <React.Fragment key={l.id}>
                   {head && <p data-testid="fill-blank-level" className="mt-1 px-1 text-[12px] font-black text-[#002147] border-b-2 border-[#C49E3A]/50 pb-0.5">{t(head.ar, head.en)}</p>}

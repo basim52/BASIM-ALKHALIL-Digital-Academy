@@ -7,6 +7,7 @@ import { saraNarrate, saraStopNarrator, saraUnlockNarrator, saraLastReason } fro
 import { toToolCalls } from '../lib/boardActions';
 import { personaById } from '../data/saraBoardPersonas';
 import TutorConversation from './TutorConversation';
+import KidsCardBoard from './KidsCardBoard';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
 import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
@@ -28,11 +29,11 @@ const useVoice = (voice: string) => {
   };
 };
 
-const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void }> = ({ q, picked, onPick }) => (
+const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; big?: boolean }> = ({ q, picked, onPick, big }) => (
   <div className="grid gap-1.5 shrink-0">
     {q.options.map((o, i) => {
       const st = picked === null ? 'bg-white text-[#001a38] border-amber-300' : i === q.correctIndex ? 'bg-emerald-100 text-emerald-900 border-emerald-500' : i === picked ? 'bg-rose-100 text-rose-900 border-rose-500' : 'bg-white/60 text-slate-600 border-slate-200';
-      return <button key={i} dir="ltr" data-testid="tutor-option" disabled={picked !== null} onClick={() => onPick(i)} className={`px-3 py-2.5 rounded-xl border text-[14px] font-bold text-start ${st}`}>{o}</button>;
+      return <button key={i} dir="ltr" data-testid="tutor-option" disabled={picked !== null} onClick={() => onPick(i)} className={`px-3 py-2.5 rounded-xl border text-[14px] font-bold text-start ${big ? 'border-2 text-[16px] font-black' : ''} ${big && !/[a-z\u0600-\u06FF]/i.test(o) ? 'text-center text-[30px] py-1.5' : ''} ${st}`}>{o}</button>;
     })}
   </div>
 );
@@ -90,7 +91,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
           return (
             <React.Fragment key={l.id}>
             {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-300" data-testid="tutor-level-head">{t(lvl!.titleAr, (lvl as { titleEn?: string }).titleEn || lvl!.titleAr)}</p>}
-            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; if (lang === 'en') { v.stop(); void englishLessonAsync(l).then(x => { const e2 = x.content!; v.play(`${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else v.play(`${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
+            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; const lk = persona.kids ? (l as TutorLesson).kids : undefined; if (lang === 'en') { v.stop(); void englishLessonAsync(l).then(x => { const e2 = x.content!; v.play(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else v.play(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-start border ${open ? 'bg-[#0a2d5c] border-amber-400/40' : 'bg-white/5 border-white/10 opacity-60'}`}>
               <span className="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-[#001a38] text-[12px] font-black flex items-center justify-center">{l.order}</span>
               <span className="flex-1 min-w-0">{lang === 'en' ? <span dir="ltr" className="block text-[13px] font-black truncate text-start">{l.titleEn}</span> : <><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></>}</span>
@@ -108,14 +109,16 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
   const total = 1 + c.exercises.length;
   const head = <><p {...longPressDebug()} className="text-[10px] text-amber-300 font-bold select-none">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{t(lesson.titleAr, lesson.titleEn)}{enLoading ? ' · …EN' : ''}</p></>;
-  const narration = `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
+  const kids = persona.kids && lesson.kids ? lesson.kids : null; // «من الصفر» teachers: picture-card board instead of tldraw
+  const narration = kids ? `${c.explanationAr} ${kids.say}` : `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
 
   if (step.k === 'board') return shell(head, <>
     <div onClickCapture={e => { if ((e.target as HTMLElement).closest('[data-testid=tutor-voice]')) setReplay(r => r + 1); }}><VoiceBtn text={narration} /></div>
     <div className="flex-1 min-h-0">
+      {kids ? <KidsCardBoard persona={persona} listTitle={kids.listTitle} cards={kids.cards} speaking={v.st === 'loading'} onSpeak={() => v.play(narration)} /> :
       <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">{t("جاري فتح السبورة…", "Opening the board…")}</div>}>
         <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={v.st === 'loading'} replayKey={replay} onSpeak={() => { setReplay(r => r + 1); v.play(narration); }} />
-      </Suspense>
+      </Suspense>}
     </div>
     {nextBtn(t('الشرح', 'Explanation'), () => setStep({ k: 'explain' }))}
   </>);
@@ -124,7 +127,12 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     <VoiceBtn text={narration} />
     <div className="flex-1 min-h-0 overflow-hidden flex flex-col gap-2">
       <p className="text-[14px] leading-7 font-bold" data-testid="tutor-explain">{c.explanationAr}</p>
-      {c.example.map((e, i) => (
+      {c.example.map((e, i) => persona.kids ? (
+        <div key={i} data-testid="kids-example" className="rounded-2xl bg-white px-3 py-2 flex items-center gap-2.5" style={{ border: `3px solid ${persona.kids.accent}` }}>
+          {kids?.cards[i] && <span className="text-[28px] leading-none shrink-0" aria-hidden>{kids.cards[i].emoji}</span>}
+          <span className="min-w-0 flex-1"><p dir="ltr" className="text-[16px] font-black text-start" style={{ color: persona.kids.ink }}>{e.en}</p>{t(e.ar, '') && <p className="text-[12px] text-slate-500 font-bold">{e.ar}</p>}</span>
+        </div>
+      ) : (
         <div key={i} className="rounded-xl bg-[#0a2d5c] border border-amber-400/30 px-3 py-2">
           <p dir="ltr" className="text-[14px] font-black text-start">{e.en}</p><p className="text-[12px] text-white/70 font-bold">{e.ar}</p>
         </div>
@@ -139,11 +147,17 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     const isLast = step.k === 'ex' && step.i === c.exercises.length - 1;
     return shell(head, <>
       <p className="text-[11px] font-black text-amber-300 shrink-0">{t('سؤال', 'Question')} {n} {t('من', 'of')} {total}</p>
+      {persona.kids ? (
+        <div className="rounded-2xl bg-white p-3 shrink-0" style={{ border: `4px solid ${persona.kids.accent}`, background: persona.kids.soft }} data-testid="kids-question">
+          <p className="text-[14px] font-black" style={{ color: persona.kids.ink }}>{q.promptAr}</p>
+          {q.promptEn && <p dir="ltr" className="text-[18px] font-black text-start mt-1" style={{ color: persona.kids.ink }}>{q.promptEn.split('___').map((p, i, a) => <React.Fragment key={i}>{p}{i < a.length - 1 && <span className="inline-block w-12 mx-1 border-b-[3px] align-baseline" style={{ borderColor: persona.kids!.accent, background: '#fff' }}>&nbsp;</span>}</React.Fragment>)}</p>}
+        </div>
+      ) : (
       <div className="rounded-xl bg-[#0a2d5c] border border-amber-400/40 p-3 shrink-0">
         <p className="text-[14px] font-black">{q.promptAr}</p>
         {q.promptEn && <p dir="ltr" className="text-[15px] font-black text-amber-200 text-start mt-1">{q.promptEn}</p>}
-      </div>
-      <Choices q={q} picked={picked} onPick={i => { setPicked(i); if (i === q.correctIndex) setCorrect(x => x + 1); else if (step.k === 'check') setCheckWrong(true); }} />
+      </div>)}
+      <Choices big={!!persona.kids} q={q} picked={picked} onPick={i => { setPicked(i); if (i === q.correctIndex) setCorrect(x => x + 1); else if (step.k === 'check') setCheckWrong(true); }} />
       {picked !== null && <p className={`text-[13px] font-black shrink-0 ${picked === q.correctIndex ? 'text-emerald-300' : 'text-rose-300'}`}>{picked === q.correctIndex ? <><CheckCircle2 size={15} className="inline" /> {t('صح!', 'Correct!')}</> : <><XCircle size={15} className="inline" /> {t('الجواب:', 'Answer:')} <span dir="ltr">{q.options[q.correctIndex]}</span></>}</p>}
       {step.k === 'check' && checkWrong && <p className="text-[12px] leading-6 font-bold text-white/85 rounded-xl bg-white/5 p-2 overflow-hidden" data-testid="tutor-alt">{c.altExplanationAr}</p>}
       <div className="flex-1" />

@@ -1,7 +1,9 @@
 import type { SaraTrackLesson, SaraChoiceQuestion } from '../saraTracks/foundations';
 import type { BoardAction } from '../../lib/boardActions';
 /** Noura level 1 — common mistakes of Arabic speakers (basic). Hand-written, validated by scripts/validate-sara-track.ts. */
-export type TutorLesson = SaraTrackLesson & { board?: BoardAction[] };
+/** One picture card of a «من الصفر» lesson (numbered word list or sentence card). `hl` = word shown highlighted (blank practice). */
+export type KidsCard = { emoji: string; en: string; ar: string; hl?: string };
+export type TutorLesson = SaraTrackLesson & { board?: BoardAction[]; /** «من الصفر» teachers: card board instead of the tldraw board. */ kids?: { listTitle: string; cards: KidsCard[]; /** spoken 1:1 from the card board (title, then each card's English). */ say: string } };
 type Q = [string, string | null, string[], number];
 const q = ([promptAr, promptEn, options, correctIndex]: Q): SaraChoiceQuestion => ({ promptAr, ...(promptEn ? { promptEn } : {}), options, correctIndex });
 const L = (order: number, titleAr: string, titleEn: string, explanationAr: string, altExplanationAr: string, example: [string, string][], check: Q, exercises: Q[], rule: string, wrong: string, right: string): TutorLesson => ({

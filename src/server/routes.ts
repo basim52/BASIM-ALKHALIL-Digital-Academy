@@ -1481,7 +1481,7 @@ RESPOND STRICTLY IN VALID JSON FORMAT with the following schema:
   // Lesson narration: ONE request per lesson page, returned as WAV and cached by the Vercel CDN for a year.
   // Lesson text is static, so each page is generated once for everybody and never touches the daily TTS quota again.
   // Only known Gemini prebuilt voices; anything else falls back to Sara's default "Kore".
-  const ALLOWED_VOICES = new Set(["Kore", "Zephyr", "Aoede", "Charon", "Orus"]);
+  const ALLOWED_VOICES = new Set(["Kore", "Zephyr", "Aoede", "Charon", "Orus", "Achernar", "Laomedeia", "Vindemiatrix", "Autonoe"]);
   const safeVoice = (v: unknown) => { const x = String(v || "Kore"); return ALLOWED_VOICES.has(x) ? x : "Kore"; };
   app.get("/api/tts/lesson", async (req, res) => {
     // Signed-in users only (protects the TTS quota). CDN-cached pages are still served from cache.
@@ -2013,6 +2013,10 @@ ${gEn ? "- LANGUAGE: the student chose English explanations, so write reasonAr a
     grammar: "Noura, a warm female English grammar teacher (basics and grammar)",
     business: "Mohammed, a friendly male teacher of business English, emails and job interviews",
     exams: "Ali, a calm male teacher who prepares students for English exams such as IELTS (no band scores, just skills)",
+    lama: "Lama, a gentle female teacher of English letters and phonics for absolute beginners, children and adults (level A0, very simple words)",
+    reem: "Reem, a cheerful female teacher of everyday English words for absolute beginners, children and adults (level A0, one picture word at a time)",
+    haya: "Haya, a calm female teacher of basic English sentences for beginners, children and adults (level A0-A1, short sentences like I like, I have, I can, There is)",
+    jana: "Jana, an energetic female teacher who gives beginners short English exercises and review (level A0-A1, fill the blank, a or an, at, to, for)",
   };
   app.post("/api/sara/board", async (req: express.Request, res: express.Response) => {
     const uid = String((req as any).authUid || "");
@@ -2631,6 +2635,10 @@ Respond ONLY with a valid JSON object matching:
       grammar: { voice: "Aoede", who: "Noura, a warm female English teacher who helps Arabic speakers fix their common mistakes" },
       business: { voice: "Charon", who: "Mohammed, a friendly male business English coach (workplace talk, emails, meetings, interviews)" },
       exams: { voice: "Orus", who: "Ali, a calm male IELTS speaking coach (exam-style questions, no band scores or promises)" },
+      lama: { voice: "Achernar", who: "Lama, a gentle female teacher of letters and sounds for absolute beginners; use only very simple A0 words and speak slowly" },
+      reem: { voice: "Laomedeia", who: "Reem, a cheerful female teacher of everyday words for absolute beginners; use only very simple A0 words" },
+      haya: { voice: "Vindemiatrix", who: "Haya, a calm female teacher of basic sentences for beginners; use short A1 sentences like I like, I have, I can" },
+      jana: { voice: "Autonoe", who: "Jana, an energetic female teacher who practises and reviews basic English with beginners; short A1 sentences only" },
     } as Record<string, { voice: string; who: string }>)[String(persona)] || null;
     if (warm) { initAI(); return res.json({ ok: true, ai: !!aiLive }); } // warms the function, auth and AI client
     const text = String(message).slice(0, 600).trim();

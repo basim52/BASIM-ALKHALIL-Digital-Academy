@@ -15,12 +15,14 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
   const [clip, setClip] = useState<Clip>("idle");
   const [loaded, setLoaded] = useState<Record<Clip, boolean>>({ idle: true, talk: false, laugh: false });
   const [visible, setVisible] = useState(true);
+  const [bad, setBad] = useState<Record<Clip, boolean>>({ idle: false, talk: false, laugh: false }); // a missing clip never covers the still
+  const fail = (k: Clip) => { setBad(b => ({ ...b, [k]: true })); if (k === "idle") onFail(); else if (k === "laugh") { laughing.current = false; setClip(isSpeechPlaying() ? "talk" : "idle"); } };
   const speakingRef = useRef(isSpeaking); speakingRef.current = isSpeaking;
   const laughing = useRef(false), lastLaugh = useRef(0), pendingLaugh = useRef(false);
   const reduced = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   // reset when tutor changes (only the active tutor's clips are ever loaded)
-  useEffect(() => { setClip("idle"); setLoaded({ idle: true, talk: false, laugh: false }); laughing.current = false; }, [id]);
+  useEffect(() => { setClip("idle"); setLoaded({ idle: true, talk: false, laugh: false }); setBad({ idle: false, talk: false, laugh: false }); laughing.current = false; }, [id]);
 
   // preload talk/laugh after idle is ready (lazy, active tutor only)
   useEffect(() => { if (reduced) return; const t = setTimeout(() => setLoaded({ idle: true, talk: true, laugh: true }), 1200); return () => clearTimeout(t); }, [id, reduced]);
@@ -74,11 +76,12 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
     <div ref={root} className="tutor-video-face" data-clip={clip}>
       <img className="tutor-video-poster" src={`/tutors/${id}.webp`} alt={alt} draggable={false} />
       {(["idle", "talk", "laugh"] as Clip[]).map(k => loaded[k] && (
-        <video key={id + k} ref={refs[k]} className={`tutor-video-clip ${clip === k ? "on" : ""}`} muted playsInline disableRemotePlayback x-webkit-airplay="deny"
+        <video key={id + k} ref={refs[k]} className={`tutor-video-clip ${clip === k && !bad[k] ? "on" : ""}`} muted playsInline disableRemotePlayback x-webkit-airplay="deny"
           loop={k !== "laugh"} preload={k === "idle" ? "auto" : "metadata"} autoPlay={k === "idle"} aria-hidden
-          onEnded={k === "laugh" ? endLaugh : undefined} onError={k === "idle" ? onFail : undefined}>
+          onEnded={k === "laugh" ? endLaugh : undefined} onError={() => fail(k)}>
           <source src={`/tutors/video/${id}-${k}.webm`} type="video/webm" />
-          <source src={`/tutors/video/${id}-${k}.mp4`} type="video/mp4" />
+          {/* when every <source> fails the error fires on the last <source>, not on the <video> */}
+          <source src={`/tutors/video/${id}-${k}.mp4`} type="video/mp4" onError={() => fail(k)} />
         </video>
       ))}
     </div>

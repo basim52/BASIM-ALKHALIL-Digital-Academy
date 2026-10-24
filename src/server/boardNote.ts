@@ -1,5 +1,5 @@
 /** Pure helpers for /api/sara/board-note (tested by scripts/test-board-note.ts). */
-export const NOTE_VOICES: Record<string, string> = { sara: "Kore", grammar: "Aoede", business: "Charon", exams: "Orus" };
+export const NOTE_VOICES: Record<string, string> = { sara: "Kore", grammar: "Aoede", business: "Charon", exams: "Orus", lama: "Achernar", reem: "Laomedeia", haya: "Vindemiatrix", jana: "Autonoe" };
 export const cleanNoteInput = (v: unknown, max = 300) => String(v ?? "").replace(/📝/g, "").replace(/\s+/g, " ").trim().slice(0, max);
 export const buildNotePrompt = (role: string, note: string, lesson: string, en = false) => `You are ${role}. An Arabic-speaking student wrote this note or question on the lesson whiteboard: """${note}"""
 ${lesson ? `Current lesson: ${lesson}\nAnswer in the context of this lesson.` : ""}

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { personaById } from '../../../data/saraBoardPersonas';
+import { personaById, type PersonaId } from '../../../data/saraBoardPersonas';
 import { useT } from '../../../lib/explainLang';
 import { TutorVideoFace } from '../../tutor3d/TutorVideoFace';
 import '../../tutor3d/tutorBoard.css';
 
-export type TutorId = 'sara' | 'noura' | 'grammar' | 'mohammed' | 'business' | 'ali' | 'exams';
+export type TutorId = 'sara' | 'noura' | 'grammar' | 'mohammed' | 'business' | 'ali' | 'exams' | PersonaId;
 export type TutorFaceSize = 'sm' | 'md' | 'lg' | number;
 
 export interface TutorFaceProps {
@@ -14,7 +14,7 @@ export interface TutorFaceProps {
   className?: string;
 }
 
-const PERSONA_MAP: Record<TutorId, 'sara' | 'grammar' | 'business' | 'exams'> = {
+const PERSONA_MAP: Record<TutorId, PersonaId> = {
   sara: 'sara',
   noura: 'grammar',
   grammar: 'grammar',
@@ -22,6 +22,10 @@ const PERSONA_MAP: Record<TutorId, 'sara' | 'grammar' | 'business' | 'exams'> = 
   business: 'business',
   ali: 'exams',
   exams: 'exams',
+  lama: 'lama',
+  reem: 'reem',
+  haya: 'haya',
+  jana: 'jana',
 };
 
 const SIZE_PX: Record<'sm' | 'md' | 'lg', number> = {

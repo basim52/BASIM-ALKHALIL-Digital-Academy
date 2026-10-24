@@ -12,6 +12,10 @@ const OWNER = 'tutor-talk';
 const STARTERS: Record<string, { en: string; scenario: string }> = {
   grammar: { en: "Hi! I'm Noura. Tell me about your day, and I'll help you fix any mistakes as we talk. What did you do today?", scenario: 'Everyday chat: the student talks about daily life; gently model the correct form of typical Arabic-speaker mistakes' },
   business: { en: "Hello, I'm Mohammed. Let's practise English for work. Could you introduce yourself and tell me what you do?", scenario: 'Workplace English: introductions, meetings, emails, small talk with colleagues and job interview answers' },
+  lama: { en: "Hi! I'm Lama. Let's say some easy words together. Can you say: cat?", scenario: 'Absolute beginner (A0): letters and sounds; use one very short sentence and one simple word at a time' },
+  reem: { en: "Hello! I'm Reem. Let's learn easy words. What is your favourite colour?", scenario: 'Absolute beginner (A0): everyday words (colours, food, family, animals); very short simple sentences' },
+  haya: { en: "Hi, I'm Haya. Let's make easy sentences. Tell me: what do you like?", scenario: 'Beginner (A0-A1): basic sentences with I like, I have, This is, I can, There is; very short and slow' },
+  jana: { en: "Hi! I'm Jana. Let's practise! Finish my sentence: I like ...", scenario: 'Beginner (A0-A1): quick practice and review of easy words and sentences; one short question at a time' },
   exams: { en: "Hi, I'm Ali. Let's practise IELTS Speaking Part 1. First question: do you work or are you a student?", scenario: 'IELTS Speaking practice: ask one exam-style question at a time (Part 1 topics), encourage extended answers with reasons and examples' },
 };
 type Line = { role: 'tutor' | 'me'; text: string };

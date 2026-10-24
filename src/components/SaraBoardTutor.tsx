@@ -100,7 +100,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   if (step === 'pick') return shell(<>
     <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[11px] text-amber-200/90 font-bold">{L("اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.", "Pick a teacher and type what you want to learn; they explain it on the board.")}</p><ExplainLangToggle /></div>
     <div className="grid grid-cols-4 gap-1.5 shrink-0">
-      {BOARD_PERSONAS.map(p => (
+      {BOARD_PERSONAS.filter(p => !p.kids).map(p => (
         <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => { setPersona(p); if (p.id === 'sara' && !mock) { voice.stop(); setSaraHub(true); } }}
           className={`rounded-xl border p-2 flex flex-col items-center gap-0.5 ${persona.id === p.id ? 'bg-amber-400 text-[#001a38] border-amber-300' : 'bg-[#0a2d5c] border-white/10'}`}>
           <span className="text-[22px] leading-none">{p.emoji}</span>
@@ -108,6 +108,22 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
           <span className={`text-[9px] font-bold text-center leading-tight ${persona.id === p.id ? 'text-[#001a38]/80' : 'text-white/70'}`}>{L(p.roleAr, p.roleEn || p.roleAr)}</span>
         </button>
       ))}
+    </div>
+    <div data-testid="kids-teachers" className="shrink-0 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] p-2">
+      <p className="text-[12px] font-black text-[#002147] mb-1.5">{L("🌱 من الصفر — للصغار والكبار", "🌱 From zero, for kids and adults")}</p>
+      <div className="grid grid-cols-4 gap-1.5">
+        {BOARD_PERSONAS.filter(p => p.kids).map(p => {
+          const on = persona.id === p.id, k = p.kids!;
+          return (
+            <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => setPersona(p)}
+              className="rounded-2xl p-1.5 flex flex-col items-center gap-0.5 bg-white transition-transform active:scale-95" style={{ border: `3px solid ${on ? k.accent : k.accent + '40'}`, background: on ? k.soft : '#fff' }}>
+              <img src={`/tutors/${p.id}.webp`} alt={L(p.nameAr, p.nameEn)} loading="lazy" draggable={false} className="w-12 h-12 rounded-full object-cover" style={{ boxShadow: `0 0 0 3px ${k.accent}` }} />
+              <span className="text-[13px] font-black" style={{ color: k.ink }}>{L(p.nameAr, p.nameEn)}</span>
+              <span className="text-[9px] font-bold text-center leading-tight text-slate-600">{L(p.roleAr, p.roleEn || p.roleAr)}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
     <input dir="ltr" value={topic} maxLength={300} onChange={e => setTopic(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void ask(); }}
       placeholder={persona.examplesAr[0]} data-testid="board-topic"
