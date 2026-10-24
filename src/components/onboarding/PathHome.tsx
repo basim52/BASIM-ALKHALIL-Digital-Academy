@@ -13,7 +13,7 @@ export function useOnboarding(uid?: string, profile?: any, refresh = 0): Onboard
 }
 
 /** Top of the student home: one big «ابدأ درس اليوم», or the small «حدّد مسارك» banner while no path is set. */
-export const TodayPathCard: React.FC<{ uid?: string; profile: any; onSetPath: () => void; onOpenLesson: () => void; onOpenCheck: () => void; onChangePlan?: () => void }> = ({ uid, profile, onSetPath, onOpenLesson, onOpenCheck, onChangePlan }) => {
+export const TodayPathCard: React.FC<{ uid?: string; profile: any; onSetPath: () => void; onOpenLesson: () => void; onOpenCheck: () => void; onChangePlan?: () => void; /** Parent/admin homes: render nothing until this account has its own saved path (no «حدّد مسارك» nag). */ hideWhenUnset?: boolean }> = ({ uid, profile, onSetPath, onOpenLesson, onOpenCheck, onChangePlan, hideWhenUnset }) => {
   const t = useT();
   const loaded = useOnboarding(uid, profile);
   const [logged, setLogged] = useState<OnboardingRecord | null>(null);
@@ -23,6 +23,7 @@ export const TodayPathCard: React.FC<{ uid?: string; profile: any; onSetPath: ()
   const next = useMemo(() => (rec?.done ? nextPathLesson(rec, uid, profile) : null), [rec, uid, profile]);
   if (rec === undefined) return null;
   if (!rec?.done) {
+    if (hideWhenUnset) return null;
     return (
       <button onClick={onSetPath} dir="rtl" data-testid="set-path-banner"
         className="w-full flex items-center gap-3 rounded-2xl border-2 border-[#C49E3A] bg-[#fdfaf3] text-[#002147] px-4 py-3 text-start active:scale-[0.99]">

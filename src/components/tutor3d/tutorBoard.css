@@ -228,3 +228,23 @@
 .tutor-video-clip{opacity:0;transition:opacity .25s ease}
 .tutor-video-clip.on{opacity:1}
 @media (prefers-reduced-motion: reduce){.tutor-video-clip{transition:none}}
+
+/* Board toolbar: wraps cleanly on tablet/desktop (nothing clipped), scrolls in one row on phones. */
+.tutor-board-toolbar-fluid {
+  height: auto;
+  min-height: 48px;
+  padding: 6px 10px;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+.tutor-board-toolbar-fluid .board-actions-group {
+  flex-wrap: wrap;
+  row-gap: 6px;
+  min-width: 0;
+}
+.tutor-board-toolbar-fluid .board-tool-action-btn { white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 599px) {
+  .tutor-board-toolbar-fluid { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tutor-board-toolbar-fluid::-webkit-scrollbar { display: none; }
+  .tutor-board-toolbar-fluid .board-actions-group { flex-wrap: nowrap; }
+}

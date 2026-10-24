@@ -1,6 +1,6 @@
 import { useT } from '../lib/explainLang';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Tldraw, createShapeId, toRichText, renderPlaintextFromRichText, type Editor, type TLShape } from 'tldraw';
+import { Tldraw, Box, createShapeId, toRichText, renderPlaintextFromRichText, type Editor, type TLShape } from 'tldraw';
 import { playCloudAudioAs, cancelAllSpeech } from '../lib/audio';
 import { getExplainLang } from '../lib/explainLang';
 import ExplainLangToggle from './ExplainLangToggle';
@@ -44,6 +44,9 @@ async function imageToJpeg(src: string): Promise<string> {
   bmp.close?.(); throw new Error('TOO_BIG');
 }
 
+/** Smallest board zoom when fitting the lesson to width (keeps text readable on phones; taller lessons scroll/pan). */
+const FIT_MIN = 0.5;
+
 const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '' }) => {
   const persona = personaById(personaId);
   const t = useT(); const NM = t(persona.nameAr, persona.nameEn);
@@ -53,6 +56,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   const [showAvatar, setShowAvatar] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 900);
   const [expanded, setExpanded] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLDivElement | null>(null);
   // Docked avatar only when the BOARD itself is wide (not the window): narrow lesson pages on desktop keep the floating avatar.
   useEffect(() => {
     const el = rootRef.current;
@@ -62,7 +66,37 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     window.addEventListener('resize', f); return () => window.removeEventListener('resize', f);
   }, []);
 
-  const fit = (editor: Editor) => { try { editor.zoomToFit({ animation: { duration: 200 } }); if (editor.getZoomLevel() > 1) editor.resetZoom(editor.getViewportScreenCenter(), { animation: { duration: 0 } }); } catch { /* ignore */ } };
+  /** Fit the lesson to the board WIDTH at a readable scale (never the old whole-content fit that dropped to ~14% on short boards).
+   *  Zoom = viewport width / lesson width, clamped to [FIT_MIN, 1]; content is centred horizontally and pinned to the top (centred if it all fits). */
+  const fit = (editor: Editor, animate = true) => {
+    try {
+      const vp = editor.getViewportScreenBounds(); if (vp.w < 40 || vp.h < 40) return;
+      const tutorIds = editor.getCurrentPageShapes().filter((sh: TLShape) => (sh.meta as any)?.tutor).map(sh => sh.id);
+      const b = tutorIds.length ? Box.Common(tutorIds.map(id => editor.getShapePageBounds(id)).filter(Boolean) as Box[]) : editor.getCurrentPageBounds();
+      if (!b || b.w <= 0) return;
+      const pad = vp.w < 520 ? 12 : 28;
+      // tldraw's style panel (wide layouts) floats over the top-right of the canvas: keep the lesson clear of it.
+      const sp = canvasRef.current?.querySelector('.tlui-style-panel__wrapper') as HTMLElement | null;
+      const reserve = sp && vp.w >= 520 ? sp.getBoundingClientRect().width + 8 : 0;
+      const usable = vp.w - reserve;
+      const z = Math.max(FIT_MIN, Math.min(1, (usable - pad * 2) / b.w));
+      const x = (usable - b.w * z) / (2 * z) - b.minX;
+      const fitsH = b.h * z + pad * 2 <= vp.h;
+      const y = fitsH ? (vp.h - b.h * z) / (2 * z) - b.minY : pad / z - b.minY;
+      editor.setCamera({ x, y, z }, animate ? { animation: { duration: 200 } } : undefined);
+    } catch { /* ignore */ }
+  };
+
+  // Re-fit when the board area changes size (rotation, window resize, expand, avatar docked/hidden).
+  useEffect(() => {
+    const el = canvasRef.current; if (!el || typeof ResizeObserver === 'undefined') return;
+    let last = ''; let tm: number | null = null;
+    const ro = new ResizeObserver(([e]) => {
+      const k = `${Math.round(e.contentRect.width)}x${Math.round(e.contentRect.height)}`; if (k === last) return; last = k;
+      if (tm) clearTimeout(tm); tm = window.setTimeout(() => { if (ed.current) fit(ed.current, false); }, 120);
+    });
+    ro.observe(el); return () => { ro.disconnect(); if (tm) clearTimeout(tm); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Same shapes as the original applyAction, stacked top-to-bottom so mobile can zoom to fit. */
   const apply = (editor: Editor, c: BoardToolCall, y: number): number => {
@@ -224,19 +258,18 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   const avatar = (
     <AvatarBoundary name={`${persona.emoji} ${persona.nameAr}`}>
     <Tutor3DAvatar agentId={persona.id} isArabic isSpeaking={speaking} compact mode={wide ? 'docked' : 'floating'}
-      onToggleFloating={() => setShowAvatar(false)} onTriggerVoicePreview={onSpeak} />
+      onToggleFloating={() => setShowAvatar(false)} hideLabel={t('✕ إخفاء', '✕ Hide')} onTriggerVoicePreview={onSpeak} />
     </AvatarBoundary>
   );
 
   return (
     <div ref={rootRef} data-testid="tldraw-board" className={`${expanded ? 'fixed inset-0 z-[400]' : 'w-full h-full'} flex ${wide ? 'flex-row' : 'flex-col'} gap-2 bg-white rounded-2xl border-2 border-amber-400/70 overflow-hidden`} dir={t("rtl", "ltr")}>
-      {wide && showAvatar && <div className="w-[320px] shrink-0 min-h-0 overflow-hidden p-2">{avatar}</div>}
+      {wide && showAvatar && <div className="w-[260px] xl:w-[320px] shrink-0 min-h-0 overflow-hidden p-2">{avatar}</div>}
       <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-        <div className="magic-board-toolbar" style={{ overflowX: 'auto', height: 'auto', minHeight: 48, padding: '6px 10px' }}>
+        <div className="magic-board-toolbar tutor-board-toolbar-fluid">
           <div className="board-title-group shrink-0"><span className="board-title-badge">📋 {t("السبورة التفاعلية", "Interactive board")}</span><span className="board-coach-tag">{persona.emoji} {NM}</span></div>
           <div className="board-actions-group" dir={t("rtl", "ltr")}>
             <ExplainLangToggle />
-            <button className="board-tool-action-btn" onClick={() => setShowAvatar(v => !v)}><span>🧊</span><span>{t("معلم 3D", "3D teacher")}</span></button>
             <button className="board-tool-action-btn" onClick={() => { setExpanded(v => !v); setTimeout(() => ed.current && fit(ed.current), 80); }}><span>🖥️</span><span>{expanded ? t('تصغير', 'Shrink') : t('توسيع السبورة', 'Expand board')}</span></button>
             <button className="board-tool-action-btn tool-inspect" onClick={() => draw(true)} data-testid="board-replay"><span>📋</span><span>{t("قالب الدرس", "Lesson template")}</span></button>
             <button className="board-tool-action-btn tool-note" onClick={addNote}><span>📝</span><span>{t("ملاحظة لاصقة", "Sticky note")}</span></button>
@@ -245,11 +278,12 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
             <button className="board-tool-action-btn tool-clear" onClick={clear}><span>🧽</span><span>{t("مسح", "Clear")}</span></button>
           </div>
         </div>
-        <div className="magic-canvas-container relative" style={{ height: 'auto', minHeight: 0 }} dir="ltr">
+        <div ref={canvasRef} className="magic-canvas-container relative" style={{ height: 'auto', minHeight: 0 }} dir="ltr">
           <div className="magic-whiteboard-inner" style={{ position: 'absolute', inset: 0 }}>
             <Tldraw onMount={onMount} />
           </div>
           {noteErr && <div className="absolute top-2 left-1/2 -translate-x-1/2 z-[360] px-3 py-1.5 rounded-xl bg-[#001a38] text-amber-300 text-[12px] font-black" dir="rtl" onClick={() => setNoteErr('')}>{noteErr}</div>}
+          {!showAvatar && <button data-testid="board-show-teacher" onClick={() => setShowAvatar(true)} className="absolute bottom-14 right-2 z-[350] flex items-center gap-1.5 rounded-full bg-[#002147] border-2 border-[#C49E3A] text-amber-300 text-[12px] font-black ps-1 pe-3 py-1 shadow-lg" dir={t('rtl', 'ltr')}><span className="w-7 h-7 rounded-full bg-[#C49E3A]/20 flex items-center justify-center">{persona.emoji}</span>{NM}</button>}
           {!wide && showAvatar && <div className="absolute bottom-14 right-2 z-[350] w-[170px] h-[230px] rounded-xl overflow-hidden shadow-xl">{avatar}</div>}
         </div>
       </div>

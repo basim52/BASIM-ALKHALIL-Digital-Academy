@@ -94,6 +94,13 @@ const PathPlanScreen = lazy(() => import('./components/onboarding/PathPlan').the
 import { shouldGateOnboarding, readLocalOnboarding } from './lib/onboardingGate';
 const ONBOARDING_FULLSCREEN: AppView[] = ['onboarding', 'onboarding-preview', 'path-lesson', 'path-check', 'path-plan'];
 /** Admin-only (MASTER_ADMINS): run the whole onboarding in preview mode; nothing is saved unless «احفظه كمساري». */
+/** Parent/admin homes: the account's OWN saved path («ابدأ درس اليوم» + weekly plan table). Hidden until a path is saved
+ *  (e.g. the admin's «احفظه كمساري»), so ordinary parents see nothing new. */
+const OwnPathCard = ({ profile, onNavigate }: { profile: UserProfile; onNavigate?: (v: AppView) => void }) => (
+  <Suspense fallback={null}>
+    <TodayPathCard uid={profile.uid} profile={profile} hideWhenUnset onSetPath={() => onNavigate?.('onboarding')} onOpenLesson={() => onNavigate?.('path-lesson')} onOpenCheck={() => onNavigate?.('path-check')} onChangePlan={() => onNavigate?.('path-plan')} />
+  </Suspense>
+);
 const OnboardingPreviewButton = ({ email, isRtl, onNavigate }: { email?: string | null; isRtl: boolean; onNavigate?: (v: AppView) => void }) =>
   onNavigate && MASTER_ADMINS.includes((email || '').toLowerCase()) ? (
     <button onClick={() => onNavigate('onboarding-preview')} data-testid="admin-onboarding-preview" dir={isRtl ? 'rtl' : 'ltr'}
@@ -3402,7 +3409,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
   if (linkedStudents.length === 0 || showAddStudent) {
     return (
       <div className={`p-4 sm:p-8 max-w-3xl mx-auto w-full ${isRtl ? 'font-arabic' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="mb-4"><OnboardingPreviewButton email={profile.email} isRtl={isRtl} onNavigate={onNavigate} /></div>
+        <div className="mb-4 space-y-3"><OwnPathCard profile={profile} onNavigate={onNavigate} /><OnboardingPreviewButton email={profile.email} isRtl={isRtl} onNavigate={onNavigate} /></div>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -4176,6 +4183,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#f8fafc]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <OwnPathCard profile={profile} onNavigate={onNavigate} />
       <OnboardingPreviewButton email={profile.email} isRtl={isRtl} onNavigate={onNavigate} />
       {/* 📊 FRIDAY WEEKLY REPORT BANNER */}
       {isFriday && showFridayBanner && (

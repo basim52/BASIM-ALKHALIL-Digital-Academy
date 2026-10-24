@@ -38,7 +38,7 @@ export const PathLessonView: React.FC<{ uid?: string; profile: any; rec: Onboard
     <div className="relative">
       {preview && <div data-testid="path-preview-ribbon" className="fixed bottom-3 left-3 z-[200] pointer-events-none rounded-full shadow-lg border border-[#002147]/20 bg-[#C49E3A] text-[#002147] text-[10.5px] font-black px-2.5 py-1 flex items-center gap-1"><Eye size={12} /> {t('تجربة — ما ينحفظ', 'Preview — not saved')}</div>}
       {target.step.kind === 'tutor'
-        ? <TutorTrackPlayer track={target.track as TutorTrack} uid={pu} mockLessonOrder={lesson.order} onBack={onBack} />
+        ? <div data-testid="path-tutor-page" className="fixed inset-0 z-[150] bg-[#001a38] flex justify-center"><div className="w-full max-w-6xl h-[100dvh] flex flex-col overflow-hidden"><TutorTrackPlayer track={target.track as TutorTrack} uid={pu} mockLessonOrder={lesson.order} onBack={onBack} /></div></div>
         : <SaraTrackPlayer isOpen track={target.track as SaraTrack} uid={pu} unlockAll={!!preview} initialLessonId={lesson.id} onClose={onBack} />}
     </div>
   );

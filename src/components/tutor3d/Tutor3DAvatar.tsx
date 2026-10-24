@@ -17,10 +17,12 @@ export interface Tutor3DAvatarProps {
   mode?: "showcase" | "docked" | "floating";
   onToggleFloating?: () => void;
   onTriggerVoicePreview?: () => void;
+  /** When set, the header button just hides the avatar and shows this label (no dock/pop-out wording). */
+  hideLabel?: string;
 }
 
 export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
-  agentId, isArabic, isSpeaking, isListening = false, isThinking = false, compact = false, mode = "docked", onToggleFloating, onTriggerVoicePreview,
+  agentId, isArabic, isSpeaking, isListening = false, isThinking = false, compact = false, mode = "docked", onToggleFloating, onTriggerVoicePreview, hideLabel,
 }) => {
   const [videoFailed, setVideoFailed] = useState(false);
   useEffect(() => setVideoFailed(false), [agentId]);
@@ -69,7 +71,7 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
                   : "Pop-out avatar"
               }
             >
-              {mode === "floating"
+              {hideLabel ? hideLabel : mode === "floating"
                 ? isArabic
                   ? "📌 تثبيت"
                   : "📌 Dock"
