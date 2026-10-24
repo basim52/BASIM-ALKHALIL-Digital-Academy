@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, CalendarDays, ChevronLeft, RefreshCw } from 'lucide-react';
+import { ArrowRight, CalendarDays, ChevronLeft, Lock, RefreshCw } from 'lucide-react';
 import { useT, isEn } from '../../lib/explainLang';
-import type { OnboardingRecord } from '../../lib/onboarding';
+import { readStepUnlocked, checkpointDue, type OnboardingRecord } from '../../lib/onboarding';
 import {
   planOptions, recommendedOption, optionPreview, liveWeek, DAY_AR, DAY_EN, PLAN_PACKAGE_SLOT, isoDay,
   savePathPlanChoice, type PathPlanOptionId, type SimDay, type PathPlanLogCell,
@@ -10,16 +10,44 @@ import {
 const fmtDate = (iso: string | null, en: boolean) => iso ? new Date(iso + 'T00:00:00').toLocaleDateString(en ? 'en-GB' : 'ar-SA', { day: 'numeric', month: 'long' }) : '';
 const KIND_ICON: Record<PathPlanLogCell['kind'], string> = { lesson: '📘', practice: '✏️', review: '🔁', check: '📝' };
 
-const CellLine: React.FC<{ c: PathPlanLogCell; done?: boolean; missed?: boolean; dark?: boolean }> = ({ c, done, missed, dark }) => {
+/**
+ * Tap a plan item → straight into it (same «academy:open-path-task» entry as Sara's smart plan → PathLessonView).
+ * Lock rule respected: only lessons the track has already unlocked (done ones + the current one) open; later lessons
+ * stay 🔒 until the one before is passed, so opening never marks anything done or skips progress.
+ */
+export function cellOpenable(c: PathPlanLogCell, rec: OnboardingRecord, uid?: string, profile?: any): boolean {
+  if (c.kind === 'check') return checkpointDue(rec, uid, profile);
+  if (!c.order || !c.trackId) return false;
+  return c.order <= readStepUnlocked({ kind: c.stepKind, trackId: c.trackId, startOrder: 1 }, uid, profile);
+}
+export function openPlanCell(c: PathPlanLogCell): void {
+  const detail = c.kind === 'check' ? { check: true } : { stepKind: c.stepKind, trackId: c.trackId, order: c.order };
+  window.dispatchEvent(new CustomEvent('academy:open-path-task', { detail }));
+}
+
+const CellLine: React.FC<{ c: PathPlanLogCell; done?: boolean; missed?: boolean; dark?: boolean; onOpen?: () => void; locked?: boolean }> = ({ c, done, missed, dark, onOpen, locked }) => {
   const t = useT();
-  return (
-    <li className="flex items-start gap-1.5 leading-snug" data-testid="plan-cell" data-kind={c.kind} data-done={done ? '1' : '0'}>
+  const body = (
+    <>
       <span aria-hidden className="shrink-0">{done ? '✅' : missed ? '⏭️' : KIND_ICON[c.kind]}</span>
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className={`block text-[12px] font-black ${done ? 'line-through opacity-60' : ''}`}>{t(c.labelAr, c.labelEn)}</span>
         {c.subAr && <span className={`block text-[10.5px] font-bold truncate ${dark ? 'text-white/60' : 'text-slate-500'}`} dir="auto">{t(c.subAr, c.subEn || c.subAr)}</span>}
         {missed && !done && <span className="block text-[10px] font-bold text-amber-600">{t('انتقل لليوم الجاي', 'Moved forward')}</span>}
       </span>
+      {onOpen && <ChevronLeft aria-hidden size={14} className={`shrink-0 self-center transition-transform group-hover:-translate-x-0.5 ${dark ? 'text-[#E6C36A]' : 'text-[#C49E3A]'}`} />}
+      {locked && <Lock aria-hidden size={11} className={`shrink-0 self-center ${dark ? 'text-white/35' : 'text-slate-300'}`} />}
+    </>
+  );
+  return (
+    <li className="leading-snug" data-testid="plan-cell" data-kind={c.kind} data-done={done ? '1' : '0'} data-open={onOpen ? '1' : '0'}>
+      {onOpen ? (
+        <button type="button" onClick={onOpen} data-testid="plan-cell-open"
+          title={t('ادخل الدرس', 'Open lesson')}
+          className={`group inline-flex max-w-full items-start gap-1.5 text-start rounded-md -mx-1 px-1.5 py-0.5 cursor-pointer transition-colors active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] ${dark ? 'hover:bg-white/10 active:bg-white/15' : 'hover:bg-[#C49E3A]/10 active:bg-[#C49E3A]/20'}`}>
+          {body}
+        </button>
+      ) : <div className="inline-flex max-w-full items-start gap-1.5 px-0.5" title={locked ? t('ينفتح بعد ما تخلص الدرس اللي قبله', 'Opens after the lesson before it') : undefined}>{body}</div>}
     </li>
   );
 };
@@ -114,6 +142,11 @@ export const PathWeekTable: React.FC<{ rec: OnboardingRecord; uid?: string; prof
           <span className="text-[11px] font-bold text-slate-500"> · {off ? t('الأسبوع الجاي', 'Next week') : t(`هذا الأسبوع ${doneN}/${all.length}`, `This week ${doneN}/${all.length}`)}</span></span>
         {onChange && <button onClick={onChange} className="text-[11px] font-black underline underline-offset-2 flex items-center gap-1" data-testid="change-plan"><RefreshCw size={11} />{t('غيّر خطتي', 'Change my plan')}</button>}
       </div>
+      {all.length > 0 && (
+        <p className="mt-1 text-[10.5px] font-normal tracking-wide text-slate-400 leading-relaxed" data-testid="plan-open-hint">
+          {t('اضغط على أي درس في الخطة للدخول إليه مباشرة · الدروس 🔒 تنفتح بالترتيب', 'Tap any lesson in the plan to open it directly · 🔒 lessons open in order')}
+        </p>
+      )}
       {last && (
         <p className="mt-1 text-[11px] font-bold text-slate-600" data-testid="plan-check-note">
           {last.outcome === 'up' ? t('⬆️ آخر فحص ممتاز — انتقلت للمستوى التالي والخطة تكمل منه', '⬆️ Last check excellent — moved up a level, the plan continues from there')
@@ -128,7 +161,7 @@ export const PathWeekTable: React.FC<{ rec: OnboardingRecord; uid?: string; prof
             <div key={r.date} data-testid="path-week-day" data-date={r.date} className={`flex gap-2 rounded-lg px-2 py-1.5 ${r.date === T ? 'bg-[#002147] text-white' : r.cells.length ? 'bg-white' : 'bg-slate-50'}`}>
               <span className={`w-14 shrink-0 text-[11px] font-black ${r.date === T ? 'text-[#E6C36A]' : 'text-[#C49E3A]'}`}>{r.date === T ? t('اليوم', 'Today') : en ? DAY_EN[r.dayIdx] : DAY_AR[r.dayIdx]}</span>
               {r.beforePlan && r.state === 'past' ? <span className="text-[11px] font-bold text-slate-400">{t('قبل خطتك', 'Before your plan')}</span>
-                : r.cells.length ? <ul className="flex-1 min-w-0 space-y-0.5">{(compact ? r.cells.slice(0, 2) : r.cells).map(c => <CellLine key={c.key} c={c} done={c.done} missed={missed && !c.done} dark={r.date === T} />)}</ul>
+                : r.cells.length ? <ul className="flex-1 min-w-0 space-y-0.5">{(compact ? r.cells.slice(0, 2) : r.cells).map(c => { const open = cellOpenable(c, rec, uid, profile); return <CellLine key={c.key} c={c} done={c.done} missed={missed && !c.done} dark={r.date === T} onOpen={open ? () => openPlanCell(c) : undefined} locked={!open && (c.kind === 'lesson' || c.kind === 'practice')} />; })}</ul>
                 : <span className={`text-[11px] font-bold ${r.date === T ? 'text-white/60' : 'text-slate-400'}`}>{r.study && r.state === 'past' ? '—' : t('راحة', 'Rest')}</span>}
             </div>
           );
