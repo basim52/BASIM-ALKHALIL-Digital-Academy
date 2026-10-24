@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  FolderOpen, 
-  Sparkles, 
-  Volume2, 
-  RotateCw, 
-  CheckCircle, 
-  HelpCircle, 
-  ChevronRight, 
-  ChevronLeft, 
-  Bookmark, 
-  Flame, 
-  Award, 
+import {
+  Volume2,
+  RotateCw,
+  CheckCircle,
+  HelpCircle,
+  ChevronRight,
+  ChevronLeft,
+  Bookmark,
+  Award,
   RefreshCcw,
-  BookOpen,
-  ArrowRight,
-  BookmarkCheck,
-  Zap,
   Trash2,
-  Plus
+  Plus,
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { useT } from '../lib/explainLang';
 import { managedSpeak } from '../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+} from './ui/academy';
 
 interface FlashcardsHubProps {
   lang: 'ar' | 'en';
@@ -2054,26 +2057,26 @@ const FLASHCARDS_DATA: Flashcard[] = [
 
 export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
   lang,
-  userProfile,
-  onBack,
-  onXPAdded
+  onXPAdded,
 }) => {
-  const isRtl = lang === 'ar';
+  const tHook = useT();
+  const isEnMode = lang === 'en' || tHook('ar', 'en') === 'en';
+  const isRtl = !isEnMode;
+  const t = (ar: string, en: string) => (isEnMode ? en : ar);
 
   const [activeCategory, setActiveCategory] = useState<'oxford' | 'grammar' | 'idioms' | 'kids'>('oxford');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [masteredIds, setMasteredIds] = useState<string[]>([]);
   const [reviewIds, setReviewIds] = useState<string[]>([]);
-  const [streakCount, setStreakCount] = useState(5); // Simulated visual streak
   const [xpAwardedCount, setXpAwardedCount] = useState(0);
-  
+
   // Custom TTS adjustments
   const [speechRate, setSpeechRate] = useState<number>(0.8);
   const [autoRead, setAutoRead] = useState<boolean>(true);
   const [currentlySpeaking, setCurrentlySpeaking] = useState<string | null>(null);
 
-  // Custom User-created cards stored in localStorage to dynamic expansion
+  // Custom User-created cards stored in localStorage
   const [customCards, setCustomCards] = useState<Flashcard[]>(() => {
     try {
       const saved = localStorage.getItem('custom_flashcards_basim');
@@ -2120,8 +2123,7 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
     }
     const randIdx = Math.floor(Math.random() * cardsPool.length);
     const targetCard = cardsPool[randIdx];
-    
-    // Pick other options as distractors
+
     const fillers = cardsPool.filter(c => c.id !== targetCard.id);
     const shuffledFillers = [...fillers].sort(() => 0.5 - Math.random());
     const pickedDistractors = shuffledFillers.slice(0, 2);
@@ -2135,7 +2137,7 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
         card: targetCard,
         type: 'word-to-ar',
         options,
-        correctAnswer
+        correctAnswer,
       });
     } else {
       const correctAnswer = targetCard.word;
@@ -2144,7 +2146,7 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
         card: targetCard,
         type: 'desc-to-word',
         options,
-        correctAnswer
+        correctAnswer,
       });
     }
     setQuizAnswer(null);
@@ -2163,7 +2165,7 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
     if (currentIndex < filteredCards.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
-      setCurrentIndex(0); // Loop back
+      setCurrentIndex(0);
     }
   };
 
@@ -2181,10 +2183,8 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
       setMasteredIds(prev => prev.filter(id => id !== cardId));
     } else {
       setMasteredIds(prev => [...prev, cardId]);
-      // Remove from review list if it was there
       setReviewIds(prev => prev.filter(id => id !== cardId));
-      
-      // Award XP
+
       if (onXPAdded) {
         onXPAdded(10);
         setXpAwardedCount(prev => prev + 10);
@@ -2212,15 +2212,15 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
         utterance.lang = isEnglish ? 'en-US' : 'ar-SA';
       }
       utterance.rate = utterance.lang.startsWith('ar') ? 1.0 : speechRate;
-      
+
       const voices = window.speechSynthesis.getVoices();
       const targetVoice = voices.find(v => v.lang.startsWith(utterance.lang.split('-')[0]));
       if (targetVoice) utterance.voice = targetVoice;
-      
+
       utterance.onstart = () => setCurrentlySpeaking(text);
       utterance.onend = () => setCurrentlySpeaking(null);
       utterance.onerror = () => setCurrentlySpeaking(null);
-      
+
       managedSpeak(utterance);
     }
   };
@@ -2232,15 +2232,15 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
         window.speechSynthesis.cancel();
       }
       if (!isFlipped) {
-        const t = setTimeout(() => {
+        const timer = setTimeout(() => {
           speakText(currentCard.word, 'en-US');
         }, 350);
-        return () => clearTimeout(t);
+        return () => clearTimeout(timer);
       } else {
-        const t = setTimeout(() => {
+        const timer = setTimeout(() => {
           speakText(`${currentCard.word}. ${currentCard.definition_en}`, 'en-US');
         }, 350);
-        return () => clearTimeout(t);
+        return () => clearTimeout(timer);
       }
     }
   }, [currentIndex, isFlipped, autoRead]);
@@ -2254,170 +2254,79 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
     };
   }, []);
 
-  const progressPercentage = Math.round((masteredIds.length / FLASHCARDS_DATA.length) * 100);
+  const decks: {
+    id: 'oxford' | 'grammar' | 'idioms' | 'kids';
+    order: number;
+    emoji: string;
+    titleAr: string;
+    titleEn: string;
+    level: string;
+  }[] = [
+    { id: 'oxford', order: 1, emoji: '🎓', titleAr: 'مصطلحات أكسفورد', titleEn: 'Oxford Academic', level: 'B2' },
+    { id: 'grammar', order: 2, emoji: '📝', titleAr: 'القواعد الأساسية', titleEn: 'Grammar Essentials', level: 'B1' },
+    { id: 'idioms', order: 3, emoji: '💡', titleAr: 'التعبيرات الشائعة', titleEn: 'Idioms & Phrases', level: 'B2' },
+    { id: 'kids', order: 4, emoji: '🎈', titleAr: 'مصطلحات الصغار', titleEn: 'Kids Essentials', level: 'A1' },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-20 relative">
-      <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-b from-[#002147]/5 to-transparent pointer-events-none" />
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} data-testid="flashcards-hub">
+      {/* Top Progress Bar with Real ProgressPills + Audio Controls */}
+      <GoldCard className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <ProgressPill data-testid="flashcard-progress-pill">
+              📇 {filteredCards.length > 0 ? currentIndex + 1 : 0} / {filteredCards.length}
+            </ProgressPill>
+            <ProgressPill>
+              ✓ {t('المتقن:', 'Mastered:')} {masteredIds.length} / {allCards.length}
+            </ProgressPill>
+            {xpAwardedCount > 0 && (
+              <ProgressPill>
+                🏆 +{xpAwardedCount} XP
+              </ProgressPill>
+            )}
+          </div>
 
-      <div className="max-w-4xl mx-auto px-4 pt-6 relative z-10">
-        {/* Navigation Breadcrumb */}
-        <div className={`flex justify-between items-center mb-6 pb-4 border-b border-slate-100 ${isRtl ? 'flex-row-reverse' : ''}`}>
-          <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
-            <button 
-              onClick={onBack}
-              className="w-10 h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-600 transition-all cursor-pointer shadow-sm"
+          {/* Compact Audio Speed & Auto-Play Row (non-wrapping at 375px) */}
+          <div className="flex items-center gap-1.5 flex-nowrap">
+            <button
+              type="button"
+              data-compact
+              onClick={() => {
+                setAutoRead(!autoRead);
+                if (!autoRead && currentCard) {
+                  speakText(currentCard.word, 'en-US');
+                } else if ('speechSynthesis' in window) {
+                  window.speechSynthesis.cancel();
+                }
+              }}
+              className={`px-2.5 py-1.5 rounded-xl text-[11px] font-black border whitespace-nowrap active:scale-95 transition-transform cursor-pointer ${
+                autoRead
+                  ? 'bg-[#002147] text-[#E6C36A] border-[#C49E3A]'
+                  : 'bg-[#fdfaf3] text-[#002147] border-[#C49E3A]/40'
+              }`}
             >
-              <ArrowRight size={18} className={isRtl ? '' : 'rotate-180'} />
+              🔊 {autoRead ? t('تلقائي: نعم', 'Auto: On') : t('تلقائي: لا', 'Auto: Off')}
             </button>
-            <div className={isRtl ? 'text-right' : 'text-left'}>
-              <h1 className="text-xl md:text-2xl font-black text-[#002147] font-sans">
-                {isRtl ? '📖 قصر الكلمات والبطاقات الذكية' : '📖 Smart Vocabulary Flashcards Hub'}
-              </h1>
-              <p className="text-xs text-slate-500 font-bold">
-                {isRtl ? 'قاطرة التكرار المتباعد والتذكر البصري الفطن' : 'Acoustics, memory triggers & spaced-repetition'}
-              </p>
-            </div>
-          </div>
 
-          {/* Quick Metrics */}
-          <div className="flex items-center gap-3">
-            <div className="bg-amber-50 text-amber-700 border border-amber-200 rounded-2xl px-3 py-1.5 flex items-center gap-1 shadow-sm font-black text-xs">
-              <Flame size={15} className="text-amber-500 fill-amber-500 animate-pulse" />
-              <span>{streakCount} {isRtl ? 'أيام متتالية' : 'Days Streak'}</span>
-            </div>
-
-            <div className="bg-[#002147]/5 text-[#002147] border border-[#002147]/10 rounded-2xl px-3 py-1.5 flex items-center gap-1.5 shadow-sm font-black text-xs font-mono">
-              <Zap size={14} className="text-[#C49E3A] fill-[#C49E3A]" />
-              <span>+{xpAwardedCount} XP</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Global Stats Overview */}
-        <div className="bg-white border border-slate-100 p-5 rounded-3xl mb-6 shadow-sm">
-          <div className={`flex flex-col md:flex-row gap-4 justify-between items-center mb-3 ${isRtl ? 'md:flex-row-reverse' : ''}`}>
-            <div className={isRtl ? 'text-right' : 'text-left'}>
-              <h3 className="text-sm font-black text-[#002147]">
-                {isRtl ? '📈 معدل إتقان مستودع الكلمات' : '📈 Spaced Repetition Mastery'}
-              </h3>
-              <p className="text-xs text-slate-400 font-bold mt-0.5">
-                {isRtl 
-                  ? `لقد أتقنت بنجاح ${masteredIds.length} كلمة من أصل ${FLASHCARDS_DATA.length}` 
-                  : `You mastered ${masteredIds.length} of ${FLASHCARDS_DATA.length} total words in the academy repository`}
-              </p>
-            </div>
-            <div className="text-right shrink-0">
-              <span className="text-lg font-black text-[#002147] font-mono">{progressPercentage}%</span>
-            </div>
-          </div>
-
-          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercentage}%` }}
-              transition={{ duration: 0.6 }}
-              className="bg-gradient-to-r from-[#002147] to-[#C49E3A] h-full rounded-full"
-            />
-          </div>
-        </div>
-
-        {/* Category Selector Tabs */}
-        <div className="flex flex-wrap gap-2 mb-4 justify-center">
-          {[
-            { id: 'oxford', label: isRtl ? '🎓 مصطلحات أكسفورد' : '🎓 Oxford Academic', color: 'border-blue-200 text-blue-800' },
-            { id: 'grammar', label: isRtl ? '📝 القواعد الأساسية' : '📝 Grammar Essentials', color: 'border-emerald-200 text-emerald-800' },
-            { id: 'idioms', label: isRtl ? '💡 التعبيرات الشائعة' : '💡 Idioms & Phrases', color: 'border-amber-200 text-amber-800' },
-            { id: 'kids', label: isRtl ? '🎈 مصطلحات الصغار' : '🎈 Kids Essentials', color: 'border-rose-200 text-rose-805' }
-          ].map(cat => {
-            const isSelected = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  setActiveCategory(cat.id as any);
-                  setCurrentIndex(0);
-                  setIsFlipped(false);
-                }}
-                className={`px-4 py-2.5 rounded-2xl text-[13px] font-black tracking-wide border cursor-pointer transition-all ${
-                  isSelected 
-                    ? 'bg-[#002147] text-white border-[#002147] shadow-md shadow-[#002147]/10' 
-                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-600'
-                }`}
-              >
-                {cat.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Voice & Learning Control Center */}
-        <div className="bg-white border border-slate-200/70 p-4 rounded-3xl mb-6 shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center">
-          <div className={`flex items-center gap-2.5 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
-            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
-              <Sparkles size={16} />
-            </div>
-            <div>
-              <h4 className="font-extrabold text-[#002147] text-[13px]">
-                {isRtl ? '⚙️ إعدادات النطق والمساعد الصوتي' : '⚙️ Speech & Sound Configuration'}
-              </h4>
-              <p className="text-[10px] text-slate-400 font-bold mt-0.5">
-                {isRtl ? 'تحكم في سرعة الإلقاء والتشغيل التلقائي الذكي عند قلب البطاقة!' : 'Adjust reading rate and toggle auto-play on cards'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-4 items-center justify-end w-full sm:w-auto">
-            {/* Auto Read Toggle */}
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100/80 rounded-2xl px-3 py-1.5 shadow-sm">
-              <span className="font-black text-slate-500 text-[10px] uppercase">
-                {isRtl ? '🔊 تلاوة تلقائية:' : '🔊 Auto-Play:'}
-              </span>
-              <button
-                onClick={() => {
-                  setAutoRead(!autoRead);
-                  if (!autoRead && currentCard) {
-                    speakText(currentCard.word, 'en-US');
-                  } else {
-                    if ('speechSynthesis' in window) {
-                      window.speechSynthesis.cancel();
-                    }
-                  }
-                }}
-                className={`w-11 h-6 rounded-full p-0.5 transition-all outline-none duration-300 relative cursor-pointer ${
-                  autoRead ? 'bg-[#002147]' : 'bg-slate-200'
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full bg-white shadow transform transition-transform duration-300 ${
-                    autoRead ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* Speech Speed Selection */}
-            <div className="flex items-center gap-1 bg-slate-50 border border-slate-100/80 rounded-2xl p-1 shadow-sm">
-              <span className="font-black text-slate-400 text-[9px] uppercase px-1.5">
-                {isRtl ? 'السرعة:' : 'Speed:'}
-              </span>
+            <div className="inline-flex items-center rounded-xl bg-[#002147] p-0.5 border border-[#C49E3A]">
               {[
-                { value: 0.5, label: isRtl ? '🐢 بطيء' : '🐢 Slow' },
-                { value: 0.8, label: isRtl ? '👤 عادي' : '👤 Normal' },
-                { value: 1.1, label: isRtl ? '⚡ سريع' : '⚡ Fast' }
+                { value: 0.5, label: '0.5x' },
+                { value: 0.8, label: '0.8x' },
+                { value: 1.1, label: '1.1x' },
               ].map(speed => (
                 <button
                   key={speed.value}
+                  type="button"
+                  data-compact
                   onClick={() => {
                     setSpeechRate(speed.value);
-                    if (currentCard) {
-                      speakText(currentCard.word, 'en-US');
-                    }
+                    if (currentCard) speakText(currentCard.word, 'en-US');
                   }}
-                  className={`px-2.5 py-1.5 rounded-xl font-black text-[9px] duration-250 cursor-pointer ${
+                  className={`px-2 py-1 rounded-lg text-[11px] font-black transition-colors cursor-pointer ${
                     speechRate === speed.value
-                      ? 'bg-[#C49E3A] text-white shadow-sm'
-                      : 'text-slate-500 hover:text-[#002147] bg-transparent'
+                      ? 'bg-[#C49E3A] text-[#002147]'
+                      : 'text-[#E6C36A] hover:text-white'
                   }`}
                 >
                   {speed.label}
@@ -2426,779 +2335,635 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
             </div>
           </div>
         </div>
+      </GoldCard>
 
-        {/* Core Flashcard Area */}
-        {filteredCards.length > 0 ? (
-          <div className="space-y-6">
-            <div className="relative h-[480px] sm:h-[420px] w-full [perspective:1000px]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${activeCategory}_${currentIndex}_${isFlipped}`}
-                  initial={{ rotateY: isFlipped ? -90 : 90, opacity: 0 }}
-                  animate={{ rotateY: 0, opacity: 1 }}
-                  exit={{ rotateY: isFlipped ? 90 : -90, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  onClick={() => setIsFlipped(!isFlipped)}
-                  className={`w-full h-full rounded-3xl p-6 md:p-8 border cursor-pointer select-none relative shadow-xl overflow-hidden flex flex-col justify-between transition-colors ${
-                    isFlipped 
-                      ? 'bg-gradient-to-br from-[#002147] to-[#123055] text-white border-[#002147]' 
-                      : 'bg-white border-slate-200 text-[#002147] hover:border-[#002147]/25'
-                  }`}
-                >
-                  {/* Decorative background logo */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] pointer-events-none select-none">
-                    <BookOpen size={160} />
+      {/* Deck List -> LessonTile Grid (2 columns on mobile) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5" data-testid="flashcards-deck-grid">
+        {decks.map(deck => {
+          const deckCards = allCards.filter(c => c.category === deck.id);
+          const deckMastered = deckCards.filter(c => masteredIds.includes(c.id)).length;
+          return (
+            <LessonTile
+              key={deck.id}
+              order={deck.order}
+              emoji={deck.emoji}
+              title={t(deck.titleAr, deck.titleEn)}
+              subtitle={`${deckMastered}/${deckCards.length} ${t('بطاقة', 'cards')}`}
+              level={deck.level}
+              active={activeCategory === deck.id}
+              done={deckCards.length > 0 && deckMastered === deckCards.length}
+              onClick={() => {
+                setActiveCategory(deck.id);
+                setCurrentIndex(0);
+                setIsFlipped(false);
+              }}
+            />
+          );
+        })}
+      </div>
+
+      {/* Core Flashcard Area */}
+      {filteredCards.length > 0 && currentCard ? (
+        <div className="space-y-4">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${activeCategory}_${currentIndex}_${isFlipped ? 'back' : 'front'}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setIsFlipped(!isFlipped)}
+            >
+              <GoldCard
+                data-testid="flashcard-main-card"
+                className={`min-h-[340px] sm:min-h-[360px] p-5 sm:p-8 flex flex-col justify-between cursor-pointer select-none transition-colors ${
+                  isFlipped
+                    ? '!bg-[#fdfaf3] !border-[#C49E3A] ring-2 ring-[#C49E3A]/30'
+                    : 'bg-white border-[#C49E3A]/40 hover:border-[#C49E3A]'
+                }`}
+              >
+                {/* Card Top Row */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <ProgressPill>
+                      {isFlipped
+                        ? t('🔄 خلفية البطاقة (المعنى والشرح)', '🔄 Back (Meaning & Context)')
+                        : t('📇 واجهة البطاقة (الكلمة)', '📇 Front (Word)')}
+                    </ProgressPill>
+                    {masteredIds.includes(currentCard.id) && (
+                      <ProgressPill className="!bg-[#002147] !text-[#E6C36A] !border-[#C49E3A]">
+                        ✓ {t('متقنة', 'Mastered')}
+                      </ProgressPill>
+                    )}
+                    {reviewIds.includes(currentCard.id) && (
+                      <ProgressPill>
+                        ★ {t('مراجعة', 'Review')}
+                      </ProgressPill>
+                    )}
                   </div>
 
-                  {/* Header part of Card */}
-                  <div className="flex justify-between items-center relative z-10 w-full">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full border ${
-                        isFlipped 
-                          ? 'bg-white/10 text-[#C49E3A] border-white/10' 
-                          : 'bg-[#002147]/5 text-[#002147] border-slate-200'
-                      }`}>
-                        {isFlipped ? (isRtl ? 'خلفية البطاقة (التحليل)' : 'REVERSE SIDE') : (isRtl ? 'واجهة البطاقة (الكلمة)' : 'FRONT SIDE')}
+                  <button
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation();
+                      speakText(currentCard.word, 'en-US');
+                    }}
+                    aria-label={t('استماع للكلمة', 'Pronounce word')}
+                    className={`w-10 h-10 rounded-xl border-2 border-[#C49E3A] flex items-center justify-center shrink-0 active:scale-95 transition-transform cursor-pointer ${
+                      currentlySpeaking === currentCard.word
+                        ? 'bg-[#C49E3A] text-[#002147]'
+                        : 'bg-[#002147] text-[#E6C36A]'
+                    }`}
+                  >
+                    <Volume2 size={18} />
+                  </button>
+                </div>
+
+                {/* Card Center Content */}
+                {!isFlipped ? (
+                  /* FRONT: White GoldCard, word in navy font-black */
+                  <div className="text-center py-6 space-y-4 my-auto">
+                    <h2
+                      dir="ltr"
+                      className="text-3xl sm:text-5xl font-black text-[#002147] tracking-tight"
+                    >
+                      {currentCard.word}
+                    </h2>
+
+                    <div dir="ltr">
+                      <span className="inline-block text-xs sm:text-sm font-mono font-bold text-[#C49E3A] bg-[#fdfaf3] border border-[#C49E3A]/40 px-3.5 py-1 rounded-full">
+                        {currentCard.phonetic}
                       </span>
-
-                      {/* Mastery Indicators Overlay */}
-                      {masteredIds.includes(currentCard.id) && (
-                        <span className="bg-emerald-500 text-white text-[9px] font-black px-2 py-1 rounded-full shadow-sm">
-                          {isRtl ? '✓ متقنة' : '✓ Mastered'}
-                        </span>
-                      )}
-                      {reviewIds.includes(currentCard.id) && (
-                        <span className="bg-rose-500 text-white text-[9px] font-black px-2 py-1 rounded-full shadow-sm animate-pulse">
-                          {isRtl ? '★ مراجعة' : '★ Review'}
-                        </span>
-                      )}
                     </div>
 
-                    <div className="flex gap-1.5">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          speakText(currentCard.word, 'en-US');
-                        }}
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all border shrink-0 ${
-                          isFlipped 
-                            ? 'bg-white/10 border-white/10 hover:bg-white/20 text-white' 
-                            : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-[#002147]'
-                        } ${currentlySpeaking === currentCard.word ? 'ring-2 ring-[#C49E3A] scale-105' : ''}`}
-                        title="Pronounce word"
-                      >
-                        <Volume2 size={16} className={currentlySpeaking === currentCard.word ? 'animate-bounce text-[#C49E3A]' : ''} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Main Content inside Card */}
-                  <div className="text-center py-4 relative z-10 flex-1 flex flex-col justify-center items-center">
-                    {!isFlipped ? (
-                      <div className="space-y-4">
-                        <h2 className="text-4xl md:text-5xl font-black font-sans tracking-tight leading-none text-[#002147]">
-                          {currentCard.word}
-                        </h2>
-                        
-                        <div>
-                          <p className="text-sm font-serif font-bold text-[#C49E3A] tracking-wider uppercase bg-[#C49E3A]/5 border border-[#C49E3A]/20 px-4 py-1.5 rounded-2xl inline-block shadow-inner">
-                            {currentCard.phonetic}
-                          </p>
-                        </div>
-
-                        {/* Interactive Equalizer when word is playing */}
-                        {currentlySpeaking === currentCard.word && (
-                          <div className="flex items-end justify-center gap-1.5 h-8 pt-2 animate-fade-in">
-                            {[14, 28, 20, 26, 12, 22, 16, 25, 10].map((val, i) => (
-                              <motion.div
-                                key={i}
-                                initial={{ height: 4 }}
-                                animate={{ height: [4, val, 4] }}
-                                transition={{
-                                  repeat: Infinity,
-                                  duration: 0.5 + (i * 0.08),
-                                  ease: "easeInOut"
-                                }}
-                                className="w-1 bg-[#C49E3A] rounded-full"
-                              />
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Interactive Example Sentence directly on the Front Side */}
-                        <div 
-                          onClick={(e) => e.stopPropagation()} 
-                          className={`p-3.5 rounded-2xl border transition-all text-left w-full max-w-md ${
-                            currentlySpeaking === currentCard.example_en 
-                              ? 'bg-[#C49E3A]/10 border-[#C49E3A]' 
-                              : 'bg-slate-50 hover:bg-slate-100/70 border-slate-100'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center gap-2">
-                            <span className="text-[9px] font-black text-slate-400 tracking-wider block">
-                              {isRtl ? '🔊 الجملة التطبيقية وقراءتها الميسرة:' : '🔊 CONTEXT SENTENCE & SPEAK PLAYER:'}
-                            </span>
-                            <div className="flex gap-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  speakText(currentCard.example_en, 'en-US');
-                                }}
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all border shrink-0 ${
-                                  currentlySpeaking === currentCard.example_en
-                                    ? 'bg-[#C49E3A] border-[#C49E3A] text-white shadow-md animate-pulse'
-                                    : 'bg-white hover:bg-slate-50 border-slate-200 text-[#002147]/70'
-                                }`}
-                                title={isRtl ? 'نطق الجملة بصوت منسجم' : 'Read English sentence aloud'}
-                              >
-                                <Volume2 size={12} className={currentlySpeaking === currentCard.example_en ? 'animate-bounce' : ''} />
-                              </button>
-                            </div>
-                          </div>
-                          
-                          <p className="text-xs font-sans text-slate-700 font-bold leading-relaxed italic mt-1.5 select-text">
-                            &ldquo; {currentCard.example_en} &rdquo;
-                          </p>
-                          
-                          <p className="text-[11px] text-slate-500 font-bold mt-1 text-right border-t border-slate-200/50 pt-1">
-                            {currentCard.example_ar}
-                          </p>
-                        </div>
-
-                        <p className="text-[10px] text-slate-400 font-black tracking-widest uppercase flex items-center gap-1.5 justify-center pt-2">
-                          <RotateCw size={11} className="animate-spin-slow" />
-                          <span>{isRtl ? 'انقر لقلب البطاقة وعرض الشرح والترجمة' : 'TAP TO FLIP & REVEAL MEANING'}</span>
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4 w-full max-w-xl text-left">
-                        {/* Interactive Definition Block */}
-                        <div 
-                          onClick={(e) => e.stopPropagation()} 
-                          className={`p-4 rounded-2xl border transition-all ${
-                            currentlySpeaking === currentCard.definition_en 
-                              ? 'bg-white/[0.08] border-[#C49E3A]' 
-                              : 'bg-white/[0.03] border-white/10 hover:border-white/20'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="flex-1 space-y-1">
-                              <span className="text-[9px] font-black text-amber-300 uppercase tracking-widest block">
-                                {isRtl ? '📝 الشرح والتعريف العلمي بالإنجليزية:' : '📝 ACADEMIC DEFINITION:'}
-                              </span>
-                              <p className="text-sm font-sans font-medium text-white/95 leading-relaxed">
-                                {currentCard.definition_en}
-                              </p>
-                            </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                speakText(currentCard.definition_en, 'en-US');
-                              }}
-                              className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-                                currentlySpeaking === currentCard.definition_en
-                                  ? 'bg-[#C49E3A] border-[#C49E3A] text-white animate-pulse shadow-md shadow-[#C49E3A]/20'
-                                  : 'bg-white/5 hover:bg-white/15 border-white/10 text-white'
-                              }`}
-                              title="Speak definition"
-                            >
-                              <Volume2 size={14} className={currentlySpeaking === currentCard.definition_en ? 'animate-bounce' : ''} />
-                            </button>
-                          </div>
-
-                          {/* Arabic Definition Sub-Row with speaker */}
-                          <div className="mt-3 pt-3 border-t border-white/10 flex justify-between items-start gap-3">
-                            <div className={`flex-1 ${isRtl ? 'text-right' : ''}`}>
-                              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest block mb-0.5">
-                                {isRtl ? '🔍 المعنى والترجمة بالعربية:' : '🔍 ARABIC MEANING:'}
-                              </span>
-                              <p className="text-xs font-bold text-amber-200 leading-relaxed font-sans">
-                                {currentCard.definition_ar}
-                              </p>
-                            </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                speakText(currentCard.definition_ar, 'ar-SA');
-                              }}
-                              className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-                                currentlySpeaking === currentCard.definition_ar
-                                  ? 'bg-[#C49E3A] border-[#C49E3A] text-white'
-                                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-300'
-                              }`}
-                              title="نطق الشرح بالعربية"
-                            >
-                              <Volume2 size={12} />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Interactive Example Sentence Block */}
-                        <div 
-                          onClick={(e) => e.stopPropagation()} 
-                          className={`p-4 rounded-2xl border transition-all ${
-                            currentlySpeaking === currentCard.example_en 
-                              ? 'bg-[#C49E3A]/10 border-[#C49E3A]' 
-                              : 'bg-white/[0.02] border-white/10 hover:border-white/15'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="flex-1 space-y-1">
-                              <span className="text-[9px] font-black text-[#C49E3A] uppercase tracking-widest block">
-                                {isRtl ? '💡 جملة تطبيقية مقترحة (Example):' : '💡 ENRICHED EXAMPLE:'}
-                              </span>
-                              <p className="text-sm font-sans text-white/90 leading-relaxed italic font-bold">
-                                &ldquo; {currentCard.example_en} &rdquo;
-                              </p>
-                            </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                speakText(currentCard.example_en, 'en-US');
-                              }}
-                              className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-                                currentlySpeaking === currentCard.example_en
-                                  ? 'bg-[#C49E3A] border-[#C49E3A] text-white animate-pulse shadow-md'
-                                  : 'bg-white/5 hover:bg-white/15 border-white/10 text-white'
-                              }`}
-                              title="Speak example sentence"
-                            >
-                              <Volume2 size={14} className={currentlySpeaking === currentCard.example_en ? 'animate-bounce' : ''} />
-                            </button>
-                          </div>
-
-                          {/* Arabic Translation Sub-Row with speaker */}
-                          <div className="mt-3 pt-3 border-t border-white/10 flex justify-between items-start gap-3">
-                            <div className={`flex-1 ${isRtl ? 'text-right' : ''}`}>
-                              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest block mb-0.5">
-                                {isRtl ? '🎯 ترجمة الجملة بالعربية:' : '🎯 ARABIC TRANSLATION:'}
-                              </span>
-                              <p className="text-xs font-bold text-slate-200 leading-relaxed">
-                                &ldquo; {currentCard.example_ar} &rdquo;
-                              </p>
-                            </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                speakText(currentCard.example_ar, 'ar-SA');
-                              }}
-                              className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-                                currentlySpeaking === currentCard.example_ar
-                                  ? 'bg-[#C49E3A] border-[#C49E3A] text-white'
-                                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-slate-300'
-                              }`}
-                              title="نطق الجملة بالعربية"
-                            >
-                              <Volume2 size={12} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer part of Card */}
-                  <div className="flex justify-between items-center relative z-10 w-full mt-auto pt-2 border-t border-slate-100/10">
-                    <span className={`text-[10px] font-black font-mono tracking-wider ${isFlipped ? 'text-white/60' : 'text-slate-400'}`}>
-                      Card {currentIndex + 1} of {filteredCards.length}
-                    </span>
-
-                    <span className={`text-[10px] font-black ${isFlipped ? 'text-amber-300' : 'text-[#002147]/60'}`}>
-                      {isRtl ? 'أكاديمية باسم الفطنة 👑' : 'Basim Academy'}
-                    </span>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* Pagination Back/Next controls */}
-            <div className="flex justify-between items-center bg-white border border-slate-200 p-4 rounded-3xl shadow-sm">
-              <button
-                onClick={handlePrev}
-                className={`flex items-center gap-1.5 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-black text-xs transition-colors cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
-              >
-                {isRtl ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
-                <span>{isRtl ? 'البطاقة السابقة' : 'Previous Card'}</span>
-              </button>
-
-              {/* Central Action Toggles: Mastered or Review */}
-              <div className="flex gap-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleReview(currentCard.id);
-                  }}
-                  className={`px-3 py-1.5 text-[10px] font-bold border rounded-xl flex items-center gap-1 transition-all cursor-pointer ${
-                    reviewIds.includes(currentCard.id)
-                      ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-inner'
-                      : 'bg-white hover:bg-slate-50 text-slate-500 border-slate-200'
-                  }`}
-                >
-                  <Bookmark size={11} className={reviewIds.includes(currentCard.id) ? 'fill-rose-500 text-rose-500' : ''} />
-                  <span>{isRtl ? 'مراجعة قريبة' : 'Needs Review'}</span>
-                </button>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleMastered(currentCard.id);
-                  }}
-                  className={`px-3.5 py-1.5 text-[10px] font-bold border rounded-xl flex items-center gap-1 transition-all cursor-pointer ${
-                    masteredIds.includes(currentCard.id)
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-inner scale-105'
-                      : 'bg-white hover:bg-slate-50 text-slate-500 border-slate-200'
-                  }`}
-                >
-                  <BookmarkCheck size={11} className={masteredIds.includes(currentCard.id) ? 'fill-emerald-500 text-emerald-500' : ''} />
-                  <span>{masteredIds.includes(currentCard.id) ? (isRtl ? 'تم إتقانها! ✓' : 'Mastered! ✓') : (isRtl ? 'حفظ وإتقان الكلمة' : 'Mark Mastered')}</span>
-                </button>
-              </div>
-
-              <button
-                onClick={handleNext}
-                className={`flex items-center gap-1.5 px-4 py-2.5 bg-[#002147] hover:bg-[#002147]/95 text-white rounded-xl font-black text-xs transition-colors cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
-              >
-                <span>{isRtl ? 'البطاقة القادمة' : 'Next Card'}</span>
-                {isRtl ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
-              </button>
-            </div>
-
-            {/* Quick Tips or Info section */}
-            <div className={`bg-gradient-to-br from-[#002147]/5 to-[#C49E3A]/5 border border-amber-100 rounded-3xl p-5 flex gap-3 items-start ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
-              <Sparkles size={18} className="text-amber-500 mt-1 shrink-0 animate-pulse" />
-              <div>
-                <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider">
-                  {isRtl ? '💡 طريقة التكرار المتباعد الفعالة (Leitner System):' : '💡 Effective Spaced-Repetition Tip:'}
-                </h4>
-                <p className="text-xs text-slate-600 leading-relaxed mt-1 font-sans">
-                  {isRtl 
-                    ? 'حدد الكلمات التي تشعر بالتردد بنطقها كـ "مراجعة قريبة" للمثابرة عليها لاحقاً. البطاقات التي أصبحت في خانة "تم إتقانها" ستحصل مقابلها على 10+ نقاط تفوق (XP) فطن!'
-                    : 'Mark any difficult words as "Needs Review" so you can cycle through them faster. Mastering cards rewards you with +10 XP. Regular reviews keep them in your long-term memory!'}
-                </p>
-              </div>
-            </div>
-
-            {/* 🏆 لوحة البراعة والتنمية اللغوية للمستخدم والمطور باسم (Review, Add, Develop & Challenge) */}
-            <div className="bg-white border-2 border-[#002147]/10 p-5 md:p-6 rounded-3xl mt-8 shadow-md">
-              <div className={`flex flex-col sm:flex-row justify-between items-center pb-4 mb-5 border-b border-slate-100 gap-3 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
-                <div className={isRtl ? 'text-right' : 'text-left'}>
-                  <h3 className="text-base font-black text-[#002147] font-sans flex items-center gap-2">
-                    <Award className="text-[#C49E3A]" size={18} />
-                    <span>{isRtl ? '🏆 جناح مراجعة، إضافة وتطوير المفردات' : '🏆 Vocabulary Mastery & Custom Dev Hub'}</span>
-                  </h3>
-                  <p className="text-[11px] text-slate-400 font-bold mt-0.5">
-                    {isRtl ? 'راجع كلماتك الصعبة، أضف مفردات جديدة لفصلك، واختبر فطنتك اللغوية بذكاء!' : 'Review challenging words, append custom cards, and test your vocabulary skills!'}
-                  </p>
-                </div>
-
-                {/* Sub-Tabs switcher */}
-                <div className="flex gap-1.5 bg-slate-100/85 p-1 rounded-2xl">
-                  {[
-                    { id: 'quiz', label: isRtl ? '🧠 اختبار ذكي' : '🧠 Quiz' },
-                    { id: 'review_list', label: isRtl ? '🔍 قائمة المراجعة' : '🔍 Review List' },
-                    { id: 'add', label: isRtl ? '➕ إضافة كلمة' : '➕ Add Word' }
-                  ].map(tab => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setDevelopmentTab(tab.id as any)}
-                      className={`px-3.5 py-2 rounded-xl text-[11px] font-black cursor-pointer transition-all ${
-                        developmentTab === tab.id
-                          ? 'bg-[#002147] text-white shadow-sm'
-                          : 'text-slate-500 hover:text-[#002147]'
-                      }`}
+                    {/* Context sentence preview */}
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      className="p-3.5 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 text-start max-w-lg mx-auto space-y-1.5"
                     >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sub-Tabs Display content */}
-              <AnimatePresence mode="wait">
-                {/* 1. QUIZ CHALLENGE SUB-TAB */}
-                {developmentTab === 'quiz' && (
-                  <motion.div
-                    key="quiz_tab"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="space-y-4"
-                  >
-                    {quizQuestion ? (
-                      <div className="bg-slate-50/70 border border-slate-100 p-5 rounded-2xl">
-                        <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-100 tracking-wider">
-                          {isRtl ? '🏆 تحدي الفهم الحالي' : '🏆 ACTIVE RETENTION CHALLENGE'}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-black text-[#002147]/70 uppercase">
+                          {t('🔊 الجملة التطبيقية:', '🔊 Context Sentence:')}
                         </span>
-                        
-                        {quizQuestion.type === 'word-to-ar' ? (
-                          <div className={`mt-3 ${isRtl ? 'text-right' : 'text-left'}`}>
-                            <p className="text-xs text-slate-400 font-bold">
-                              {isRtl ? 'ما هو المعنى الصحيح للكلمة التالية باللغة العربية؟' : 'What is the correct Arabic meaning of the following word?'}
-                            </p>
-                            <h4 className="text-2xl font-black text-[#002147] mt-1 mb-4 select-all">
-                              {quizQuestion.card.word} <span className="text-xs text-[#C49E3A] font-serif font-bold">{quizQuestion.card.phonetic}</span>
-                            </h4>
-                          </div>
-                        ) : (
-                          <div className={`mt-3 ${isRtl ? 'text-right' : 'text-left'}`}>
-                            <p className="text-xs text-slate-400 font-bold">
-                              {isRtl ? 'أي الكلمات التالية توافق بشكل تام التفسير العلمي أدناه؟' : 'Which word perfectly defines the following academic concept?'}
-                            </p>
-                            <p className="text-sm font-sans font-medium text-slate-700 bg-white border border-slate-100 p-3 rounded-xl mt-1 mb-4 shadow-sm italic select-all">
-                              &ldquo; {quizQuestion.card.definition_en} &rdquo;
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Interactive choices */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                          {quizQuestion.options.map((option, idx) => {
-                            const isSelected = quizAnswer === option;
-                            const isCorrect = option === quizQuestion.correctAnswer;
-                            
-                            let btnStyle = 'bg-white hover:bg-slate-100 border-slate-200 text-[#002147]';
-                            if (quizAnswer) {
-                              if (isCorrect) {
-                                btnStyle = 'bg-emerald-50 text-emerald-800 border-emerald-300';
-                              } else if (isSelected) {
-                                btnStyle = 'bg-rose-50 text-rose-800 border-rose-300';
-                              } else {
-                                btnStyle = 'bg-white border-slate-100 text-slate-400 opacity-60';
-                              }
-                            }
-                            
-                            return (
-                              <button
-                                key={idx}
-                                disabled={!!quizAnswer}
-                                onClick={() => {
-                                  setQuizAnswer(option);
-                                  if (option === quizQuestion.correctAnswer) {
-                                    setQuizStatus('correct');
-                                    speakText(isRtl ? 'رائع إجابة صحيحة' : 'Incredible! correct answer', 'en-US');
-                                    if (onXPAdded) {
-                                      onXPAdded(15);
-                                      setXpAwardedCount(prev => prev + 15);
-                                    }
-                                  } else {
-                                    setQuizStatus('incorrect');
-                                    speakText(isRtl ? 'إجابة خاطئة حاول مجددا' : 'Wrong answer! try again', 'en-US');
-                                  }
-                                }}
-                                className={`p-3 rounded-xl border text-xs font-black transition-all cursor-pointer ${btnStyle}`}
-                              >
-                                {option}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Status feedback block */}
-                        {quizAnswer && (
-                          <div className={`mt-4 pt-3 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
-                            <span className={`text-xs font-black flex items-center gap-1.5 ${quizStatus === 'correct' ? 'text-emerald-700' : 'text-rose-700'}`}>
-                              {quizStatus === 'correct' ? (
-                                <>
-                                  <CheckCircle size={15} />
-                                  <span>{isRtl ? '✓ كفو فطن! أحسنت صنعاً (+15 XP)' : '✓ Outstanding memory! (+15 XP)'}</span>
-                                </>
-                              ) : (
-                                <>
-                                  <HelpCircle size={15} />
-                                  <span>{isRtl ? '✗ الإجابة الصحيحة كانت: ' + quizQuestion.correctAnswer : '✗ Incorrect. The right match was: ' + quizQuestion.correctAnswer}</span>
-                                </>
-                              )}
-                            </span>
-
-                            <button
-                              onClick={() => triggerNewQuiz()}
-                              className="px-3 py-1.5 bg-[#002147] hover:bg-[#002147]/90 text-white rounded-xl font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
-                            >
-                              <RefreshCcw size={10} />
-                              <span>{isRtl ? 'تحدي جديد' : 'New Challenge'}</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-slate-400 text-xs">
-                        {isRtl ? 'يرجى إدخال كلمات إضافية للتمكن من توليد مسابقة تفاعلية مبهجة.' : 'Add more words to enable game dynamics.'}
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-
-                {/* 2. CHALLENGING WORDS REVIEW SUB-TAB */}
-                {developmentTab === 'review_list' && (
-                  <motion.div
-                    key="review_tab"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <h4 className={`text-xs font-black text-[#002147] mb-2 ${isRtl ? 'text-right' : 'text-left'}`}>
-                        {isRtl ? `📋 مسارات المراجعة النشطة للفئة الحالية (${filteredCards.filter(c => reviewIds.includes(c.id)).length} كلمات متبقية):` : `📋 Active category review items (${filteredCards.filter(c => reviewIds.includes(c.id)).length} pending):`}
-                      </h4>
-                    </div>
-
-                    {filteredCards.filter(c => reviewIds.includes(c.id)).length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-1">
-                        {filteredCards.filter(c => reviewIds.includes(c.id)).map(card => (
-                          <div 
-                            key={card.id} 
-                            className={`p-3.5 bg-slate-50 border border-slate-100 hover:border-[#002147]/20 rounded-2xl flex justify-between items-center transition-all ${isRtl ? 'flex-row-reverse' : ''}`}
-                          >
-                            <div className={isRtl ? 'text-right' : 'text-left'}>
-                              <p className="text-xs font-black text-[#002147]">{card.word}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5">{card.phonetic}</p>
-                              <p className="text-[10px] text-amber-700 font-bold mt-1 max-w-xs">{card.definition_ar}</p>
-                            </div>
-
-                            <div className="flex gap-1.5 shrink-0">
-                              <button
-                                onClick={() => speakText(card.word, 'en-US')}
-                                className="w-7 h-7 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg flex items-center justify-center shrink-0"
-                                title="Listen pronunciation"
-                              >
-                                <Volume2 size={13} />
-                              </button>
-                              <button
-                                onClick={() => toggleReview(card.id)}
-                                className="w-7 h-7 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 rounded-lg flex items-center justify-center shrink-0"
-                                title="إزالة من المراجعة"
-                              >
-                                <Trash2 size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-6 bg-slate-50 border border-slate-100 p-4 rounded-2xl">
-                        <Bookmark className="text-slate-300 mx-auto mb-2 opacity-50" size={24} />
-                        <p className="text-xs text-slate-500 font-bold">
-                          {isRtl ? 'لا توجد كلمات حالية تحتاج مراجعة تحت هذه الفئة. عظيم!' : 'Splendid! You sorted everything for review in this channel.'}
-                        </p>
-                        <p className="text-[10px] text-slate-400 mt-1">
-                          {isRtl ? 'انقر على زر "مراجعة قريبة" أثناء تصفح البطاقة لإضافة الكلمات الصعبة هنا.' : 'Click "Needs Review" on any card view above to seed items in this sandbox!'}
-                        </p>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-
-                {/* 3. ADD CUSTOM FLASHCARD SUB-TAB */}
-                {developmentTab === 'add' && (
-                  <motion.div
-                    key="add_tab"
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                  >
-                    <form 
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!newWord.trim() || !newDefEn.trim() || !newDefAr.trim()) return;
-
-                        const added: Flashcard = {
-                          id: `fc_custom_${Date.now()}`,
-                          word: newWord.trim(),
-                          phonetic: newPhonetic.trim() || '/ˈkʌstəm/',
-                          definition_en: newDefEn.trim(),
-                          definition_ar: newDefAr.trim(),
-                          example_en: newExEn.trim() || 'This is a custom interactive sentence.',
-                          example_ar: newExAr.trim() || 'هذه جملة تفاعلية مخصصة.',
-                          category: activeCategory
-                        };
-
-                        const nextCustoms = [...customCards, added];
-                        setCustomCards(nextCustoms);
-                        localStorage.setItem('custom_flashcards_basim', JSON.stringify(nextCustoms));
-
-                        setNewWord('');
-                        setNewPhonetic('');
-                        setNewDefEn('');
-                        setNewDefAr('');
-                        setNewExEn('');
-                        setNewExAr('');
-
-                        setAddSuccessMsg(isRtl ? '✨ تم إضافة بطاقتك الذكية بنجاح في هذا القسم!' : '✨ New custom card added successfully!');
-                        setTimeout(() => setAddSuccessMsg(''), 4000);
-
-                        if (onXPAdded) {
-                          onXPAdded(15);
-                          setXpAwardedCount(prev => prev + 15);
-                        }
-                      }}
-                      className="space-y-4"
-                    >
-                      {addSuccessMsg && (
-                        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black p-3 rounded-xl animate-bounce text-center">
-                          {addSuccessMsg}
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Word Input */}
-                        <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                          <label className="text-[11px] font-black text-[#002147] block">
-                            {isRtl ? '🔑 الكلمة الإنجليزية (English Word) *:' : '🔑 English Word *:'}
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={newWord}
-                            onChange={(e) => setNewWord(e.target.value)}
-                            placeholder="e.g., Illuminate"
-                            className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-[#002147] transition-all"
-                          />
-                        </div>
-
-                        {/* Phonetic Spelt Input */}
-                        <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                          <label className="text-[11px] font-black text-slate-400 block">
-                            {isRtl ? '🗣️ اللفظ الصوتي (Phonetic spelling) - اختياري:' : '🗣️ Phonetic Spelt - Optional:'}
-                          </label>
-                          <input
-                            type="text"
-                            value={newPhonetic}
-                            onChange={(e) => setNewPhonetic(e.target.value)}
-                            placeholder="e.g., /ɪˈluːmɪneɪt/"
-                            className="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-[#002147] transition-all"
-                          />
-                        </div>
-
-                        {/* ENG Definition */}
-                        <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                          <label className="text-[11px] font-black text-[#002147] block">
-                            {isRtl ? '📝 التعريف العلمي بالإنجليزي (ENG Definition) *:' : '📝 ENG Definition *:'}
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={newDefEn}
-                            onChange={(e) => setNewDefEn(e.target.value)}
-                            placeholder="To make something visible or bright with light..."
-                            className="w-full text-xs font-sans font-medium bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-[#002147] transition-all"
-                          />
-                        </div>
-
-                        {/* ARB Definition */}
-                        <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                          <label className="text-[11px] font-black text-[#002147] block">
-                            {isRtl ? '🎨 المعنى والتفسير القيّم بالعربية *:' : '🎨 ARB Mean & Definition *:'}
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={newDefAr}
-                            onChange={(e) => setNewDefAr(e.target.value)}
-                            placeholder="مثال: يضيء وينير الكوانب بنور بهي ساحر الشدة..."
-                            className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-[#002147] transition-all text-right"
-                          />
-                        </div>
-
-                        {/* ENG Example */}
-                        <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                          <label className="text-[11px] font-black text-slate-400 block">
-                            {isRtl ? '💡 جملة إنجليزية تطبيقية (ENG Example sentence):' : '💡 English Example Sentence:'}
-                          </label>
-                          <input
-                            type="text"
-                            value={newExEn}
-                            onChange={(e) => setNewExEn(e.target.value)}
-                            placeholder="The moonlight was enough to illuminate the path..."
-                            className="w-full text-xs font-sans bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-[#002147] transition-all"
-                          />
-                        </div>
-
-                        {/* ARB Example */}
-                        <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                          <label className="text-[11px] font-black text-slate-400 block">
-                            {isRtl ? '🎯 الجملة مترجمة للغة العربية (ARB Description):' : '🎯 Arabic Sentence translation:'}
-                          </label>
-                          <input
-                            type="text"
-                            value={newExAr}
-                            onChange={(e) => setNewExAr(e.target.value)}
-                            placeholder="مثال: كان ضوء القمر منسرباً وكافياً ليرشد خطى السالكين بالليل الوديع..."
-                            className="w-full text-xs font-sans bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-[#002147] transition-all text-right"
-                          />
-                        </div>
-                      </div>
-
-                      <div className={`pt-2 flex ${isRtl ? 'justify-start' : 'justify-end'}`}>
                         <button
-                          type="submit"
-                          className="px-5 py-3 cursor-pointer bg-[#002147] hover:bg-slate-900 border border-[#002147] text-white rounded-xl font-black text-xs transition-colors flex items-center gap-1.5"
+                          type="button"
+                          data-compact
+                          onClick={e => {
+                            e.stopPropagation();
+                            speakText(currentCard.example_en, 'en-US');
+                          }}
+                          className="w-7 h-7 rounded-lg bg-white border border-[#C49E3A]/50 text-[#002147] flex items-center justify-center shrink-0 active:scale-95 cursor-pointer"
+                          aria-label={t('نطق الجملة', 'Speak sentence')}
                         >
-                          <Plus size={14} />
-                          <span>{isRtl ? 'إرسال وحفظ البطاقة فوراً (+15 XP)' : 'Submit & Save custom card (+15 XP)'}</span>
+                          <Volume2 size={13} />
                         </button>
                       </div>
-                    </form>
-
-                    {/* Show created custom cards of active Category so user can track/delete them */}
-                    {customCards.filter(c => c.category === activeCategory).length > 0 && (
-                      <div className="mt-5 pt-4 border-t border-slate-100">
-                        <h5 className={`text-[10px] font-black text-slate-400 tracking-wider mb-2 uppercase ${isRtl ? 'text-right' : 'text-left'}`}>
-                          {isRtl ? '🛠️ الكلمات المخصصة المضافة من قبلك في هذا القسم حالياً:' : '🛠️ Your custom added words in this category:'}
-                        </h5>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          {customCards.filter(c => c.category === activeCategory).map(card => (
-                            <div 
-                              key={card.id} 
-                              className={`p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-[11px] ${isRtl ? 'flex-row-reverse' : ''}`}
-                            >
-                              <span className="font-extrabold text-[#002147] truncate gap-1 flex items-center">
-                                <span>🏷️</span>
-                                <span>{card.word}</span>
-                              </span>
-
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const updated = customCards.filter(c => c.id !== card.id);
-                                  setCustomCards(updated);
-                                  localStorage.setItem('custom_flashcards_basim', JSON.stringify(updated));
-                                  if (reviewIds.includes(card.id)) {
-                                    setReviewIds(prev => prev.filter(x => x !== card.id));
-                                  }
-                                  if (masteredIds.includes(card.id)) {
-                                    setMasteredIds(prev => prev.filter(x => x !== card.id));
-                                  }
-                                }}
-                                className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg cursor-pointer border border-transparent hover:border-rose-100"
-                                title="حذف الكلمة"
-                              >
-                                <Trash2 size={11} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
+                      <p dir="ltr" className="text-xs sm:text-sm font-bold text-[#002147] italic leading-relaxed">
+                        &ldquo;{currentCard.example_en}&rdquo;
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  /* BACK: Cream background with the Arabic meaning */
+                  <div className="py-4 space-y-3.5 my-auto max-w-xl mx-auto w-full">
+                    {/* Arabic Meaning Highlight */}
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      className="p-4 rounded-2xl bg-white border-2 border-[#C49E3A] space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-black text-[#C49E3A] uppercase">
+                          {t('🔍 المعنى بالعربية:', '🔍 Arabic Meaning:')}
+                        </span>
+                        <button
+                          type="button"
+                          data-compact
+                          onClick={e => {
+                            e.stopPropagation();
+                            speakText(currentCard.definition_ar, 'ar-SA');
+                          }}
+                          className="w-7 h-7 rounded-lg bg-[#fdfaf3] border border-[#C49E3A]/50 text-[#002147] flex items-center justify-center shrink-0 active:scale-95 cursor-pointer"
+                          aria-label={t('نطق المعنى بالعربية', 'Speak Arabic meaning')}
+                        >
+                          <Volume2 size={13} />
+                        </button>
                       </div>
-                    )}
-                  </motion.div>
+                      <p className="text-base sm:text-lg font-black text-[#002147] leading-relaxed">
+                        {currentCard.definition_ar}
+                      </p>
+                    </div>
+
+                    {/* English Definition */}
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      className="p-3.5 rounded-2xl bg-white border border-[#C49E3A]/40 space-y-1"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-black text-[#002147]/70 uppercase">
+                          {t('📝 التعريف بالإنجليزية:', '📝 English Definition:')}
+                        </span>
+                        <button
+                          type="button"
+                          data-compact
+                          onClick={e => {
+                            e.stopPropagation();
+                            speakText(currentCard.definition_en, 'en-US');
+                          }}
+                          className="w-7 h-7 rounded-lg bg-[#fdfaf3] border border-[#C49E3A]/50 text-[#002147] flex items-center justify-center shrink-0 active:scale-95 cursor-pointer"
+                          aria-label={t('نطق التعريف', 'Speak definition')}
+                        >
+                          <Volume2 size={13} />
+                        </button>
+                      </div>
+                      <p dir="ltr" className="text-xs sm:text-sm font-bold text-[#002147] leading-relaxed">
+                        {currentCard.definition_en}
+                      </p>
+                    </div>
+
+                    {/* Example Sentence + Arabic Translation */}
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      className="p-3.5 rounded-2xl bg-white border border-[#C49E3A]/40 space-y-1"
+                    >
+                      <p dir="ltr" className="text-xs font-bold text-[#002147] italic">
+                        &ldquo;{currentCard.example_en}&rdquo;
+                      </p>
+                      <p className="text-xs font-bold text-[#002147]/75 pt-1 border-t border-[#C49E3A]/20">
+                        {currentCard.example_ar}
+                      </p>
+                    </div>
+                  </div>
                 )}
-              </AnimatePresence>
+
+                {/* Card Footer Hint */}
+                <div className="flex items-center justify-between pt-2 border-t border-[#C49E3A]/25 text-[11px] font-black text-[#002147]/70">
+                  <span className="flex items-center gap-1.5">
+                    <RotateCw size={12} className="text-[#C49E3A]" />
+                    <span>{t('اضغط لقلب البطاقة', 'Tap card to flip')}</span>
+                  </span>
+                  <span dir="ltr">
+                    {currentIndex + 1} / {filteredCards.length}
+                  </span>
+                </div>
+              </GoldCard>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Know / Don't Know Buttons (PrimaryButton / GhostButton) + Prev/Next */}
+          <GoldCard className="!p-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <GhostButton
+                onClick={handlePrev}
+                className="w-full !px-2.5 !text-xs whitespace-nowrap"
+              >
+                {isRtl ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+                <span>{t('السابقة', 'Previous')}</span>
+              </GhostButton>
+
+              <GhostButton
+                onClick={() => toggleReview(currentCard.id)}
+                className={`w-full !px-2.5 !text-xs whitespace-nowrap ${
+                  reviewIds.includes(currentCard.id) ? '!bg-[#fdfaf3] !border-[#C49E3A] ring-2 ring-[#C49E3A]/40' : ''
+                }`}
+              >
+                <span>
+                  {reviewIds.includes(currentCard.id)
+                    ? t('★ في المراجعة', '★ In Review')
+                    : t('لا أعرفها ↺', "Don't Know ↺")}
+                </span>
+              </GhostButton>
+
+              <PrimaryButton
+                onClick={() => toggleMastered(currentCard.id)}
+                className="w-full !px-2.5 !text-xs whitespace-nowrap"
+              >
+                <span>
+                  {masteredIds.includes(currentCard.id)
+                    ? t('✓ متقنة', '✓ Mastered')
+                    : t('أعرفها ✓', 'I Know It ✓')}
+                </span>
+              </PrimaryButton>
+
+              <GhostButton
+                onClick={handleNext}
+                className="w-full !px-2.5 !text-xs whitespace-nowrap"
+              >
+                <span>{t('التالية', 'Next')}</span>
+                {isRtl ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
+              </GhostButton>
+            </div>
+          </GoldCard>
+
+          {/* Vocabulary Mastery & Custom Dev Hub */}
+          <GoldCard className="space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-3 border-b border-[#C49E3A]/25 gap-3">
+              <div>
+                <h3 className="text-sm sm:text-base font-black text-[#002147] flex items-center gap-2">
+                  <Award className="text-[#C49E3A] shrink-0" size={18} />
+                  <span>{t('🏆 جناح مراجعة، إضافة وتطوير المفردات', '🏆 Vocabulary Mastery & Custom Hub')}</span>
+                </h3>
+                <p className="text-xs text-[#002147]/70 font-bold mt-0.5">
+                  {t('راجع كلماتك الصعبة، أضف مفردات جديدة، واختبر فطنتك اللغوية!', 'Review challenging words, add custom cards, and test your vocabulary!')}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-1.5 w-full sm:w-auto">
+                {[
+                  { id: 'quiz', labelAr: '🧠 اختبار', labelEn: '🧠 Quiz' },
+                  { id: 'review_list', labelAr: '🔍 المراجعة', labelEn: '🔍 Review' },
+                  { id: 'add', labelAr: '➕ إضافة', labelEn: '➕ Add' },
+                ].map(tab => {
+                  const active = developmentTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setDevelopmentTab(tab.id as any)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-black whitespace-nowrap text-center active:scale-95 transition-transform cursor-pointer ${
+                        active
+                          ? 'bg-[#002147] text-[#E6C36A] border border-[#C49E3A]'
+                          : 'bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/40'
+                      }`}
+                    >
+                      {t(tab.labelAr, tab.labelEn)}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 p-8 space-y-4 shadow-sm">
-            <HelpCircle size={48} className="text-slate-300 mx-auto animate-bounce" />
-            <h3 className="text-lg font-black text-[#002147]">{isRtl ? 'لا توجد كلمات في هذا القسم' : 'No words captured'}</h3>
-            <p className="text-xs text-slate-500">{isRtl ? 'يرجى مراجعة اختيار الفئة المحددة.' : 'Please select another category above.'}</p>
-          </div>
-        )}
-      </div>
-    </div>
+            {developmentTab === 'quiz' && (
+              <div className="space-y-3">
+                {quizQuestion ? (
+                  <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-4 rounded-2xl space-y-3">
+                    <ProgressPill>
+                      🏆 {t('تحدي الفهم الحالي', 'Active Retention Challenge')}
+                    </ProgressPill>
+
+                    {quizQuestion.type === 'word-to-ar' ? (
+                      <div>
+                        <p className="text-xs text-[#002147]/70 font-bold">
+                          {t('ما هو المعنى الصحيح للكلمة التالية باللغة العربية؟', 'What is the correct Arabic meaning of the following word?')}
+                        </p>
+                        <h4 className="text-xl font-black text-[#002147] mt-1" dir="ltr">
+                          {quizQuestion.card.word}{' '}
+                          <span className="text-xs text-[#C49E3A] font-mono font-bold">{quizQuestion.card.phonetic}</span>
+                        </h4>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs text-[#002147]/70 font-bold">
+                          {t('أي الكلمات التالية توافق التفسير العلمي أدناه؟', 'Which word matches the academic definition below?')}
+                        </p>
+                        <p dir="ltr" className="text-xs sm:text-sm font-bold text-[#002147] bg-white border border-[#C49E3A]/30 p-3 rounded-xl mt-1 italic">
+                          &ldquo;{quizQuestion.card.definition_en}&rdquo;
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {quizQuestion.options.map((option, idx) => {
+                        const isSelected = quizAnswer === option;
+                        const isCorrect = option === quizQuestion.correctAnswer;
+                        const state = quizAnswer
+                          ? isCorrect
+                            ? 'correct'
+                            : isSelected
+                            ? 'wrong'
+                            : 'normal'
+                          : 'normal';
+
+                        return (
+                          <AnswerOption
+                            key={idx}
+                            label={option}
+                            state={state}
+                            disabled={!!quizAnswer}
+                            onClick={() => {
+                              setQuizAnswer(option);
+                              if (option === quizQuestion.correctAnswer) {
+                                setQuizStatus('correct');
+                                speakText(isRtl ? 'رائع إجابة صحيحة' : 'Incredible! correct answer', 'en-US');
+                                if (onXPAdded) {
+                                  onXPAdded(15);
+                                  setXpAwardedCount(prev => prev + 15);
+                                }
+                              } else {
+                                setQuizStatus('incorrect');
+                                speakText(isRtl ? 'إجابة خاطئة حاول مجددا' : 'Wrong answer! try again', 'en-US');
+                              }
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {quizAnswer && (
+                      <div className="pt-2 border-t border-[#C49E3A]/25 flex flex-wrap justify-between items-center gap-2">
+                        <span className={`text-xs font-black flex items-center gap-1.5 ${quizStatus === 'correct' ? 'text-green-800' : 'text-red-800'}`}>
+                          {quizStatus === 'correct' ? (
+                            <>
+                              <CheckCircle size={15} />
+                              <span>{t('✓ أحسنت صنعاً (+15 XP)', '✓ Outstanding memory! (+15 XP)')}</span>
+                            </>
+                          ) : (
+                            <>
+                              <HelpCircle size={15} />
+                              <span>{t(`✗ الإجابة الصحيحة: ${quizQuestion.correctAnswer}`, `✗ Correct match: ${quizQuestion.correctAnswer}`)}</span>
+                            </>
+                          )}
+                        </span>
+
+                        <PrimaryButton onClick={() => triggerNewQuiz()} className="!px-3 !py-1.5 !text-xs">
+                          <RefreshCcw size={13} />
+                          <span>{t('تحدي جديد', 'New Challenge')}</span>
+                        </PrimaryButton>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-[#002147]/60 text-xs font-bold">
+                    {t('يرجى إدخال كلمات إضافية للتمكن من توليد مسابقة تفاعلية.', 'Add more words to enable quiz challenges.')}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {developmentTab === 'review_list' && (
+              <div className="space-y-3">
+                <h4 className="text-xs font-black text-[#002147]">
+                  {t(
+                    `📋 قائمة المراجعة النشطة (${filteredCards.filter(c => reviewIds.includes(c.id)).length} كلمات):`,
+                    `📋 Active category review items (${filteredCards.filter(c => reviewIds.includes(c.id)).length}):`
+                  )}
+                </h4>
+
+                {filteredCards.filter(c => reviewIds.includes(c.id)).length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-60 overflow-y-auto">
+                    {filteredCards
+                      .filter(c => reviewIds.includes(c.id))
+                      .map(card => (
+                        <div
+                          key={card.id}
+                          className="p-3 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-2xl flex justify-between items-center gap-2"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs font-black text-[#002147] truncate" dir="ltr">{card.word}</p>
+                            <p className="text-[11px] text-[#C49E3A] font-bold truncate">{card.definition_ar}</p>
+                          </div>
+                          <div className="flex gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              data-compact
+                              onClick={() => speakText(card.word, 'en-US')}
+                              className="w-8 h-8 bg-white border border-[#C49E3A]/40 text-[#002147] rounded-xl flex items-center justify-center cursor-pointer"
+                              aria-label={t('استماع', 'Listen')}
+                            >
+                              <Volume2 size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              data-compact
+                              onClick={() => toggleReview(card.id)}
+                              className="w-8 h-8 bg-white border border-red-300 text-red-700 rounded-xl flex items-center justify-center cursor-pointer"
+                              aria-label={t('إزالة', 'Remove')}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 bg-[#fdfaf3] border border-[#C49E3A]/30 p-4 rounded-2xl">
+                    <Bookmark className="text-[#C49E3A] mx-auto mb-1.5" size={22} />
+                    <p className="text-xs text-[#002147] font-bold">
+                      {t('لا توجد كلمات حالية تحتاج مراجعة تحت هذه الفئة.', 'No cards marked for review in this deck.')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {developmentTab === 'add' && (
+              <div className="space-y-4">
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    if (!newWord.trim() || !newDefEn.trim() || !newDefAr.trim()) return;
+
+                    const added: Flashcard = {
+                      id: `fc_custom_${Date.now()}`,
+                      word: newWord.trim(),
+                      phonetic: newPhonetic.trim() || '/ˈkʌstəm/',
+                      definition_en: newDefEn.trim(),
+                      definition_ar: newDefAr.trim(),
+                      example_en: newExEn.trim() || 'This is a custom interactive sentence.',
+                      example_ar: newExAr.trim() || 'هذه جملة تفاعلية مخصصة.',
+                      category: activeCategory,
+                    };
+
+                    const nextCustoms = [...customCards, added];
+                    setCustomCards(nextCustoms);
+                    localStorage.setItem('custom_flashcards_basim', JSON.stringify(nextCustoms));
+
+                    setNewWord('');
+                    setNewPhonetic('');
+                    setNewDefEn('');
+                    setNewDefAr('');
+                    setNewExEn('');
+                    setNewExAr('');
+
+                    setAddSuccessMsg(t('✨ تم إضافة بطاقتك الذكية بنجاح!', '✨ New custom card added successfully!'));
+                    setTimeout(() => setAddSuccessMsg(''), 4000);
+
+                    if (onXPAdded) {
+                      onXPAdded(15);
+                      setXpAwardedCount(prev => prev + 15);
+                    }
+                  }}
+                  className="space-y-3"
+                >
+                  {addSuccessMsg && (
+                    <div className="bg-green-50 border border-green-600 text-[#002147] text-xs font-black p-3 rounded-xl text-center">
+                      {addSuccessMsg}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-[#002147] block">
+                        {t('🔑 الكلمة الإنجليزية *:', '🔑 English Word *:')}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newWord}
+                        onChange={e => setNewWord(e.target.value)}
+                        placeholder="e.g., Illuminate"
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-2.5 focus:outline-none focus:border-[#C49E3A] text-[#002147]"
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-[#002147]/70 block">
+                        {t('🗣️ اللفظ الصوتي (اختياري):', '🗣️ Phonetic (Optional):')}
+                      </label>
+                      <input
+                        type="text"
+                        value={newPhonetic}
+                        onChange={e => setNewPhonetic(e.target.value)}
+                        placeholder="e.g., /ɪˈluːmɪneɪt/"
+                        className="w-full text-xs font-mono bg-white border border-[#C49E3A]/40 rounded-xl p-2.5 focus:outline-none focus:border-[#C49E3A] text-[#002147]"
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-[#002147] block">
+                        {t('📝 التعريف بالإنجليزي *:', '📝 English Definition *:')}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newDefEn}
+                        onChange={e => setNewDefEn(e.target.value)}
+                        placeholder="To make something bright with light..."
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-2.5 focus:outline-none focus:border-[#C49E3A] text-[#002147]"
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-[#002147] block">
+                        {t('🎨 المعنى بالعربية *:', '🎨 Arabic Meaning *:')}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newDefAr}
+                        onChange={e => setNewDefAr(e.target.value)}
+                        placeholder={t('مثال: يضيء وينير...', 'Arabic meaning...')}
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-2.5 focus:outline-none focus:border-[#C49E3A] text-[#002147]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-[#002147]/70 block">
+                        {t('💡 جملة إنجليزية تطبيقية:', '💡 English Example Sentence:')}
+                      </label>
+                      <input
+                        type="text"
+                        value={newExEn}
+                        onChange={e => setNewExEn(e.target.value)}
+                        placeholder="The moonlight illuminated the path..."
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-2.5 focus:outline-none focus:border-[#C49E3A] text-[#002147]"
+                        dir="ltr"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-black text-[#002147]/70 block">
+                        {t('🎯 ترجمة الجملة للعربية:', '🎯 Arabic Sentence Translation:')}
+                      </label>
+                      <input
+                        type="text"
+                        value={newExAr}
+                        onChange={e => setNewExAr(e.target.value)}
+                        placeholder={t('ترجمة الجملة...', 'Sentence translation...')}
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-2.5 focus:outline-none focus:border-[#C49E3A] text-[#002147]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <PrimaryButton type="submit">
+                      <Plus size={15} />
+                      <span>{t('حفظ البطاقة (+15 XP)', 'Save Card (+15 XP)')}</span>
+                    </PrimaryButton>
+                  </div>
+                </form>
+
+                {customCards.filter(c => c.category === activeCategory).length > 0 && (
+                  <div className="pt-3 border-t border-[#C49E3A]/25 space-y-2">
+                    <h5 className="text-[11px] font-black text-[#002147]/70">
+                      {t('🛠️ الكلمات المخصصة المضافة في هذا القسم:', '🛠️ Custom cards in this deck:')}
+                    </h5>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {customCards
+                        .filter(c => c.category === activeCategory)
+                        .map(card => (
+                          <div
+                            key={card.id}
+                            className="p-2.5 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-xl flex items-center justify-between text-xs"
+                          >
+                            <span className="font-black text-[#002147] truncate">🏷️ {card.word}</span>
+                            <button
+                              type="button"
+                              data-compact
+                              onClick={() => {
+                                const updated = customCards.filter(c => c.id !== card.id);
+                                setCustomCards(updated);
+                                localStorage.setItem('custom_flashcards_basim', JSON.stringify(updated));
+                                setReviewIds(prev => prev.filter(x => x !== card.id));
+                                setMasteredIds(prev => prev.filter(x => x !== card.id));
+                              }}
+                              className="p-1 text-red-700 hover:bg-red-50 rounded-lg cursor-pointer"
+                              aria-label={t('حذف', 'Delete')}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </GoldCard>
+        </div>
+      ) : null}
+    </SectionShell>
   );
 };

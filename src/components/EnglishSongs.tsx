@@ -1,42 +1,58 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Music, 
-  Volume2, 
-  Award, 
-  Star, 
-  Mic, 
-  MicOff, 
-  Play, 
-  Pause, 
-  HelpCircle, 
-  RotateCcw, 
-  CheckCircle2, 
-  X, 
-  Check, 
-  Info, 
+import {
+  Volume2,
+  Star,
+  Mic,
+  MicOff,
+  Play,
+  Pause,
+  RotateCcw,
+  CheckCircle2,
+  X,
+  Info,
   Heart,
-  Sparkles
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { ENGLISH_WITH_SONGS_DATA } from '../data/interactiveCurriculum';
 import { createManagedAudio, managedSpeak } from '../lib/audio';
+import { useT } from '../lib/explainLang';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  TutorFace,
+} from './ui/academy';
 
 interface EnglishSongsProps {
   lang: 'ar' | 'en';
   userProfile: UserProfile | null;
   onBack: () => void;
-  onXPAdded?: (xp: number, details?: { lessonId: string; courseId: string; score: number; total: number; title: string, level?: string }) => void;
+  onXPAdded?: (
+    xp: number,
+    details?: {
+      lessonId: string;
+      courseId: string;
+      score: number;
+      total: number;
+      title: string;
+      level?: string;
+    }
+  ) => void;
   initialSongId?: string;
 }
 
 export const EnglishSongs: React.FC<EnglishSongsProps> = ({
   lang,
-  userProfile,
-  onBack,
+  userProfile: _userProfile,
+  onBack: _onBack,
   onXPAdded,
-  initialSongId
+  initialSongId,
 }) => {
+  const t = useT();
   const isRtl = lang === 'ar';
 
   // Audio Playback Player simulation states
@@ -67,7 +83,7 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
     try {
       const saved = localStorage.getItem('custom_english_songs');
       return saved ? JSON.parse(saved) : [];
-    } catch (e) {
+    } catch {
       return [];
     }
   });
@@ -77,7 +93,7 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
     try {
       const saved = localStorage.getItem('favorite_english_songs');
       return saved ? JSON.parse(saved) : [];
-    } catch (e) {
+    } catch {
       return [];
     }
   });
@@ -92,154 +108,254 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
 
   // Dynamic song details generation based on selected ID
   const getSongData = (id: string) => {
-    // Check custom first
-    const customMatch = customSongs.find(s => s.id === id);
+    const customMatch = customSongs.find((s) => s.id === id);
     if (customMatch) {
       return customMatch;
     }
 
-    const meta = ENGLISH_WITH_SONGS_DATA.find(s => s.id === id) || ENGLISH_WITH_SONGS_DATA[0];
-    
+    const meta =
+      ENGLISH_WITH_SONGS_DATA.find((s) => s.id === id) || ENGLISH_WITH_SONGS_DATA[0];
+
     if (id === 'song_001') {
       return {
-        title: "Twinkle Twinkle Little Star",
-        titleAr: "لمعي لمعي أيتها النجمة الصغيرة ✨",
+        title: 'Twinkle Twinkle Little Star',
+        titleAr: 'لمعي لمعي أيتها النجمة الصغيرة ✨',
         lyrics: [
-          { en: "Twinkle, twinkle, little star,", ar: "لمعي، لمعي، أيتها النجمة الصغيرة،" },
-          { en: "How I wonder what you are!", ar: "كم أتساءل عن حقيقتكِ!" },
-          { en: "Up above the world so high,", ar: "عالياً فوق هذا العالم المرتفع،" },
-          { en: "Like a diamond in the sky.", ar: "مثل قطعت ألماس تلمع في السماء." },
-          { en: "Twinkle, twinkle, little star,", ar: "لمعي، لمعي، أيتها النجمة الصغيرة،" },
-          { en: "How I wonder what you are!", ar: "كم أتساءل عن حقيقتكِ!" }
+          { en: 'Twinkle, twinkle, little star,', ar: 'لمعي، لمعي، أيتها النجمة الصغيرة،' },
+          { en: 'How I wonder what you are!', ar: 'كم أتساءل عن حقيقتكِ!' },
+          { en: 'Up above the world so high,', ar: 'عالياً فوق هذا العالم المرتفع،' },
+          { en: 'Like a diamond in the sky.', ar: 'مثل قطعت ألماس تلمع في السماء.' },
+          { en: 'Twinkle, twinkle, little star,', ar: 'لمعي، لمعي، أيتها النجمة الصغيرة،' },
+          { en: 'How I wonder what you are!', ar: 'كم أتساءل عن حقيقتكِ!' },
         ],
         vocab: [
-          { word: "Twinkle", trigger: "twinkle", meaning: "تلمع / تومض", example: "Stars twinkle in the dark night.", emoji: "✨" },
-          { word: "Wonder", trigger: "wonder", meaning: "يتساءل / يتعجب", example: "I wonder where the birds sleep.", emoji: "💭" },
-          { word: "Above", trigger: "above", meaning: "فوق / في الأعلى", example: "The sky is blue above us.", emoji: "☁️" },
-          { word: "Diamond", trigger: "diamond", meaning: "ألماس / جوهرة", example: "Her ring shines like a diamond.", emoji: "💎" },
-          { word: "Sky", trigger: "sky", meaning: "السماء", example: "Birds are flying in the blue sky.", emoji: "🌌" }
+          {
+            word: 'Twinkle',
+            trigger: 'twinkle',
+            meaning: 'تلمع / تومض',
+            example: 'Stars twinkle in the dark night.',
+            emoji: '✨',
+          },
+          {
+            word: 'Wonder',
+            trigger: 'wonder',
+            meaning: 'يتساءل / يتعجب',
+            example: 'I wonder where the birds sleep.',
+            emoji: '💭',
+          },
+          {
+            word: 'Above',
+            trigger: 'above',
+            meaning: 'فوق / في الأعلى',
+            example: 'The sky is blue above us.',
+            emoji: '☁️',
+          },
+          {
+            word: 'Diamond',
+            trigger: 'diamond',
+            meaning: 'ألماس / جوهرة',
+            example: 'Her ring shines like a diamond.',
+            emoji: '💎',
+          },
+          {
+            word: 'Sky',
+            trigger: 'sky',
+            meaning: 'السماء',
+            example: 'Birds are flying in the blue sky.',
+            emoji: '🌌',
+          },
         ],
         questions: [
           {
             id: 1,
-            question: "What shines high in the sky in this song?",
-            questionAr: "ما الذي يلمع عالياً في السماء في هذه الأغنية؟",
-            options: ["A little bird 🐦", "A little star ⭐", "A bright airplane ✈️"],
+            question: 'What shines high in the sky in this song?',
+            questionAr: 'ما الذي يلمع عالياً في السماء في هذه الأغنية؟',
+            options: ['A little bird 🐦', 'A little star ⭐', 'A bright airplane ✈️'],
             correctIndex: 1,
-            explanation: "The song says: 'Twinkle, twinkle, little star!'"
+            explanation: "The song says: 'Twinkle, twinkle, little star!'",
           },
           {
             id: 2,
-            question: "What looks like a diamond in the sky?",
-            questionAr: "ما الذي يشبّهه الكاتب بقطعة الألماس في السماء؟",
-            options: ["The cloud ☁️", "The golden moon 🌙", "The twinkling star ⭐"],
+            question: 'What looks like a diamond in the sky?',
+            questionAr: 'ما الذي يشبّهه الكاتب بقطعة الألماس في السماء؟',
+            options: ['The cloud ☁️', 'The golden moon 🌙', 'The twinkling star ⭐'],
             correctIndex: 2,
-            explanation: "The lyric states: 'Like a diamond in the sky' describing the star."
+            explanation:
+              "The lyric states: 'Like a diamond in the sky' describing the star.",
           },
           {
             id: 3,
-            question: "Where is the star shining?",
-            questionAr: "أين تلمع هذه النجمة الصغيرة؟",
-            options: ["Up above the world so high 🌍", "Under the deep blue ocean 🌊", "In the school garden 🏡"],
+            question: 'Where is the star shining?',
+            questionAr: 'أين تلمع هذه النجمة الصغيرة؟',
+            options: [
+              'Up above the world so high 🌍',
+              'Under the deep blue ocean 🌊',
+              'In the school garden 🏡',
+            ],
             correctIndex: 0,
-            explanation: "The line says: 'Up above the world so high, like a diamond in the sky.'"
-          }
-        ]
+            explanation:
+              "The line says: 'Up above the world so high, like a diamond in the sky.'",
+          },
+        ],
       };
     }
 
     if (id === 'song_002') {
       return {
-        title: "Old MacDonald Had a Farm",
-        titleAr: "مزرعة العم ماكدونالد السعيدة 🚜",
+        title: 'Old MacDonald Had a Farm',
+        titleAr: 'مزرعة العم ماكدونالد السعيدة 🚜',
         lyrics: [
-          { en: "Old MacDonald had a farm, E-I-E-I-O!", ar: "العم ماكدونالد كان لديه مزرعة!" },
-          { en: "And on his farm he had a cow, E-I-E-I-O!", ar: "وفي مزرعته كان لديه بقرة!" },
-          { en: "With a moo moo here, and a moo moo there,", ar: "مع صوت موو موو هنا، وموو موو هناك،" },
-          { en: "Here a moo, there a moo, everywhere a moo moo!", ar: "هنا موو، هناك موو، في كل مكان موو موو!" }
+          {
+            en: 'Old MacDonald had a farm, E-I-E-I-O!',
+            ar: 'العم ماكدونالد كان لديه مزرعة!',
+          },
+          {
+            en: 'And on his farm he had a cow, E-I-E-I-O!',
+            ar: 'وفي مزرعته كان لديه بقرة!',
+          },
+          {
+            en: 'With a moo moo here, and a moo moo there,',
+            ar: 'مع صوت موو موو هنا، وموو موو هناك،',
+          },
+          {
+            en: 'Here a moo, there a moo, everywhere a moo moo!',
+            ar: 'هنا موو، هناك موو، في كل مكان موو موو!',
+          },
         ],
         vocab: [
-          { word: "Farm", trigger: "farm", meaning: "مزرعة", example: "Chickens run on the open farm.", emoji: "🚜" },
-          { word: "Cow", trigger: "cow", meaning: "بقرة", example: "The cow gives us fresh milk.", emoji: "🐮" },
-          { word: "Everywhere", trigger: "everywhere", meaning: "في كل مكان", example: "Flowers grow everywhere in spring.", emoji: "🌱" }
+          {
+            word: 'Farm',
+            trigger: 'farm',
+            meaning: 'مزرعة',
+            example: 'Chickens run on the open farm.',
+            emoji: '🚜',
+          },
+          {
+            word: 'Cow',
+            trigger: 'cow',
+            meaning: 'بقرة',
+            example: 'The cow gives us fresh milk.',
+            emoji: '🐮',
+          },
+          {
+            word: 'Everywhere',
+            trigger: 'everywhere',
+            meaning: 'في كل مكان',
+            example: 'Flowers grow everywhere in spring.',
+            emoji: '🌱',
+          },
         ],
         questions: [
           {
             id: 1,
-            question: "Whose farm is mentioned in this song?",
-            questionAr: "مزرعة مَن المذكورة في هذه الأغنية؟",
-            options: ["Old MacDonald 🧑‍🌾", "Noor the Explorer 👧", "The Flying Captain 🧑‍✈️"],
+            question: 'Whose farm is mentioned in this song?',
+            questionAr: 'مزرعة مَن المذكورة في هذه الأغنية؟',
+            options: [
+              'Old MacDonald 🧑‍🌾',
+              'Noor the Explorer 👧',
+              'The Flying Captain 🧑‍✈️',
+            ],
             correctIndex: 0,
-            explanation: "The song starts with: 'Old MacDonald had a farm.'"
+            explanation: "The song starts with: 'Old MacDonald had a farm.'",
           },
           {
             id: 2,
-            question: "What animal sound does the cow make?",
-            questionAr: "ما هو صوت البقرة في هذه الأغنية؟",
-            options: ["Quack quack 🦆", "Meow meow 🐱", "Moo moo 🐮"],
+            question: 'What animal sound does the cow make?',
+            questionAr: 'ما هو صوت البقرة في هذه الأغنية؟',
+            options: ['Quack quack 🦆', 'Meow meow 🐱', 'Moo moo 🐮'],
             correctIndex: 2,
-            explanation: "The cow makes the sound 'moo moo'."
-          }
-        ]
+            explanation: "The cow makes the sound 'moo moo'.",
+          },
+        ],
       };
     }
 
-    const isKids = meta.level === 'أطفال';
     return {
       title: meta.title,
-      titleAr: isRtl ? `${meta.title} (${meta.artist || 'كلاسيكي تفاعلي'}) ✨` : `${meta.title} by ${meta.artist || 'Traditional'} ✨`,
+      titleAr: isRtl
+        ? `${meta.title} (${meta.artist || 'كلاسيكي تفاعلي'}) ✨`
+        : `${meta.title} by ${meta.artist || 'Traditional'} ✨`,
       lyrics: [
-        { en: `We are listening to the beautiful song: ${meta.title}.`, ar: `نستمع الآن للأغنية الجميلة التفاعلية: ${meta.title}.` },
-        { en: `English songs are perfect for learning new words and rhythms!`, ar: `الأغاني الإنجليزية هي الطريقة الأفضل لتعلم كلمات ونغمات جديدة للجميع!` },
-        { en: `Let's practice singing it and recording our progress.`, ar: `دعونا نتدرب على ترنيمها وتسجيل نطقنا السليم لها لتعزيز تقدمنا.` }
+        {
+          en: `We are listening to the beautiful song: ${meta.title}.`,
+          ar: `نستمع الآن للأغنية الجميلة التفاعلية: ${meta.title}.`,
+        },
+        {
+          en: `English songs are perfect for learning new words and rhythms!`,
+          ar: `الأغاني الإنجليزية هي الطريقة الأفضل لتعلم كلمات ونغمات جديدة للجميع!`,
+        },
+        {
+          en: `Let's practice singing it and recording our progress.`,
+          ar: `دعونا نتدرب على ترنيمها وتسجيل نطقنا السليم لها لتعزيز تقدمنا.`,
+        },
       ],
       vocab: [
-        { word: "Melody", trigger: "melody", meaning: "النغمة / اللحن", example: "This song has a beautiful melody.", emoji: "🎵" },
-        { word: "Rhythm", trigger: "rhythm", meaning: "الإيقاع اللغوي", example: "Clap your hands to the song rhythm.", emoji: "👏" },
-        { word: "Singing", trigger: "singing", meaning: "الغناء والترنيم", example: "Singing makes learning English easier.", emoji: "🎤" }
+        {
+          word: 'Melody',
+          trigger: 'melody',
+          meaning: 'النغمة / اللحن',
+          example: 'This song has a beautiful melody.',
+          emoji: '🎵',
+        },
+        {
+          word: 'Rhythm',
+          trigger: 'rhythm',
+          meaning: 'الإيقاع اللغوي',
+          example: 'Clap your hands to the song rhythm.',
+          emoji: '👏',
+        },
+        {
+          word: 'Singing',
+          trigger: 'singing',
+          meaning: 'الغناء والترنيم',
+          example: 'Singing makes learning English easier.',
+          emoji: '🎤',
+        },
       ],
       questions: [
         {
           id: 1,
           question: `What is the correct title of this song?`,
-          questionAr: "ما هو العنوان الصحيح لهذه الأغنية؟",
-          options: [meta.title, "Other Old Melodies 🎻", "Noor's Adventure Song 🗺️"],
+          questionAr: 'ما هو العنوان الصحيح لهذه الأغنية؟',
+          options: [meta.title, 'Other Old Melodies 🎻', "Noor's Adventure Song 🗺️"],
           correctIndex: 0,
-          explanation: `The title is ${meta.title}.`
+          explanation: `The title is ${meta.title}.`,
         },
         {
           id: 2,
           question: `Why do we sing along in our Language Lab?`,
-          questionAr: "لماذا نغني ونرنم في معمل اللغويات؟",
-          options: ["To master correct English rhythm and words 🎙️", "To go to sleep early 🛌", "To paint a canvas wall 🖌️"],
+          questionAr: 'لماذا نغني ونرنم في معمل اللغويات؟',
+          options: [
+            'To master correct English rhythm and words 🎙️',
+            'To go to sleep early 🛌',
+            'To paint a canvas wall 🖌️',
+          ],
           correctIndex: 0,
-          explanation: "Singing along helps build perfect vocabulary, accent, and linguistic intuition."
-        }
-      ]
+          explanation:
+            'Singing along helps build perfect vocabulary, accent, and linguistic intuition.',
+        },
+      ],
     };
   };
 
   const songData = getSongData(selectedSongId);
 
   const handleSelectSong = (id: string) => {
-    // Clean up current playbacks
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
     setIsPlaying(false);
     setActivePlaybackLine(null);
     if (progressTimerRef.current) clearInterval(progressTimerRef.current);
-    
-    // Reset quiz
+
     setUserAnswers({});
     setQuizSubmitted(false);
     setQuizXPClaimed(false);
-    
-    // Reset voice recording
+
     setRecordedBlobUrl(null);
     setRecordingSeconds(0);
     setRecordingXPClaimed(false);
-    
+
     setSelectedSongId(id);
   };
 
@@ -249,13 +365,12 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
     }
   }, [initialSongId]);
 
-  // Text to Speech
   const speakText = (text: string, id: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'en-US';
-      utterance.rate = 0.85; // slightly slower for comprehension
+      utterance.rate = 0.85;
 
       utterance.onstart = () => setIsSpeaking(id);
       utterance.onend = () => setIsSpeaking(null);
@@ -265,7 +380,6 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
     }
   };
 
-  // Simulation timer for Song Player
   const togglePlaySong = () => {
     if (isPlaying) {
       setIsPlaying(false);
@@ -275,7 +389,7 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
       setIsPlaying(true);
       setPlayProgress(0);
       progressTimerRef.current = setInterval(() => {
-        setPlayProgress(prev => {
+        setPlayProgress((prev) => {
           if (prev >= 100) {
             setIsPlaying(false);
             setActivePlaybackLine(null);
@@ -283,19 +397,22 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
             return 0;
           }
           const next = prev + 5;
-          // Calculate active line based on percentage
-          const lineIndex = Math.min(Math.floor((next / 100) * songData.lyrics.length), songData.lyrics.length - 1);
+          const lineIndex = Math.min(
+            Math.floor((next / 100) * songData.lyrics.length),
+            songData.lyrics.length - 1
+          );
           setActivePlaybackLine(lineIndex);
           return next;
         });
       }, 1000);
 
-      // Play introductory synthesis or keep track
-      speakText("Twinkle, twinkle, little star, how I wonder what you are! Up above the world so high, like a diamond in the sky. Twinkle, twinkle, little star, how I wonder what you are!", "song");
+      speakText(
+        'Twinkle, twinkle, little star, how I wonder what you are! Up above the world so high, like a diamond in the sky. Twinkle, twinkle, little star, how I wonder what you are!',
+        'song'
+      );
     }
   };
 
-  // Recording API Implementation (or fallback simulator)
   const startRecording = async () => {
     setRecordedBlobUrl(null);
     setRecordingSeconds(0);
@@ -317,20 +434,19 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
           const audioUrl = URL.createObjectURL(audioBlob);
           setRecordedBlobUrl(audioUrl);
-          stream.getTracks().forEach(track => track.stop());
+          stream.getTracks().forEach((track) => track.stop());
         };
 
         mediaRecorder.start();
         setIsRecording(true);
 
         recordingTimerRef.current = setInterval(() => {
-          setRecordingSeconds(prev => prev + 1);
+          setRecordingSeconds((prev) => prev + 1);
         }, 1000);
       } else {
-        // Fallback simulated recording
         setIsRecording(true);
         recordingTimerRef.current = setInterval(() => {
-          setRecordingSeconds(prev => {
+          setRecordingSeconds((prev) => {
             if (prev >= 10) {
               stopRecording();
               return 10;
@@ -340,14 +456,17 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
         }, 1000);
       }
     } catch (err) {
-      console.warn("Could not access microphone directly (may be iframe restrictions). Running audio simulator instead.", err);
+      console.warn(
+        'Could not access microphone directly (may be iframe restrictions). Running audio simulator instead.',
+        err
+      );
       setIsRecording(true);
       recordingTimerRef.current = setInterval(() => {
-        setRecordingSeconds(prev => {
+        setRecordingSeconds((prev) => {
           if (prev >= 6) {
             setIsRecording(false);
             if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-            setRecordedBlobUrl("simulated_recording.wav");
+            setRecordedBlobUrl('simulated_recording.wav');
             return 6;
           }
           return prev + 1;
@@ -358,22 +477,24 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
 
   const stopRecording = () => {
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-    
+
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
     } else {
-      // simulator stop
       setIsRecording(false);
-      setRecordedBlobUrl("simulated_recording.wav");
+      setRecordedBlobUrl('simulated_recording.wav');
     }
   };
 
   const playRecordedAudio = () => {
     if (!recordedBlobUrl) return;
-    if (recordedBlobUrl === "simulated_recording.wav") {
+    if (recordedBlobUrl === 'simulated_recording.wav') {
       setIsRecordingPlayback(true);
-      speakText("Twinkle twinkle little star, how I wonder what you are!", "vocal_playback");
+      speakText(
+        'Twinkle twinkle little star, how I wonder what you are!',
+        'vocal_playback'
+      );
       setTimeout(() => {
         setIsRecordingPlayback(false);
       }, 4000);
@@ -386,12 +507,13 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
     }
   };
 
-  // Claims XP for voice recording
   const claimRecordingXP = () => {
     if (recordingXPClaimed) return;
     setRecordingXPClaimed(true);
     if (onXPAdded) {
-      const currentSongMeta = ENGLISH_WITH_SONGS_DATA.find(s => s.id === selectedSongId) || ENGLISH_WITH_SONGS_DATA[0];
+      const currentSongMeta =
+        ENGLISH_WITH_SONGS_DATA.find((s) => s.id === selectedSongId) ||
+        ENGLISH_WITH_SONGS_DATA[0];
       const songLevel = currentSongMeta.level === 'أطفال' ? 'Kids' : 'Adults';
       onXPAdded(20, {
         lessonId: String(selectedSongId),
@@ -399,22 +521,20 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
         score: 10,
         total: 10,
         title: songData.title,
-        level: songLevel
+        level: songLevel,
       });
     }
   };
 
-  // Submits context quiz
   const handleSelectOption = (qIdx: number, valIdx: number) => {
     if (quizSubmitted) return;
-    setUserAnswers(prev => ({ ...prev, [qIdx]: valIdx }));
+    setUserAnswers((prev) => ({ ...prev, [qIdx]: valIdx }));
   };
 
   const handleSubmitQuiz = () => {
     setQuizSubmitted(true);
-    // count score
     let correctCount = 0;
-    songData.questions.forEach((q, idx) => {
+    songData.questions.forEach((q: any, idx: number) => {
       if (userAnswers[idx] === q.correctIndex) {
         correctCount++;
       }
@@ -422,7 +542,9 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
 
     const gainedXP = correctCount * 10;
     if (gainedXP > 0 && onXPAdded && !quizXPClaimed) {
-      const currentSongMeta = ENGLISH_WITH_SONGS_DATA.find(s => s.id === selectedSongId) || ENGLISH_WITH_SONGS_DATA[0];
+      const currentSongMeta =
+        ENGLISH_WITH_SONGS_DATA.find((s) => s.id === selectedSongId) ||
+        ENGLISH_WITH_SONGS_DATA[0];
       const songLevel = currentSongMeta.level === 'أطفال' ? 'Kids' : 'Adults';
       onXPAdded(gainedXP, {
         lessonId: String(selectedSongId),
@@ -430,7 +552,7 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
         score: correctCount,
         total: songData.questions.length,
         title: songData.title,
-        level: songLevel
+        level: songLevel,
       });
       setQuizXPClaimed(true);
     }
@@ -442,341 +564,375 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFAF5] pb-24 text-slate-800">
-      {/* Curved background top banner */}
-      <div className="absolute top-0 left-0 right-0 h-72 bg-gradient-to-b from-[#E3F2FD] to-transparent pointer-events-none" />
-
-      <div className="max-w-5xl mx-auto px-4 pt-6 relative z-10">
-        
-        {/* Navigation / Header */}
-        <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-8 pb-4 border-b border-blue-100 ${isRtl ? 'md:flex-row-reverse text-right' : 'text-left'}`}>
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/10 shrink-0">
-              <Music size={24} className="animate-spin" style={{ animationDuration: '6s' }} />
-            </div>
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="space-y-6">
+        {/* Song List: LessonTile rows with a gold play icon + Small TutorFace (Sara) next to title */}
+        <GoldCard className="p-4 sm:p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <TutorFace
+              tutor="sara"
+              size="sm"
+              isSpeaking={isPlaying || Boolean(isSpeaking)}
+            />
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-[#002147] tracking-tight">
-                {isRtl ? 'الإنجليزية عبر الأغاني 🎵' : 'English With Songs 🎵'}
-              </h1>
-              <p className="text-xs text-blue-700 font-bold tracking-widest mt-0.5">
-                {isRtl ? 'استمع للأغاني، احفظ المفردات، وسجل نطقك لتبهر عائلتك' : 'Learn basic vocabulary through lovely children songs with voice challenges'}
+              <h2 className="text-base sm:text-lg font-black text-[#002147]">
+                {t(
+                  'اختر أغنية للبدء في الغناء والترنيم والتحدث:',
+                  'Choose a Song to Start Singing, Practicing, and Learning:'
+                )}
+              </h2>
+              <p className="text-xs font-bold text-[#002147]/70">
+                {t(
+                  'استمع للأغاني، احفظ المفردات، وسجل نطقك لتبهر عائلتك',
+                  'Learn basic vocabulary through lovely children songs with voice challenges'
+                )}
               </p>
             </div>
           </div>
 
-          <button
-            onClick={onBack}
-            className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-black text-xs transition-all cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
-          >
-            <span>{isRtl ? 'العودة للمنصة ↩️' : 'Back to Academy ↩️'}</span>
-          </button>
-        </div>
-
-        {/* Song Selectors Pane */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 mb-6 space-y-4">
-          <div className={`flex items-center gap-2 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
-            <span className="text-xl">✨</span>
-            <h2 className="text-base font-black text-[#002147]">
-              {isRtl ? 'اختر أغنية للبدء في الغناء والترنيم والتحدث:' : 'Choose a Song to Start Singing, Practicing, and Learning:'}
-            </h2>
-          </div>
-          
-          <div className="space-y-3">
-            {/* Kids category */}
-            <div>
-              <p className={`text-[10px] uppercase font-black tracking-wider text-blue-600 mb-1.5 ${isRtl ? 'text-right' : 'text-left'}`}>
-                {isRtl ? '👧 أغاني مسلية للأطفال (المستوى الأساسي)' : '👧 Fun Kids Songs (Elementary)'}
+          <div className="space-y-4">
+            {/* Kids Category */}
+            <div className="space-y-2">
+              <p className="text-[11px] uppercase font-black tracking-wider text-[#C49E3A]">
+                {t(
+                  '👧 أغاني مسلية للأطفال (المستوى الأساسي)',
+                  '👧 Fun Kids Songs (Elementary)'
+                )}
               </p>
-              <div className="flex flex-wrap gap-2 justify-start">
-                {[...ENGLISH_WITH_SONGS_DATA.filter(s => s.level === 'أطفال'), ...customSongs].map((s) => (
-                  <button
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {[...ENGLISH_WITH_SONGS_DATA.filter((s) => s.level === 'أطفال'), ...customSongs].map((s, idx) => (
+                  <LessonTile
                     key={s.id}
+                    order={idx + 1}
+                    title={s.title}
+                    emoji="🎵"
+                    level="▶"
+                    active={selectedSongId === s.id}
+                    done={favoriteSongs.includes(s.id)}
                     onClick={() => handleSelectSong(s.id)}
-                    className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer border ${
-                      selectedSongId === s.id
-                        ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/10 scale-95'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    🎵 {s.title}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
 
-            {/* Adults category */}
-            <div className="pt-2 border-t border-slate-100">
-              <p className={`text-[10px] uppercase font-black tracking-wider text-emerald-600 mb-1.5 ${isRtl ? 'text-right' : 'text-left'}`}>
-                {isRtl ? '🧑‍💼 أغاني متطورة للكبار واليافعين' : '🧑‍💼 Elite Songs for Adults & Juniors'}
+            {/* Adults Category */}
+            <div className="pt-3 border-t border-[#C49E3A]/30 space-y-2">
+              <p className="text-[11px] uppercase font-black tracking-wider text-[#002147]">
+                {t(
+                  '🧑‍💼 أغاني متطورة للكبار واليافعين',
+                  '🧑‍💼 Elite Songs for Adults & Juniors'
+                )}
               </p>
-              <div className="flex flex-wrap gap-2 justify-start">
-                {ENGLISH_WITH_SONGS_DATA.filter(s => s.level === 'كبار').map((s) => (
-                  <button
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {ENGLISH_WITH_SONGS_DATA.filter((s) => s.level === 'كبار').map((s, idx) => (
+                  <LessonTile
                     key={s.id}
+                    order={idx + 1}
+                    title={s.title}
+                    subtitle={s.artist}
+                    emoji="🎶"
+                    level="▶"
+                    active={selectedSongId === s.id}
+                    done={favoriteSongs.includes(s.id)}
                     onClick={() => handleSelectSong(s.id)}
-                    className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer border ${
-                      selectedSongId === s.id
-                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-500/10 scale-95'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    🎶 {s.title} <span className="opacity-75 text-[10px] font-normal">({s.artist})</span>
-                  </button>
+                  />
                 ))}
               </div>
             </div>
           </div>
-        </div>
+        </GoldCard>
 
-        {/* Outer Bento Grid */}
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* Column 1: Song Player and Translation Lyrics (8 cols) */}
+          {/* Left 8 cols: Player + Lyrics + Recording + Quiz */}
           <div className="col-span-1 lg:col-span-8 space-y-6">
-            
-            {/* Playback Container Box */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
-              
-              {/* Media Player Head */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#EDF7FF] rounded-2xl p-4 border border-blue-100">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">⭐</span>
-                  <div>
+            {/* Player Area: Navy card with gold frame + Small TutorFace (Sara) next to title */}
+            <div className="bg-[#002147] text-white rounded-2xl border-2 border-[#C49E3A] p-4 sm:p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <TutorFace
+                    tutor="sara"
+                    size="sm"
+                    isSpeaking={isPlaying || Boolean(isSpeaking)}
+                  />
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-slate-800 font-black text-sm capitalize">{songData.title}</h3>
+                      <h3
+                        dir="ltr"
+                        className="text-[#E6C36A] font-black text-sm sm:text-base capitalize truncate"
+                      >
+                        {songData.title}
+                      </h3>
                       <button
+                        type="button"
                         onClick={() => {
                           const isFav = favoriteSongs.includes(selectedSongId);
                           const nextFavs = isFav
-                            ? favoriteSongs.filter(id => id !== selectedSongId)
+                            ? favoriteSongs.filter((id) => id !== selectedSongId)
                             : [...favoriteSongs, selectedSongId];
                           setFavoriteSongs(nextFavs);
-                          localStorage.setItem('favorite_english_songs', JSON.stringify(nextFavs));
+                          localStorage.setItem(
+                            'favorite_english_songs',
+                            JSON.stringify(nextFavs)
+                          );
                         }}
-                        className={`p-[3px] rounded-md border transition-all cursor-pointer ${
+                        className={`p-1.5 rounded-lg border transition-transform active:scale-95 cursor-pointer shrink-0 ${
                           favoriteSongs.includes(selectedSongId)
-                            ? 'bg-rose-50 border-rose-150 text-rose-600'
-                            : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500'
+                            ? 'bg-[#C49E3A] border-[#E6C36A] text-[#002147]'
+                            : 'bg-[#001a38] border-[#C49E3A]/40 text-[#E6C36A]'
                         }`}
-                        title={isRtl ? 'إضافة إلى المفضلات' : 'Add to favorites'}
+                        title={t('إضافة إلى المفضلات', 'Add to favorites')}
                       >
-                        <Heart size={11} fill={favoriteSongs.includes(selectedSongId) ? 'currentColor' : 'none'} />
+                        <Heart
+                          size={12}
+                          fill={
+                            favoriteSongs.includes(selectedSongId)
+                              ? 'currentColor'
+                              : 'none'
+                          }
+                        />
                       </button>
                     </div>
-                    <p className="text-blue-700 text-[10px] font-bold mt-0.5">{isRtl ? songData.titleAr : 'Interactive Children Anthem'}</p>
+                    <p className="text-white/80 text-xs font-bold mt-0.5 truncate">
+                      {isRtl ? songData.titleAr : 'Interactive Children Anthem'}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  {/* Progress Indicator Slider (Disabled) */}
-                  <div className="flex-1 sm:w-28 bg-slate-200 h-1 rounded-full overflow-hidden relative">
-                    <div 
-                      className="bg-blue-500 h-full transition-all duration-300" 
+                <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
+                  <div className="flex-1 sm:w-28 bg-[#001a38] border border-[#C49E3A]/40 h-2 rounded-full overflow-hidden">
+                    <div
+                      className="bg-[#C49E3A] h-full transition-all duration-300"
                       style={{ width: `${playProgress}%` }}
                     />
                   </div>
 
                   <button
+                    type="button"
                     onClick={togglePlaySong}
-                    className={`px-4 py-2 bg-blue-600 text-white font-black text-xs rounded-xl flex items-center gap-2 cursor-pointer transition-all hover:bg-blue-700 ${
-                      isPlaying ? 'animate-pulse' : ''
-                    }`}
+                    className="px-4 py-2 bg-[#C49E3A] hover:bg-[#E6C36A] text-[#002147] font-black text-xs rounded-xl flex items-center gap-2 cursor-pointer transition-transform active:scale-95 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E6C36A]"
                   >
-                    {isPlaying ? <Pause size={12} /> : <Play size={12} />}
-                    <span>{isPlaying ? (isRtl ? 'إيقاف الأغنية' : 'PAUSE') : (isRtl ? 'شغّل وانطق 🔊' : 'PLAY SONG 🔊')}</span>
+                    {isPlaying ? <Pause size={13} /> : <Play size={13} />}
+                    <span>
+                      {isPlaying
+                        ? t('إيقاف الأغنية', 'PAUSE')
+                        : t('شغّل وانطق 🔊', 'PLAY SONG 🔊')}
+                    </span>
                   </button>
                 </div>
               </div>
-
-              {/* Display lyrics line by line */}
-              <div className="space-y-3.5 pt-2">
-                <span className="text-[9px] uppercase font-black text-blue-700 tracking-wider">
-                  {isRtl ? 'كلمات الأنشودة بالإنجليزية والترجمة بالعربية (اضغط للاستماع لكل سطر отдельно)' : 'Click on any lyric line to listen individually:'}
-                </span>
-
-                <div className="space-y-2">
-                  {songData.lyrics.map((line, index) => {
-                    const isLinePlaying = activePlaybackLine === index;
-                    const isSpeakingThis = isSpeaking === `line_${index}`;
-
-                    return (
-                      <div
-                        key={index}
-                        onClick={() => speakText(line.en, `line_${index}`)}
-                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-3 text-right select-none ${
-                          isLinePlaying || isSpeakingThis
-                            ? 'bg-[#E3F2FD] border-blue-300 text-slate-800 scale-[1.01] shadow-xs'
-                            : 'bg-[#fafafa]/50 border-slate-100 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 font-sans font-black text-sm md:text-base text-[#002147] text-left">
-                          <span className="text-xs text-blue-400 font-mono">0{index + 1}.</span>
-                          <p className="tracking-tight italic">{line.en}</p>
-                        </div>
-                        <div className="flex items-center justify-end gap-2 shrink-0">
-                          <p className="text-xs text-slate-500 font-bold">{line.ar}</p>
-                          <span className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-500 text-[10px]">
-                            <Volume2 size={12} />
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
             </div>
 
-            {/* Vocal Practice singing task */}
-            <div className="bg-[#FFFCEF] rounded-3xl border border-amber-200 shadow-sm p-6 space-y-4">
+            {/* Lyrics in a white GoldCard, current line highlighted in soft gold (#E6C36A) */}
+            <GoldCard className="p-4 sm:p-6 space-y-3.5">
+              <span className="text-[11px] uppercase font-black text-[#002147]/70 tracking-wider block">
+                {t(
+                  'كلمات الأنشودة بالإنجليزية والترجمة بالعربية (اضغط للاستماع لكل سطر)',
+                  'Click on any lyric line to listen individually:'
+                )}
+              </span>
+
+              <div className="space-y-2.5">
+                {songData.lyrics.map((line: { en: string; ar: string }, index: number) => {
+                  const isLinePlaying = activePlaybackLine === index;
+                  const isSpeakingThis = isSpeaking === `line_${index}`;
+                  const isHighlighted = isLinePlaying || isSpeakingThis;
+
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => speakText(line.en, `line_${index}`)}
+                      className={`p-3.5 rounded-2xl border transition-transform active:scale-95 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-2.5 select-none ${
+                        isHighlighted
+                          ? 'bg-[#E6C36A] border-[#C49E3A] text-[#002147] shadow-sm'
+                          : 'bg-[#fdfaf3] border-[#C49E3A]/30 hover:border-[#C49E3A] text-[#002147]'
+                      }`}
+                    >
+                      <div
+                        dir="ltr"
+                        className="flex items-center gap-2 font-black text-sm sm:text-base text-[#002147] text-left"
+                      >
+                        <span className="text-xs text-[#C49E3A] font-mono">
+                          0{index + 1}.
+                        </span>
+                        <p className="tracking-tight italic">{line.en}</p>
+                      </div>
+                      <div className="flex items-center justify-end gap-2 shrink-0">
+                        <p className="text-xs text-[#002147]/80 font-bold">{line.ar}</p>
+                        <span className="p-1.5 bg-[#002147] border border-[#C49E3A] rounded-lg text-[#E6C36A]">
+                          <Volume2 size={12} />
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </GoldCard>
+
+            {/* Vocal Practice Singing Task */}
+            <GoldCard className="p-4 sm:p-6 space-y-4">
               <div className="flex items-center gap-2.5">
                 <span className="text-xl">🎤</span>
                 <div>
-                  <h3 className="font-extrabold text-[#002147] text-base">{isRtl ? 'تحدي الميكروفون الغنائي (Singing Challenge) 🌟' : 'Singing Challenge! 🌟'}</h3>
-                  <p className="text-xs text-amber-800 font-bold">
-                    {isRtl ? 'سجل صوتك وأنت تغني بالإنجليزية السطر الأول!' : 'Sing the first line: "Twinkle, Twinkle, Little Star, How I wonder what you are!"'}
+                  <h3 className="font-black text-[#002147] text-base">
+                    {t(
+                      'تحدي الميكروفون الغنائي (Singing Challenge)',
+                      'Singing Challenge!'
+                    )}
+                  </h3>
+                  <p className="text-xs text-[#C49E3A] font-black">
+                    {t(
+                      'سجل صوتك وأنت تغني بالإنجليزية السطر الأول!',
+                      'Sing the first line: "Twinkle, Twinkle, Little Star, How I wonder what you are!"'
+                    )}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white border border-amber-100 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-                
-                {/* Visual mic controls */}
+              <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <button
+                    type="button"
                     onClick={isRecording ? stopRecording : startRecording}
-                    className={`w-14 h-14 rounded-full flex items-center justify-center text-white transition-all cursor-pointer ${
-                      isRecording 
-                        ? 'bg-rose-600 animate-pulse hover:bg-rose-700' 
-                        : 'bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-500/20'
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95 cursor-pointer border-2 ${
+                      isRecording
+                        ? 'bg-[#001a38] text-[#E6C36A] border-[#E6C36A]'
+                        : 'bg-[#002147] text-[#E6C36A] border-[#C49E3A]'
                     }`}
                   >
-                    {isRecording ? <MicOff size={22} /> : <Mic size={22} />}
+                    {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
                   </button>
 
                   <div>
-                    <span className="text-[11px] font-bold text-slate-400 block uppercase">
-                      {isRecording ? (isRtl ? 'جاري الاستماع لصوتك العذب...' : 'Listening closely to your voice...') : (isRtl ? 'الحالة' : 'STATUS')}
+                    <span className="text-[10px] font-black text-[#002147]/60 block uppercase">
+                      {isRecording
+                        ? t(
+                            'جاري الاستماع لصوتك العذب...',
+                            'Listening closely to your voice...'
+                          )
+                        : t('الحالة', 'STATUS')}
                     </span>
                     <strong className="text-sm font-black text-[#002147]">
-                      {isRecording 
-                        ? (isRtl ? `جاري التسجيل (${recordingSeconds} ثانية)` : `Recording (${recordingSeconds}s)`) 
-                        : (recordedBlobUrl ? (isRtl ? 'توجد أغنية مسجلة جاهزة! 🥳' : 'Awesome singing recorded!') : (isRtl ? 'جاهز للتحدي' : 'Ready to start'))}
+                      {isRecording
+                        ? isRtl
+                          ? `جاري التسجيل (${recordingSeconds} ثانية)`
+                          : `Recording (${recordingSeconds}s)`
+                        : recordedBlobUrl
+                        ? t(
+                            'توجد أغنية مسجلة جاهزة! 🥳',
+                            'Awesome singing recorded!'
+                          )
+                        : t('جاهز للتحدي', 'Ready to start')}
                     </strong>
                   </div>
                 </div>
 
-                {/* Simulated waveforms */}
-                {isRecording && (
-                  <div className="flex items-center gap-1 my-2">
-                    <span className="w-1.5 h-6 bg-red-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                    <span className="w-1.5 h-10 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
-                    <span className="w-1.5 h-7 bg-red-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
-                    <span className="w-1.5 h-12 bg-red-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                    <span className="w-1.5 h-4 bg-red-300 rounded-full animate-bounce" style={{ animationDelay: '0.7s' }} />
-                  </div>
-                )}
-
-                {/* Actions on audio track */}
                 {recordedBlobUrl && !isRecording && (
-                  <div className="flex items-center gap-2">
-                    <button
+                  <div className="flex flex-wrap items-center gap-2">
+                    <GhostButton
                       onClick={playRecordedAudio}
-                      className={`px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-black rounded-xl cursor-pointer flex items-center gap-2 ${
-                        isRecordingPlayback ? 'animate-bounce' : ''
-                      }`}
+                      className="!px-3.5 !py-2 !text-xs"
                     >
                       <Volume2 size={13} />
-                      <span>{isRtl ? 'استمع لتسجيلك 🎧' : 'Listen Recording 🎧'}</span>
-                    </button>
+                      <span>{t('استمع لتسجيلك 🎧', 'Listen Recording 🎧')}</span>
+                    </GhostButton>
 
                     {!recordingXPClaimed ? (
-                      <button
+                      <PrimaryButton
                         onClick={claimRecordingXP}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl cursor-pointer"
+                        className="!px-3.5 !py-2 !text-xs"
                       >
-                        {isRtl ? 'حصد +20 نقطة تفوق 💎' : 'Claim +20 XP 💎'}
-                      </button>
+                        <span>
+                          {t('حصد +20 نقطة تفوق 💎', 'Claim +20 XP 💎')}
+                        </span>
+                      </PrimaryButton>
                     ) : (
-                      <span className="text-emerald-700 font-extrabold text-xs flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                      <span className="text-[#002147] font-black text-xs flex items-center gap-1 bg-[#E6C36A]/35 px-3 py-1.5 rounded-xl border border-[#C49E3A]">
                         <CheckCircle2 size={13} />
-                        <span>{isRtl ? 'حصدت الجائزة' : 'XP Claimed'}</span>
+                        <span>{t('حصدت الجائزة', 'XP Claimed')}</span>
                       </span>
                     )}
                   </div>
                 )}
               </div>
-            </div>
+            </GoldCard>
 
             {/* Song Comprehension Quiz Widget */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
-              <div className="border-b pb-3 flex items-center justify-between">
+            <GoldCard className="p-4 sm:p-6 space-y-5">
+              <div className="border-b border-[#C49E3A]/30 pb-3 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">💡</span>
                   <div>
-                    <h3 className="font-extrabold text-[#002147] text-base">{isRtl ? 'أسئلة فهم واستيعاب الأغنية' : 'Song Comprehension Test'}</h3>
-                    <p className="text-[10px] text-slate-400 font-semibold">{isRtl ? 'أثبت أنك عبقري وحلّ الأسئلة لتنال نقاط تفوق مضاعفة!' : 'Demonstrate comprehension to earn stars'}</p>
+                    <h3 className="font-black text-[#002147] text-base">
+                      {t('أسئلة فهم واستيعاب الأغنية', 'Song Comprehension Test')}
+                    </h3>
+                    <p className="text-[11px] text-[#002147]/70 font-bold">
+                      {t(
+                        'أثبت أنك عبقري وحلّ الأسئلة لتنال نقاط تفوق مضاعفة!',
+                        'Demonstrate comprehension to earn stars'
+                      )}
+                    </p>
                   </div>
                 </div>
 
-                <button
-                  onClick={resetQuiz}
-                  className="p-1 px-2.5 bg-slate-50 border hover:bg-slate-100 rounded-lg font-bold text-[10px] text-slate-500 flex items-center gap-1 cursor-pointer"
-                >
-                  <RotateCcw size={10} />
-                  <span>{isRtl ? 'تصفير الأسئلة' : 'Reset'}</span>
-                </button>
+                <GhostButton onClick={resetQuiz} className="!px-3 !py-1.5 !text-xs">
+                  <RotateCcw size={12} />
+                  <span>{t('تصفير الأسئلة', 'Reset')}</span>
+                </GhostButton>
               </div>
 
-              <div className="space-y-6">
-                {songData.questions.map((q, qIdx) => {
+              <div className="space-y-4">
+                {songData.questions.map((q: any, qIdx: number) => {
                   const selectedOpt = userAnswers[qIdx];
-                  const hasAnswered = selectedOpt !== undefined;
 
                   return (
-                    <div key={q.id} className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
-                      <div className="space-y-1 block md:flex md:items-center md:justify-between text-right">
-                        <h4 className="font-sans font-black text-base text-[#002147] text-left">
+                    <div
+                      key={q.id}
+                      className="space-y-3 bg-[#fdfaf3] p-4 rounded-2xl border border-[#C49E3A]/30"
+                    >
+                      <div className="space-y-1">
+                        <h4
+                          dir="ltr"
+                          className="font-black text-sm sm:text-base text-[#002147] text-left"
+                        >
                           Q{q.id}. {q.question}
                         </h4>
                         {q.questionAr && (
-                          <p className="text-xs text-slate-500 font-bold block">{q.questionAr}</p>
+                          <p className="text-xs text-[#002147]/75 font-bold">
+                            {q.questionAr}
+                          </p>
                         )}
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                        {q.options.map((opt, optIdx) => {
+                        {q.options.map((opt: string, optIdx: number) => {
                           const isSelected = selectedOpt === optIdx;
                           const isCorrect = optIdx === q.correctIndex;
 
-                          let choiceStyle = "bg-white border-slate-200 text-slate-700 hover:border-slate-300";
+                          let state: 'normal' | 'correct' | 'wrong' = 'normal';
                           if (quizSubmitted) {
-                            if (isCorrect) {
-                              choiceStyle = "bg-emerald-50 border-emerald-500 text-emerald-800 font-black";
-                            } else if (isSelected) {
-                              choiceStyle = "bg-red-50 border-red-400 text-red-800 font-black";
-                            } else {
-                              choiceStyle = "bg-white border-slate-150 text-slate-350 opacity-60";
-                            }
-                          } else if (isSelected) {
-                            choiceStyle = "bg-blue-50 border-blue-400 text-blue-800 font-black";
+                            if (isCorrect) state = 'correct';
+                            else if (isSelected) state = 'wrong';
                           }
 
                           return (
-                            <button
+                            <AnswerOption
                               key={optIdx}
+                              label={opt}
+                              state={state}
+                              selected={isSelected}
                               disabled={quizSubmitted}
                               onClick={() => handleSelectOption(qIdx, optIdx)}
-                              className={`p-3 rounded-xl border-2 text-xs font-bold transition-all text-center cursor-pointer relative overflow-hidden select-none ${choiceStyle}`}
-                            >
-                              <span>{opt}</span>
-                            </button>
+                            />
                           );
                         })}
                       </div>
 
                       {quizSubmitted && selectedOpt !== undefined && (
-                        <p className="text-[10px] text-slate-400 leading-normal pl-2 font-mono">
+                        <p
+                          dir="ltr"
+                          className="text-xs text-[#002147]/80 font-bold pt-1"
+                        >
                           ℹ️ {q.explanation}
                         </p>
                       )}
@@ -785,143 +941,168 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
                 })}
               </div>
 
-              {/* Submit Quiz actions footer */}
               {!quizSubmitted ? (
-                <div className="flex justify-end pt-2 border-t">
-                  <button
-                    disabled={Object.keys(userAnswers).length < songData.questions.length}
+                <div className="flex justify-end pt-2 border-t border-[#C49E3A]/30">
+                  <PrimaryButton
+                    disabled={
+                      Object.keys(userAnswers).length < songData.questions.length
+                    }
                     onClick={handleSubmitQuiz}
-                    className="px-6 py-2.5 bg-blue-600 disabled:bg-slate-200 disabled:text-slate-400 text-white font-black text-xs uppercase tracking-wider rounded-xl cursor-pointer"
                   >
-                    {isRtl ? 'إرسال الإجابات وحصد الجوائز 🏆' : 'Submit Answers 🏆'}
-                  </button>
+                    <span>
+                      {t('إرسال الإجابات وحصد الجوائز 🏆', 'Submit Answers 🏆')}
+                    </span>
+                  </PrimaryButton>
                 </div>
               ) : (
-                <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                <div className="p-4 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A] flex flex-col sm:flex-row items-center justify-between gap-3">
                   <div>
-                    <span className="text-emerald-800 font-black text-sm block">
-                      {isRtl ? 'مبارك! أكملت مراجعة الفهم بنجاح' : 'Congratulations! Completed comprehension checks'}
+                    <span className="text-[#002147] font-black text-sm block">
+                      {t(
+                        'مبارك! أكملت مراجعة الفهم بنجاح',
+                        'Congratulations! Completed comprehension checks'
+                      )}
                     </span>
-                    <p className="text-emerald-600 text-[10px] font-bold">
-                      {isRtl ? `حصلت على +${songData.questions.length * 10} نقطة تفوق مضاعفة تم إضافتها فوراً.` : `Earned +${songData.questions.length * 10} XP for your vocabulary mastery.`}
+                    <p className="text-[#C49E3A] text-xs font-black">
+                      {isRtl
+                        ? `حصلت على +${
+                            songData.questions.length * 10
+                          } نقطة تفوق مضاعفة تم إضافتها فوراً.`
+                        : `Earned +${
+                            songData.questions.length * 10
+                          } XP for your vocabulary mastery.`}
                     </p>
                   </div>
-                  <button
-                    onClick={resetQuiz}
-                    className="px-4 py-2 bg-[#002147] text-white text-xs font-black rounded-lg hover:bg-[#002d5d] cursor-pointer"
-                  >
-                    {isRtl ? 'إعادة الإجابة' : 'Try Again'}
-                  </button>
+                  <PrimaryButton onClick={resetQuiz} className="!text-xs">
+                    <span>{t('إعادة الإجابة', 'Try Again')}</span>
+                  </PrimaryButton>
                 </div>
               )}
-
-            </div>
-
+            </GoldCard>
           </div>
 
-          {/* Column 2: Extracted 5 Vocabulary Items (4 cols) */}
+          {/* Right 4 cols: Extracted Vocabulary Items */}
           <div className="col-span-1 lg:col-span-4 space-y-4">
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 space-y-4">
-              
-              <div className="flex items-center gap-2 border-b pb-3">
-                <span className="text-xl">⭐️</span>
+            <GoldCard className="p-4 sm:p-5 space-y-4">
+              <div className="flex items-center gap-2 border-b border-[#C49E3A]/30 pb-3">
+                <span className="text-xl">⭐</span>
                 <div>
-                  <h3 className="font-extrabold text-[#002147] text-sm uppercase">
-                    {isRtl ? '5 كلمات جديدة من الأغنية' : '5 New Words to Learn'}
+                  <h3 className="font-black text-[#002147] text-sm uppercase">
+                    {t('5 كلمات جديدة من الأغنية', '5 New Words to Learn')}
                   </h3>
-                  <p className="text-[10px] text-slate-400 font-semibold">{isRtl ? 'اضغط لسماع الكلمة وطريقة نطقها ومثال عليها' : 'Extracted premium vocabulary from twilight'}</p>
+                  <p className="text-[11px] text-[#002147]/70 font-bold">
+                    {t(
+                      'اضغط لسماع الكلمة وطريقة نطقها ومثال عليها',
+                      'Extracted premium vocabulary from twilight'
+                    )}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                {songData.vocab.map((item) => {
+                {songData.vocab.map((item: any) => {
                   const isSpeakingThis = isSpeaking === `vocab_${item.word}`;
 
                   return (
                     <div
                       key={item.word}
                       onClick={() => speakText(item.word, `vocab_${item.word}`)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer relative bg-[#FCFAF0]/80 hover:bg-amber-50/50 group ${
-                        isSpeakingThis ? 'border-amber-400 bg-amber-50/30 ring-2 ring-amber-300/10' : 'border-slate-100'
+                      className={`p-3.5 rounded-2xl border transition-transform active:scale-95 cursor-pointer bg-[#fdfaf3] ${
+                        isSpeakingThis
+                          ? 'border-[#C49E3A] ring-2 ring-[#C49E3A]/40'
+                          : 'border-[#C49E3A]/30 hover:border-[#C49E3A]'
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-2 border-b border-amber-100/60 pb-1.5 mb-2">
+                      <div className="flex items-center justify-between gap-2 border-b border-[#C49E3A]/25 pb-2 mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-lg bg-white p-1 rounded-lg border shadow-3xs">{item.emoji}</span>
-                          <h4 className="font-sans font-black text-sm md:text-base text-slate-800 capitalize leading-none">{item.word}</h4>
+                          <span className="text-lg bg-white p-1 rounded-lg border border-[#C49E3A]/30">
+                            {item.emoji}
+                          </span>
+                          <h4
+                            dir="ltr"
+                            className="font-black text-sm sm:text-base text-[#002147] capitalize"
+                          >
+                            {item.word}
+                          </h4>
                         </div>
 
-                        <span className="text-xs font-black text-amber-600 block bg-amber-100/40 px-2 py-0.5 rounded-lg">
+                        <span className="text-xs font-black text-[#E6C36A] bg-[#002147] px-2.5 py-0.5 rounded-full">
                           {item.meaning}
                         </span>
                       </div>
 
                       <div className="space-y-1">
-                        <span className="text-[9px] text-slate-400 font-black uppercase tracking-wider block">
-                          {isRtl ? 'مثال معبر' : 'Example Sentence'}
+                        <span className="text-[10px] text-[#002147]/60 font-black uppercase tracking-wider block">
+                          {t('مثال معبر', 'Example Sentence')}
                         </span>
-                        <p className="text-[11px] text-slate-500 font-bold leading-relaxed italic pr-4">
-                          &ldquo; {item.example} &rdquo;
+                        <p
+                          dir="ltr"
+                          className="text-xs text-[#002147]/80 font-bold leading-relaxed italic"
+                        >
+                          &ldquo;{item.example}&rdquo;
                         </p>
                       </div>
-
-                      {/* Speaking indicator overlay */}
-                      {isSpeakingThis && (
-                        <div className="absolute right-3.5 bottom-3.5 flex items-center gap-0.5">
-                          <span className="w-1 h-3 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                          <span className="w-1 h-4 bg-amber-600 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
-                          <span className="w-1 h-2.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
-                        </div>
-                      )}
                     </div>
                   );
                 })}
               </div>
 
-              {/* Family recommendation */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-150 flex items-start gap-2.5 text-[10px] text-slate-400 mt-2">
-                <Info size={14} className="text-slate-400 shrink-0 mt-0.5" />
+              <div className="bg-[#fdfaf3] p-3.5 rounded-2xl border border-[#C49E3A]/30 flex items-start gap-2.5 text-xs text-[#002147]/75 font-bold">
+                <Info size={14} className="text-[#C49E3A] shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  {isRtl
-                    ? 'الأغاني والأناشيد تساعد الأطفال على التقاط الإيقاع اللغوي وحفظ مخارج الحروف الإنجليزية بسلاسة دون مجهود ميكانيكي.'
-                    : 'Encouraging children to hum along creates neural pathways specifically adapted to language acquisition.'}
+                  {t(
+                    'الأغاني والأناشيد تساعد الأطفال على التقاط الإيقاع اللغوي وحفظ مخارج الحروف الإنجليزية بسلاسة دون مجهود ميكانيكي.',
+                    'Encouraging children to hum along creates neural pathways specifically adapted to language acquisition.'
+                  )}
                 </p>
               </div>
-
-            </div>
+            </GoldCard>
           </div>
-
         </div>
 
-        {/* 🏆 لوحة التطوير والإضافة اللغوية للأناشيد (Review & Custom Songs Creator Dashboard) */}
-        <div className="bg-white border-2 border-blue-500/10 p-5 md:p-6 rounded-3xl mt-8 shadow-sm">
-          <div className={`flex flex-col sm:flex-row justify-between items-center pb-4 mb-5 border-b border-rose-50 gap-3 ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
-            <div className={isRtl ? 'text-right' : 'text-left'}>
-              <h3 className="text-base font-black text-[#002147] font-sans flex items-center gap-2">
-                <Star className="text-blue-500" size={18} fill="currentColor" />
-                <span>{isRtl ? '🎨 لوحة الإضافة والمراجعة للأناشيد التفاعلية' : '🎨 Kids Music Board: Add & Review Songs'}</span>
+        {/* Review & Custom Songs Creator Dashboard */}
+        <GoldCard className="p-5 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-5 border-b border-[#C49E3A]/30 gap-3">
+            <div>
+              <h3 className="text-base font-black text-[#002147] flex items-center gap-2">
+                <Star className="text-[#C49E3A]" size={18} fill="currentColor" />
+                <span>
+                  {t(
+                    '🎨 لوحة الإضافة والمراجعة للأناشيد التفاعلية',
+                    '🎨 Kids Music Board: Add & Review Songs'
+                  )}
+                </span>
               </h3>
-              <p className="text-[11px] text-slate-400 font-bold mt-0.5">
-                {isRtl ? 'صمم أناشيد مخصصة لصف طفلك، وراجع الأناشيد المفضلة لديه بلمسات سريعة!' : 'Compose interactive nursery rhymes, and list bookmarked audio tracks with easy playback!'}
+              <p className="text-xs text-[#002147]/70 font-bold mt-0.5">
+                {t(
+                  'صمم أناشيد مخصصة لصف طفلك، وراجع الأناشيد المفضلة لديه بلمسات سريعة!',
+                  'Compose interactive nursery rhymes, and list bookmarked audio tracks with easy playback!'
+                )}
               </p>
             </div>
 
-            {/* Sub-tabs switcher */}
-            <div className="flex gap-1 bg-slate-100/80 p-1 rounded-2xl">
+            <div className="flex gap-1.5 bg-[#fdfaf3] p-1 rounded-2xl border border-[#C49E3A]/40">
               {[
-                { id: 'review', label: isRtl ? '❤️ المفضلة المحفوظة' : '❤️ My Bookmarks' },
-                { id: 'add', label: isRtl ? '➕ تصميم أنشودة مخصصة' : '➕ Compose New Song' }
-              ].map(t => (
+                {
+                  id: 'review',
+                  label: t('❤️ المفضلة المحفوظة', '❤️ My Bookmarks'),
+                },
+                {
+                  id: 'add',
+                  label: t('➕ تصميم أنشودة مخصصة', '➕ Compose New Song'),
+                },
+              ].map((tabItem) => (
                 <button
-                  key={t.id}
-                  onClick={() => setSongTab(t.id as any)}
-                  className={`px-3.5 py-1.5 rounded-xl text-[10px] font-black cursor-pointer transition-all ${
-                    songTab === t.id
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'text-slate-500 hover:text-blue-600'
+                  key={tabItem.id}
+                  type="button"
+                  onClick={() => setSongTab(tabItem.id as 'review' | 'add')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-black cursor-pointer transition-transform active:scale-95 ${
+                    songTab === tabItem.id
+                      ? 'bg-[#002147] text-[#E6C36A] shadow-sm'
+                      : 'text-[#002147]/70 hover:text-[#002147]'
                   }`}
                 >
-                  {t.label}
+                  {tabItem.label}
                 </button>
               ))}
             </div>
@@ -931,53 +1112,68 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
             {songTab === 'review' && (
               <motion.div
                 key="song_review"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 className="space-y-4"
               >
-                <h4 className={`text-xs font-black text-[#002147] mb-2 ${isRtl ? 'text-right' : 'text-left'}`}>
-                  {isRtl ? `📋 قائمة الأناشيد المفضلة المحصورة حالياً (${favoriteSongs.length}):` : `📋 Bookmarked audio songs list (${favoriteSongs.length}):`}
+                <h4 className="text-xs font-black text-[#002147]">
+                  {isRtl
+                    ? `📋 قائمة الأناشيد المفضلة المحصورة حالياً (${favoriteSongs.length}):`
+                    : `📋 Bookmarked audio songs list (${favoriteSongs.length}):`}
                 </h4>
 
                 {favoriteSongs.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {favoriteSongs.map((songId) => {
-                      const sMeta = [...ENGLISH_WITH_SONGS_DATA, ...customSongs].find(it => it.id === songId);
+                      const sMeta = [...ENGLISH_WITH_SONGS_DATA, ...customSongs].find(
+                        (it) => it.id === songId
+                      );
                       if (!sMeta) return null;
 
                       return (
                         <div
                           key={songId}
-                          className={`p-3 bg-blue-50/10 border border-blue-100 hover:border-blue-300 rounded-2xl flex justify-between items-center transition-all ${isRtl ? 'flex-row-reverse' : ''}`}
+                          className="p-3 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-2xl flex justify-between items-center gap-2"
                         >
-                          <div className={`flex items-center gap-2.5 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
-                            <span className="text-2xl bg-white p-1 rounded-lg border border-blue-100">🎼</span>
-                            <div>
-                              <p className="text-xs font-black text-slate-800 capitalize leading-snug">{sMeta.title}</p>
-                              <span className="text-[9px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-bold block mt-0.5 w-max">
-                                {sMeta.level === 'كبار' ? (isRtl ? 'مستوى متقدم' : 'Advanced Level') : (isRtl ? 'مستوى الأطفال' : 'Kids Level')}
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span className="text-2xl bg-white p-1.5 rounded-xl border border-[#C49E3A]/30 shrink-0">
+                              🎼
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-xs font-black text-[#002147] capitalize truncate">
+                                {sMeta.title}
+                              </p>
+                              <span className="text-[10px] text-[#C49E3A] font-black block mt-0.5">
+                                {sMeta.level === 'كبار'
+                                  ? t('مستوى متقدم', 'Advanced Level')
+                                  : t('مستوى الأطفال', 'Kids Level')}
                               </span>
                             </div>
                           </div>
 
-                          <div className="flex gap-1 shrink-0">
-                            {/* Fast direct selection */}
-                            <button
+                          <div className="flex gap-1.5 shrink-0">
+                            <PrimaryButton
                               onClick={() => handleSelectSong(songId)}
-                              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-black cursor-pointer transition-colors"
+                              className="!px-3 !py-1.5 !text-xs"
                             >
-                              {isRtl ? 'تشغيل حاد 🔊' : 'Open 🔊'}
-                            </button>
+                              <span>{t('تشغيل حاد 🔊', 'Open 🔊')}</span>
+                            </PrimaryButton>
                             <button
+                              type="button"
                               onClick={() => {
-                                const nextFavs = favoriteSongs.filter(id => id !== songId);
+                                const nextFavs = favoriteSongs.filter(
+                                  (id) => id !== songId
+                                );
                                 setFavoriteSongs(nextFavs);
-                                localStorage.setItem('favorite_english_songs', JSON.stringify(nextFavs));
+                                localStorage.setItem(
+                                  'favorite_english_songs',
+                                  JSON.stringify(nextFavs)
+                                );
                               }}
-                              className="w-7 h-7 bg-rose-50 hover:bg-rose-100 border border-rose-100 text-rose-500 rounded-lg flex items-center justify-center shrink-0 cursor-pointer transition-colors border border-transparent"
+                              className="w-8 h-8 bg-white border border-[#C49E3A]/40 text-[#002147] rounded-xl flex items-center justify-center shrink-0 cursor-pointer active:scale-95"
                             >
-                              <X size={11} />
+                              <X size={12} />
                             </button>
                           </div>
                         </div>
@@ -985,13 +1181,19 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-6 bg-slate-50 border border-slate-150 p-4 rounded-2xl">
-                    <Heart className="text-slate-300 mx-auto mb-2 opacity-50" size={24} />
-                    <p className="text-xs text-slate-500 font-bold">
-                      {isRtl ? 'لم تختر أي أنشودة مفضلة حتى الآن.' : 'Bookmarked twilight anthems show up here.'}
+                  <div className="text-center py-6 bg-[#fdfaf3] border border-[#C49E3A]/30 p-4 rounded-2xl">
+                    <Heart className="text-[#C49E3A] mx-auto mb-2 opacity-60" size={24} />
+                    <p className="text-xs text-[#002147] font-black">
+                      {t(
+                        'لم تختر أي أنشودة مفضلة حتى الآن.',
+                        'Bookmarked twilight anthems show up here.'
+                      )}
                     </p>
-                    <p className="text-[10px] text-slate-400 mt-1">
-                      {isRtl ? 'انقر على رمز القلب ❤️ بجانب عنوان الأغنية النشطة لحفظها في هذه القائمة والوصول إليها بسرعة.' : 'Click the Heart bookmark icon next to any active song title to review its lyrics instantly!'}
+                    <p className="text-[11px] text-[#002147]/70 font-bold mt-1">
+                      {t(
+                        'انقر على رمز القلب ❤️ بجانب عنوان الأغنية النشطة لحفظها في هذه القائمة والوصول إليها بسرعة.',
+                        'Click the Heart bookmark icon next to any active song title to review its lyrics instantly!'
+                      )}
                     </p>
                   </div>
                 )}
@@ -1001,20 +1203,23 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
             {songTab === 'add' && (
               <motion.div
                 key="song_add"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (!newSongTitle || !newSongEngLyrics) return;
 
-                    // Parse comma or newline separated lyric strings
-                    const linesArr = newSongEngLyrics.split('\n').filter(Boolean).map((line, idx) => {
-                      const rawAr = newSongArLyrics.split('\n')[idx] || 'ترجمة تفاعلية.';
-                      return { en: line.trim(), ar: rawAr.trim() };
-                    });
+                    const linesArr = newSongEngLyrics
+                      .split('\n')
+                      .filter(Boolean)
+                      .map((line, idx) => {
+                        const rawAr =
+                          newSongArLyrics.split('\n')[idx] || 'ترجمة تفاعلية.';
+                        return { en: line.trim(), ar: rawAr.trim() };
+                      });
 
                     const designId = `custom_song_${Date.now()}`;
                     const customObj = {
@@ -1022,36 +1227,65 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
                       title: newSongTitle.trim(),
                       titleAr: newSongTitleAr.trim() || 'أنشودة مخصصة ✨',
                       level: 'أطفال',
-                      lyrics: linesArr.length > 0 ? linesArr : [
-                        { en: "This is a custom interactive nursery rhyme draft.", ar: "هذه مسودة لأنشودة تفاعلية مخصصة." },
-                        { en: "Sing with confidence and have fun playing words!", ar: "رنم بثقة واستمتع بلعب الكلمات اللطيفة!" }
-                      ],
+                      lyrics:
+                        linesArr.length > 0
+                          ? linesArr
+                          : [
+                              {
+                                en: 'This is a custom interactive nursery rhyme draft.',
+                                ar: 'هذه مسودة لأنشودة تفاعلية مخصصة.',
+                              },
+                              {
+                                en: 'Sing with confidence and have fun playing words!',
+                                ar: 'رنم بثقة واستمتع بلعب الكلمات اللطيفة!',
+                              },
+                            ],
                       vocab: [
-                        { word: "Rhyme", trigger: "rhyme", meaning: "سجع / قافية لغوية", example: "Nursery rhymes have a beautiful flow.", emoji: "🌸" },
-                        { word: "Harmony", trigger: "harmony", meaning: "تناسق الأصوات والانسجام", example: "We sing in perfect harmony.", emoji: "✨" }
+                        {
+                          word: 'Rhyme',
+                          trigger: 'rhyme',
+                          meaning: 'سجع / قافية لغوية',
+                          example: 'Nursery rhymes have a beautiful flow.',
+                          emoji: '🌸',
+                        },
+                        {
+                          word: 'Harmony',
+                          trigger: 'harmony',
+                          meaning: 'تناسق الأصوات والانسجام',
+                          example: 'We sing in perfect harmony.',
+                          emoji: '✨',
+                        },
                       ],
                       questions: [
                         {
                           id: 1,
-                          question: "What language is this song designed in?",
-                          questionAr: "بأي لغة تم تصميم هذه الأنشودة؟",
-                          options: ["English Language 🇬🇧", "Español 🇪🇸", "French 🇫🇷"],
+                          question: 'What language is this song designed in?',
+                          questionAr: 'بأي لغة تم تصميم هذه الأنشودة؟',
+                          options: ['English Language 🇬🇧', 'Español 🇪🇸', 'French 🇫🇷'],
                           correctIndex: 0,
-                          explanation: "The song is designed in English."
-                        }
-                      ]
+                          explanation: 'The song is designed in English.',
+                        },
+                      ],
                     };
 
                     const updated = [...customSongs, customObj];
                     setCustomSongs(updated);
-                    localStorage.setItem('custom_english_songs', JSON.stringify(updated));
+                    localStorage.setItem(
+                      'custom_english_songs',
+                      JSON.stringify(updated)
+                    );
 
                     setNewSongTitle('');
                     setNewSongTitleAr('');
                     setNewSongEngLyrics('');
                     setNewSongArLyrics('');
 
-                    setSongsMsg(isRtl ? '✨ مبارك! تم إنشاء الأنشودة المخصصة للأطفال بنجاح وأصبحت جاهزة للتشغيل.' : '✨ Song configured and added to basic level!');
+                    setSongsMsg(
+                      t(
+                        '✨ مبارك! تم إنشاء الأنشودة المخصصة للأطفال بنجاح وأصبحت جاهزة للتشغيل.',
+                        '✨ Song configured and added to basic level!'
+                      )
+                    );
                     setTimeout(() => setSongsMsg(''), 4500);
 
                     if (onXPAdded) onXPAdded(15);
@@ -1059,15 +1293,15 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
                   className="space-y-4"
                 >
                   {songsMsg && (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black p-3 rounded-xl text-center">
+                    <div className="bg-[#fdfaf3] border border-[#C49E3A] text-[#002147] text-xs font-black p-3 rounded-xl text-center">
                       {songsMsg}
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                      <label className="text-[11px] font-black text-[#002147] block">
-                        {isRtl ? '🔑 عنوان الأنشودة بالإنجليزية *:' : '🔑 English Song Title *:'}
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-[#002147] block">
+                        {t('🔑 عنوان الأنشودة بالإنجليزية *:', '🔑 English Song Title *:')}
                       </label>
                       <input
                         type="text"
@@ -1075,26 +1309,29 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
                         value={newSongTitle}
                         onChange={(e) => setNewSongTitle(e.target.value)}
                         placeholder="e.g., Row Row Row Your Boat"
-                        className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-blue-400"
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-3 text-[#002147] focus:outline-none focus:border-[#C49E3A]"
                       />
                     </div>
 
-                    <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                      <label className="text-[11px] font-black text-slate-400 block">
-                        {isRtl ? '🎨 ترجمة الاسم للعربية:' : '🎨 Arabic Translation / Intro:'}
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-[#002147]/70 block">
+                        {t('🎨 ترجمة الاسم للعربية:', '🎨 Arabic Translation / Intro:')}
                       </label>
                       <input
                         type="text"
                         value={newSongTitleAr}
                         onChange={(e) => setNewSongTitleAr(e.target.value)}
                         placeholder="مثال: جدّف جدّف بقاربك الصغير مائيًا 🚣‍♂️"
-                        className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-blue-400 text-right"
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-3 text-[#002147] focus:outline-none focus:border-[#C49E3A] text-right"
                       />
                     </div>
 
-                    <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                      <label className="text-[11px] font-black text-[#002147] block">
-                        {isRtl ? '📝 الكلمات بالإنجليزية (كل سطر منفصل) *:' : '📝 English Lyrics (One line per row) *:'}
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-[#002147] block">
+                        {t(
+                          '📝 الكلمات بالإنجليزية (كل سطر منفصل) *:',
+                          '📝 English Lyrics (One line per row) *:'
+                        )}
                       </label>
                       <textarea
                         required
@@ -1102,48 +1339,55 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
                         value={newSongEngLyrics}
                         onChange={(e) => setNewSongEngLyrics(e.target.value)}
                         placeholder="Row, row, row your boat&#10;Gently down the stream&#10;Merrily, merrily, merrily!..."
-                        className="w-full text-xs font-mono font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-blue-400"
+                        className="w-full text-xs font-mono font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-3 text-[#002147] focus:outline-none focus:border-[#C49E3A]"
                       />
                     </div>
 
-                    <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                      <label className="text-[11px] font-black text-slate-400 block">
-                        {isRtl ? '🎯 الترجمة المقابلة بالعربية (كل سطر منفصل):' : '🎯 Corresponding Arabic Translation:'}
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-[#002147]/70 block">
+                        {t(
+                          '🎯 الترجمة المقابلة بالعربية (كل سطر منفصل):',
+                          '🎯 Corresponding Arabic Translation:'
+                        )}
                       </label>
                       <textarea
                         rows={3}
                         value={newSongArLyrics}
                         onChange={(e) => setNewSongArLyrics(e.target.value)}
                         placeholder="جدّف جدّف جدّف بقاربك&#10;بلطفٍ لأسفل المجرى المائي&#10;بكل مرح وبسمات رائعة!..."
-                        className="w-full text-xs font-sans font-bold bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:border-blue-400 text-right"
+                        className="w-full text-xs font-bold bg-white border border-[#C49E3A]/40 rounded-xl p-3 text-[#002147] focus:outline-none focus:border-[#C49E3A] text-right"
                       />
                     </div>
                   </div>
 
-                  <div className={`pt-2 flex ${isRtl ? 'justify-start' : 'justify-end'}`}>
-                    <button
-                      type="submit"
-                      className="px-5 py-3 cursor-pointer bg-[#002147] hover:bg-slate-800 text-white rounded-xl font-black text-xs shadow-md transition-all flex items-center gap-1.5"
-                    >
-                      <span>{isRtl ? 'حفظ الأنشودة في المزرعة وتجهيز المشغّل (+15 XP) 💾' : 'Compile & Save nursery rhyme (+15 XP) 💾'}</span>
-                    </button>
+                  <div className="pt-2 flex justify-end">
+                    <PrimaryButton type="submit" className="!text-xs">
+                      <span>
+                        {t(
+                          'حفظ الأنشودة في المزرعة وتجهيز المشغّل (+15 XP) 💾',
+                          'Compile & Save nursery rhyme (+15 XP) 💾'
+                        )}
+                      </span>
+                    </PrimaryButton>
                   </div>
                 </form>
 
-                {/* Show created songs list to delete customizable songs */}
                 {customSongs.length > 0 && (
-                  <div className="mt-5 pt-4 border-t border-slate-100/60">
-                    <h5 className={`text-[10px] font-black text-slate-400 tracking-wider mb-2 uppercase ${isRtl ? 'text-right' : 'text-left'}`}>
-                      {isRtl ? '⚙️ الأناشيد المصممة من قبلك المرفقة بالتطبيق:' : '⚙️ Custom compiled rhymes created:'}
+                  <div className="mt-5 pt-4 border-t border-[#C49E3A]/30">
+                    <h5 className="text-[11px] font-black text-[#002147]/70 tracking-wider mb-2 uppercase">
+                      {t(
+                        '⚙️ الأناشيد المصممة من قبلك المرفقة بالتطبيق:',
+                        '⚙️ Custom compiled rhymes created:'
+                      )}
                     </h5>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {customSongs.map((cuSong) => (
                         <div
                           key={cuSong.id}
-                          className={`p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-[11px] ${isRtl ? 'flex-row-reverse' : ''}`}
+                          className="p-2.5 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-xl flex items-center justify-between text-xs"
                         >
-                          <span className="font-extrabold text-[#002147] truncate gap-1 flex items-center">
+                          <span className="font-black text-[#002147] truncate gap-1.5 flex items-center">
                             <span>🎵</span>
                             <span className="capitalize">{cuSong.title}</span>
                           </span>
@@ -1151,19 +1395,25 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
                           <button
                             type="button"
                             onClick={() => {
-                              const updated = customSongs.filter(c => c.id !== cuSong.id);
+                              const updated = customSongs.filter(
+                                (c) => c.id !== cuSong.id
+                              );
                               setCustomSongs(updated);
-                              localStorage.setItem('custom_english_songs', JSON.stringify(updated));
+                              localStorage.setItem(
+                                'custom_english_songs',
+                                JSON.stringify(updated)
+                              );
                               if (favoriteSongs.includes(cuSong.id)) {
-                                setFavoriteSongs(prev => prev.filter(id => id !== cuSong.id));
+                                setFavoriteSongs((prev) =>
+                                  prev.filter((id) => id !== cuSong.id)
+                                );
                               }
-                              // Select first item as fallback
                               setSelectedSongId('song_001');
                             }}
-                            className="p-1 hover:bg-rose-50 text-rose-600 rounded-lg cursor-pointer border border-transparent hover:border-rose-100"
-                            title="حذف"
+                            className="p-1 text-[#002147]/70 hover:text-[#002147] rounded-lg cursor-pointer"
+                            title={t('حذف', 'Delete')}
                           >
-                            <X size={11} />
+                            <X size={12} />
                           </button>
                         </div>
                       ))}
@@ -1173,9 +1423,8 @@ export const EnglishSongs: React.FC<EnglishSongsProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-
+        </GoldCard>
       </div>
-    </div>
+    </SectionShell>
   );
 };
