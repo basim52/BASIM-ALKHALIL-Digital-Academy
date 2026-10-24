@@ -1,16 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { toPng, getFontEmbedCSS } from 'html-to-image';
+import { toPng } from 'html-to-image';
 import { db } from '../lib/firebase';
 import { ReportExportLayout, type ReportExportData } from './ReportExportLayout';
 import { loadWeeklyReportData, type WeeklyReportData } from './ParentWeeklyStepsReport';
 
-// Font embedding is the slowest part of html-to-image: compute once per page and reuse.
-let fontCssPromise: Promise<string> | null = null;
-function preloadExportAssets(node?: HTMLElement | null) {
+function preloadExportAssets(_node?: HTMLElement | null) {
   try { const im = new Image(); im.src = '/icon-512.png'; } catch { /* ignore */ }
-  if (!fontCssPromise && node) fontCssPromise = getFontEmbedCSS(node).catch(() => '');
-  return fontCssPromise;
+  return Promise.resolve('');
 }
 import { loadTrackProgress } from '../lib/saraProgressSync';
 import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
@@ -83,8 +80,8 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
       const imgs = Array.from(node.querySelectorAll('img'));
       await Promise.all(imgs.map(im => im.complete ? null : new Promise(res => { im.onload = im.onerror = () => res(null); })));
       const H = Math.min(1920, Math.max(1350, Math.ceil(node.scrollHeight)));
-      const fontEmbedCSS = (await preloadExportAssets(rootRef.current || node)) || undefined;
-      const url = await toPng(node, { width: 1080, height: H, pixelRatio: 1.5, cacheBust: false, backgroundColor: '#002147', fontEmbedCSS });
+      await preloadExportAssets(rootRef.current || node);
+      const url = await toPng(node, { width: 1080, height: H, pixelRatio: 1.5, cacheBust: false, backgroundColor: '#002147', fontEmbedCSS: '' });
       console.debug(`[report export] ${Math.round(performance.now() - t0)}ms`);
       const fileName = `تقرير-${who.name}-${new Date().toISOString().slice(0, 10)}.png`;
       const blob = await (await fetch(url)).blob();

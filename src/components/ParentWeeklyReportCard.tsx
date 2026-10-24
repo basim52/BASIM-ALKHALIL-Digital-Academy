@@ -383,7 +383,8 @@ export const ParentWeeklyReportCard: React.FC<ParentWeeklyReportCardProps> = ({
       const dataUrl = await toPng(reportRef.current, {
         quality: 0.98,
         pixelRatio: 2,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        fontEmbedCSS: ''
       });
 
       const pdf = new jsPDF({
