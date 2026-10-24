@@ -85,6 +85,22 @@ const SaraContinueView = lazy(() => import('./lib/saraContinue').then(m => ({ de
 } })));
 const SaraSkillsChart = lazy(() => import('./components/SaraSkillsChart').then(m => ({ default: m.SaraSkillsChart })));
 const SaraTools = lazy(() => import('./components/SaraTools').then(m => ({ default: m.SaraTools })));
+// Onboarding / guidance (welcome questions → placement → «مسارك جاهز»), all lazy; the gate check itself is tiny.
+const OnboardingFlow = lazy(() => import('./components/onboarding/OnboardingFlow').then(m => ({ default: m.OnboardingFlow })));
+const TodayPathCard = lazy(() => import('./components/onboarding/PathHome').then(m => ({ default: m.TodayPathCard })));
+const PathLessonView = lazy(() => import('./components/onboarding/PathViews').then(m => ({ default: m.PathLessonView })));
+const PathCheckView = lazy(() => import('./components/onboarding/PathViews').then(m => ({ default: m.PathCheckView })));
+import { shouldGateOnboarding, readLocalOnboarding } from './lib/onboardingGate';
+const ONBOARDING_FULLSCREEN: AppView[] = ['onboarding', 'onboarding-preview', 'path-lesson', 'path-check'];
+/** Admin-only (MASTER_ADMINS): run the whole onboarding in preview mode; nothing is saved unless «احفظه كمساري». */
+const OnboardingPreviewButton = ({ email, isRtl, onNavigate }: { email?: string | null; isRtl: boolean; onNavigate?: (v: AppView) => void }) =>
+  onNavigate && MASTER_ADMINS.includes((email || '').toLowerCase()) ? (
+    <button onClick={() => onNavigate('onboarding-preview')} data-testid="admin-onboarding-preview" dir={isRtl ? 'rtl' : 'ltr'}
+      className="w-full flex items-center gap-3 rounded-2xl border-2 border-dashed border-[#C49E3A] bg-[#002147] text-[#E6C36A] px-4 py-3 text-start font-black text-sm active:scale-[0.99]">
+      <span className="text-xl" aria-hidden>🧭</span>
+      <span className="flex-1">{isRtl ? 'جرّب نظام التوجيه' : 'Try the onboarding flow'}<span className="block text-[11px] font-bold text-white/70">{isRtl ? 'للأدمن فقط — تجربة كاملة بدون ما يتغير مسارك أو تقدمك' : 'Admin only — full run, your path and progress stay untouched'}</span></span>
+    </button>
+  ) : null;
 import { auth, googleProvider, db, handleFirestoreError, OperationType, testConnection, redeemVoucherTransaction } from './lib/firebase';
 import firebaseConfig from '../firebase-applet-config.json';
 import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
@@ -1672,6 +1688,12 @@ const StudentHome = ({
   return (
     <div className={`flex-1 p-3.5 sm:p-6 md:p-10 lg:p-12 overflow-y-auto ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#F7F7F7]`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
+
+        {/* «ابدأ درس اليوم» (student's path) or the small «حدّد مسارك» banner */}
+        <Suspense fallback={null}>
+          <TodayPathCard uid={profile.uid} profile={profile} onSetPath={() => onNavigate('onboarding')} onOpenLesson={() => onNavigate('path-lesson')} onOpenCheck={() => onNavigate('path-check')} />
+        </Suspense>
+        <OnboardingPreviewButton email={profile.email} isRtl={isRtl} onNavigate={onNavigate} />
 
         {/* IN-APP DAILY BANNER REMINDER */}
         {shouldShowDailyReminderBanner && (
@@ -3379,6 +3401,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
   if (linkedStudents.length === 0 || showAddStudent) {
     return (
       <div className={`p-4 sm:p-8 max-w-3xl mx-auto w-full ${isRtl ? 'font-arabic' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="mb-4"><OnboardingPreviewButton email={profile.email} isRtl={isRtl} onNavigate={onNavigate} /></div>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -4152,6 +4175,7 @@ Keep the tone encouraging, intellectual, and professional. Use markdown formatti
 
   return (
     <div className={`p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 ${isRtl ? 'font-arabic' : 'font-sans'} bg-[#f8fafc]`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <OnboardingPreviewButton email={profile.email} isRtl={isRtl} onNavigate={onNavigate} />
       {/* 📊 FRIDAY WEEKLY REPORT BANNER */}
       {isFriday && showFridayBanner && (
         <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-5 text-white shadow-xl shadow-orange-900/10 border-2 border-amber-300/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in relative overflow-hidden">
@@ -5087,6 +5111,19 @@ export default function AuthenticatedApp({
     }
   }, [propUser]);
   const [view, setView] = useState<AppView>(initialView || 'dashboard');
+  // Onboarding: unsaved preview record (admin) and an explicit lesson to reopen (review after a path check).
+  const [pathPreviewRec, setPathPreviewRec] = useState<any>(null);
+  const [pathAt, setPathAt] = useState<any>(null);
+  const onboardingGated = useRef(false);
+  useEffect(() => {
+    if (!userProfile || onboardingGated.current) return;
+    onboardingGated.current = true;
+    const email = (userProfile.email || currentUser?.email || '').toLowerCase();
+    let q = ''; try { q = new URLSearchParams(window.location.search).get('onboarding') || ''; } catch { /* ignore */ }
+    if (q === 'preview' && MASTER_ADMINS.includes(email)) { setView('onboarding-preview'); return; }
+    // First sign-in of a NEW student only (existing students just see «حدّد مسارك» on home).
+    if (shouldGateOnboarding(currentUser?.uid, userProfile)) setView('onboarding');
+  }, [userProfile]); // eslint-disable-line react-hooks/exhaustive-deps
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isTabletSidebarExpanded, setIsTabletSidebarExpanded] = useState<boolean>(false);
@@ -6879,6 +6916,29 @@ export default function AuthenticatedApp({
         />
       );
     }
+    if ((view === 'onboarding' || view === 'onboarding-preview') && userProfile) {
+      const preview = view === 'onboarding-preview';
+      return (
+        <OnboardingFlow uid={currentUser.uid} profile={userProfile} preview={preview}
+          onLater={() => setView('dashboard')}
+          onClose={() => setView('dashboard')}
+          onSaved={(rec) => setUserProfile({ ...(userProfile as any), onboarding: rec } as any)}
+          onStartLesson={(rec, unsaved) => { setPathAt(null); setPathPreviewRec(unsaved ? rec : null); setView('path-lesson'); }} />
+      );
+    }
+    if (view === 'path-lesson' && userProfile) {
+      const rec = pathPreviewRec || (userProfile as any).onboarding || readLocalOnboarding(currentUser.uid);
+      if (!rec) { setTimeout(() => setView('onboarding'), 0); return null; }
+      return <PathLessonView uid={currentUser.uid} profile={userProfile} rec={rec} preview={!!pathPreviewRec} at={pathAt}
+        onBack={() => { const wasPreview = !!pathPreviewRec; setPathAt(null); setPathPreviewRec(null); setView(wasPreview ? 'onboarding-preview' : 'dashboard'); }} />;
+    }
+    if (view === 'path-check' && userProfile) {
+      const rec = readLocalOnboarding(currentUser.uid) || (userProfile as any).onboarding;
+      if (!rec) { setTimeout(() => setView('dashboard'), 0); return null; }
+      return <PathCheckView uid={currentUser.uid} profile={userProfile} rec={rec} onBack={() => setView('dashboard')}
+        onUpdated={(r) => setUserProfile({ ...(userProfile as any), onboarding: r } as any)}
+        onReview={(step, order) => { setPathPreviewRec(null); setPathAt({ step, order }); setView('path-lesson'); }} />;
+    }
     if (view === 'sara-continue') {
       return <SaraContinueView uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;
     }
@@ -7049,6 +7109,14 @@ export default function AuthenticatedApp({
       const targetLevel = isParentOrAdmin && activeStudentProfile ? (activeStudentProfile.level || 'A1') : (userProfile.level || 'A1');
 
       return (
+        <>
+        {!isParentOrAdmin && (
+          <div className="max-w-3xl mx-auto px-4 pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
+            <button onClick={() => setView('onboarding')} data-testid="profile-change-goal" className="w-full flex items-center gap-2 rounded-2xl border-2 border-[#C49E3A] bg-[#fdfaf3] px-4 py-2.5 text-[#002147] font-black text-sm">
+              <span aria-hidden>🧭</span><span className="flex-1 text-start">{isRtl ? 'غيّر هدفك' : 'Change your goal'}</span><span className="text-[11px] text-slate-500">{isRtl ? 'أعد أسئلة التوجيه واختبار المستوى' : 'Redo the welcome questions and placement'}</span>
+            </button>
+          </div>
+        )}
         <StudentStats 
           lang={lang} 
           userId={targetUserId} 
@@ -7056,6 +7124,7 @@ export default function AuthenticatedApp({
           level={targetLevel}
           onNavigateToAdaptive={() => setView('adaptive-learning-path')}
         />
+        </>
       );
     }
     
@@ -7110,7 +7179,7 @@ export default function AuthenticatedApp({
           className={`flex min-h-screen bg-[#f8fafc] ${isRtl ? 'flex-row' : 'flex-row-reverse'}`}
         >
           {/* Navigation - Responsive Strategy */}
-          {view !== 'placement-test' && view !== 'sara-tutor' && view !== 'real-time-voice-call' && (
+          {view !== 'placement-test' && view !== 'sara-tutor' && view !== 'real-time-voice-call' && !ONBOARDING_FULLSCREEN.includes(view) && (
             <>
               {/* Mobile Top Header */}
               <header className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-100 z-50 px-4 py-2.5 flex justify-between items-center shadow-sm">
@@ -7695,17 +7764,17 @@ export default function AuthenticatedApp({
           )}
 
           <main className={`flex-1 min-w-0 w-full overflow-x-hidden transition-all ${
-            view === 'placement-test' || view === 'sara-tutor' || view === 'real-time-voice-call'
+            view === 'placement-test' || view === 'sara-tutor' || view === 'real-time-voice-call' || ONBOARDING_FULLSCREEN.includes(view)
               ? ''
               : view === 'ai-chat'
               ? (isRtl ? 'md:mr-20 lg:mr-64 pt-14 md:pt-20 lg:pt-0' : 'md:ml-20 lg:ml-64 pt-14 md:pt-20 lg:pt-0')
               : (isRtl ? 'md:mr-20 lg:mr-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12' : 'md:ml-20 lg:ml-64 mb-24 md:mb-6 pt-16 md:pt-20 lg:pt-4 pb-28 md:pb-12')
           }`}>
             <Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center"><div className="w-10 h-10 rounded-full border-4 border-[#C49E3A] border-t-transparent animate-spin" aria-label="loading" /></div>}>
-              {!['dashboard', 'sara-tutor', 'placement-test', 'real-time-voice-call', 'ai-chat'].includes(view) && (
+              {!['dashboard', 'sara-tutor', 'placement-test', 'real-time-voice-call', 'ai-chat', ...ONBOARDING_FULLSCREEN].includes(view) && (
                 <AcademySectionBar view={view} isRtl={isRtl} onHome={() => { cancelAllSpeech(); setView('dashboard'); }} />
               )}
-              <div className={!['dashboard', 'sara-tutor', 'placement-test', 'real-time-voice-call', 'ai-chat'].includes(view) ? 'academy-section contents' : 'contents'}>
+              <div className={!['dashboard', 'sara-tutor', 'placement-test', 'real-time-voice-call', 'ai-chat', ...ONBOARDING_FULLSCREEN].includes(view) ? 'academy-section contents' : 'contents'}>
                 {renderContent()}
               </div>
             </Suspense>

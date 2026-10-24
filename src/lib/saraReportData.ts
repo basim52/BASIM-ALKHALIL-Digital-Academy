@@ -28,6 +28,8 @@ export interface SaraReport {
   calls: { n: number; week: number; minutes: number; words: number; last: number };
   tests: { n: number; passed: number; best: { name: string; score: number } | null; last: { name: string; score: number; at: number } | null };
   exams: { sets: number; correct: number; total: number };
+  /** Onboarding path (users/{uid}.onboarding) — null when the student has not set one. */
+  path: { titleAr: string; titleEn: string; level: string | null; minutes: number; checks: number } | null;
   words: number;
   hasAny: boolean;
 }
@@ -45,11 +47,14 @@ export async function loadSaraReport(uid: string): Promise<SaraReport | null> {
     getDoc(doc(db, 'tutorMemory', uid)).then(d => (d.data() || {}) as any).catch(() => ({} as any)),
   ]);
   const sp = (u.saraTrackProgress || {}) as Record<string, number>, tp = (u.tutorTrackProgress || {}) as Record<string, number>;
+  // Lessons unlocked by placement / level-up jumps were not studied: never count them as passed.
+  const skip = ((u.onboarding && u.onboarding.skipped) || {}) as Record<string, number>;
+  const real = (id: string, n: number) => Math.max(0, n - (Number(skip[id]) || 0));
   const sara = SARA_TRACKS.map(t => {
     const lg = LEGACY_TRACK_IDS[t.id];
     let un = Number(sp[t.id]) || (lg ? migrateLegacyCount(Number(sp[lg]) || 1) : 1);
     if (own) un = Math.max(un, localUnlocked(`sara_track_${t.id}_${uid}`));
-    return { id: t.id, titleAr: t.titleAr, titleEn: t.titleEn, total: t.lessons.length, passed: Math.max(0, Math.min(t.lessons.length, un - 1)) };
+    return { id: t.id, titleAr: t.titleAr, titleEn: t.titleEn, total: t.lessons.length, passed: real(t.id, Math.max(0, Math.min(t.lessons.length, un - 1))) };
   });
   { // "Complete the sentence with Sara" (fill_blank) — same stored progress shape (unlocked order), read-only
     let un = Number(sp[FILL_BLANK_TRACK_ID]) || 1;
@@ -60,7 +65,7 @@ export async function loadSaraReport(uid: string): Promise<SaraReport | null> {
   const tutors = [...TUTOR_TRACKS, ...TUTOR_FILL_BLANK_TRACKS].map(t => {
     let un = Number(tp[t.id]) || 1;
     if (own) un = Math.max(un, localUnlocked(`tutor_track_${t.id}_${uid}`));
-    return { id: t.id, titleAr: t.titleAr, titleEn: t.titleEn, personaId: t.personaId, total: t.lessons.length, passed: Math.max(0, Math.min(t.lessons.length, un - 1)) };
+    return { id: t.id, titleAr: t.titleAr, titleEn: t.titleEn, personaId: t.personaId, total: t.lessons.length, passed: real(t.id, Math.max(0, Math.min(t.lessons.length, un - 1))) };
   });
   const since = Date.now() - 7 * DAY;
   const board: SaraReport['board'] = { n: 0, week: 0, correct: 0, total: 0, byPersona: {}, last: null };
@@ -82,5 +87,8 @@ export async function loadSaraReport(uid: string): Promise<SaraReport | null> {
   const exams = { sets: ex.length, correct: ex.reduce((s, r) => s + (Number(r?.correct) || 0), 0), total: ex.reduce((s, r) => s + (Number(r?.total) || 0), 0) };
   const words = Array.isArray(mem.wordsLearned) ? mem.wordsLearned.length : 0;
   const hasAny = sara.some(r => r.passed) || tutors.some(r => r.passed) || board.n > 0 || calls.n > 0 || tests.n > 0 || exams.sets > 0 || words > 0;
-  return { sara, tutors, lastAt: Number(u.saraTrackProgressAt) || 0, lastTrack: u.saraLastTrack || null, board, calls, tests, exams, words, hasAny };
+  const ob = u.onboarding && u.onboarding.done ? u.onboarding : null;
+  const PI: Record<string, [string, string]> = { 'from-zero': ['مسار من الصفر', 'From-zero path'], kids: ['مسار الأطفال', 'Kids path'], exams: ['مسار الاختبارات', 'Exams path'], work: ['مسار العمل', 'Work path'], sara: ['مسار سارة حسب المستوى', "Sara's level path"] };
+  const path = ob && PI[ob.path] ? { titleAr: PI[ob.path][0], titleEn: PI[ob.path][1], level: ob.placement?.level || null, minutes: Number(ob.answers?.minutes) || 0, checks: Array.isArray(ob.checkpoints) ? ob.checkpoints.length : 0 } : null;
+  return { path, sara, tutors, lastAt: Number(u.saraTrackProgressAt) || 0, lastTrack: u.saraLastTrack || null, board, calls, tests, exams, words, hasAny };
 }

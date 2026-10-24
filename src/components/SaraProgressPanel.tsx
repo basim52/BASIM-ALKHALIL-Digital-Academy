@@ -47,6 +47,14 @@ export const SaraProgressPanel: React.FC<{ uid: string; compact?: boolean; pickC
         <p className="text-[13px] font-black">{L('👩‍💼 تقدم سارة وفصل المعلمين', "👩‍💼 Sara & Teachers' Class progress")}</p>
         <span className="text-[10px] font-bold text-white/60">{L('بيانات حقيقية محفوظة فقط', 'Real saved data only')}</span>
       </div>
+      {d.path && (
+        <p data-testid="report-path" className="mb-2 rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 px-3 py-2 text-[12px] font-bold text-white/85">
+          🧭 {L('المسار', 'Path')}: <span style={{ color: GOLD }}>{L(d.path.titleAr, d.path.titleEn)}</span>
+          {d.path.level ? ` · ${L('المستوى من اختبار التحديد', 'Placement level')}: ${d.path.level}` : ''}
+          {d.path.minutes ? ` · ${L(`${d.path.minutes} دقيقة يومياً`, `${d.path.minutes} min/day`)}` : ''}
+          {d.path.checks ? ` · ${L(`مراجعات المسار ${d.path.checks}`, `Path checks ${d.path.checks}`)}` : ''}
+        </p>
+      )}
       {!d.hasAny ? <p className="text-[12px] font-bold text-white/70">{L('ما فيه نشاط محفوظ مع سارة أو المعلمين للحين.', 'No saved activity with Sara or the teachers yet.')}</p> : <>
         <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} gap-2`}>
           <Tile label={L('دروس سارة المجتازة', "Sara lessons passed")} value={String(d.sara.reduce((s, r) => s + r.passed, 0))} note={d.lastAt ? L(`آخر تقدم ${date(d.lastAt)}`, `Last progress ${date(d.lastAt)}`) : undefined} />
