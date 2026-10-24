@@ -503,6 +503,35 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
   const [showMobileToolsDrawer, setShowMobileToolsDrawer] = useState<boolean>(false);
   const [mobileTab, setMobileTab] = useState<'chat' | 'board' | 'curriculum' | 'scenarios' | 'lab'>('chat');
+  // 💬 The chat lives on its own full-screen view. Browser/phone back closes it (one history entry while open).
+  const [chatViewOpen, setChatViewOpen] = useState<boolean>(false);
+  const chatHistoryPushedRef = useRef(false);
+  const openChatView = useCallback(() => {
+    setChatViewOpen(true);
+    if (!chatHistoryPushedRef.current && typeof window !== 'undefined') {
+      try { window.history.pushState({ ...(window.history.state || {}), saraChat: true }, ''); chatHistoryPushedRef.current = true; } catch (e) {}
+    }
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ block: 'end' }), 60);
+  }, []);
+  const closeChatView = useCallback(() => {
+    if (chatHistoryPushedRef.current) { try { window.history.back(); return; } catch (e) {} }
+    setChatViewOpen(false);
+  }, []);
+  useEffect(() => {
+    const onPop = () => { if (chatHistoryPushedRef.current) { chatHistoryPushedRef.current = false; setChatViewOpen(false); } };
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      // Leaving Sara's page with the chat open: drop our history entry so the app's back stays correct.
+      if (chatHistoryPushedRef.current) { chatHistoryPushedRef.current = false; try { window.history.back(); } catch (e) {} }
+    };
+  }, []);
+  // Lock page scroll behind the full-screen chat.
+  useEffect(() => {
+    if (!chatViewOpen) return;
+    const prev = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [chatViewOpen]);
   const [isMobileActivityCapsuleExpanded, setIsMobileActivityCapsuleExpanded] = useState<boolean>(false);
   const SARA_STORAGE_KEY = (uid?: string) => `sara_chat_history_${uid || 'guest'}`;
 
@@ -523,6 +552,18 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const hasTriggeredTimeUpRef = useRef<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Anything that talks to Sara from the main page (suggested questions, tools, triggers) opens the chat view:
+  // open on any NEW message added after the page settled (old history / the greeting don't count).
+  const chatMountedAtRef = useRef<number>(Date.now());
+  const lastMsgCountRef = useRef<number>(0);
+  useEffect(() => {
+    const n = messages.length; const prevN = lastMsgCountRef.current; lastMsgCountRef.current = n;
+    if (n <= prevN || chatViewOpen) return;
+    const last = messages[n - 1] as any;
+    const ts = Number(last?.timestamp) || 0;
+    if (Date.now() - chatMountedAtRef.current < 2500 || ts < chatMountedAtRef.current + 2500) return;
+    openChatView();
+  }, [messages, chatViewOpen, openChatView]);
   const recognitionRef = useRef<any>(null);
   const currentSpeechControlRef = useRef<{ stop: () => void } | null>(null);
   const hasInitializedWelcomeRef = useRef<boolean>(false);
@@ -548,37 +589,59 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
   const [saraTool, setSaraTool] = useState<SaraToolId | null>(null);
   const BOARD_TEACHERS: [string, string, string][] = [['sara', 'سارة', 'Sara'], ['grammar', 'نورة', 'Noura'], ['business', 'محمد', 'Mohammed'], ['exams', 'علي', 'Ali'], ['lama', 'لمى', 'Lama'], ['reem', 'ريم', 'Reem'], ['haya', 'هيا', 'Haya'], ['jana', 'جنى', 'Jana']];
-  /** 🧑‍🏫 فصل المعلمين — long navy & gold banner: fills the empty space under the سارة / التدريب rows (desktop, inside the wrapped toolbar) or sits full-width under the toolbar (phone/tablet). */
-  const renderTeachersBanner = (where: 'desk' | 'mob') => (
+  /** 🧑‍🏫 فصل المعلمين — the first thing on Sara's page: a full-width navy & gold hero with all 8 teacher portraits. */
+  const renderTeachersBanner = () => (
           <button
             type="button"
             onClick={() => setSaraTool('board')}
-            data-testid={where === 'desk' ? 'sara-board-tool-desk' : 'sara-board-tool'}
+            data-testid="sara-board-tool"
             aria-label={isRtl ? "فصل المعلمين" : "Teachers' Class"}
-            className={`group relative ${where === 'desk' ? 'hidden lg:block flex-1 min-w-[340px] self-stretch' : 'lg:hidden w-full basis-full order-last mt-1'} overflow-hidden rounded-2xl border border-[#C49E3A]/70 bg-gradient-to-l from-[#001a38] via-[#002147] to-[#0a2d5c] px-3 py-2.5 sm:px-4 sm:py-3 text-start shadow-md hover:shadow-lg hover:border-[#C49E3A] transition-all active:scale-[0.99] cursor-pointer`}
+            className="group relative w-full overflow-hidden rounded-3xl border border-[#C49E3A]/70 bg-gradient-to-l from-[#001a38] via-[#002147] to-[#0a2d5c] px-4 py-5 sm:px-7 sm:py-7 text-start shadow-lg hover:shadow-xl hover:border-[#C49E3A] transition-all active:scale-[0.995] cursor-pointer"
           >
-            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
-            <span aria-hidden className="pointer-events-none absolute -left-10 -top-10 w-32 h-32 rounded-full bg-[#C49E3A]/10 blur-2xl" />
-            <span className="relative flex items-center gap-3">
-              <span className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 rounded-full border-2 border-[#C49E3A] bg-[#001a38] flex items-center justify-center text-[18px] sm:text-[20px] shadow-inner">🧑‍🏫</span>
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
+            <span aria-hidden className="pointer-events-none absolute -left-16 -top-16 w-56 h-56 rounded-full bg-[#C49E3A]/10 blur-3xl" />
+            <span className="relative flex items-center gap-3 sm:gap-4">
+              <span className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl border-2 border-[#C49E3A] bg-[#001a38] flex items-center justify-center text-[22px] sm:text-[26px] shadow-inner">🧑‍🏫</span>
               <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-2">
-                  <span className="text-[15px] sm:text-[16px] font-black text-amber-300 tracking-wide whitespace-nowrap">{isRtl ? 'فصل المعلمين' : "Teachers' Class"}</span>
-                  <span className="hidden sm:inline h-px flex-1 bg-gradient-to-l from-[#C49E3A]/60 to-transparent" />
-                </span>
-                <span className="block text-[10.5px] sm:text-[11px] font-bold text-white/75 truncate">{isRtl ? 'دروس على السبورة' : 'Lessons on the board'}<span className="hidden sm:inline">{isRtl ? ' بصوت كل معلم' : " in each teacher's voice"}</span></span>
+                <span className="block text-[20px] sm:text-[26px] font-black text-[#E8C766] leading-tight">{isRtl ? 'فصل المعلمين' : "Teachers' Class"}</span>
+                <span className="block mt-1 text-[12px] sm:text-[14px] font-bold text-white/80">{isRtl ? 'دروس على السبورة بصوت كل معلم — اختر معلمك وابدأ' : "Board lessons in each teacher's own voice — pick a teacher and start"}</span>
+              </span>
+              <span className="hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-2xl bg-[#C49E3A] group-hover:bg-[#d4ae4a] text-[#002147] font-black text-[13px] px-4 py-2.5 shadow-md transition-colors">
+                {isRtl ? 'ادخل الفصل' : 'Enter class'}{isRtl ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}
               </span>
             </span>
-            {/* 8 teacher portraits: one row of equal cells, so it always fits (phone 320px → desktop) without overflow. */}
-            <span className="relative mt-2 grid grid-cols-8 gap-1 sm:gap-1.5" data-testid="sara-board-teachers">
+            {/* 8 teacher portraits: 4×2 on phone, one row of 8 from tablet up. */}
+            <span className="relative mt-5 sm:mt-6 grid grid-cols-4 md:grid-cols-8 gap-x-2 gap-y-4 sm:gap-x-3" data-testid="sara-board-teachers">
               {BOARD_TEACHERS.map(([img, a, e]) => (
-                <span key={img} className="min-w-0 flex flex-col items-center gap-0.5">
-                  <img src={`/tutors/${img}.webp`} alt="" width={36} height={36} loading="lazy" decoding="async" className="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-cover bg-[#0a2d5c] border border-[#C49E3A]/70 group-hover:border-[#C49E3A] transition-colors" />
-                  <span className="max-w-full truncate text-[9px] sm:text-[10px] font-black text-amber-200 leading-none">{isRtl ? a : e}</span>
+                <span key={img} className="min-w-0 flex flex-col items-center gap-1.5">
+                  <img src={`/tutors/${img}.webp`} alt="" width={80} height={80} loading="lazy" decoding="async" className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover bg-[#0a2d5c] border-2 border-[#C49E3A]/80 group-hover:border-[#C49E3A] shadow-md transition-colors" />
+                  <span className="max-w-full truncate text-[12px] sm:text-[13px] font-black text-amber-100 leading-none">{isRtl ? a : e}</span>
                 </span>
               ))}
             </span>
+            <span className="sm:hidden relative mt-5 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-[#C49E3A] text-[#002147] font-black text-[13px] py-2.5 shadow-md">
+              {isRtl ? 'ادخل الفصل' : 'Enter class'}{isRtl ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}
+            </span>
           </button>
+  );
+  /** 💬 «تكلّم مع سارة» — the chat now lives on its own full-screen view; this card opens it. */
+  const renderTalkToSaraCard = () => (
+          <div data-testid="sara-talk-card" className="relative overflow-hidden rounded-3xl border border-[#C49E3A]/60 bg-gradient-to-l from-[#002147] to-[#0a2d5c] px-4 py-4 sm:px-6 sm:py-5 shadow-lg">
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
+            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <img src="/tutors/sara.webp" alt="" width={64} height={64} className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 rounded-full object-cover bg-[#001a38] border-2 border-[#C49E3A] shadow-md" />
+                <div className="min-w-0">
+                  <h2 className="text-[18px] sm:text-[21px] font-black text-[#E8C766] leading-tight">{isRtl ? 'تكلّم مع سارة' : 'Talk to Sara'}</h2>
+                  <p className="mt-1 text-[12px] sm:text-[13px] font-bold text-white/80">{isRtl ? 'اسألها أي شي بالعربي أو الإنجليزي، بالكتابة أو بصوتك' : 'Ask her anything in Arabic or English, by text or voice'}</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => openChatView()} data-testid="open-sara-chat"
+                className="shrink-0 inline-flex items-center justify-center gap-2 rounded-2xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] font-black text-[14px] px-6 py-3 shadow-md transition-all active:scale-95 cursor-pointer">
+                <MessageCircle size={17} />{isRtl ? 'ابدأ المحادثة' : 'Start chatting'}
+              </button>
+            </div>
+          </div>
   );
   const [isPhoneticModalOpen, _raw_setIsPhoneticModalOpen] = useState<boolean>(false);
   // Tool icon opens the matching Sara tool page (SaraTools).
@@ -3234,517 +3297,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </button>
           </div>
 
-          {/* Sara tools: labeled sections (scrolls sideways on phone/tablet, wraps on desktop) */}
-          <nav data-testid="sara-toolbar" className="w-full basis-full order-last flex items-stretch gap-2 overflow-x-auto lg:overflow-visible lg:flex-wrap no-scrollbar pb-1 -mx-1 px-1">
-          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
-            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'سارة' : 'Sara'}</p>
-            <div className="flex items-start gap-1">
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 📚 SARA EXCLUSIVE CURRICULUMS (Circular with Glowing Badge) */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => handleOpenCurriculum('all')}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-md hover:scale-110 active:scale-95 shrink-0 ring-2 ring-amber-300/60 relative"
-                aria-label={isRtl ? 'مناهج سارة' : "Sara's Exclusive Curriculums"}
-              >
-                <span className="text-base sm:text-lg animate-bounce">📚</span>
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
-                <span>📚</span>
-                <span>{isRtl ? 'مناهج سارة 📚' : "Sara's Curriculum 📚"}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-t border-l border-amber-400/40" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'المناهج' : "Curricula"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* ✨ SMART WHITEBOARD */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => {
-                  if (isWhiteboardOpen) {
-                    setIsWhiteboardOpen(false);
-                  } else {
-                    openWhiteboardModal();
-                  }
-                }}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  isWhiteboardOpen
-                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
-                    : 'bg-gradient-to-r from-amber-50 to-amber-100/60 hover:from-amber-100 hover:to-amber-200 text-[#855B14] border-[#C49E3A]/40'
-                }`}
-                aria-label={isRtl ? 'السبورة الذكية' : 'Whiteboard'}
-              >
-                <Sparkles size={16} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : 'animate-pulse'}`} />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>✨</span>
-                <span>{isRtl ? 'السبورة الذكية التفاعلية' : 'Smart Whiteboard'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'السبورة' : "Board"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🎯 PLACEMENT TEST */}
-            <div className="relative group/btn">
-              <button
-                onClick={startPlacementTest}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  placementState.isActive
-                    ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
-                    : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
-                }`}
-                aria-label={isRtl ? 'تحديد المستوى' : 'Placement Test'}
-              >
-                <Target size={16} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🎯</span>
-                <span>{isRtl ? 'اختبار تحديد المستوى الشامل 🎯' : 'Placement Test 🎯'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تحديد المستوى' : "Placement"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 📄 PRINTABLE WORKSHEET */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsWorksheetModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 border-blue-300"
-                aria-label={isRtl ? 'ورقة عمل' : 'Worksheet'}
-              >
-                <FileText size={16} className="text-blue-600" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>📄</span>
-                <span>{isRtl ? 'توليد ورقة عمل قابلة للطباعة PDF 📄' : 'Printable Worksheet & PDF 📄'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'ورقة عمل' : "Worksheet"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button onClick={() => handleOpenCurriculum('listening')} data-testid="sara-listening-icon"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
-                aria-label={isRtl ? 'الاستماع' : 'Listening'}>
-                <Headphones size={16} />
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الاستماع' : "Listening"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button onClick={() => handleOpenCurriculum('pronunciation')} data-testid="sara-pron-icon"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
-                aria-label={isRtl ? 'النطق' : 'Pronunciation'}>
-                <Mic size={16} />
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'النطق' : "Pronunciation"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button onClick={() => handleOpenCurriculum('vocabulary')} data-testid="sara-vocab-icon"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
-                aria-label={isRtl ? 'المفردات' : 'Vocabulary'}>
-                <span className="text-[13px] font-black">Aa</span>
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'المفردات' : "Vocabulary"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button onClick={() => setIsFreeChatOpen(true)} data-testid="sara-free-icon"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
-                aria-label={isRtl ? 'محاورة حرة' : 'Free conversation'}>
-                <MessageCircle size={16} />
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'محاورة حرة' : "Free talk"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button onClick={() => handleOpenCurriculum('daily')} data-testid="sara-daily-icon"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
-                aria-label={isRtl ? 'الحياة اليومية' : 'Everyday English'}>
-                <Globe size={16} />
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الحياة اليومية' : "Daily life"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button onClick={() => setIsExamOpen(true)} data-testid="sara-exam-icon"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
-                aria-label="IELTS / STEP">
-                <span className="text-[9px] font-black">IELTS</span>
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">IELTS/STEP</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-              <button
-                onClick={() => setSaraTool('grammar')}
-                data-testid="sara-grammar-tool"
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-[#002147] text-amber-300 border-[#C49E3A]"
-                aria-label="تدقيق نحوي"
-              >
-                <span className="text-[15px]">✍️</span>
-              </button>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تدقيق نحوي' : "Grammar check"}</span>
-            </div>
-            </div>
-          </section>
-          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
-            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'التدريب' : 'Practice'}</p>
-            <div className="flex items-start gap-1">
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🎙️ LIVE VOICE MODE */}
-            <div className="relative group/btn">
-              <button
-                onClick={toggleLiveVoiceMode}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  isLiveMode
-                    ? 'bg-rose-500 border-rose-600 text-white animate-pulse ring-2 ring-rose-400/40'
-                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
-                }`}
-                aria-label={isRtl ? 'محادثة لايف' : 'Live Voice'}
-              >
-                <Radio size={16} className={isLiveMode ? 'animate-spin' : 'text-emerald-700'} />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🎙️</span>
-                <span>{isLiveMode ? (isRtl ? 'إيقاف اللايف 🔴' : 'Stop Live Mode 🔴') : (isRtl ? 'محادثة لايف صوتية مستمرة 🎙️' : 'Live Voice Mode 🎙️')}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'محادثة لايف' : "Live chat"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 📞 LIVE PHONE CALL */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsPhoneCallModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-tr from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-300 ring-2 ring-teal-400/20"
-                aria-label={isRtl ? 'اتصال بسارة' : 'Call Sara'}
-              >
-                <Phone size={16} className="text-teal-600 animate-pulse" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>📞</span>
-                <span>{isRtl ? 'مكالمة هاتفية حية مع سارة 📞' : 'Live Phone Call with Sara 📞'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'اتصال' : "Call"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🎙️ PHONETIC LAB */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => {
-                  setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Al-Khalil Digital Academy');
-                  setIsPhoneticModalOpen(true);
-                }}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
-                aria-label={isRtl ? 'مختبر النطق' : 'Speech Lab'}
-              >
-                <Mic size={16} className="text-purple-600 animate-pulse" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🎙️</span>
-                <span>{isRtl ? 'مختبر مخارج الحروف وتصحيح النطق 🎙️' : 'Phonetic Pronunciation Lab 🎙️'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'مختبر النطق' : "Pronunciation lab"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🗣️ VOICE COACH */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsVoiceCoachModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-purple-900 border-purple-300"
-                aria-label={isRtl ? 'مدرب النطق' : 'Voice Coach'}
-              >
-                <span className="text-sm">🗣️</span>
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🗣️</span>
-                <span>{isRtl ? 'مدرب النطق الصوتي الذكي 🎙️' : 'AI Speech Coach 🎙️'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'مدرب الصوت' : "Voice coach"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🎮 12Y ROLE-PLAY ADVENTURES */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsRolePlayModalOpen(true)}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  activeRolePlay
-                    ? 'bg-amber-400 text-slate-950 border-amber-500 ring-2 ring-amber-300/40'
-                    : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-[#002147] border-indigo-200'
-                }`}
-                aria-label={isRtl ? 'سيناريوهات 12 سنة' : '12Y Adventures'}
-              >
-                <span className="text-base">🎮</span>
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🎮</span>
-                <span>{isRtl ? 'سيناريوهات ومغامرات 12 سنة 🎮' : '12Y Role-Play & Adventures 🎮'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'لعب الأدوار' : "Role-play"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* ⚡ SPEED DRILLS */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsSpeedDrillModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-900 border-amber-300"
-                aria-label={isRtl ? 'تحديات السرعة' : 'Speed Drills'}
-              >
-                <Zap size={16} className="text-amber-600 animate-pulse" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>⚡</span>
-                <span>{isRtl ? 'تحديات السرعة المصغرة ضد الوقت ⚡' : 'Speed Drills & Micro-Challenges ⚡'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تحدي السرعة' : "Speed challenge"}</span>
-            </div>
-            </div>
-          </section>
-          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
-            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'التقدّم' : 'Progress'}</p>
-            <div className="flex items-start gap-1">
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🧠 SMART ADAPTIVE MEMORY */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsAdaptiveMemoryModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-900 border-indigo-300 relative"
-                aria-label={isRtl ? 'ذاكرة سارة' : 'Memory'}
-              >
-                <Brain size={16} className="text-indigo-600 animate-pulse" />
-                {((tutorMemory.strengths?.length || 0) + (tutorMemory.masteredTopics?.length || 0)) > 0 && (
-                  <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
-                    {(tutorMemory.strengths?.length || 0) + (tutorMemory.masteredTopics?.length || 0)}
-                  </span>
-                )}
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🧠</span>
-                <span>{isRtl ? 'ذاكرة سارة وملف التعلم المعرفي 🧠' : "Sara's Smart Memory & Profile 🧠"}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الذاكرة' : "Memory"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🏆 ACHIEVEMENTS & QUESTS */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsAchievementsModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-900 border-amber-300"
-                aria-label={isRtl ? 'الإنجازات' : 'Achievements'}
-              >
-                <Trophy size={16} className="text-amber-600" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🏆</span>
-                <span>{isRtl ? 'الأوسمة والمهام اليومية وجوائز الإتقان 🏆' : 'Achievements & Daily Quests 🏆'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الإنجازات' : "Achievements"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 📊 PARENT INSIGHTS */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsParentInsightsModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-900 border-emerald-300"
-                aria-label={isRtl ? 'تقرير ولي الأمر' : 'Parent Report'}
-              >
-                <Award size={16} className="text-emerald-600" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>📊</span>
-                <span>{isRtl ? 'تحليلات ورؤى أولياء الأمور 📊' : 'Parent & Mentor Insights 📊'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تقرير ولي الأمر' : "Parent report"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 📓 ERROR NOTEBOOK */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsNotebookModalOpen(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300 relative"
-                aria-label={isRtl ? 'دفتر الأخطاء' : 'Notebook'}
-              >
-                <BookMarked size={16} className="text-[#C49E3A]" />
-                {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
-                  <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
-                    {tutorMemory.frequentMistakes.length}
-                  </span>
-                )}
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>📓</span>
-                <span>{isRtl ? 'دفتر الملاحظات والأخطاء الشخصي وبنك المفردات 📓' : 'My Error Notebook & Word Bank 📓'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'دفتر الأخطاء' : "Mistakes notebook"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🔥 STREAK */}
-            <div className="relative group/btn">
-              <div className="h-9 sm:h-10 px-2.5 rounded-full border-2 border-orange-200 bg-orange-50 text-[#ff9600] font-black text-xs flex items-center justify-center gap-1 shadow-xs cursor-default">
-                <Flame size={15} className="animate-bounce-slow text-orange-500" />
-                <span>{streak.current}</span>
-              </div>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🔥</span>
-                <span>{isRtl ? `سلسلة الأيام المستمرة (${streak.current} يوم) 🔥` : `Daily Streak (${streak.current} days) 🔥`}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'السلسلة' : "Streak"}</span>
-            </div>
-            </div>
-          </section>
-          <section className="shrink-0 rounded-2xl bg-slate-50 border border-slate-200 px-2 pt-1.5 pb-1">
-            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'الأدوات' : 'Tools'}</p>
-            <div className="flex items-start gap-1">
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 👩‍🏫 SARA 3D CHARACTER */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setIsSara3DOpen(!isSara3DOpen)}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  isSara3DOpen
-                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
-                }`}
-                aria-label={isRtl ? 'سارة 3D' : 'Sara 3D'}
-              >
-                <span className="text-base">👩‍🏫</span>
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>👩‍🏫</span>
-                <span>{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة (اضغط للإخفاء) ✨' : 'عرض سارة 3D 👩‍🏫') : 'Toggle 3D Sara'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'سارة 3D' : "Sara 3D"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* ⚡ SPEECH SPEED */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => {
-                  const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
-                  setSaraSpeechRate(nextRate);
-                }}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-                aria-label="Speech Speed"
-              >
-                <span className="text-xs font-black">{saraSpeechRate === 0.8 ? '🐢' : saraSpeechRate === 1.2 ? '🚀' : '⚡'}</span>
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>⚡</span>
-                <span>{isRtl ? `سرعة صوت سارة: ${saraSpeechRate}x (اضغط للتغيير) ⚡` : `Speech Speed: ${saraSpeechRate}x ⚡`}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'سرعة الصوت' : "Voice speed"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 📦 ARCHIVE CURRENT SESSION */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => setShowArchiveConfirm(true)}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300"
-                aria-label={isRtl ? 'أرشف الجلسة' : 'Archive Session'}
-              >
-                <Archive size={16} className="text-amber-700" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>📦</span>
-                <span>{isRtl ? 'أرشف الجلسة الحالية وبدء محادثة جديدة 📦' : 'Archive Session & Start Fresh 📦'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'أرشفة' : "Archive"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🗂️ SESSIONS ARCHIVE */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => {
-                  fetchArchivedSessions();
-                  setIsArchiveModalOpen(true);
-                }}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300"
-                aria-label={isRtl ? 'الأرشيف' : 'Archive'}
-              >
-                <History size={16} className="text-slate-500" />
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🗂️</span>
-                <span>{isRtl ? 'استعراض واسترجاع أرشيف الجلسات 🗂️' : 'Sessions Archive 🗂️'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الأرشيف' : "Archive list"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🌐 BILINGUAL SWITCHER */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => handleToggleLanguage()}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-100 hover:bg-slate-200 border-slate-200 text-[#002147] font-black text-xs"
-                aria-label="Language Toggle"
-              >
-                <span className="text-sm">{activeLang === 'ar' ? '🇸🇦' : '🇬🇧'}</span>
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>🌐</span>
-                <span>{activeLang === 'ar' ? 'التبديل إلى English (المحادثة الإنجليزية بالكامل) 🇬🇧' : 'Switch to Arabic Explanation 🇸🇦'}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'اللغة' : "Language"}</span>
-            </div>
-            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
-            {/* 🔊 VOICE TOGGLE */}
-            <div className="relative group/btn">
-              <button
-                onClick={() => {
-                  if (isSpeaking) cancelAllSpeech();
-                  setVoiceEnabled(!voiceEnabled);
-                }}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
-                  voiceEnabled
-                    ? 'bg-blue-50 text-[#002147] border-blue-200'
-                    : 'bg-slate-100 text-slate-400 border-slate-200'
-                }`}
-                aria-label="Toggle Voice"
-              >
-                {voiceEnabled ? <Volume2 size={16} className="text-[#C49E3A]" /> : <VolumeX size={16} />}
-              </button>
-              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
-                <span>{voiceEnabled ? '🔊' : '🔇'}</span>
-                <span>{voiceEnabled ? (isRtl ? 'صوت سارة مفعّل (اضغط للكتم) 🔊' : 'Voice Enabled 🔊') : (isRtl ? 'صوت سارة مكتوم (اضغط للتشغيل) 🔇' : 'Voice Muted 🔇')}</span>
-                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
-              </div>
-            </div>
-              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الصوت' : "Sound"}</span>
-            </div>
-            </div>
-          </section>
-          {renderTeachersBanner('desk')}
-          </nav>
-          {renderTeachersBanner('mob')}
         </div>
 
         {/* Mobile Redesigned 5-Segment Tab Bar (md:hidden) */}
@@ -3762,8 +3314,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <span>💬</span>
-              <span className="text-[11px]">{isRtl ? 'المحادثة' : 'Chat'}</span>
+              <span>🏠</span>
+              <span className="text-[11px]">{isRtl ? 'سارة' : 'Sara'}</span>
             </button>
 
             {/* 2. Whiteboard Tab */}
@@ -3846,7 +3398,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       {/* ======================================================== */}
       {/* 2. MAIN CONTENT AREA (BOARD + CHAT) */}
       {/* ======================================================== */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4 overflow-hidden">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-3 py-4 sm:px-5 sm:py-6 flex flex-col gap-5 overflow-hidden">
+        <div className={mobileTab === 'chat' ? 'block' : 'hidden md:block'}>{renderTeachersBanner()}</div>
+
         
         {/* 🧭 TOP: the single «ابدأ درس اليوم» card from the saved path + this week's table (only when a path plan exists). */}
         {pathPlanSaved && (
@@ -3858,6 +3412,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </React.Suspense>
           </div>
         )}
+        <div className={mobileTab === 'chat' ? 'block' : 'hidden md:block'}>{renderTalkToSaraCard()}</div>
+
         {/* ======================================================== */}
         {/* 2A-000. ACTIVE ACADEMIC STUDY PLAN BANNER (HUD) */}
         {/* ======================================================== */}
@@ -4134,40 +3690,523 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         </div>
         )}
 
-        {/* ======================================================== */}
-        {/* SARA'S 4 CORE PILLARS — one tidy row of equal chips (desktop / tablet) */}
-        {/* ======================================================== */}
-        <div data-testid="sara-tracks-row" className="hidden md:block bg-white border border-[#C49E3A]/40 rounded-2xl px-3 py-2.5 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-6 h-6 rounded-lg bg-[#002147] text-[#C49E3A] flex items-center justify-center text-[13px] shrink-0">📚</span>
-            <h3 className="text-[12.5px] font-black text-[#002147] truncate">{isRtl ? 'مناهج سارة التخصصية المستقلة' : "Sara's Independent Curriculums"}</h3>
-            <p className="text-[10.5px] text-slate-500 font-semibold truncate hidden lg:block">
-              {isRtl ? 'اختر أي مسار تخصصي لتبدأ سارة بشرحه بالصوت والكتابة على السبورة الذكية 👩‍🏫' : 'Choose a track for Sara to teach on the smart whiteboard with voice 👩‍🏫'}
-            </p>
-          </div>
-          <div className={`grid gap-1.5 ${(pathPlanSaved || activeStudyPlan) ? 'grid-cols-5' : 'grid-cols-3'}`}>
-            <button onClick={() => handleOpenCurriculum('grammar')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج القواعد التحدثية السريعة' : 'Spoken Grammar & Fast Patterns'}>
-              <span>🧠</span><span className="truncate">{isRtl ? 'القواعد التحدثية' : 'Spoken Grammar'}</span>
-            </button>
-            <button onClick={() => handleOpenCurriculum('conversation')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج المحادثة والطلاقة التفاعلية' : 'Active Conversation & Fluency'}>
-              <span>💬</span><span className="truncate">{isRtl ? 'المحادثة والطلاقة' : 'Active Fluency'}</span>
-            </button>
-            <button onClick={() => handleOpenCurriculum('reading')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج القراءة التعبيرية والنطق الصوتي' : 'Expressive Reading & Phonetics'}>
-              <span>📖</span><span className="truncate">{isRtl ? 'القراءة والنطق' : 'Reading & Phonetics'}</span>
-            </button>
-            <button onClick={() => handleOpenCurriculum('writing')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج الكتابة التعبيرية الحوارية' : 'Conversational Writing'}>
-              <span>✍️</span><span className="truncate">{isRtl ? 'الكتابة التعبيرية' : 'Writing'}</span>
-            </button>
-            <button onClick={() => handleOpenCurriculum('all')} className="h-9 px-2 rounded-xl bg-[#002147] hover:bg-[#0a2d5c] text-[#E8C766] border border-[#C49E3A]/60 font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'استعراض كافة مناهج سارة التخصصية' : "Browse all Sara's curricula"}>
-              <span>🌐</span><span className="truncate">{isRtl ? 'كل مناهج سارة ➔' : 'All Curriculums ➔'}</span>
-            </button>
-            {!(pathPlanSaved || activeStudyPlan) && (
-              <button onClick={() => setIsSmartPlanGeneratorOpen(true)} className="h-9 px-2 rounded-xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'توليد خطة دراسية ذكية مع سارة' : 'Generate Smart Study Plan with Sara'}>
-                <Sparkles size={13} /><span className="truncate">{isRtl ? 'توليد خطة ذكية ⚡' : 'Smart Plan ⚡'}</span>
+        {/* 🧰 Sara's tools — moved out of the header into one titled card under the page's main cards. */}
+        <section data-testid="sara-tools-card" className={`bg-white border border-slate-200 rounded-3xl shadow-sm px-3 py-4 sm:px-5 sm:py-5 ${mobileTab === 'chat' ? 'block' : 'hidden md:block'}`}>
+          <h2 className="flex items-center gap-2 text-[15px] sm:text-[17px] font-black text-[#002147] mb-3 px-1">
+            <span className="w-1.5 h-5 rounded-full bg-[#C49E3A]" />{isRtl ? 'أدوات سارة' : "Sara's tools"}
+          </h2>
+          {/* Sara tools: labeled sections (scrolls sideways on phone/tablet, wraps on desktop) */}
+          <nav data-testid="sara-toolbar" className="flex items-stretch gap-2.5 overflow-x-auto md:overflow-visible md:flex-wrap no-scrollbar pb-1">
+          <section className="shrink-0 md:flex-auto rounded-2xl bg-slate-50 border border-slate-200 px-2.5 pt-2 pb-1.5">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'سارة' : 'Sara'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 📚 SARA EXCLUSIVE CURRICULUMS (Circular with Glowing Badge) */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => handleOpenCurriculum('all')}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-amber-400 bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 flex items-center justify-center transition-all cursor-pointer shadow-md hover:scale-110 active:scale-95 shrink-0 ring-2 ring-amber-300/60 relative"
+                aria-label={isRtl ? 'مناهج سارة' : "Sara's Exclusive Curriculums"}
+              >
+                <span className="text-base sm:text-lg animate-bounce">📚</span>
               </button>
-            )}
-          </div>
-        </div>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-950/95 backdrop-blur-md text-amber-300 text-xs font-black shadow-xl border border-amber-400/40 flex items-center gap-1.5">
+                <span>📚</span>
+                <span>{isRtl ? 'مناهج سارة 📚' : "Sara's Curriculum 📚"}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-950 rotate-45 border-t border-l border-amber-400/40" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'المناهج' : "Curricula"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* ✨ SMART WHITEBOARD */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  if (isWhiteboardOpen) {
+                    setIsWhiteboardOpen(false);
+                  } else {
+                    openWhiteboardModal();
+                  }
+                }}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  isWhiteboardOpen
+                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
+                    : 'bg-gradient-to-r from-amber-50 to-amber-100/60 hover:from-amber-100 hover:to-amber-200 text-[#855B14] border-[#C49E3A]/40'
+                }`}
+                aria-label={isRtl ? 'السبورة الذكية' : 'Whiteboard'}
+              >
+                <Sparkles size={16} className={`text-[#C49E3A] ${isWhiteboardOpen ? 'animate-spin' : 'animate-pulse'}`} />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>✨</span>
+                <span>{isRtl ? 'السبورة الذكية التفاعلية' : 'Smart Whiteboard'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'السبورة' : "Board"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🎯 PLACEMENT TEST */}
+            <div className="relative group/btn">
+              <button
+                onClick={startPlacementTest}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  placementState.isActive
+                    ? 'bg-[#002147] text-amber-300 border-amber-400 ring-2 ring-amber-300/40 animate-pulse'
+                    : 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-[#002147] border-blue-300'
+                }`}
+                aria-label={isRtl ? 'تحديد المستوى' : 'Placement Test'}
+              >
+                <Target size={16} className={placementState.isActive ? 'text-amber-300' : 'text-blue-600'} />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎯</span>
+                <span>{isRtl ? 'اختبار تحديد المستوى الشامل 🎯' : 'Placement Test 🎯'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تحديد المستوى' : "Placement"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 📄 PRINTABLE WORKSHEET */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsWorksheetModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-900 border-blue-300"
+                aria-label={isRtl ? 'ورقة عمل' : 'Worksheet'}
+              >
+                <FileText size={16} className="text-blue-600" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📄</span>
+                <span>{isRtl ? 'توليد ورقة عمل قابلة للطباعة PDF 📄' : 'Printable Worksheet & PDF 📄'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'ورقة عمل' : "Worksheet"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => handleOpenCurriculum('listening')} data-testid="sara-listening-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'الاستماع' : 'Listening'}>
+                <Headphones size={16} />
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الاستماع' : "Listening"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => handleOpenCurriculum('pronunciation')} data-testid="sara-pron-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'النطق' : 'Pronunciation'}>
+                <Mic size={16} />
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'النطق' : "Pronunciation"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => handleOpenCurriculum('vocabulary')} data-testid="sara-vocab-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'المفردات' : 'Vocabulary'}>
+                <span className="text-[13px] font-black">Aa</span>
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'المفردات' : "Vocabulary"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => setIsFreeChatOpen(true)} data-testid="sara-free-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'محاورة حرة' : 'Free conversation'}>
+                <MessageCircle size={16} />
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'محاورة حرة' : "Free talk"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => handleOpenCurriculum('daily')} data-testid="sara-daily-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label={isRtl ? 'الحياة اليومية' : 'Everyday English'}>
+                <Globe size={16} />
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الحياة اليومية' : "Daily life"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button onClick={() => setIsExamOpen(true)} data-testid="sara-exam-icon"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#C49E3A] bg-[#002147] text-amber-300 flex items-center justify-center shadow-xs hover:scale-105 active:scale-95 shrink-0"
+                aria-label="IELTS / STEP">
+                <span className="text-[9px] font-black">IELTS</span>
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">IELTS/STEP</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+              <button
+                onClick={() => setSaraTool('grammar')}
+                data-testid="sara-grammar-tool"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-[#002147] text-amber-300 border-[#C49E3A]"
+                aria-label="تدقيق نحوي"
+              >
+                <span className="text-[15px]">✍️</span>
+              </button>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تدقيق نحوي' : "Grammar check"}</span>
+            </div>
+            </div>
+          </section>
+          <section className="shrink-0 md:flex-auto rounded-2xl bg-slate-50 border border-slate-200 px-2.5 pt-2 pb-1.5">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'التدريب' : 'Practice'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🎙️ LIVE VOICE MODE */}
+            <div className="relative group/btn">
+              <button
+                onClick={toggleLiveVoiceMode}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  isLiveMode
+                    ? 'bg-rose-500 border-rose-600 text-white animate-pulse ring-2 ring-rose-400/40'
+                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                }`}
+                aria-label={isRtl ? 'محادثة لايف' : 'Live Voice'}
+              >
+                <Radio size={16} className={isLiveMode ? 'animate-spin' : 'text-emerald-700'} />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎙️</span>
+                <span>{isLiveMode ? (isRtl ? 'إيقاف اللايف 🔴' : 'Stop Live Mode 🔴') : (isRtl ? 'محادثة لايف صوتية مستمرة 🎙️' : 'Live Voice Mode 🎙️')}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'محادثة لايف' : "Live chat"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 📞 LIVE PHONE CALL */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsPhoneCallModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-tr from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 text-teal-900 border-teal-300 ring-2 ring-teal-400/20"
+                aria-label={isRtl ? 'اتصال بسارة' : 'Call Sara'}
+              >
+                <Phone size={16} className="text-teal-600 animate-pulse" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📞</span>
+                <span>{isRtl ? 'مكالمة هاتفية حية مع سارة 📞' : 'Live Phone Call with Sara 📞'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'اتصال' : "Call"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🎙️ PHONETIC LAB */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Al-Khalil Digital Academy');
+                  setIsPhoneticModalOpen(true);
+                }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-900 border-purple-200"
+                aria-label={isRtl ? 'مختبر النطق' : 'Speech Lab'}
+              >
+                <Mic size={16} className="text-purple-600 animate-pulse" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎙️</span>
+                <span>{isRtl ? 'مختبر مخارج الحروف وتصحيح النطق 🎙️' : 'Phonetic Pronunciation Lab 🎙️'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'مختبر النطق' : "Pronunciation lab"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🗣️ VOICE COACH */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsVoiceCoachModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 text-purple-900 border-purple-300"
+                aria-label={isRtl ? 'مدرب النطق' : 'Voice Coach'}
+              >
+                <span className="text-sm">🗣️</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🗣️</span>
+                <span>{isRtl ? 'مدرب النطق الصوتي الذكي 🎙️' : 'AI Speech Coach 🎙️'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'مدرب الصوت' : "Voice coach"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🎮 12Y ROLE-PLAY ADVENTURES */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsRolePlayModalOpen(true)}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  activeRolePlay
+                    ? 'bg-amber-400 text-slate-950 border-amber-500 ring-2 ring-amber-300/40'
+                    : 'bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 text-[#002147] border-indigo-200'
+                }`}
+                aria-label={isRtl ? 'سيناريوهات 12 سنة' : '12Y Adventures'}
+              >
+                <span className="text-base">🎮</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🎮</span>
+                <span>{isRtl ? 'سيناريوهات ومغامرات 12 سنة 🎮' : '12Y Role-Play & Adventures 🎮'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'لعب الأدوار' : "Role-play"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* ⚡ SPEED DRILLS */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsSpeedDrillModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-900 border-amber-300"
+                aria-label={isRtl ? 'تحديات السرعة' : 'Speed Drills'}
+              >
+                <Zap size={16} className="text-amber-600 animate-pulse" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>⚡</span>
+                <span>{isRtl ? 'تحديات السرعة المصغرة ضد الوقت ⚡' : 'Speed Drills & Micro-Challenges ⚡'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تحدي السرعة' : "Speed challenge"}</span>
+            </div>
+            </div>
+          </section>
+          <section className="shrink-0 md:flex-auto rounded-2xl bg-slate-50 border border-slate-200 px-2.5 pt-2 pb-1.5">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'التقدّم' : 'Progress'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🧠 SMART ADAPTIVE MEMORY */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsAdaptiveMemoryModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-indigo-50 via-purple-50 to-indigo-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-900 border-indigo-300 relative"
+                aria-label={isRtl ? 'ذاكرة سارة' : 'Memory'}
+              >
+                <Brain size={16} className="text-indigo-600 animate-pulse" />
+                {((tutorMemory.strengths?.length || 0) + (tutorMemory.masteredTopics?.length || 0)) > 0 && (
+                  <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-indigo-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                    {(tutorMemory.strengths?.length || 0) + (tutorMemory.masteredTopics?.length || 0)}
+                  </span>
+                )}
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🧠</span>
+                <span>{isRtl ? 'ذاكرة سارة وملف التعلم المعرفي 🧠' : "Sara's Smart Memory & Profile 🧠"}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الذاكرة' : "Memory"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🏆 ACHIEVEMENTS & QUESTS */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsAchievementsModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-900 border-amber-300"
+                aria-label={isRtl ? 'الإنجازات' : 'Achievements'}
+              >
+                <Trophy size={16} className="text-amber-600" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🏆</span>
+                <span>{isRtl ? 'الأوسمة والمهام اليومية وجوائز الإتقان 🏆' : 'Achievements & Daily Quests 🏆'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الإنجازات' : "Achievements"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 📊 PARENT INSIGHTS */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsParentInsightsModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-900 border-emerald-300"
+                aria-label={isRtl ? 'تقرير ولي الأمر' : 'Parent Report'}
+              >
+                <Award size={16} className="text-emerald-600" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📊</span>
+                <span>{isRtl ? 'تحليلات ورؤى أولياء الأمور 📊' : 'Parent & Mentor Insights 📊'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'تقرير ولي الأمر' : "Parent report"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 📓 ERROR NOTEBOOK */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsNotebookModalOpen(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-[#855B14] border-amber-300 relative"
+                aria-label={isRtl ? 'دفتر الأخطاء' : 'Notebook'}
+              >
+                <BookMarked size={16} className="text-[#C49E3A]" />
+                {tutorMemory.frequentMistakes && tutorMemory.frequentMistakes.length > 0 && (
+                  <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center shadow-xs">
+                    {tutorMemory.frequentMistakes.length}
+                  </span>
+                )}
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📓</span>
+                <span>{isRtl ? 'دفتر الملاحظات والأخطاء الشخصي وبنك المفردات 📓' : 'My Error Notebook & Word Bank 📓'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'دفتر الأخطاء' : "Mistakes notebook"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🔥 STREAK */}
+            <div className="relative group/btn">
+              <div className="h-9 sm:h-10 px-2.5 rounded-full border-2 border-orange-200 bg-orange-50 text-[#ff9600] font-black text-xs flex items-center justify-center gap-1 shadow-xs cursor-default">
+                <Flame size={15} className="animate-bounce-slow text-orange-500" />
+                <span>{streak.current}</span>
+              </div>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🔥</span>
+                <span>{isRtl ? `سلسلة الأيام المستمرة (${streak.current} يوم) 🔥` : `Daily Streak (${streak.current} days) 🔥`}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'السلسلة' : "Streak"}</span>
+            </div>
+            </div>
+          </section>
+          <section className="shrink-0 md:flex-auto rounded-2xl bg-slate-50 border border-slate-200 px-2.5 pt-2 pb-1.5">
+            <p className="text-[10px] font-black text-[#C49E3A] mb-1 px-0.5">{isRtl ? 'الأدوات' : 'Tools'}</p>
+            <div className="flex items-start gap-1">
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 👩‍🏫 SARA 3D CHARACTER */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setIsSara3DOpen(!isSara3DOpen)}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  isSara3DOpen
+                    ? 'bg-amber-100 text-amber-900 border-[#C49E3A] ring-2 ring-amber-300/40'
+                    : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                }`}
+                aria-label={isRtl ? 'سارة 3D' : 'Sara 3D'}
+              >
+                <span className="text-base">👩‍🏫</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>👩‍🏫</span>
+                <span>{isRtl ? (isSara3DOpen ? 'سارة 3D نشطة (اضغط للإخفاء) ✨' : 'عرض سارة 3D 👩‍🏫') : 'Toggle 3D Sara'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'سارة 3D' : "Sara 3D"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* ⚡ SPEECH SPEED */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  const nextRate = saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0;
+                  setSaraSpeechRate(nextRate);
+                }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                aria-label="Speech Speed"
+              >
+                <span className="text-xs font-black">{saraSpeechRate === 0.8 ? '🐢' : saraSpeechRate === 1.2 ? '🚀' : '⚡'}</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>⚡</span>
+                <span>{isRtl ? `سرعة صوت سارة: ${saraSpeechRate}x (اضغط للتغيير) ⚡` : `Speech Speed: ${saraSpeechRate}x ⚡`}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'سرعة الصوت' : "Voice speed"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 📦 ARCHIVE CURRENT SESSION */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => setShowArchiveConfirm(true)}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300"
+                aria-label={isRtl ? 'أرشف الجلسة' : 'Archive Session'}
+              >
+                <Archive size={16} className="text-amber-700" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>📦</span>
+                <span>{isRtl ? 'أرشف الجلسة الحالية وبدء محادثة جديدة 📦' : 'Archive Session & Start Fresh 📦'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'أرشفة' : "Archive"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🗂️ SESSIONS ARCHIVE */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  fetchArchivedSessions();
+                  setIsArchiveModalOpen(true);
+                }}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300"
+                aria-label={isRtl ? 'الأرشيف' : 'Archive'}
+              >
+                <History size={16} className="text-slate-500" />
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🗂️</span>
+                <span>{isRtl ? 'استعراض واسترجاع أرشيف الجلسات 🗂️' : 'Sessions Archive 🗂️'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الأرشيف' : "Archive list"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🌐 BILINGUAL SWITCHER */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => handleToggleLanguage()}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 bg-slate-100 hover:bg-slate-200 border-slate-200 text-[#002147] font-black text-xs"
+                aria-label="Language Toggle"
+              >
+                <span className="text-sm">{activeLang === 'ar' ? '🇸🇦' : '🇬🇧'}</span>
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>🌐</span>
+                <span>{activeLang === 'ar' ? 'التبديل إلى English (المحادثة الإنجليزية بالكامل) 🇬🇧' : 'Switch to Arabic Explanation 🇸🇦'}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'اللغة' : "Language"}</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 w-[58px] shrink-0">
+            {/* 🔊 VOICE TOGGLE */}
+            <div className="relative group/btn">
+              <button
+                onClick={() => {
+                  if (isSpeaking) cancelAllSpeech();
+                  setVoiceEnabled(!voiceEnabled);
+                }}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer shadow-xs hover:scale-105 active:scale-95 shrink-0 ${
+                  voiceEnabled
+                    ? 'bg-blue-50 text-[#002147] border-blue-200'
+                    : 'bg-slate-100 text-slate-400 border-slate-200'
+                }`}
+                aria-label="Toggle Voice"
+              >
+                {voiceEnabled ? <Volume2 size={16} className="text-[#C49E3A]" /> : <VolumeX size={16} />}
+              </button>
+              <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 opacity-0 group-hover/btn:opacity-100 translate-y-1 group-hover/btn:translate-y-0 transition-all duration-200 pointer-events-none z-50 whitespace-nowrap px-3 py-1.5 rounded-xl bg-slate-900/95 backdrop-blur-md text-white text-xs font-black shadow-xl border border-slate-700/80 flex items-center gap-1.5">
+                <span>{voiceEnabled ? '🔊' : '🔇'}</span>
+                <span>{voiceEnabled ? (isRtl ? 'صوت سارة مفعّل (اضغط للكتم) 🔊' : 'Voice Enabled 🔊') : (isRtl ? 'صوت سارة مكتوم (اضغط للتشغيل) 🔇' : 'Voice Muted 🔇')}</span>
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45 border-t border-l border-slate-700/80" />
+              </div>
+            </div>
+              <span className="text-[10px] leading-tight font-bold text-slate-600 text-center whitespace-nowrap">{isRtl ? 'الصوت' : "Sound"}</span>
+            </div>
+            </div>
+          </section>
+          </nav>
+        </section>
+
+        {/* Sara's tracks box removed (owner's ask): «كل مناهج سارة» = المناهج in the header tools + 📚 in the quick tools bar; «توليد خطة ذكية» = ✨ in the quick tools bar. */}
 
         {/* ======================================================== */}
         {/* 2A-0A. SARA ACTIVE CURRICULUM LESSON HUD BANNER */}
@@ -5048,7 +5087,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               {/* Bottom Action Strip */}
               <div className="pt-1 flex items-center gap-2">
                 <button
-                  onClick={() => setMobileTab('chat')}
+                  onClick={() => { setMobileTab('chat'); openChatView(); }}
                   className="flex-1 py-2 px-3 bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 font-black text-xs rounded-xl transition-all cursor-pointer shadow-sm flex items-center justify-center gap-1.5 active:scale-95"
                 >
                   <span>💬</span>
@@ -5363,7 +5402,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 )}
 
                 <button
-                  onClick={() => setMobileTab('chat')}
+                  onClick={() => { setMobileTab('chat'); openChatView(); }}
                   className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-300 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-md active:scale-95"
                 >
                   <span>💬</span>
@@ -5681,7 +5720,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </div>
 
               <button
-                onClick={() => setMobileTab('chat')}
+                onClick={() => { setMobileTab('chat'); openChatView(); }}
                 className="w-full py-2.5 bg-[#002147] text-white font-black text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 mt-1"
               >
                 <span>💬</span>
@@ -5694,7 +5733,24 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         {/* ======================================================== */}
         {/* 2B. CHAT HISTORY CONTAINER */}
         {/* ======================================================== */}
-        <div className={`flex-1 bg-white border-2 border-slate-200 rounded-3xl p-3 sm:p-5 overflow-y-auto space-y-3.5 shadow-sm min-h-[280px] ${mobileTab === 'chat' ? 'block' : 'hidden md:block'}`}>
+        {/* 💬 Dedicated full-screen chat view (opened from «تكلّم مع سارة» or anything that talks to Sara). */}
+        <div data-testid="sara-chat-view" role="dialog" aria-modal={chatViewOpen} aria-label={isRtl ? 'المحادثة مع سارة' : 'Chat with Sara'}
+          className={chatViewOpen ? 'fixed inset-0 z-[45] bg-[#F8FAFC] flex flex-col' : 'hidden'}>
+          <div className="shrink-0 bg-gradient-to-l from-[#001a38] via-[#002147] to-[#0a2d5c] border-b-2 border-[#C49E3A]/70 shadow-md">
+            <div className="max-w-4xl mx-auto w-full px-3 sm:px-5 py-2.5 flex items-center gap-3">
+              <button type="button" onClick={closeChatView} data-testid="close-sara-chat"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-[12.5px] px-3 py-2 cursor-pointer active:scale-95 transition-all">
+                {isRtl ? <ArrowRight size={15} /> : <ArrowLeft size={15} />}<span>{isRtl ? 'صفحة سارة' : "Sara's page"}</span>
+              </button>
+              <img src="/tutors/sara.webp" alt="" width={36} height={36} className="w-9 h-9 rounded-full object-cover border-2 border-[#C49E3A] bg-[#001a38]" />
+              <div className="min-w-0">
+                <div className="text-[15px] font-black text-[#E8C766] leading-tight">{isRtl ? 'المحادثة مع سارة' : 'Chat with Sara'}</div>
+                <div className="text-[11px] font-bold text-white/70 truncate">{loading ? (isRtl ? 'سارة تكتب…' : 'Sara is typing…') : (isRtl ? 'معلمتك الخليجية الذكية' : 'Your smart Gulf tutor')}</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 min-h-0 max-w-4xl w-full mx-auto px-3 sm:px-5 pt-3 flex flex-col gap-3">
+        <div data-testid="sara-chat-panel" className="flex-1 min-h-0 bg-white border-2 border-slate-200 rounded-3xl p-3 sm:p-5 overflow-y-auto overscroll-contain space-y-3.5 shadow-sm">
           {/* Active Placement Test Step Indicator */}
           
 
@@ -6057,7 +6113,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         {/* ======================================================== */}
         {/* 2C. INPUT CONTROLS (INTEGRATED LIVE + MIC + TEXT + SEND) */}
         {/* ======================================================== */}
-        <div className={`sticky bottom-0 z-30 bg-[#F8FAFC]/95 backdrop-blur-md pt-1 pb-safe space-y-2 ${mobileTab === 'chat' ? 'block' : 'hidden md:block'}`}>
+        <div data-testid="sara-input-bar" className="shrink-0 bg-[#F8FAFC] pt-1 pb-3 pb-safe space-y-2">
           <div className={`bg-white border-2 rounded-2xl sm:rounded-3xl p-1.5 sm:p-2.5 shadow-md flex items-center gap-1.5 sm:gap-2 transition-all ${
             isLiveMode ? 'border-amber-400 ring-2 ring-amber-300/40' : 'border-slate-200'
           }`}>
@@ -6402,6 +6458,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 {isRtl ? chip.ar : chip.en}
               </button>
             ))}
+          </div>
+        </div>
           </div>
         </div>
       </main>
