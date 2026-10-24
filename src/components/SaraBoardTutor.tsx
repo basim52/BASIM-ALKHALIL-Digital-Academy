@@ -50,6 +50,14 @@ const VoiceBtn: React.FC<{ v: ReturnType<typeof usePersonaVoice>; text: string; 
   </div>
 );
 
+/** Teacher portrait (/tutors/{id}.webp) in a gold ring; falls back to the persona emoji if the photo is missing. */
+const TeacherPhoto: React.FC<{ p: BoardPersona; size: number; ring?: string; className?: string }> = ({ p, size, ring = '#C49E3A', className = '' }) => {
+  const [bad, setBad] = useState(false);
+  if (bad) return <span className={`leading-none ${className}`} style={{ fontSize: Math.round(size * 0.55) }}>{p.emoji}</span>;
+  return <img src={`/tutors/${p.id}.webp`} alt={L(p.nameAr, p.nameEn)} loading="lazy" decoding="async" draggable={false} onError={() => setBad(true)} width={size} height={size}
+    className={`rounded-full object-cover shrink-0 ${className}`} style={{ width: size, height: size, boxShadow: `0 0 0 3px ${ring}` }} />;
+};
+
 export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; persona?: string; board?: BoardResult } }> = ({ uid, mock }) => {
   const [step, setStep] = useState<Step>(mock?.step || 'pick');
   const [persona, setPersona] = useState<BoardPersona>(personaById(mock?.persona || 'grammar'));
@@ -102,8 +110,8 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
     <div className="grid grid-cols-4 gap-1.5 shrink-0">
       {BOARD_PERSONAS.filter(p => !p.kids).map(p => (
         <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => { setPersona(p); if (p.id === 'sara' && !mock) { voice.stop(); setSaraHub(true); } }}
-          className={`rounded-xl border p-2 flex flex-col items-center gap-0.5 ${persona.id === p.id ? 'bg-amber-400 text-[#001a38] border-amber-300' : 'bg-[#0a2d5c] border-white/10'}`}>
-          <span className="text-[22px] leading-none">{p.emoji}</span>
+          className={`rounded-2xl border p-1.5 pt-2 flex flex-col items-center gap-0.5 transition-transform active:scale-95 ${persona.id === p.id ? 'bg-amber-400 text-[#001a38] border-amber-300' : 'bg-[#0a2d5c] border-white/10'}`}>
+          <TeacherPhoto p={p} size={48} ring={persona.id === p.id ? '#001a38' : '#C49E3A'} className="mb-0.5" />
           <span className="text-[13px] font-black">{L(p.nameAr, p.nameEn)}</span>
           <span className={`text-[9px] font-bold text-center leading-tight ${persona.id === p.id ? 'text-[#001a38]/80' : 'text-white/70'}`}>{L(p.roleAr, p.roleEn || p.roleAr)}</span>
         </button>
@@ -164,7 +172,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
 
   if (step === 'board') return shell(<>
     <div className="flex items-center justify-between gap-2 shrink-0">
-      <p className="text-[12px] font-black text-amber-300">{persona.emoji} {L(persona.nameAr, persona.nameEn)} — {L(persona.roleAr, persona.roleEn || persona.roleAr)}</p>
+      <p className="text-[12px] font-black text-amber-300 flex items-center gap-2"><TeacherPhoto p={persona} size={28} /> {L(persona.nameAr, persona.nameEn)} — {L(persona.roleAr, persona.roleEn || persona.roleAr)}</p>
       <VoiceBtn v={voice} text={boardSpeech(board)} p={persona} />
     </div>
     <div data-testid="board-surface" className="flex-1 min-h-0">
@@ -202,7 +210,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const total = board.checks.length;
   return shell(<>
     <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
-      <span className="text-[44px]">{persona.emoji}</span>
+      <TeacherPhoto p={persona} size={72} className="mb-1" />
       <p className="text-[18px] font-black text-amber-300">{total ? L(`جاوبت ${correct} من ${total} صح`, `You got ${correct} of ${total} right`) : L('خلصنا الشرح', 'Explanation finished')}</p>
       <p className="text-[12px] font-bold text-white/80">{total && correct === total ? L('ممتاز، فهمت الفكرة.', 'Excellent, you got the idea.') : L('راجع السبورة مرة ثانية إذا تحب.', 'Review the board again if you like.')}</p>
       {saved === 'fail' && <p className="text-[11px] font-bold text-rose-300">{L("ما انحفظت الجلسة، بس ما يأثر على دروسك.", "The session was not saved, but your lessons are not affected.")}</p>}
