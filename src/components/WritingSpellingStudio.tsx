@@ -132,7 +132,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
   const t = (ar: string, en: string) => (isEnMode ? en : ar);
   const tr = (ar: string) => t(ar, WRITING_EN_MAP[ar] || toEnglish(ar));
 
-  const [activeStudioTab, setActiveStudioTab] = useState<'expression' | 'essay' | 'spelling'>('expression');
+  const [activeStudioTab, setActiveStudioTab] = useState<'expression' | 'essay' | 'spelling'>('essay');
 
   // ==========================================
   // TAB 1: EXPRESSION & RHETORIC
@@ -265,7 +265,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
     });
     (evaluationResult.spellingFeedback || []).forEach((s: any) => {
       const wrong = s.misspelledWord || s.word || '';
-      const correct = s.correctSpelling || s.correct || '';
+      const correct = s.correctSpelling || s.correctWord || s.correct || '';
       const reason = s.phonicRuleAr || '';
       if ((wrong || correct) && wrong !== correct) feedbackIssues.push({ wrong, correct, reason });
     });
@@ -279,7 +279,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
   return (
     <SectionShell dir={isRtl ? 'rtl' : 'ltr'} data-testid="writing-spelling-studio">
       {/* Studio Pill Tabs (Navy when active, white with gold border otherwise) */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+      <div className="grid grid-cols-3 gap-1.5">
         {[
           { id: 'essay', labelAr: '📝 المقال والتقييم', labelEn: '📝 Essay & AI Grade' },
           { id: 'spelling', labelAr: '🎯 معمل الإملاء', labelEn: '🎯 Spelling Lab' },
@@ -291,7 +291,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
               key={tab.id}
               type="button"
               onClick={() => setActiveStudioTab(tab.id as any)}
-              className={`flex-1 py-2 px-3.5 rounded-full text-xs font-black whitespace-nowrap active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer ${
+              className={`py-2 px-2 sm:px-3.5 rounded-full text-[11px] sm:text-xs font-black truncate text-center active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer ${
                 active
                   ? 'bg-[#002147] text-[#E6C36A] border border-[#C49E3A] shadow-sm'
                   : 'bg-white text-[#002147] border border-[#C49E3A]/40 hover:border-[#C49E3A]'
@@ -374,19 +374,19 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
             {/* Writing Workspace */}
             <div className="lg:col-span-7">
               <GoldCard className="space-y-4">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2.5">
+                <div className="flex items-center justify-between gap-2 flex-nowrap">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <TutorFace tutor="exams" size="sm" />
-                    <div>
-                      <span className="text-xs font-black text-[#002147] block">
+                    <div className="min-w-0">
+                      <span className="text-xs font-black text-[#002147] block truncate">
                         {t('علي • مدرب الكتابة الأكاديمية', 'Ali • Academic Writing Coach')}
                       </span>
-                      <span className="text-[11px] font-bold text-[#002147]/70">
+                      <span className="text-[11px] font-bold text-[#002147]/70 block truncate">
                         {t('موضوع المقال الأكاديمي', 'Writing Prompt')}
                       </span>
                     </div>
                   </div>
-                  <ProgressPill data-testid="essay-word-counter">
+                  <ProgressPill data-testid="essay-word-counter" className="shrink-0">
                     ✍️ {wordCount} {t('كلمة', 'words')}
                   </ProgressPill>
                 </div>
@@ -406,30 +406,32 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
                   dir="ltr"
                 />
 
-                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
+                <div className="flex items-center justify-between gap-2 flex-nowrap pt-1">
                   <GhostButton
+                    className="!px-2.5 sm:!px-4 !text-xs whitespace-nowrap shrink-0"
                     onClick={() =>
                       setEssayText(
                         `In recent years, artificial intelligence has emerged as a groundbreaking tool in modern classrooms. Rather than replacing educators, AI empowers teachers by automating routine grading and providing real-time personalized tutoring. Furthermore, it allows students to practice conversational skills at any time, boosting confidence and fluency.`
                       )
                     }
                   >
-                    {t('إدراج نموذج تجريبي جاهز', 'Insert Sample Essay')}
+                    {t('نموذج تجريبي', 'Sample Essay')}
                   </GhostButton>
 
                   <PrimaryButton
+                    className="!px-3 sm:!px-4 !text-xs whitespace-nowrap shrink-0"
                     disabled={wordCount < 10 || isEvaluating}
                     onClick={handleEvaluateEssay}
                   >
                     {isEvaluating ? (
                       <>
                         <span className="w-4 h-4 rounded-full border-2 border-[#C49E3A] border-t-transparent animate-spin inline-block shrink-0" />
-                        <span>{t('جاري الفحص بالذكاء الاصطناعي...', 'Evaluating...')}</span>
+                        <span>{t('جاري الفحص...', 'Evaluating...')}</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles size={15} />
-                        <span>{t('فحص المقال والتقييم الأكاديمي 🚀', 'Evaluate & Grade 🚀')}</span>
+                        <Sparkles size={15} className="shrink-0" />
+                        <span>{t('فحص المقال 🚀', 'Evaluate Essay 🚀')}</span>
                       </>
                     )}
                   </PrimaryButton>
@@ -450,7 +452,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
                     <div className="p-4 rounded-2xl bg-[#002147] text-white border-2 border-[#C49E3A] flex items-center justify-between gap-2">
                       <div>
                         <div className="text-2xl font-black text-[#E6C36A]">
-                          {evaluationResult.score} / 100
+                          {evaluationResult.score ?? evaluationResult.overallScore} / 100
                         </div>
                         {evaluationResult.cefrLevel && (
                           <div className="text-xs font-bold text-white/85">
@@ -472,17 +474,17 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
                       </div>
                     )}
 
-                    {/* Issues list: mistake (red), correction (green), short explanation in its own small card */}
+                    {/* Issues list: mistake (red), correction (green), short explanation in its own small GoldCard */}
                     {feedbackIssues.length > 0 && (
                       <div className="space-y-2.5">
                         <div className="text-xs font-black text-[#002147]">
                           {t('🔍 التصحيحات والتحسينات المقترحة:', '🔍 Corrections & Improvements:')}
                         </div>
                         {feedbackIssues.map((item, idx) => (
-                          <div
+                          <GoldCard
                             key={idx}
                             data-testid="essay-feedback-card"
-                            className="p-3 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 space-y-1.5"
+                            className="!p-3 !bg-[#fdfaf3] space-y-1.5"
                           >
                             {item.wrong && (
                               <div className="flex items-center gap-1.5 text-red-700 font-black text-xs" dir="ltr">
@@ -501,7 +503,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
                                 {tr(item.reason)}
                               </p>
                             )}
-                          </div>
+                          </GoldCard>
                         ))}
                       </div>
                     )}

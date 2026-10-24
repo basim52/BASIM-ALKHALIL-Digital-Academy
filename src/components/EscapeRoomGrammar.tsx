@@ -214,8 +214,8 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
     >
       <div className="max-w-4xl mx-auto space-y-5">
         {/* Header Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#C49E3A]/30">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#C49E3A]/30">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-11 h-11 bg-[#002147] border-2 border-[#C49E3A] rounded-2xl flex items-center justify-center text-[#C49E3A] shrink-0">
               {isUnlocked ? (
                 <LockKeyholeOpen size={22} className="text-[#E6C36A] animate-[pulse_0.6s_ease-out_1]" />
@@ -223,11 +223,11 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
                 <LockKeyhole size={22} className="text-[#C49E3A]" />
               )}
             </div>
-            <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-black text-[#C49E3A] tracking-tight truncate">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base sm:text-2xl font-black text-[#C49E3A] tracking-tight truncate">
                 {t('غرفة الهروب النحوية في لندن 🏛️', 'Grammar Escape Room: London Clues 🏛️')}
-              </h1>
-              <p className="text-xs text-white/75 font-bold mt-0.5">
+              </h2>
+              <p className="text-xs text-white/75 font-bold mt-0.5 truncate">
                 {t(
                   'لغز الزمن المضارع البسيط - استخدم عبقريتك لتفك الشفرات وتتحرر!',
                   'Solve Present Simple logic riddles to open the heavy ancient doors!'
@@ -235,13 +235,6 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
               </p>
             </div>
           </div>
-
-          <GhostButton
-            onClick={onBack}
-            className="!bg-[#002147] !text-[#E6C36A] !border-[#C49E3A]/60 hover:!border-[#C49E3A] shrink-0"
-          >
-            {t('العودة للمنصة ↩️', 'Back to Academy ↩️')}
-          </GhostButton>
         </div>
 
         {/* Rooms Grid: GoldCard style on navy (white/5 fill, gold/40 border), lock icon in gold, locked rooms dimmed */}
@@ -291,22 +284,22 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
           {!gameFinished ? (
             <GoldCard className="!bg-white/5 !border-[#C49E3A]/40 !text-white !p-0 overflow-hidden">
               {/* Top Stage Banner */}
-              <div className="bg-[#002147] p-4 sm:p-5 border-b border-[#C49E3A]/40 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-2xl bg-[#001a38] p-2 rounded-xl border border-[#C49E3A]/50 shrink-0">
+              <div className="bg-[#002147] p-3.5 sm:p-5 border-b border-[#C49E3A]/40 flex items-center justify-between gap-2 flex-nowrap">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <span className="text-xl sm:text-2xl bg-[#001a38] p-2 rounded-xl border border-[#C49E3A]/50 shrink-0">
                     {currentLevel.lockIcon}
                   </span>
-                  <div className="min-w-0">
-                    <span className="text-[10px] text-[#C49E3A] font-black uppercase tracking-widest block">
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] text-[#C49E3A] font-black uppercase tracking-widest block truncate">
                       {t('المستوى الحالي', 'CURRENT TOWER CHAMBER')}
                     </span>
-                    <h3 className="text-base sm:text-lg font-black text-white truncate">
+                    <h3 className="text-sm sm:text-lg font-black text-white truncate">
                       {t(currentLevel.stageNameAr, currentLevel.stageName)}
                     </h3>
                   </div>
                 </div>
 
-                <ProgressPill className="!bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A]/60">
+                <ProgressPill className="!bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A]/60 shrink-0">
                   {t(`المحاولات الخاطئة: ${attempts}`, `Wrong Attempts: ${attempts}`)}
                 </ProgressPill>
               </div>

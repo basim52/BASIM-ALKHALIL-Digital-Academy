@@ -7164,6 +7164,7 @@ export default function AuthenticatedApp({
                           case 'grammar-academy': return isRtl ? 'أكاديمية القواعد 📐' : 'Grammar Academy 📐';
                           case 'reading-lab': return isRtl ? 'مختبر القراءة 📖' : 'Reading Lab 📖';
                           case 'writing-spelling-studio': return isRtl ? 'استوديو التعبير والإملاء ✍️' : 'Writing Studio ✍️';
+                          case 'escape-room': return isRtl ? 'غرفة الهروب النحوية 🔐' : 'Grammar Escape Room 🔐';
                           case 'pronunciation-lab': return isRtl ? 'معمل النطق 🎙️' : 'Speech Lab 🎙️';
                           case 'interactive-learning': return isRtl ? 'تعليم تفاعلي ⚡' : 'Interactive Learning ⚡';
                           case 'educational-games': return isRtl ? 'واحة الألعاب والآداب 🎮' : 'Games Hub 🎮';
