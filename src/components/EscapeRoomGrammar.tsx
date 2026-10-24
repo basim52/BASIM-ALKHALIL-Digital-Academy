@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Key, 
-  Lock, 
-  Unlock, 
-  MapPin, 
-  ChevronRight, 
-  RefreshCw, 
-  Award, 
-  ShieldCheck, 
-  Sparkles, 
-  HelpCircle, 
+import { motion } from 'motion/react';
+import {
+  Lock,
+  Unlock,
+  ShieldCheck,
   Volume2,
   LockKeyhole,
-  LockKeyholeOpen
+  LockKeyholeOpen,
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { useT } from '../lib/explainLang';
 import { managedSpeak } from '../lib/audio';
+import {
+  GoldCard,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+} from './ui/academy';
 
 interface EscapeRoomGrammarProps {
   lang: 'ar' | 'en';
@@ -40,14 +41,18 @@ interface Level {
   lockIcon: string;
 }
 
+const ESCAPE_XP_REWARD = 30;
+
 export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
   lang,
-  userProfile,
   onBack,
-  onXPAdded
+  onXPAdded,
 }) => {
-  const isRtl = lang === 'ar';
-  
+  const tHook = useT();
+  const isEnMode = lang === 'en' || tHook('ar', 'en') === 'en';
+  const isRtl = !isEnMode;
+  const t = (ar: string, en: string) => (isEnMode ? en : ar);
+
   // Game states
   const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -125,7 +130,7 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
       options: ["are", "is", "am"],
       correctAnswer: "are",
       explanation: "We use 'are' because 'crew members' is plural.",
-      explanationAr: "نשתخدم الفعل المساعد 'are' لأن الفاعل (أعضاء طاقم السفينة) جمع.",
+      explanationAr: "نستخدم الفعل المساعد 'are' لأن الفاعل (أعضاء طاقم السفينة) جمع.",
       lockIcon: "🚢"
     },
     {
@@ -184,9 +189,8 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
       setShowErrorAlert(false);
     } else {
       setGameFinished(true);
-      // add points
       if (onXPAdded && !xpAwarded) {
-        onXPAdded(30);
+        onXPAdded(ESCAPE_XP_REWARD);
         setXpAwarded(true);
       }
     }
@@ -203,270 +207,264 @@ export const EscapeRoomGrammar: React.FC<EscapeRoomGrammarProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#1E112A] text-stone-100 pb-24 relative overflow-hidden">
-      
-      {/* Mystical purple glow in background */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-4xl mx-auto px-4 pt-6 relative z-10">
-
-        {/* Header bar */}
-        <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-8 pb-4 border-b border-purple-900/30 ${isRtl ? 'md:flex-row-reverse text-right' : 'text-left'}`}>
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 bg-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-600/20 shrink-0">
-              <LockKeyhole size={24} className={isUnlocked ? 'hidden' : 'animate-pulse'} />
-              <LockKeyholeOpen size={24} className={isUnlocked ? 'block text-amber-400' : 'hidden'} />
+    <div
+      dir={isRtl ? 'rtl' : 'ltr'}
+      data-testid="escape-room-grammar"
+      className="min-h-screen bg-[#001a38] text-white px-3 py-4 sm:px-6 sm:py-6 pb-24 font-sans"
+    >
+      <div className="max-w-4xl mx-auto space-y-5">
+        {/* Header Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#C49E3A]/30">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 bg-[#002147] border-2 border-[#C49E3A] rounded-2xl flex items-center justify-center text-[#C49E3A] shrink-0">
+              {isUnlocked ? (
+                <LockKeyholeOpen size={22} className="text-[#E6C36A] animate-[pulse_0.6s_ease-out_1]" />
+              ) : (
+                <LockKeyhole size={22} className="text-[#C49E3A]" />
+              )}
             </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black text-amber-450 tracking-tight">
-                {isRtl ? 'غرفة الهروب النحوية في لندن 🏛️' : 'Grammar Escape Room: London Clues 🏛️'}
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-black text-[#C49E3A] tracking-tight truncate">
+                {t('غرفة الهروب النحوية في لندن 🏛️', 'Grammar Escape Room: London Clues 🏛️')}
               </h1>
-              <p className="text-xs text-purple-300 font-bold tracking-widest mt-0.5">
-                {isRtl ? 'لغز الزمن المضارع البسيط - استخدم عبقريتك لتفك الشفرات وتتحرر!' : 'Solve Present Simple logic riddles to open the heavy ancient doors!'}
+              <p className="text-xs text-white/75 font-bold mt-0.5">
+                {t(
+                  'لغز الزمن المضارع البسيط - استخدم عبقريتك لتفك الشفرات وتتحرر!',
+                  'Solve Present Simple logic riddles to open the heavy ancient doors!'
+                )}
               </p>
             </div>
           </div>
 
-          <button
+          <GhostButton
             onClick={onBack}
-            className={`flex items-center gap-2 px-4 py-2 bg-purple-950 border border-purple-800 hover:bg-purple-900 text-stone-250 rounded-xl font-black text-xs transition-all cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
+            className="!bg-[#002147] !text-[#E6C36A] !border-[#C49E3A]/60 hover:!border-[#C49E3A] shrink-0"
           >
-            <span>{isRtl ? 'العودة للمنصة ↩️' : 'Back to Academy ↩️'}</span>
-          </button>
+            {t('العودة للمنصة ↩️', 'Back to Academy ↩️')}
+          </GhostButton>
         </div>
 
-        {/* Steps display */}
+        {/* Rooms Grid: GoldCard style on navy (white/5 fill, gold/40 border), lock icon in gold, locked rooms dimmed */}
         {!gameFinished && (
-          <div className="flex items-center justify-center gap-8 mb-8 font-mono text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {levels.map((lvl, index) => {
               const active = index === currentLevelIdx;
-              const completed = index < currentLevelIdx;
+              const completed = index < currentLevelIdx || (active && isUnlocked);
+              const locked = index > currentLevelIdx;
 
               return (
-                <div key={lvl.id} className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border font-bold ${
-                    active 
-                      ? 'bg-purple-600 text-white border-purple-500 shadow-md ring-4 ring-purple-500/20' 
-                      : completed 
-                        ? 'bg-emerald-800 text-emerald-150 border-emerald-600' 
-                        : 'bg-purple-950 text-purple-400 border-purple-900'
-                  }`}>
-                    {lvl.id}
+                <GoldCard
+                  key={lvl.id}
+                  className={`!p-3 !bg-white/5 !border-[#C49E3A]/40 !text-white flex items-center justify-between gap-2 transition-opacity ${
+                    active ? 'ring-2 ring-[#C49E3A] !border-[#C49E3A]' : ''
+                  } ${locked ? 'opacity-50' : ''}`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-6 h-6 rounded-full bg-[#002147] border border-[#C49E3A] text-[#E6C36A] text-[11px] font-black flex items-center justify-center shrink-0">
+                      {lvl.id}
+                    </span>
+                    <span className="text-xs font-black text-white truncate">
+                      {t(lvl.stageNameAr, `${lvl.lockIcon} ${lvl.stageName}`)}
+                    </span>
                   </div>
-                  <span className={`hidden md:inline font-bold ${active ? 'text-amber-400' : 'text-slate-400'}`}>
-                    {isRtl ? lvl.stageNameAr.split(' ')[0] : lvl.stageName.split(' ')[1]}
-                  </span>
-                </div>
+                  {completed ? (
+                    <Unlock
+                      size={15}
+                      className={`text-[#E6C36A] shrink-0 ${active && isUnlocked ? 'animate-[pulse_0.6s_ease-out_1]' : ''}`}
+                    />
+                  ) : (
+                    <Lock size={15} className="text-[#C49E3A] shrink-0" />
+                  )}
+                </GoldCard>
               );
             })}
           </div>
         )}
 
-        {/* Room Main Card */}
-        <AnimatePresence mode="wait">
+        {/* Active Room or Win Screen */}
+        <motion.div
+          key={gameFinished ? 'finished' : currentLevelIdx}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.18 }}
+        >
           {!gameFinished ? (
-            <motion.div
-              key={currentLevelIdx}
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              className="bg-purple-950/60 border border-purple-900 shadow-2xl rounded-3xl overflow-hidden flex flex-col min-h-[430px]"
-            >
-              
-              {/* Card top banner with stage description */}
-              <div className="bg-gradient-to-r from-purple-900/60 to-indigo-950/40 p-6 border-b border-purple-900 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl bg-purple-900/40 p-2.5 rounded-xl border border-purple-800">{currentLevel.lockIcon}</span>
-                  <div>
-                    <span className="text-[10px] text-amber-500 font-extrabold uppercase tracking-widest block">
-                      {isRtl ? 'المستوى الحالي' : 'CURRENT TOWER CHAMBER'}
+            <GoldCard className="!bg-white/5 !border-[#C49E3A]/40 !text-white !p-0 overflow-hidden">
+              {/* Top Stage Banner */}
+              <div className="bg-[#002147] p-4 sm:p-5 border-b border-[#C49E3A]/40 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-2xl bg-[#001a38] p-2 rounded-xl border border-[#C49E3A]/50 shrink-0">
+                    {currentLevel.lockIcon}
+                  </span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-[#C49E3A] font-black uppercase tracking-widest block">
+                      {t('المستوى الحالي', 'CURRENT TOWER CHAMBER')}
                     </span>
-                    <h3 className="text-lg font-black text-stone-150">
-                      {isRtl ? currentLevel.stageNameAr : currentLevel.stageName}
+                    <h3 className="text-base sm:text-lg font-black text-white truncate">
+                      {t(currentLevel.stageNameAr, currentLevel.stageName)}
                     </h3>
                   </div>
                 </div>
 
-                <div className="text-right text-xs font-mono font-bold text-purple-300">
-                  <span>{isRtl ? `المحاولات الخاطئة: ${attempts}` : `Wrong Attempts: ${attempts}`}</span>
-                </div>
+                <ProgressPill className="!bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A]/60">
+                  {t(`المحاولات الخاطئة: ${attempts}`, `Wrong Attempts: ${attempts}`)}
+                </ProgressPill>
               </div>
 
-              {/* Card clue storyline */}
-              <div className="p-6 md:p-8 space-y-6 flex-1">
-                
-                {/* Story bubble */}
-                <div className="bg-purple-900/30 border border-purple-800 p-4 rounded-2xl flex items-start gap-3">
+              {/* Room Body */}
+              <div className="p-4 sm:p-6 space-y-5">
+                {/* Clue Box */}
+                <div className="bg-[#002147] border border-[#C49E3A]/40 p-4 rounded-2xl flex items-start gap-3">
                   <span className="text-xl shrink-0">🕵️‍♂️</span>
-                  <div>
-                    <span className="text-[9px] text-purple-400 font-black block uppercase tracking-wider">{isRtl ? 'المحقق كود' : 'DETECTIVE INSTRUCTIONS'}</span>
-                    <p className="text-xs text-stone-300 font-bold leading-relaxed mt-1">
-                      {isRtl ? currentLevel.clueAr : currentLevel.clue}
+                  <div className="min-w-0">
+                    <span className="text-[10px] text-[#C49E3A] font-black block uppercase tracking-wider">
+                      {t('المحقق كود', 'DETECTIVE INSTRUCTIONS')}
+                    </span>
+                    <p className="text-xs text-white/90 font-bold leading-relaxed mt-1">
+                      {t(currentLevel.clueAr, currentLevel.clue)}
                     </p>
                   </div>
                 </div>
 
-                {/* Grammatical Locked Equation */}
-                <div className="bg-[#12091A] border-2 border-purple-900/80 p-6 rounded-2xl text-center space-y-3 relative overflow-hidden">
-                  
-                  {/* Glowing padlock representation */}
+                {/* Grammatical Locked Cipher */}
+                <div className="bg-[#002147] border-2 border-[#C49E3A] p-5 rounded-2xl text-center space-y-3 relative">
                   <div className="absolute right-4 top-4">
                     {isUnlocked ? (
-                      <Unlock size={22} className="text-emerald-400 drop-shadow-md" />
+                      <Unlock size={20} className="text-[#E6C36A] animate-[pulse_0.6s_ease-out_1]" />
                     ) : (
-                      <Lock size={22} className="text-rose-500 drop-shadow-md" />
+                      <Lock size={20} className="text-[#C49E3A]" />
                     )}
                   </div>
 
-                  <span className="text-[9px] tracking-wider font-sans font-extrabold text-amber-500 bg-purple-950/80 px-2.5 py-1 rounded-md uppercase">
-                    {isRtl ? 'اللغز اللغوي رقم:' : 'GRAMMAR CIPHER LEVEL:'} 0{currentLevel.id}
+                  <span className="inline-block text-[10px] tracking-wider font-black text-[#E6C36A] bg-[#001a38] border border-[#C49E3A]/50 px-2.5 py-1 rounded-full uppercase">
+                    {t('اللغز اللغوي رقم:', 'GRAMMAR CIPHER LEVEL:')} 0{currentLevel.id}
                   </span>
 
-                  <div className="pt-3 flex flex-col items-center gap-1">
-                    <p className="font-sans font-black text-white text-lg md:text-xl tracking-tight italic">
-                      &rdquo; {currentLevel.question} &ldquo;
+                  <div className="pt-2 flex flex-col items-center gap-2">
+                    <p className="font-black text-white text-base sm:text-xl tracking-tight" dir="ltr">
+                      &ldquo;{currentLevel.question}&rdquo;
                     </p>
-                    
-                    <button
-                      onClick={() => speakText(currentLevel.question.replace("______", currentLevel.correctAnswer))}
-                      className="p-1 px-2.5 bg-purple-900/40 text-purple-300 hover:bg-purple-900 rounded-md text-[10px] mt-2 flex items-center gap-1 cursor-pointer font-bold"
+
+                    <GhostButton
+                      onClick={() => speakText(currentLevel.question.replace('______', currentLevel.correctAnswer))}
+                      className="!bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A]/60 hover:!border-[#C49E3A]"
                     >
-                      <Volume2 size={11} />
-                      <span>{isRtl ? 'اسمع الجملة الكاملة 🔊' : 'Listen Full Sentence 🔊'}</span>
-                    </button>
+                      <Volume2 size={13} />
+                      <span>{t('اسمع الجملة الكاملة 🔊', 'Listen Full Sentence 🔊')}</span>
+                    </GhostButton>
                   </div>
                 </div>
 
-                {/* Multiple choices options */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Answer Choices using AnswerOption */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" dir="ltr">
                   {currentLevel.options.map((opt) => {
                     const isSelected = selectedOption === opt;
                     const isCorrect = opt === currentLevel.correctAnswer;
-
-                    let btnStyle = "bg-purple-900/30 border-purple-800 text-purple-200 hover:bg-purple-900/50 hover:border-purple-700";
-                    if (isUnlocked) {
-                      if (isCorrect) {
-                        btnStyle = "bg-emerald-900/40 border-emerald-500 text-emerald-300 pointer-events-none";
-                      } else {
-                        btnStyle = "bg-purple-950 border-purple-950 text-purple-600 opacity-40 pointer-events-none";
-                      }
-                    } else if (isSelected) {
-                      btnStyle = "bg-purple-600 border-purple-400 text-white font-extrabold shadow-lg";
-                    }
+                    const state = isUnlocked
+                      ? isCorrect
+                        ? 'correct'
+                        : 'normal'
+                      : showErrorAlert && isSelected
+                      ? 'wrong'
+                      : 'normal';
 
                     return (
-                      <button
+                      <AnswerOption
                         key={opt}
+                        label={opt}
+                        dir="ltr"
+                        selected={isSelected && !isUnlocked && !showErrorAlert}
+                        state={state}
                         disabled={isUnlocked}
                         onClick={() => handleSelectOption(opt)}
-                        className={`p-3.5 rounded-xl border-2 text-center text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 select-none ${btnStyle}`}
-                      >
-                        <span className="font-mono">{opt}</span>
-                      </button>
+                      />
                     );
                   })}
                 </div>
 
-                {/* Danger or Success alert */}
+                {/* Feedback Alerts */}
                 {showErrorAlert && (
-                  <div className="bg-rose-950/40 border border-rose-900 p-3.5 rounded-xl text-center text-xs text-rose-300 font-bold">
-                    ⚠️ {isRtl ? 'رمز التشفير خاطئ! أعد المحاولة، فالحارس يقترب...' : 'Cipher matching code failed! Try another configuration.'}
+                  <div className="bg-red-950/70 border border-red-500/60 p-3.5 rounded-2xl text-center text-xs text-red-100 font-black">
+                    ⚠️ {t('رمز التشفير خاطئ! أعد المحاولة، فالحارس يقترب...', 'Cipher matching code failed! Try another configuration.')}
                   </div>
                 )}
 
                 {isUnlocked && (
-                  <div className="bg-emerald-950/50 border border-emerald-900 p-4 rounded-xl space-y-2">
-                    <p className="text-xs text-emerald-300 font-black">
-                      🔓 {isRtl ? 'تم حل الشفرة بشكل مذهل! انفتح القفل السري:' : 'Padlock opened successfully! Mystery decoded:'}
+                  <div className="bg-[#002147] border-2 border-[#C49E3A] p-4 rounded-2xl space-y-1.5 animate-[pulse_0.6s_ease-out_1]">
+                    <p className="text-xs text-[#E6C36A] font-black">
+                      🔓 {t('تم حل الشفرة بشكل مذهل! انفتح القفل السري:', 'Padlock opened successfully! Mystery decoded:')}
                     </p>
-                    <p className="text-xs text-stone-300 leading-normal font-bold">
-                      {isRtl ? currentLevel.explanationAr : currentLevel.explanation}
+                    <p className="text-xs text-white/90 leading-relaxed font-bold">
+                      {t(currentLevel.explanationAr, currentLevel.explanation)}
                     </p>
                   </div>
                 )}
-
               </div>
 
-              {/* Bottom footer button for check or progress */}
-              <div className="bg-purple-950 border-t border-purple-900 p-4 flex justify-end gap-3">
+              {/* Footer Action Row */}
+              <div className="bg-[#002147] border-t border-[#C49E3A]/40 p-4 flex justify-end">
                 {!isUnlocked ? (
-                  <button
+                  <PrimaryButton
                     disabled={!selectedOption}
                     onClick={handleDecoderCheck}
-                    className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-900/30 disabled:text-purple-600 disabled:border-purple-900/40 border border-purple-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md shadow-purple-900/20"
                   >
-                    <span>{isRtl ? 'فحص الرمز المفتاح 🗝️' : 'CHECK COMBINATION 🗝️'}</span>
-                  </button>
+                    {t('فحص الرمز المفتاح 🗝️', 'CHECK COMBINATION 🗝️')}
+                  </PrimaryButton>
                 ) : (
-                  <button
-                    onClick={handleNextStage}
-                    className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-[#002147] font-black text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-md"
-                  >
-                    <span>
-                      {currentLevelIdx < levels.length - 1 
-                        ? (isRtl ? 'الباب التالي ➡️' : 'Decode Next Door ➡️') 
-                        : (isRtl ? 'الهروب العظيم وحصد الثمار 🏆' : 'Complete Escape & Claim 🏆')}
-                    </span>
-                  </button>
+                  <PrimaryButton onClick={handleNextStage}>
+                    {currentLevelIdx < levels.length - 1
+                      ? t('الباب التالي ➡️', 'Decode Next Door ➡️')
+                      : t('الهروب العظيم وحصد الثمار 🏆', 'Complete Escape & Claim 🏆')}
+                  </PrimaryButton>
                 )}
               </div>
-
-            </motion.div>
+            </GoldCard>
           ) : (
-            /* Game finished successfully */
-            <div className="bg-purple-950/60 border border-purple-900 shadow-2xl rounded-3xl p-8 text-center space-y-6 flex flex-col items-center justify-center min-h-[400px]">
-              
-              <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center text-amber-400 border border-amber-500/30 animate-bounce">
-                <ShieldCheck size={48} strokeWidth={2.5} />
+            /* Win Screen -> Navy Card with Gold Badge showing the real XP earned */
+            <div className="bg-[#002147] border-2 border-[#C49E3A] rounded-2xl p-6 sm:p-8 text-center space-y-5 flex flex-col items-center justify-center shadow-sm">
+              <div className="w-16 h-16 bg-[#001a38] rounded-full flex items-center justify-center text-[#E6C36A] border-2 border-[#C49E3A]">
+                <ShieldCheck size={36} strokeWidth={2.5} />
               </div>
 
               <div className="space-y-2">
-                <span className="text-[10px] text-amber-500 font-extrabold tracking-widest block uppercase">
-                  {isRtl ? 'لقب الشرف الفخري' : 'HONORARY DETECTIVE DECREE'}
+                <span className="text-[11px] text-[#C49E3A] font-black tracking-widest block uppercase">
+                  {t('لقب الشرف الفخري', 'HONORARY DETECTIVE DECREE')}
                 </span>
-                <h2 className="text-3xl font-black text-white">
-                  {isRtl ? 'لقد حررت قفل ساعة بيغ بن! 🕰️🎉' : 'You Cleared London Tower! 🕰️🎉'}
+                <h2 className="text-2xl sm:text-3xl font-black text-[#E6C36A]">
+                  {t('لقد حررت قفل ساعة بيغ بن! 🕰️🎉', 'You Cleared London Tower! 🕰️🎉')}
                 </h2>
-                <p className="text-purple-300 font-bold text-sm max-w-sm mx-auto">
-                  {isRtl
-                    ? 'بفضل ذكائك وإتقانك لزمن المضارع البسيط، أعدت عقارب الساعة للعمل وهربت بسلام من برج لندن القديم!'
-                    : 'You proved subject-verb coordination mastery! All locks opened and the ancient tower stands proud.'}
+                <p className="text-white/85 font-bold text-xs sm:text-sm max-w-md mx-auto leading-relaxed">
+                  {t(
+                    'بفضل ذكائك وإتقانك لزمن المضارع البسيط، أعدت عقارب الساعة للعمل وهربت بسلام من برج لندن القديم!',
+                    'You proved subject-verb coordination mastery! All locks opened and the ancient tower stands proud.'
+                  )}
                 </p>
               </div>
 
-              {/* Gained scores */}
-              <div className="bg-[#12091A] border border-purple-900 p-4 rounded-xl flex items-center justify-around max-w-xs w-full">
-                <div>
-                  <span className="text-[9px] text-purple-400 font-bold block">{isRtl ? 'المستوى' : 'LEVELS'}</span>
-                  <strong className="text-xl font-black text-amber-400">3 / 3</strong>
-                </div>
-                <div className="border-r h-8 border-purple-900" />
-                <div>
-                  <span className="text-[9px] text-purple-400 font-bold block">{isRtl ? 'جائزة الهروب' : 'ESCAPE REWARD'}</span>
-                  <strong className="text-xl font-black text-emerald-400">+30 XP</strong>
-                </div>
+              {/* Gold badge showing real rooms solved and real XP earned */}
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <ProgressPill className="!bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A] !px-4 !py-1.5 !text-sm">
+                  🔓 {t('المستوى', 'LEVELS')}: {levels.length} / {levels.length}
+                </ProgressPill>
+                <ProgressPill className="!bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A] !px-4 !py-1.5 !text-sm">
+                  🏆 {t('جائزة الهروب', 'ESCAPE REWARD')}: +{ESCAPE_XP_REWARD} XP
+                </ProgressPill>
               </div>
 
-              <div className="flex items-center gap-3 w-full max-w-xs">
-                <button
-                  onClick={handleResetGame}
-                  className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-pointer"
-                >
-                  {isRtl ? 'إعادة اللعب 🔄' : 'Replay Clockwork 🔄'}
-                </button>
-                <button
+              <div className="flex items-center justify-center gap-3 w-full max-w-xs pt-2">
+                <PrimaryButton onClick={handleResetGame} className="flex-1">
+                  {t('إعادة اللعب 🔄', 'Replay Clockwork 🔄')}
+                </PrimaryButton>
+                <GhostButton
                   onClick={onBack}
-                  className="flex-1 py-3 bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-800 font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-pointer"
+                  className="flex-1 !bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A]/60 hover:!border-[#C49E3A]"
                 >
-                  {isRtl ? 'العودة للمنصة' : 'Exit Tower'}
-                </button>
+                  {t('العودة للمنصة', 'Exit Tower')}
+                </GhostButton>
               </div>
-
             </div>
           )}
-        </AnimatePresence>
-
+        </motion.div>
       </div>
     </div>
   );

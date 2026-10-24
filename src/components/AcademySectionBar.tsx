@@ -5,6 +5,7 @@ const TITLES: Record<string, [string, string]> = {
   'grammar-academy': ['أكاديمية القواعد 📐', 'Grammar Academy 📐'],
   'reading-lab': ['مختبر القراءة 📖', 'Reading Lab 📖'],
   'writing-spelling-studio': ['استوديو التعبير والإملاء ✍️', 'Writing & Spelling ✍️'],
+  'escape-room': ['غرفة الهروب النحوية 🔐', 'Grammar Escape Room 🔐'],
   'pronunciation-lab': ['معمل النطق 🎙️', 'Pronunciation Lab 🎙️'],
   'live-translate': ['المترجم المباشر 🌐', 'Live Translate 🌐'],
   'interactive-learning': ['تعليم تفاعلي ⚡', 'Interactive Learning ⚡'],

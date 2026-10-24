@@ -1,30 +1,24 @@
 import React, { useState } from 'react';
-import { 
-  PenTool, 
-  Volume2, 
-  Sparkles, 
-  CheckCircle2, 
-  XCircle, 
-  ArrowRight, 
-  ArrowLeft, 
-  Trophy, 
-  RefreshCw, 
-  Flame, 
-  BookOpen, 
-  Layers, 
-  FileText, 
-  Type, 
-  Award,
-  Zap,
-  Lightbulb,
-  Check,
-  Send,
-  HelpCircle,
-  Copy
+import {
+  PenTool,
+  Volume2,
+  Sparkles,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { Language } from '../lib/translations';
+import { useT } from '../lib/explainLang';
+import { toEnglish } from '../lib/domTranslate';
 import { managedSpeak } from '../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  PrimaryButton,
+  GhostButton,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface WritingSpellingStudioProps {
   lang: Language;
@@ -97,14 +91,54 @@ const SPELLING_DATASET: SpellingItem[] = [
   }
 ];
 
-export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ lang, onBack, userLevel, onXPAdded }) => {
-  const isRtl = lang === 'ar';
+const WRITING_EN_MAP: Record<string, string> = {
+  'التباين والمقابلة (Contrast)': 'Contrast & Comparison',
+  'السبب والنتيجة (Cause & Effect)': 'Cause & Effect',
+  'التوكيد والإضافة (Addition & Emphasis)': 'Addition & Emphasis',
+  'المعرفة والعلم': 'Knowledge and learning',
+  'الشك والريبة': 'Uncertainty or doubt',
+  'شامل ودقيق ومفصل': 'Complete, detailed, and careful',
+  'يستوعب / يستضيف': 'To provide space or lodging for',
+  'متقن وضميري ويقظ الضمير': 'Diligent, careful, and thorough',
+  'تبدأ بحرف صامت، وتحتوي على dge في النهاية': 'Starts with a silent letter and ends with -dge',
+  'حرف b صامت تماماً قبل حرف t': 'The letter b is completely silent before t',
+  'تنتهي بالمقطع الشهير -ough': 'Ends with the classic -ough pattern',
+  'تحتوي على حرفي c مضاعفين وحرفي m مضاعفين (cc + mm)': 'Contains both double c and double m (cc + mm)',
+  'تنتهي باللاحقة -tious وصوت /ʃəs/': 'Ends with the suffix -tious pronounced /ʃəs/',
+  'قاعدة الحرف الصامت (Silent K): حرف K لا يُنطق إذا جاء بعده حرف N في بداية الكلمة (Kn-). وقاعدة -dge تعطي صوت /dʒ/ بعد حرف علة قصير.':
+    'Silent K rule: K is silent before N at the start of a word (Kn-). The -dge spelling makes the /dʒ/ sound after a short vowel.',
+  'قاعدة الحرف الصامت (Silent B): حرف B لا يُنطق عندما يأتي قبل حرف T في الكلمات ذات الأصل اللاتيني مثل Doubt و Debt.':
+    'Silent B rule: B is silent before T in Latin-origin words such as Doubt and Debt.',
+  'قاعدة المقطع -ough: مقطع متعدد الأصوات، هنا ينطق بصوت الشوا الخفيف /ə/.':
+    'The -ough pattern has multiple pronunciations; in "thorough" it is pronounced with a soft schwa /ə/.',
+  'قاعدة التضعيف المزدوج (Double Consonants): تحتوي الكلمة على cc و mm معاً وتعتبر من أكثر الكلمات اختباراً في المسابقات الدولية.':
+    'Double Consonants rule: "Accommodate" has both double c (cc) and double m (mm).',
+  'قاعدة اللواحق (-tious / -cious): تنطق دائماً /ʃəs/ وتستخدم لتحويل الأسماء إلى صفات تصف الاتقان والشخصية.':
+    'Suffix rule (-tious / -cious): pronounced /ʃəs/ and used to form adjectives describing character and care.',
+  'كتابة ممتازة وفكرة واضحة! استخدمت روابط منطقية جيدة وتركيب جمل متناسق.':
+    'Excellent writing and clear ideas! You used strong logical connectors and well-structured sentences.',
+  'حافظ على نسق موحد للأزمنة في نفس الفقرة.':
+    'Keep verb tenses consistent within the same paragraph.',
+  'الإملاء سليم ومنضبط.':
+    'Spelling is accurate and well-controlled.',
+  'ترقية المفردات لأسلوب أكثر فصاحة.':
+    'Upgraded vocabulary for a more academic tone.',
+};
+
+export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ lang, userLevel, onXPAdded }) => {
+  const tHook = useT();
+  const isEnMode = lang === 'en' || tHook('ar', 'en') === 'en';
+  const isRtl = !isEnMode;
+  const t = (ar: string, en: string) => (isEnMode ? en : ar);
+  const tr = (ar: string) => t(ar, WRITING_EN_MAP[ar] || toEnglish(ar));
+
   const [activeStudioTab, setActiveStudioTab] = useState<'expression' | 'essay' | 'spelling'>('expression');
 
   // ==========================================
   // TAB 1: EXPRESSION & RHETORIC
   // ==========================================
-  const [selectedCategory, setSelectedCategory] = useState<'transitions' | 'idioms' | 'builders'>('transitions');
+  const [selectedCategory] = useState<'transitions' | 'idioms' | 'builders'>('transitions');
+  void selectedCategory;
 
   const transitions = [
     {
@@ -135,7 +169,7 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
   // ==========================================
   // TAB 2: ESSAY & GUIDED WRITING + AI EVALUATOR
   // ==========================================
-  const [essayPrompt, setEssayPrompt] = useState('How can artificial intelligence empower human education rather than replace teachers?');
+  const [essayPrompt] = useState('How can artificial intelligence empower human education rather than replace teachers?');
   const [essayText, setEssayText] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState<any>(null);
@@ -213,7 +247,6 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
       setIsSpellingChecked(false);
       setIsSpellingCorrect(false);
     } else {
-      // Loop or finish
       setCurrentSpellingIdx(0);
       setTypedSpelling('');
       setIsSpellingChecked(false);
@@ -221,242 +254,253 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
     }
   };
 
+  // Collect all feedback issues for Sara-style sentence check cards
+  const feedbackIssues: { wrong: string; correct: string; reason: string }[] = [];
+  if (evaluationResult) {
+    (evaluationResult.grammarFeedback || []).forEach((g: any) => {
+      const wrong = g.originalFragment || g.issue || '';
+      const correct = g.correctedFragment || g.fix || '';
+      const reason = g.ruleAr || g.tipAr || '';
+      if (wrong || correct) feedbackIssues.push({ wrong, correct, reason });
+    });
+    (evaluationResult.spellingFeedback || []).forEach((s: any) => {
+      const wrong = s.misspelledWord || s.word || '';
+      const correct = s.correctSpelling || s.correct || '';
+      const reason = s.phonicRuleAr || '';
+      if ((wrong || correct) && wrong !== correct) feedbackIssues.push({ wrong, correct, reason });
+    });
+    (evaluationResult.vocabularyEnhancements || []).forEach((v: any) => {
+      if (v.original || v.upgraded) {
+        feedbackIssues.push({ wrong: v.original || '', correct: v.upgraded || '', reason: v.reasonAr || '' });
+      }
+    });
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/20 to-indigo-50/30 p-3 sm:p-6 lg:p-8 font-sans" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Top Navigation Bar */}
-      <div className="max-w-7xl mx-auto mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-purple-100 shadow-sm">
-          <div className="flex items-center gap-3 sm:gap-4">
-            {onBack && (
-              <button
-                onClick={onBack}
-                className="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-600 flex items-center justify-center transition-all cursor-pointer border border-slate-200"
-              >
-                {isRtl ? <ArrowRight size={20} /> : <ArrowLeft size={20} />}
-              </button>
-            )}
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-purple-500/20">
-              <PenTool size={26} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  {isRtl ? 'استوديو التعبير والكتابة والإملاء العلمي' : 'Master Writing, Expression & Spelling Studio'}
-                </h1>
-                <span className="bg-purple-50 text-purple-700 text-xs font-black px-2.5 py-0.5 rounded-full border border-purple-200">
-                  {isRtl ? 'بلاغة وإملاء متقن ✍️' : 'Rhetoric & Orthography ✍️'}
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-                {isRtl
-                  ? 'صياغة التعبير البليغ، كتابة المقالات الأكاديمية مع التقييم الذكي، وتدريبات الإملاء الصوتي والقواعد الإملائية'
-                  : 'Master eloquent expression, essay structuring with instant AI grading, and scientific phonics spelling drills.'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1 text-xs font-black text-purple-700 bg-purple-50 px-3 py-1.5 rounded-xl border border-purple-200">
-              <Trophy size={16} />
-              {isRtl ? 'نقاط الكتابة والإملاء:' : 'Writing XP:'} 890
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Main 3 Sub-Studio Switches */}
-        <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-1 overflow-x-auto">
-          {[
-            { id: 'expression', labelAr: '💬 التعبير الذكي والروابط البليغة', labelEn: '💬 Smart Expression & Transitions' },
-            { id: 'essay', labelAr: '📝 محرر المقالات ومقيم الذكاء الاصطناعي', labelEn: '📝 Essay Crafter & AI Evaluator' },
-            { id: 'spelling', labelAr: '🎯 معمل الإملاء الصوتي والعلمي', labelEn: '🎯 Phonics & Spelling Lab' },
-          ].map((tab) => (
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} data-testid="writing-spelling-studio">
+      {/* Studio Pill Tabs (Navy when active, white with gold border otherwise) */}
+      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+        {[
+          { id: 'essay', labelAr: '📝 المقال والتقييم', labelEn: '📝 Essay & AI Grade' },
+          { id: 'spelling', labelAr: '🎯 معمل الإملاء', labelEn: '🎯 Spelling Lab' },
+          { id: 'expression', labelAr: '💬 الروابط البليغة', labelEn: '💬 Transitions' },
+        ].map((tab) => {
+          const active = activeStudioTab === tab.id;
+          return (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveStudioTab(tab.id as any)}
-              className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black transition-all whitespace-nowrap flex items-center justify-center gap-2 cursor-pointer ${
-                activeStudioTab === tab.id
-                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm scale-100'
-                  : 'text-slate-600 hover:bg-slate-50'
+              className={`flex-1 py-2 px-3.5 rounded-full text-xs font-black whitespace-nowrap active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer ${
+                active
+                  ? 'bg-[#002147] text-[#E6C36A] border border-[#C49E3A] shadow-sm'
+                  : 'bg-white text-[#002147] border border-[#C49E3A]/40 hover:border-[#C49E3A]'
               }`}
             >
-              {isRtl ? tab.labelAr : tab.labelEn}
+              {t(tab.labelAr, tab.labelEn)}
             </button>
-          ))}
-        </div>
+          );
+        })}
+      </div>
 
+      {/* Single fade transition between tabs */}
+      <motion.div
+        key={activeStudioTab}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.18 }}
+      >
         {/* ================================================================= */}
         {/* SUB-STUDIO 1: SMART EXPRESSION & RHETORIC */}
         {/* ================================================================= */}
         {activeStudioTab === 'expression' && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-6">
-              <div>
-                <h3 className="text-lg font-black text-slate-900">
-                  {isRtl ? 'روابط التعبير الأكاديمي وصياغة الأفكار' : 'Academic Discourse Markers & Transition Connectors'}
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {isRtl
-                    ? 'استخدم هذه الروابط لرفع مستوى فصاحتك الكتابية والشفهية من المستوى العادي إلى الأكاديمي المتقدم'
-                    : 'Elevate your fluency from basic conversational to polished academic prose.'}
-                </p>
-              </div>
+          <GoldCard className="space-y-5">
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-[#002147]">
+                {t('روابط التعبير الأكاديمي وصياغة الأفكار', 'Academic Discourse Markers & Transition Connectors')}
+              </h3>
+              <p className="text-xs font-bold text-[#002147]/70 mt-0.5">
+                {t(
+                  'استخدم هذه الروابط لرفع مستوى فصاحتك الكتابية والشفهية من المستوى العادي إلى الأكاديمي المتقدم',
+                  'Elevate your fluency from basic conversational to polished academic prose.'
+                )}
+              </p>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {transitions.map((tGroup, gIdx) => (
-                  <div key={gIdx} className="p-5 rounded-2xl bg-purple-50/40 border border-purple-100 space-y-3">
-                    <h4 className="text-xs font-black text-purple-900 uppercase tracking-wide">
-                      {tGroup.groupAr}
-                    </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {transitions.map((tGroup, gIdx) => (
+                <div key={gIdx} className="p-4 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 space-y-3">
+                  <h4 className="text-xs font-black text-[#002147] uppercase tracking-wide border-b border-[#C49E3A]/30 pb-1.5">
+                    {tr(tGroup.groupAr)}
+                  </h4>
 
-                    <div className="space-y-2.5">
-                      {tGroup.items.map((item, iIdx) => (
-                        <div key={iIdx} className="p-3.5 bg-white rounded-xl border border-slate-200/80 space-y-1.5 shadow-2xs group hover:border-purple-300 transition-colors">
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono text-xs font-black text-purple-700">
-                              {item.en}
-                            </span>
-                            <button
-                              onClick={() => playAudio(item.en)}
-                              className="text-slate-400 hover:text-purple-600 transition-colors cursor-pointer"
-                            >
-                              <Volume2 size={14} />
-                            </button>
-                          </div>
-                          <div className="text-[11px] font-bold text-slate-700">
+                  <div className="space-y-2.5">
+                    {tGroup.items.map((item, iIdx) => (
+                      <div key={iIdx} className="p-3 bg-white rounded-xl border border-[#C49E3A]/30 space-y-1.5 shadow-2xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-mono text-xs font-black text-[#002147]" dir="ltr">
+                            {item.en}
+                          </span>
+                          <GhostButton
+                            onClick={() => playAudio(item.en)}
+                            className="!px-2 !py-1"
+                            aria-label={t('استماع', 'Listen')}
+                          >
+                            <Volume2 size={13} />
+                          </GhostButton>
+                        </div>
+                        {isRtl && (
+                          <div className="text-[11px] font-bold text-[#002147]/80">
                             {item.ar}
                           </div>
-                          <div className="text-[10px] text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-100 font-medium italic">
-                            "{item.example}"
-                          </div>
+                        )}
+                        <div className="text-[11px] text-[#002147]/75 bg-[#fdfaf3] p-2 rounded-lg border border-[#C49E3A]/20 font-bold" dir="ltr">
+                          "{item.example}"
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          </motion.div>
+          </GoldCard>
         )}
 
         {/* ================================================================= */}
-        {/* SUB-STUDIO 2: ESSAY CRAFTER & AI EVALUATOR */}
+        {/* SUB-STUDIO 2: ESSAY CRAFTER & AI EVALUATOR (with Ali TutorFace) */}
         {/* ================================================================= */}
         {activeStudioTab === 'essay' && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-6"
-          >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Writing Workspace */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
-                    {isRtl ? 'موضوع المقال الأكاديمي' : 'Writing Prompt'}
-                  </span>
-                  <span className="text-xs font-bold text-slate-400">
-                    {wordCount} {isRtl ? 'كلمة' : 'words'}
-                  </span>
+            <div className="lg:col-span-7">
+              <GoldCard className="space-y-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2.5">
+                    <TutorFace tutor="exams" size="sm" />
+                    <div>
+                      <span className="text-xs font-black text-[#002147] block">
+                        {t('علي • مدرب الكتابة الأكاديمية', 'Ali • Academic Writing Coach')}
+                      </span>
+                      <span className="text-[11px] font-bold text-[#002147]/70">
+                        {t('موضوع المقال الأكاديمي', 'Writing Prompt')}
+                      </span>
+                    </div>
+                  </div>
+                  <ProgressPill data-testid="essay-word-counter">
+                    ✍️ {wordCount} {t('كلمة', 'words')}
+                  </ProgressPill>
                 </div>
 
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-sm font-bold text-slate-900 leading-relaxed">
+                <div className="p-3.5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 text-xs sm:text-sm font-black text-[#002147] leading-relaxed" dir="ltr">
                   "{essayPrompt}"
                 </div>
 
                 <textarea
                   value={essayText}
                   onChange={(e) => setEssayText(e.target.value)}
-                  placeholder={isRtl 
-                    ? 'ابدأ بكتابة مقالك هنا باللغة الإنجليزية... استخدم جملاً متناسقة وروابط تباين وإضافة. (الحد الأدنى المقترح: 40 كلمة)' 
-                    : 'Type your essay or response here in English...'}
-                  className="w-full p-4 rounded-2xl border border-slate-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-sm outline-none resize-none h-64 font-serif leading-relaxed"
+                  placeholder={t(
+                    'ابدأ بكتابة مقالك هنا باللغة الإنجليزية... استخدم جملاً متناسقة وروابط تباين وإضافة. (الحد الأدنى المقترح: 40 كلمة)',
+                    'Type your essay or response here in English...'
+                  )}
+                  className="w-full p-4 rounded-2xl bg-white border border-[#C49E3A]/40 focus:border-[#C49E3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] text-sm font-bold text-[#002147] resize-none h-60 leading-relaxed"
                   dir="ltr"
                 />
 
-                <div className="flex items-center justify-between pt-2">
-                  <button
-                    onClick={() => setEssayText(`In recent years, artificial intelligence has emerged as a groundbreaking tool in modern classrooms. Rather than replacing educators, AI empowers teachers by automating routine grading and providing real-time personalized tutoring. Furthermore, it allows students to practice conversational skills at any time, boosting confidence and fluency.`)}
-                    className="text-xs font-bold text-purple-600 hover:text-purple-800 underline cursor-pointer"
+                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
+                  <GhostButton
+                    onClick={() =>
+                      setEssayText(
+                        `In recent years, artificial intelligence has emerged as a groundbreaking tool in modern classrooms. Rather than replacing educators, AI empowers teachers by automating routine grading and providing real-time personalized tutoring. Furthermore, it allows students to practice conversational skills at any time, boosting confidence and fluency.`
+                      )
+                    }
                   >
-                    {isRtl ? 'إدراج نموذج تجريبي جاهز' : 'Insert Sample Essay'}
-                  </button>
+                    {t('إدراج نموذج تجريبي جاهز', 'Insert Sample Essay')}
+                  </GhostButton>
 
-                  <button
+                  <PrimaryButton
                     disabled={wordCount < 10 || isEvaluating}
                     onClick={handleEvaluateEssay}
-                    className={`px-6 py-3 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                      wordCount >= 10 && !isEvaluating
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md'
-                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                    }`}
                   >
                     {isEvaluating ? (
                       <>
-                        <RefreshCw size={16} className="animate-spin" />
-                        {isRtl ? 'جاري الفحص بالذكاء الاصطناعي...' : 'Evaluating...'}
+                        <span className="w-4 h-4 rounded-full border-2 border-[#C49E3A] border-t-transparent animate-spin inline-block shrink-0" />
+                        <span>{t('جاري الفحص بالذكاء الاصطناعي...', 'Evaluating...')}</span>
                       </>
                     ) : (
                       <>
-                        <Sparkles size={16} />
-                        {isRtl ? 'فحص المقال والتقييم الأكاديمي 🚀' : 'Evaluate & Grade 🚀'}
+                        <Sparkles size={15} />
+                        <span>{t('فحص المقال والتقييم الأكاديمي 🚀', 'Evaluate & Grade 🚀')}</span>
                       </>
                     )}
-                  </button>
+                  </PrimaryButton>
                 </div>
-              </div>
+              </GoldCard>
             </div>
 
             {/* AI Evaluator Output Panel */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4 min-h-[400px]">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider">
-                  {isRtl ? 'تقرير فحص الكتابة والدرجة المعتمدة' : 'AI Academic Evaluation Report'}
+            <div className="lg:col-span-5">
+              <GoldCard className="space-y-4 min-h-[360px]">
+                <h3 className="text-xs font-black text-[#002147]/70 uppercase tracking-wider">
+                  {t('تقرير فحص الكتابة والدرجة المعتمدة', 'AI Academic Evaluation Report')}
                 </h3>
 
                 {evaluationResult ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-4"
-                  >
-                    {/* Score badge */}
-                    <div className="p-4 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-between">
+                  <div className="space-y-3.5">
+                    {/* Score badge in Navy/Gold */}
+                    <div className="p-4 rounded-2xl bg-[#002147] text-white border-2 border-[#C49E3A] flex items-center justify-between gap-2">
                       <div>
-                        <div className="text-2xl font-black text-purple-900">
+                        <div className="text-2xl font-black text-[#E6C36A]">
                           {evaluationResult.score} / 100
                         </div>
-                        <div className="text-xs font-bold text-purple-700">
-                          CEFR Tier: {evaluationResult.cefrLevel}
-                        </div>
+                        {evaluationResult.cefrLevel && (
+                          <div className="text-xs font-bold text-white/85">
+                            CEFR: {evaluationResult.cefrLevel}
+                          </div>
+                        )}
                       </div>
-                      <span className="text-xs font-black bg-purple-600 text-white px-3 py-1 rounded-xl shadow-xs">
-                        +{evaluationResult.xpEarned || 150} XP 🏆
-                      </span>
+                      {typeof evaluationResult.xpEarned === 'number' && (
+                        <ProgressPill className="!bg-[#001a38] !text-[#E6C36A] !border-[#C49E3A]">
+                          🏆 +{evaluationResult.xpEarned} XP
+                        </ProgressPill>
+                      )}
                     </div>
 
                     {/* Summary */}
-                    <div className="text-xs text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-200 leading-relaxed font-medium">
-                      {evaluationResult.feedbackSummaryAr}
-                    </div>
+                    {evaluationResult.feedbackSummaryAr && (
+                      <div className="text-xs text-[#002147] bg-[#fdfaf3] p-3.5 rounded-2xl border border-[#C49E3A]/40 leading-relaxed font-bold">
+                        {tr(evaluationResult.feedbackSummaryAr)}
+                      </div>
+                    )}
 
-                    {/* Vocabulary Enhancements */}
-                    {evaluationResult.vocabularyEnhancements && evaluationResult.vocabularyEnhancements.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="text-xs font-black text-indigo-800">
-                          {isRtl ? '💡 ترقيات المفردات المقترحة:' : 'Vocabulary Upgrades:'}
+                    {/* Issues list: mistake (red), correction (green), short explanation in its own small card */}
+                    {feedbackIssues.length > 0 && (
+                      <div className="space-y-2.5">
+                        <div className="text-xs font-black text-[#002147]">
+                          {t('🔍 التصحيحات والتحسينات المقترحة:', '🔍 Corrections & Improvements:')}
                         </div>
-                        {evaluationResult.vocabularyEnhancements.map((v: any, vIdx: number) => (
-                          <div key={vIdx} className="p-2.5 bg-indigo-50/50 rounded-xl border border-indigo-100 text-xs space-y-0.5">
-                            <div className="font-bold text-indigo-900">
-                              <span className="line-through text-slate-400 mr-1">{v.original}</span> ➔ <span className="text-emerald-700">{v.upgraded}</span>
-                            </div>
-                            <div className="text-[11px] text-slate-600">{v.reasonAr}</div>
+                        {feedbackIssues.map((item, idx) => (
+                          <div
+                            key={idx}
+                            data-testid="essay-feedback-card"
+                            className="p-3 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 space-y-1.5"
+                          >
+                            {item.wrong && (
+                              <div className="flex items-center gap-1.5 text-red-700 font-black text-xs" dir="ltr">
+                                <XCircle size={14} className="shrink-0 text-red-600" />
+                                <span className="line-through">{item.wrong}</span>
+                              </div>
+                            )}
+                            {item.correct && (
+                              <div className="flex items-center gap-1.5 text-green-800 font-black text-xs" dir="ltr">
+                                <CheckCircle2 size={14} className="shrink-0 text-green-600" />
+                                <span>{item.correct}</span>
+                              </div>
+                            )}
+                            {item.reason && (
+                              <p className="text-[11px] font-bold text-[#002147]/80 leading-relaxed">
+                                {tr(item.reason)}
+                              </p>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -464,173 +508,180 @@ export const WritingSpellingStudio: React.FC<WritingSpellingStudioProps> = ({ la
 
                     {/* Polished Version */}
                     {evaluationResult.polishedVersion && (
-                      <div className="p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-200 space-y-1.5">
-                        <div className="text-xs font-black text-emerald-800">
-                          {isRtl ? '✨ الصياغة الأكاديمية المصقولة:' : 'Polished Academic Version:'}
+                      <div className="p-3.5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 space-y-1.5">
+                        <div className="text-xs font-black text-[#002147]">
+                          {t('✨ الصياغة الأكاديمية المصقولة:', '✨ Polished Academic Version:')}
                         </div>
-                        <p className="text-xs text-slate-800 font-serif leading-relaxed" dir="ltr">
+                        <p className="text-xs text-[#002147] font-bold leading-relaxed" dir="ltr">
                           "{evaluationResult.polishedVersion}"
                         </p>
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 ) : (
-                  <div className="text-center py-16 text-slate-400 space-y-2">
-                    <PenTool size={36} className="mx-auto text-slate-300" />
+                  <div className="text-center py-14 text-[#002147]/60 space-y-2">
+                    <PenTool size={32} className="mx-auto text-[#C49E3A]" />
                     <p className="text-xs font-bold">
-                      {isRtl ? 'اكتب مقالك واضغط على "فحص المقال" لعرض التحليل الشامل' : 'Write your essay and hit evaluate to see instant feedback.'}
+                      {t(
+                        'اكتب مقالك واضغط على "فحص المقال" لعرض التحليل الشامل',
+                        'Write your essay and hit evaluate to see instant feedback.'
+                      )}
                     </p>
                   </div>
                 )}
-              </div>
+              </GoldCard>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* ================================================================= */}
-        {/* SUB-STUDIO 3: SCIENTIFIC PHONICS & SPELLING LAB */}
+        {/* SUB-STUDIO 3: SCIENTIFIC PHONICS & SPELLING LAB (with Noura TutorFace) */}
         {/* ================================================================= */}
         {activeStudioTab === 'spelling' && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div>
-                <span className="text-xs font-black text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
-                  {isRtl ? `تحدي الإملاء ${currentSpellingIdx + 1} من ${SPELLING_DATASET.length}` : `Challenge ${currentSpellingIdx + 1} of ${SPELLING_DATASET.length}`}
-                </span>
-                <h3 className="text-lg font-black text-slate-900 mt-2">
-                  {isRtl ? 'استمع واكتب الإملاء الصحيح علمياً' : 'Listen & Type Accurate Spelling'}
-                </h3>
-              </div>
-              <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-                Score: {spellingScore} XP
-              </span>
-            </div>
-
-            {/* Audio Cue Button */}
-            <div className="text-center py-6 bg-purple-50/50 rounded-3xl border border-purple-100 space-y-3">
-              <button
-                onClick={() => playAudio(currentSpellingItem.word)}
-                className="w-16 h-16 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-purple-500/30 hover:scale-105 transition-transform cursor-pointer"
-              >
-                <Volume2 size={28} />
-              </button>
-              <div className="text-xs font-black text-purple-900">
-                {isRtl ? 'اضغط للاستماع إلى النطق الصوتي الدقيق' : 'Click to hear the target word'}
-              </div>
-              <div className="text-xs text-slate-500 font-mono">
-                {currentSpellingItem.ipa}
-              </div>
-            </div>
-
-            {/* Context & Meaning Clues */}
-            <div className="space-y-3">
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                <div className="text-xs text-slate-500 font-bold">
-                  {isRtl ? 'المعنى بالعربية:' : 'Arabic Meaning:'}
+          <div className="max-w-3xl mx-auto">
+            <GoldCard className="space-y-5">
+              {/* Header with Noura TutorFace */}
+              <div className="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-[#C49E3A]/25">
+                <div className="flex items-center gap-3">
+                  <TutorFace tutor="noura" size="sm" />
+                  <div>
+                    <ProgressPill>
+                      {t(
+                        `تحدي الإملاء ${currentSpellingIdx + 1} من ${SPELLING_DATASET.length}`,
+                        `Challenge ${currentSpellingIdx + 1} of ${SPELLING_DATASET.length}`
+                      )}
+                    </ProgressPill>
+                    <h3 className="text-base sm:text-lg font-black text-[#002147] mt-1">
+                      {t('نورة • استمع واكتب الإملاء الصحيح علمياً', 'Noura • Listen & Type Accurate Spelling')}
+                    </h3>
+                  </div>
                 </div>
-                <div className="text-sm font-black text-slate-900">
-                  {currentSpellingItem.meaningAr}
-                </div>
+                <ProgressPill>
+                  🏆 {spellingScore} XP
+                </ProgressPill>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                <div className="text-xs text-slate-500 font-bold">
-                  {isRtl ? 'السياق في الجملة:' : 'Context Sentence:'}
-                </div>
-                <div className="text-sm font-medium text-slate-800 font-serif" dir="ltr">
-                  "{currentSpellingItem.sentence}"
-                </div>
-              </div>
-            </div>
-
-            {/* Spelling Input */}
-            <div className="space-y-3">
-              <input
-                type="text"
-                value={typedSpelling}
-                disabled={isSpellingChecked}
-                onChange={(e) => setTypedSpelling(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isSpellingChecked) {
-                    handleCheckSpelling();
-                  }
-                }}
-                placeholder={isRtl ? 'اكتب الكلمة بالإنجليزية هنا...' : 'Type word here...'}
-                className="w-full p-4 text-center text-lg sm:text-xl font-bold tracking-widest uppercase rounded-2xl border-2 border-slate-200 focus:border-purple-600 outline-none"
-                dir="ltr"
-              />
-
-              {/* Feedback and Rule */}
-              {isSpellingChecked && (
-                <motion.div
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`p-4 rounded-2xl border text-xs space-y-2 ${
-                    isSpellingCorrect
-                      ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                      : 'bg-rose-50 border-rose-300 text-rose-900'
-                  }`}
+              {/* Audio Cue Card */}
+              <div className="text-center py-5 px-4 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => playAudio(currentSpellingItem.word)}
+                  className="w-14 h-14 rounded-full bg-[#002147] text-[#E6C36A] border-2 border-[#C49E3A] flex items-center justify-center mx-auto shadow-sm active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] cursor-pointer"
+                  aria-label={t('استماع', 'Listen')}
                 >
-                  <div className="flex items-center gap-2 font-black text-sm">
-                    {isSpellingCorrect ? (
-                      <>
-                        <CheckCircle2 size={18} className="text-emerald-600" />
-                        <span>{isRtl ? 'إملاء ممتاز وصحيح 100%! (+100 XP)' : 'Perfect Spelling! (+100 XP)'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <XCircle size={18} className="text-rose-600" />
-                        <span>
-                          {isRtl ? `الإملاء الصحيح هو: ` : `Correct Spelling: `}
-                          <strong className="underline text-base tracking-wider">{currentSpellingItem.word}</strong>
-                        </span>
-                      </>
-                    )}
-                  </div>
+                  <Volume2 size={24} />
+                </button>
+                <div className="text-xs font-black text-[#002147]">
+                  {t('اضغط للاستماع إلى النطق الصوتي الدقيق', 'Click to hear the target word')}
+                </div>
+                <div className="text-xs text-[#C49E3A] font-mono font-bold" dir="ltr">
+                  {currentSpellingItem.ipa}
+                </div>
+              </div>
 
-                  <div className="p-3 bg-white rounded-xl text-slate-700 border border-slate-200 leading-relaxed">
-                    <strong className="text-purple-700 block mb-1">
-                      {isRtl ? '🔬 القاعدة الصوتية والإملائية (Phonics Rule):' : '🔬 Phonics Rule:'}
-                    </strong>
-                    {currentSpellingItem.phonicRuleAr}
+              {/* Context & Meaning Clues */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3.5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 space-y-1">
+                  <div className="text-xs text-[#002147]/70 font-bold">
+                    {t('المعنى:', 'Meaning:')}
                   </div>
-                </motion.div>
-              )}
+                  <div className="text-sm font-black text-[#002147]">
+                    {tr(currentSpellingItem.meaningAr)}
+                  </div>
+                </div>
 
-              {/* Submit / Next Button */}
-              <div className="flex justify-end pt-2">
-                {!isSpellingChecked ? (
-                  <button
-                    disabled={!typedSpelling.trim()}
-                    onClick={handleCheckSpelling}
-                    className={`px-8 py-3.5 rounded-xl font-black text-xs transition-all cursor-pointer ${
-                      typedSpelling.trim()
-                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md'
-                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                <div className="p-3.5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 space-y-1">
+                  <div className="text-xs text-[#002147]/70 font-bold">
+                    {t('السياق في الجملة:', 'Context Sentence:')}
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-[#002147]" dir="ltr">
+                    "{currentSpellingItem.sentence}"
+                  </div>
+                </div>
+              </div>
+
+              {/* Large Spelling Input with AnswerOption-style states (normal / green / red with one pulse) */}
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={typedSpelling}
+                  disabled={isSpellingChecked}
+                  onChange={(e) => setTypedSpelling(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isSpellingChecked) {
+                      handleCheckSpelling();
+                    }
+                  }}
+                  placeholder={t('اكتب الكلمة بالإنجليزية هنا...', 'Type word here...')}
+                  className={`w-full p-4 text-center text-lg sm:text-xl font-black tracking-widest uppercase rounded-2xl border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C49E3A] transition-colors ${
+                    !isSpellingChecked
+                      ? 'bg-[#fdfaf3] border-[#C49E3A]/40 focus:border-[#C49E3A] text-[#002147]'
+                      : isSpellingCorrect
+                      ? 'bg-green-50 border-green-600 text-[#002147] animate-[pulse_0.6s_ease-out_1]'
+                      : 'bg-red-50 border-red-600 text-red-900 animate-[pulse_0.6s_ease-out_1]'
+                  }`}
+                  dir="ltr"
+                />
+
+                {/* Feedback and Phonics Rule */}
+                {isSpellingChecked && (
+                  <div
+                    className={`p-4 rounded-2xl border-2 text-xs space-y-2 ${
+                      isSpellingCorrect
+                        ? 'bg-green-50 border-green-600 text-[#002147]'
+                        : 'bg-red-50 border-red-600 text-red-900'
                     }`}
                   >
-                    {isRtl ? 'فحص الإملاء ✓' : 'Check Spelling ✓'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleNextSpelling}
-                    className="px-8 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer"
-                  >
-                    {currentSpellingIdx + 1 < SPELLING_DATASET.length
-                      ? (isRtl ? 'الكلمة التالية ➔' : 'Next Word ➔')
-                      : (isRtl ? 'إنهاء الجولة 🏆' : 'Finish Round 🏆')}
-                  </button>
+                    <div className="flex items-center gap-2 font-black text-sm">
+                      {isSpellingCorrect ? (
+                        <>
+                          <CheckCircle2 size={18} className="text-green-600 shrink-0" />
+                          <span>{t('إملاء ممتاز وصحيح 100%! (+100 XP)', 'Perfect Spelling! (+100 XP)')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle size={18} className="text-red-600 shrink-0" />
+                          <span>
+                            {t('الإملاء الصحيح هو: ', 'Correct Spelling: ')}
+                            <strong className="underline text-base tracking-wider" dir="ltr">
+                              {currentSpellingItem.word}
+                            </strong>
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="p-3 bg-white rounded-xl text-[#002147] border border-[#C49E3A]/30 leading-relaxed font-bold">
+                      <strong className="text-[#002147] block mb-1">
+                        {t('🔬 القاعدة الصوتية والإملائية (Phonics Rule):', '🔬 Phonics Rule:')}
+                      </strong>
+                      {tr(currentSpellingItem.phonicRuleAr)}
+                    </div>
+                  </div>
                 )}
+
+                {/* Submit / Next Button */}
+                <div className="flex justify-end pt-1">
+                  {!isSpellingChecked ? (
+                    <PrimaryButton
+                      disabled={!typedSpelling.trim()}
+                      onClick={handleCheckSpelling}
+                    >
+                      {t('فحص الإملاء ✓', 'Check Spelling ✓')}
+                    </PrimaryButton>
+                  ) : (
+                    <PrimaryButton onClick={handleNextSpelling}>
+                      {currentSpellingIdx + 1 < SPELLING_DATASET.length
+                        ? t('الكلمة التالية ➔', 'Next Word ➔')
+                        : t('إنهاء الجولة 🏆', 'Finish Round 🏆')}
+                    </PrimaryButton>
+                  )}
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </GoldCard>
+          </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </SectionShell>
   );
 };
