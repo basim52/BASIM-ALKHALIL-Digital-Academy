@@ -94,6 +94,8 @@ import { MASTER_ADMINS, UserRole } from '../types';
 import { getScenarioEducationalContent } from '../data/saraScenarioCurriculumData';
 import { buildSaraLessonContext } from '../utils/saraLessonContext';
 import { CurriculumLesson, getAllCurriculumLessons } from '../utils/academicCurriculumCatalogue';
+import { loadOnboarding, readLocalOnboarding } from '../lib/onboarding';
+const TodayPathCard = React.lazy(() => import('./onboarding/PathHome').then(m => ({ default: m.TodayPathCard })));
 
 interface MessageItem {
   id: string;
@@ -635,6 +637,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [activeStudyPlan, setActiveStudyPlan] = useState<StudyPlan | null>(null);
   const [isLoadingStudyPlan, setIsLoadingStudyPlan] = useState<boolean>(false);
   const [isStudyPlanBannerDismissed, setIsStudyPlanBannerDismissed] = useState<boolean>(false);
+  /** The student's saved onboarding path plan (device first, then cloud) — only used to tidy the home banners. */
+  const [pathPlanSaved, setPathPlanSaved] = useState<boolean>(() => { const r = readLocalOnboarding(profile?.uid) as any; return !!(r?.done && r?.plan); });
+  useEffect(() => { let alive = true; loadOnboarding(profile?.uid, (profile as any)?.onboarding).then(r => { if (alive) setPathPlanSaved(!!(r?.done && r?.plan)); }).catch(() => {}); return () => { alive = false; }; }, [profile?.uid, (profile as any)?.onboarding?.updatedAt]); // eslint-disable-line react-hooks/exhaustive-deps
   const [isSmartPlanGeneratorOpen, _raw_setIsSmartPlanGeneratorOpen] = useState<boolean>(false);
   // Tool icon opens the matching Sara tool page (SaraTools).
   const setIsSmartPlanGeneratorOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsSmartPlanGeneratorOpen(false); if (v === true) setSaraTool('plan'); };
@@ -3843,87 +3848,16 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       {/* ======================================================== */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4 overflow-hidden">
         
-        {/* ======================================================== */}
-        {/* SARA'S 4 CORE PILLARS & FLUENCY ACTION BAR (ALWAYS VISIBLE ON DESKTOP) */}
-        {/* ======================================================== */}
-        <div className="hidden md:flex bg-gradient-to-r from-amber-500/15 via-white to-amber-500/15 backdrop-blur-md border-2 border-amber-400 rounded-3xl p-3.5 sm:p-4 shadow-lg items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 flex items-center justify-center text-xl font-black shadow-md shrink-0">
-              📚
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-black text-[#002147] flex items-center gap-1.5 flex-wrap">
-                <span>{isRtl ? 'مناهج سارة التخصصية المستقلة' : "Sara's Independent Curriculums"}</span>
-              </h3>
-              <p className="text-[10px] sm:text-[11px] text-slate-600 font-semibold hidden sm:block">
-                {isRtl ? 'اختر أي مسار تخصصي لتبدأ سارة بشرحه بالصوت والكتابة على السبورة الذكية 👩‍🏫' : 'Choose a track for Sara to teach on the smart whiteboard with voice 👩‍🏫'}
-              </p>
-            </div>
+        {/* 🧭 TOP: the single «ابدأ درس اليوم» card from the saved path + this week's table (only when a path plan exists). */}
+        {pathPlanSaved && (
+          <div data-testid="sara-path-card" className={messages.length <= 3 ? 'block' : 'hidden md:block'}>
+            <React.Suspense fallback={null}>
+              <TodayPathCard uid={profile?.uid} profile={profile} hideWhenUnset
+                onSetPath={() => onNavigate('onboarding' as AppView)} onOpenLesson={() => onNavigate('path-lesson' as AppView)}
+                onOpenCheck={() => onNavigate('path-check' as AppView)} onChangePlan={() => onNavigate('path-plan' as AppView)} />
+            </React.Suspense>
           </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full justify-start">
-            {/* 1. Grammar */}
-            <button
-              onClick={() => handleOpenCurriculum('grammar')}
-              className="px-3 py-1.5 rounded-xl bg-blue-100 hover:bg-blue-200 text-blue-950 border border-blue-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
-              title={isRtl ? 'منهج القواعد التحدثية السريعة' : 'Spoken Grammar & Fast Patterns'}
-            >
-              <span>🧠</span>
-              <span>{isRtl ? 'القواعد التحدثية' : 'Spoken Grammar'}</span>
-            </button>
-
-            {/* 2. Conversation & Speaking */}
-            <button
-              onClick={() => handleOpenCurriculum('conversation')}
-              className="px-3 py-1.5 rounded-xl bg-cyan-100 hover:bg-cyan-200 text-cyan-950 border border-cyan-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
-              title={isRtl ? 'منهج المحادثة والطلاقة التفاعلية' : 'Active Conversation & Fluency'}
-            >
-              <span>💬</span>
-              <span>{isRtl ? 'المحادثة والطلاقة' : 'Active Fluency'}</span>
-            </button>
-
-            {/* 3. Reading & Phonetics */}
-            <button
-              onClick={() => handleOpenCurriculum('reading')}
-              className="px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
-              title={isRtl ? 'منهج القراءة التعبيرية والنطق الصوتي' : 'Expressive Reading & Phonetics'}
-            >
-              <span>📖</span>
-              <span>{isRtl ? 'القراءة والنطق' : 'Reading & Phonetics'}</span>
-            </button>
-
-            {/* 4. Writing */}
-            <button
-              onClick={() => handleOpenCurriculum('writing')}
-              className="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-950 border border-purple-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-xs shrink-0"
-              title={isRtl ? 'منهج الكتابة التعبيرية الحوارية' : 'Conversational Writing'}
-            >
-              <span>✍️</span>
-              <span>{isRtl ? 'الكتابة التعبيرية' : 'Writing'}</span>
-            </button>
-
-            {/* 5. All Curriculums Hub */}
-            <button
-              onClick={() => handleOpenCurriculum('all')}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#002147] to-[#0d3b66] hover:from-[#093568] hover:to-[#002147] text-amber-300 font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-md shrink-0 border border-amber-400/40"
-              title={isRtl ? 'استعراض كافة مناهج سارة التخصصية' : "Browse all Sara's curricula"}
-            >
-              <span>🌐</span>
-              <span>{isRtl ? 'كل مناهج سارة ➔' : 'All Curriculums ➔'}</span>
-            </button>
-
-            {/* 6. Smart Plan Generator Button */}
-            <button
-              onClick={() => setIsSmartPlanGeneratorOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 shadow-md shrink-0 border border-blue-400/40"
-              title={isRtl ? 'توليد خطة دراسية ذكية مع سارة' : 'Generate Smart Study Plan with Sara'}
-            >
-              <Sparkles size={14} className="text-amber-300 animate-pulse" />
-              <span>{isRtl ? 'توليد خطة ذكية ⚡' : 'Smart Plan ⚡'}</span>
-            </button>
-          </div>
-        </div>
-        
+        )}
         {/* ======================================================== */}
         {/* 2A-000. ACTIVE ACADEMIC STUDY PLAN BANNER (HUD) */}
         {/* ======================================================== */}
@@ -4017,11 +3951,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
 
         {/* 2A-000-B. INVITING BANNER IF NO ACTIVE PLAN YET */}
-        {!activeStudyPlan && !isStudyPlanBannerDismissed && (
+        {!activeStudyPlan && !pathPlanSaved && !isStudyPlanBannerDismissed && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="hidden md:block bg-gradient-to-r from-[#002147] via-blue-950 to-indigo-950 text-white p-3.5 sm:p-4 rounded-3xl shadow-xl border border-blue-400/30 relative overflow-hidden"
+            className="hidden md:block bg-[#002147] text-white px-3.5 py-2.5 rounded-2xl shadow-md border border-[#C49E3A]/50 relative overflow-hidden"
           >
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
@@ -4033,7 +3967,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     <span className="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
                       {isRtl ? 'الخطة الأكاديمية الذكية' : 'Smart Academic Plan'}
                     </span>
-                    <span className="text-xs text-blue-200 font-bold">
+                    <span className="text-xs text-white font-bold">
                       {isRtl ? 'جاهز لتوليد خطتك الدراسية الذكية مع سارة؟' : 'Ready to generate your smart plan?'}
                     </span>
                   </div>
@@ -4065,6 +3999,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           </motion.div>
         )}
 
+        {/* 🔄 Resume + 🎮 Today's scenario: two compact equal cards in one row (stack on phone; a lone card spans the row). */}
+        {((!isContinuityBannerDismissed && (tutorMemory.lastSessionTopic || tutorMemory.lastSessionSummary) && messages.length <= 3) || (!activeRolePlay && todayScheduledLesson && !isStudyPlanBannerDismissed)) && (
+        <div data-testid="sara-quick-row" className="grid grid-cols-1 md:grid-cols-2 gap-3 md:[&>*:only-child]:col-span-2">
         {/* ======================================================== */}
         {/* 🧠 2A-0. SMART ADAPTIVE CROSS-SESSION CONTINUITY BANNER */}
         {/* ======================================================== */}
@@ -4072,23 +4009,23 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-r from-[#0E1E38] via-[#1B2A4A] to-[#0E1E38] text-white border-2 border-indigo-400/50 rounded-3xl p-3.5 sm:p-4 shadow-xl relative overflow-hidden"
+            data-testid="sara-resume-card" className="bg-[#002147] text-white border border-[#C49E3A]/45 rounded-2xl p-3 shadow-md relative overflow-hidden flex flex-col gap-2.5 min-w-0"
           >
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-11 h-11 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-400/40 flex items-center justify-center text-xl shrink-0 shadow-inner">
-                  <Brain size={22} className="text-indigo-400 animate-pulse" />
+            <div className="flex flex-col gap-2.5 h-full">
+              <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                <div className="w-9 h-9 rounded-xl bg-[#C49E3A]/15 border border-[#C49E3A]/40 flex items-center justify-center shrink-0">
+                  <Brain size={18} className="text-[#E8C766]" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <span className="px-2 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                    <span className="px-2 py-0.5 rounded-full bg-[#C49E3A]/20 text-[#E8C766] border border-[#C49E3A]/40 text-[10px] font-black">
                       {isRtl ? 'استئناف من الجلسة السابقة 🔄' : 'Resume Previous Session 🔄'}
                     </span>
-                    <span className="text-xs sm:text-sm font-black text-indigo-100 truncate">
+                    <span className="text-[12.5px] font-black text-white truncate max-w-full">
                       {tutorMemory.lastSessionTopic || tutorMemory.lastSessionSummary}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-300 font-medium">
+                  <p className="text-[11px] text-slate-300 font-medium line-clamp-2">
                     {tutorMemory.crossSessionHook || (isRtl
                       ? 'تتذكر سارة أين توقفت في جلستك السابقة، هل ترغب في استئناف التحدي أو الانطلاق في موضوع جديد؟'
                       : 'Sara remembers where you stopped. Would you like to resume or start a fresh topic?')}
@@ -4096,7 +4033,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap mt-auto">
                 <button
                   onClick={() => {
                     setIsContinuityBannerDismissed(true);
@@ -4107,7 +4044,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                         : `Sara, welcome back! Let's resume and practice our previous topic: "${topic}". Give me a quick challenge!`
                     );
                   }}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs transition-all shadow-md active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] font-black text-[11.5px] transition-all shadow-sm active:scale-95 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Zap size={14} />
                   <span>{isRtl ? 'استئناف التحدي ⚡' : 'Resume Challenge ⚡'}</span>
@@ -4121,14 +4058,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                         : "Sara, I'm ready for a fresh, exciting topic today! Suggest a fun lesson or challenge."
                     );
                   }}
-                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs transition-all border border-white/15 active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white font-black text-[11.5px] transition-all border border-white/20 active:scale-95 flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Sparkles size={14} className="text-indigo-300" />
+                  <Sparkles size={14} className="text-[#E8C766]" />
                   <span>{isRtl ? 'موضوع جديد 🚀' : 'New Topic 🚀'}</span>
                 </button>
                 <button
                   onClick={() => setIsContinuityBannerDismissed(true)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                  className="ms-auto p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                   title={isRtl ? 'إخفاء' : 'Dismiss'}
                 >
                   <X size={14} />
@@ -4145,22 +4082,22 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="hidden md:flex bg-gradient-to-r from-[#002147] via-[#093568] to-[#002147] text-white border-2 border-amber-400/60 rounded-3xl p-3.5 sm:p-4 shadow-lg items-center justify-between gap-3 flex-wrap"
+            data-testid="sara-scenario-card" className="hidden md:flex bg-[#002147] text-white border border-[#C49E3A]/45 rounded-2xl p-3 shadow-md relative overflow-hidden flex-col gap-2.5 min-w-0"
           >
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center text-2xl shrink-0 shadow-md border border-white/40">
+            <div className="flex items-start gap-2.5 min-w-0 flex-1">
+              <div className="w-9 h-9 rounded-xl bg-[#C49E3A]/15 border border-[#C49E3A]/40 flex items-center justify-center text-lg shrink-0">
                 {todayScheduledLesson.scenario?.badge || '🎮'}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#C49E3A]/20 text-[#E8C766] border border-[#C49E3A]/40">
                     {isRtl ? 'تحدي سيناريو اليوم 🌟' : "Today's Scenario Quest 🌟"}
                   </span>
-                  <span className="text-xs sm:text-sm font-black text-white truncate">
+                  <span className="text-[12.5px] font-black text-white truncate max-w-full">
                     {isRtl ? todayScheduledLesson.titleAr : todayScheduledLesson.titleEn}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300 truncate mt-0.5">
+                <p className="text-[11px] text-slate-300 line-clamp-2 mt-0.5">
                   {isRtl 
                     ? 'شرح حقيقي + مفردات وقواعد + تمارين واختبار إتقان قبل بدء المحاكاة بالصوت! 🚀' 
                     : 'Real explanation, vocab & grammar, exercises and mastery quiz before voice role-play! 🚀'}
@@ -4168,14 +4105,14 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap mt-auto">
               <button
                 onClick={() => {
                   setIsRolePlayModalOpen(true);
                 }}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-300 hover:brightness-105 active:scale-95 text-slate-950 font-black text-xs transition-all cursor-pointer flex items-center gap-1.5 shadow-md"
+                className="px-3 py-1.5 rounded-xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] font-black text-[11.5px] transition-all shadow-sm active:scale-95 flex items-center gap-1.5 cursor-pointer"
               >
-                <BookOpen size={13} className="text-slate-950" />
+                <BookOpen size={13} />
                 <span>{isRtl ? 'الشرح والتمارين 📖' : 'Lesson & Exercises 📖'}</span>
               </button>
 
@@ -4185,7 +4122,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                     handleStartRolePlayScenario(todayScheduledLesson.scenario);
                   }
                 }}
-                className="px-3 py-2 rounded-xl bg-emerald-500/80 hover:bg-emerald-600 text-white font-bold text-xs transition-all cursor-pointer flex items-center gap-1 shadow-sm"
+                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-white font-black text-[11.5px] transition-all border border-white/20 active:scale-95 flex items-center gap-1.5 cursor-pointer"
               >
                 <Play size={13} className="fill-current" />
                 <span>{isRtl ? 'بدء المحاكاة 🚀' : 'Start Simulation'}</span>
@@ -4193,6 +4130,44 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </div>
           </motion.div>
         )}
+
+        </div>
+        )}
+
+        {/* ======================================================== */}
+        {/* SARA'S 4 CORE PILLARS — one tidy row of equal chips (desktop / tablet) */}
+        {/* ======================================================== */}
+        <div data-testid="sara-tracks-row" className="hidden md:block bg-white border border-[#C49E3A]/40 rounded-2xl px-3 py-2.5 shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-6 h-6 rounded-lg bg-[#002147] text-[#C49E3A] flex items-center justify-center text-[13px] shrink-0">📚</span>
+            <h3 className="text-[12.5px] font-black text-[#002147] truncate">{isRtl ? 'مناهج سارة التخصصية المستقلة' : "Sara's Independent Curriculums"}</h3>
+            <p className="text-[10.5px] text-slate-500 font-semibold truncate hidden lg:block">
+              {isRtl ? 'اختر أي مسار تخصصي لتبدأ سارة بشرحه بالصوت والكتابة على السبورة الذكية 👩‍🏫' : 'Choose a track for Sara to teach on the smart whiteboard with voice 👩‍🏫'}
+            </p>
+          </div>
+          <div className={`grid gap-1.5 ${(pathPlanSaved || activeStudyPlan) ? 'grid-cols-5' : 'grid-cols-3'}`}>
+            <button onClick={() => handleOpenCurriculum('grammar')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج القواعد التحدثية السريعة' : 'Spoken Grammar & Fast Patterns'}>
+              <span>🧠</span><span className="truncate">{isRtl ? 'القواعد التحدثية' : 'Spoken Grammar'}</span>
+            </button>
+            <button onClick={() => handleOpenCurriculum('conversation')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج المحادثة والطلاقة التفاعلية' : 'Active Conversation & Fluency'}>
+              <span>💬</span><span className="truncate">{isRtl ? 'المحادثة والطلاقة' : 'Active Fluency'}</span>
+            </button>
+            <button onClick={() => handleOpenCurriculum('reading')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج القراءة التعبيرية والنطق الصوتي' : 'Expressive Reading & Phonetics'}>
+              <span>📖</span><span className="truncate">{isRtl ? 'القراءة والنطق' : 'Reading & Phonetics'}</span>
+            </button>
+            <button onClick={() => handleOpenCurriculum('writing')} className="h-9 px-2 rounded-xl bg-white hover:bg-[#fdfaf3] text-[#002147] border border-[#C49E3A]/45 hover:border-[#C49E3A] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'منهج الكتابة التعبيرية الحوارية' : 'Conversational Writing'}>
+              <span>✍️</span><span className="truncate">{isRtl ? 'الكتابة التعبيرية' : 'Writing'}</span>
+            </button>
+            <button onClick={() => handleOpenCurriculum('all')} className="h-9 px-2 rounded-xl bg-[#002147] hover:bg-[#0a2d5c] text-[#E8C766] border border-[#C49E3A]/60 font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'استعراض كافة مناهج سارة التخصصية' : "Browse all Sara's curricula"}>
+              <span>🌐</span><span className="truncate">{isRtl ? 'كل مناهج سارة ➔' : 'All Curriculums ➔'}</span>
+            </button>
+            {!(pathPlanSaved || activeStudyPlan) && (
+              <button onClick={() => setIsSmartPlanGeneratorOpen(true)} className="h-9 px-2 rounded-xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] font-black text-[11.5px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap min-w-0" title={isRtl ? 'توليد خطة دراسية ذكية مع سارة' : 'Generate Smart Study Plan with Sara'}>
+                <Sparkles size={13} /><span className="truncate">{isRtl ? 'توليد خطة ذكية ⚡' : 'Smart Plan ⚡'}</span>
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* ======================================================== */}
         {/* 2A-0A. SARA ACTIVE CURRICULUM LESSON HUD BANNER */}
