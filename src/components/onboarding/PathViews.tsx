@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Eye } from 'lucide-react';
 import { GoldCard, PrimaryButton, AnswerOption } from '../ui/academy';
 import { useT, isEn } from '../../lib/explainLang';
@@ -12,14 +12,25 @@ import {
 import type { TutorTrack } from '../../data/tutorTracks';
 import type { SaraTrack } from '../../data/saraTracks/foundations';
 
+const FillBlankPlayer = lazy(() => import('../SaraFillBlankPlayer').then(m => ({ default: m.FillBlankPlayer })));
+/** Plan «تمرين أكمل الجملة/الكلمة»: the teacher's fill-blank track (data loaded only when opened — it is large). */
+const PlanFillBlank: React.FC<{ trackId: string; uid?: string; onBack: () => void }> = ({ trackId, uid, onBack }) => {
+  const [track, setTrack] = useState<any>(null);
+  useEffect(() => { let ok = true; import('../../data/fillBlankTracks').then(m => { if (ok) setTrack(m.ALL_FILL_BLANK_TRACKS.find(x => x.id === trackId) || m.SARA_FILL_BLANK); }); return () => { ok = false; }; }, [trackId]);
+  return track ? <Suspense fallback={null}><FillBlankPlayer isOpen track={track} uid={uid} onClose={onBack} /></Suspense> : null;
+};
+
 /** Opens the next lesson of the path in the existing players (their own progress saving). Preview: guest progress only. */
 export const PathLessonView: React.FC<{ uid?: string; profile: any; rec: OnboardingRecord; preview?: boolean; at?: { step: PathStep; order: number } | null; onBack: () => void }> = ({ uid, profile, rec, preview, at, onBack }) => {
   const t = useT();
+  const fb = at?.step.trackId.startsWith('fill_blank') ? at.step.trackId : null;
   const target = useMemo(() => {
+    if (fb) return null;
     if (at) { const tr = pathTrack(at.step); return tr ? { step: at.step, track: tr, order: at.order } : null; }
     if (preview) { const s = rec.steps[0]; const tr = s && pathTrack(s); return tr ? { step: s, track: tr, order: s.startOrder } : null; }
     const n = nextPathLesson(rec, uid, profile); return n ? { step: n.step, track: n.track, order: n.order } : null;
   }, [rec, uid, profile, preview, at]);
+  if (fb) return <PlanFillBlank trackId={fb} uid={preview ? undefined : uid} onBack={onBack} />;
   if (!target) return <div dir="rtl" className="p-6 text-center"><p className="font-black text-[#002147]">{t('خلّصت دروس مسارك 🎉', 'You finished your path 🎉')}</p><PrimaryButton className="mt-4" onClick={onBack}>{t('رجوع', 'Back')}</PrimaryButton></div>;
   const pu = preview ? undefined : uid; // preview never writes the admin's own progress
   const lesson = target.track.lessons.find(l => l.order === target.order) || target.track.lessons[0];
@@ -54,7 +65,9 @@ export const PathCheckView: React.FC<{ uid?: string; profile: any; rec: Onboardi
   const record = async (final: number[]) => {
     const c = final.filter((a, k) => a === qs[k].q.correctIndex).length; const sc = Math.round((c / qs.length) * 100);
     const oc: 'up' | 'keep' | 'review' = sc >= 80 ? 'up' : sc < 60 ? 'review' : 'keep';
-    const nr: OnboardingRecord = { ...rec, checkpoints: [...(rec.checkpoints || []), { at: Date.now(), lessonsDone: lessonsSincePath(rec, uid, profile), trackId: check.track.id, correct: c, total: qs.length, outcome: oc }] };
+    const nr: OnboardingRecord = { ...rec, checkpoints: [...(rec.checkpoints || []), { at: Date.now(), lessonsDone: lessonsSincePath(rec, uid, profile), trackId: check.track.id, correct: c, total: qs.length, outcome: oc,
+      // missed lessons → review tasks in the plan (only when the outcome is «review»)
+      ...(oc === 'review' ? { weak: Array.from(new Map(qs.filter((q, k) => final[k] !== q.q.correctIndex).map(q => [q.lesson.order, { order: q.lesson.order, titleAr: q.lesson.titleAr, titleEn: q.lesson.titleEn }])).values()) } : {}) }] };
     await saveOnboarding(uid, nr); onUpdated(nr);
     const wrongByLesson: Record<string, number> = {};
     qs.forEach((q, k) => { if (final[k] !== q.q.correctIndex) wrongByLesson[q.lesson.id] = (wrongByLesson[q.lesson.id] || 0) + 1; });

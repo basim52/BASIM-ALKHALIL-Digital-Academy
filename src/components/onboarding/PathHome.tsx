@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Play, Compass, ClipboardCheck } from 'lucide-react';
+import { Play, Compass, ClipboardCheck, CalendarDays } from 'lucide-react';
+import { PathWeekTable } from './PathPlan';
+import { ensureTodayLog } from '../../lib/pathPlan';
 import { useT, isEn } from '../../lib/explainLang';
 import { loadOnboarding, readLocalOnboarding, nextPathLesson, checkpointDue, stepPortrait, stepTitle, PATH_INFO, CHECK_EVERY, type OnboardingRecord } from '../../lib/onboarding';
 
@@ -11,9 +13,13 @@ export function useOnboarding(uid?: string, profile?: any, refresh = 0): Onboard
 }
 
 /** Top of the student home: one big «ابدأ درس اليوم», or the small «حدّد مسارك» banner while no path is set. */
-export const TodayPathCard: React.FC<{ uid?: string; profile: any; onSetPath: () => void; onOpenLesson: () => void; onOpenCheck: () => void }> = ({ uid, profile, onSetPath, onOpenLesson, onOpenCheck }) => {
+export const TodayPathCard: React.FC<{ uid?: string; profile: any; onSetPath: () => void; onOpenLesson: () => void; onOpenCheck: () => void; onChangePlan?: () => void }> = ({ uid, profile, onSetPath, onOpenLesson, onOpenCheck, onChangePlan }) => {
   const t = useT();
-  const rec = useOnboarding(uid, profile);
+  const loaded = useOnboarding(uid, profile);
+  const [logged, setLogged] = useState<OnboardingRecord | null>(null);
+  const rec = logged && loaded && logged.updatedAt >= (loaded.updatedAt || 0) ? logged : loaded;
+  // Freeze today's planned items once a day (a missed day simply moves forward; nothing piles up).
+  useEffect(() => { if (loaded?.done && loaded.plan && uid) ensureTodayLog(uid, loaded, profile).then(r => { if (r) setLogged(r); }).catch(() => { /* offline */ }); }, [loaded?.updatedAt, uid]); // eslint-disable-line react-hooks/exhaustive-deps
   const next = useMemo(() => (rec?.done ? nextPathLesson(rec, uid, profile) : null), [rec, uid, profile]);
   if (rec === undefined) return null;
   if (!rec?.done) {
@@ -47,6 +53,15 @@ export const TodayPathCard: React.FC<{ uid?: string; profile: any; onSetPath: ()
         <span className="text-[11px] font-bold text-slate-500">{t(PATH_INFO[rec.path].titleAr, PATH_INFO[rec.path].titleEn)}</span>
         <button onClick={onSetPath} className="text-[11px] font-black text-[#002147] underline underline-offset-2" data-testid="change-goal">{t('غيّر هدفك', 'Change your goal')}</button>
       </div>
+      {rec.plan ? <PathWeekTable rec={rec} uid={uid} profile={profile} onChange={onChangePlan} />
+        : onChangePlan && (
+        <button onClick={onChangePlan} data-testid="choose-plan-banner" className="w-full flex items-center gap-2 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] px-3 py-2.5 text-[#002147] text-start">
+          <CalendarDays size={18} className="text-[#C49E3A]" />
+          <span className="flex-1"><span className="block text-[13px] font-black">{t('اختر خطتك الأسبوعية', 'Choose your weekly plan')}</span>
+            <span className="block text-[11px] font-bold text-slate-600">{t('خفيفة، متوسطة أو مكثفة — بجدول من الأحد للسبت', 'Light, medium or intense — a Sun→Sat table')}</span></span>
+          <span className="text-[12px] font-black text-[#C49E3A]">{t('اختر', 'Pick')}</span>
+        </button>
+      )}
       {due && (
         <button onClick={onOpenCheck} data-testid="path-check-due" className="w-full flex items-center gap-2 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A] px-3 py-2.5 text-[#002147] text-start">
           <ClipboardCheck size={18} className="text-[#C49E3A]" />

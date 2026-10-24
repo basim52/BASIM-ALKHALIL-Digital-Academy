@@ -24,7 +24,12 @@ export interface PlacementResult { level: CefrBand; band: number; correct: numbe
 
 export type PathId = 'from-zero' | 'kids' | 'exams' | 'work' | 'sara';
 export interface PathStep { kind: 'tutor' | 'sara'; trackId: string; startOrder: number }
-export interface PathCheckpoint { at: number; lessonsDone: number; trackId: string; correct: number; total: number; outcome: 'up' | 'keep' | 'review' }
+export interface PathCheckpoint { at: number; lessonsDone: number; trackId: string; correct: number; total: number; outcome: 'up' | 'keep' | 'review'; /** lessons answered wrong (review outcome → planned as review tasks) */ weak?: { order: number; titleAr: string; titleEn?: string }[] }
+export type PathPlanOptionId = 'light' | 'medium' | 'intense';
+/** A day's planned items, frozen when the day starts (so today never refills and past days keep their ✅ / ⏭️). */
+export interface PathPlanLogCell { key: string; kind: 'lesson' | 'practice' | 'review' | 'check'; stepKind: 'tutor' | 'sara'; trackId: string; order?: number; labelAr: string; labelEn: string; subAr?: string; subEn?: string; who: string }
+/** The student's chosen smart plan for the path (see lib/pathPlan). Progress is never stored here — only the choice and the daily log. */
+export interface PathPlanChoice { option: PathPlanOptionId; chosenAt: number; changedAt?: number; log?: Record<string, PathPlanLogCell[]>; reviewed?: Record<string, number> }
 export interface OnboardingRecord {
   v: 1;
   done: boolean;
@@ -39,6 +44,8 @@ export interface OnboardingRecord {
   /** Lessons jumped by level-ups after the baseline (not studied) — excluded from the 10-lesson count. */
   jumpsSinceBaseline?: number;
   checkpoints: PathCheckpoint[];
+  /** Chosen weekly plan (خفيفة / متوسطة / مكثفة). Missing on records saved before plans existed. */
+  plan?: PathPlanChoice;
   updatedAt: number;
 }
 
@@ -118,6 +125,8 @@ export async function commitPath(uid: string | undefined, profile: any, answers:
   const baseline: Record<string, number> = {};
   for (const s of steps) baseline[s.trackId] = Math.max(readStepUnlocked(s, uid, profile), s === steps[0] ? s.startOrder : 1);
   const rec: OnboardingRecord = { v: 1, done: true, answers, placement, path, steps, baseline, skipped, jumpsSinceBaseline: 0, checkpoints: [], updatedAt: Date.now() };
+  // New goal → keep the chosen plan option, but its day log belonged to the old path.
+  if (prev?.plan) rec.plan = { option: prev.plan.option, chosenAt: Date.now(), log: {}, reviewed: {} };
   await saveOnboarding(uid, rec);
   return rec;
 }

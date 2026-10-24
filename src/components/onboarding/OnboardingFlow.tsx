@@ -8,6 +8,8 @@ import {
   buildPath, commitPath, deferOnboarding, PATH_INFO, stepPortrait, stepTitle,
   type OnboardingAnswers, type OnboardingRecord, type PlacementResult, type WhoAnswer, type GoalAnswer, type LevelAnswer, type MinutesAnswer,
 } from '../../lib/onboarding';
+import { savePathPlanChoice, type PathPlanOptionId } from '../../lib/pathPlan';
+import { PlanPicker } from './PathPlan';
 import { LISTENING_AT, PLACEMENT_ITEMS, makeItem, nextBand, scorePlacement, startBand, type PlacementItem } from '../../lib/onboardingPlacement';
 
 type Card<V> = { v: V; icon: string; ar: string; en: string };
@@ -57,6 +59,8 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ uid, profile, pr
   const [placement, setPlacement] = useState<PlacementResult | null>(null);
   const [saved, setSaved] = useState<OnboardingRecord | null>(null);
   const [saving, setSaving] = useState(false);
+  const [planPick, setPlanPick] = useState<PathPlanOptionId | null>(null);
+  const [planBusy, setPlanBusy] = useState(false);
 
   const questions: { key: keyof OnboardingAnswers; titleAr: string; titleEn: string; cards: Card<any>[] }[] = [
     { key: 'who', titleAr: 'مين أنت؟', titleEn: 'Who are you?', cards: WHO },
@@ -80,7 +84,9 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ uid, profile, pr
     if (saving) return;
     setSaving(true);
     try {
-      const rec = await commitPath(uid, profile, answers, placement, profile?.onboarding || null);
+      let rec = await commitPath(uid, profile, answers, placement, profile?.onboarding || null);
+      // Preview: a plan picked before «احفظه كمساري» is saved together with the path (never before).
+      if (preview && planPick) rec = await savePathPlanChoice(uid, rec, planPick, profile);
       setSaved(rec); onSaved?.(rec);
       // Official level goes through the server route only (never in preview); a failure must not block the path.
       if (placement && !preview) { try { await savePlacementLevel(placement.level, { totalScore: placement.score }); } catch (e) { console.debug('placement level save note:', e); } }
@@ -91,6 +97,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ uid, profile, pr
   useEffect(() => { if (step === 5 && !preview && !autoSaved.current) { autoSaved.current = true; void save(); } }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const previewRec = (): OnboardingRecord => ({ v: 1, done: true, answers, placement, path: plan!.path, steps: plan!.steps, baseline: {}, skipped: {}, checkpoints: [], updatedAt: Date.now() });
+  const draftRec = useMemo(() => (plan ? previewRec() : null), [plan]); // eslint-disable-line react-hooks/exhaustive-deps
+  const chosenPlan = saved?.plan?.option || planPick;
+  // Real students (and a saved preview): picking saves the plan into Sara's smart plan right away. Unsaved preview: local only.
+  const pickPlan = async (id: PathPlanOptionId) => {
+    setPlanPick(id);
+    if (!saved || planBusy) return;
+    setPlanBusy(true);
+    try { const nr = await savePathPlanChoice(uid, saved, id, profile); setSaved(nr); onSaved?.(nr); } finally { setPlanBusy(false); }
+  };
 
   return (
     <div dir="rtl" className="min-h-[100dvh] bg-gradient-to-b from-[#002147] to-[#00152e] text-white flex flex-col" data-testid="onboarding">
@@ -160,25 +175,27 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ uid, profile, pr
                   </li>
                 ))}
               </ol>
-              <p className="mt-3 text-[11px] font-bold text-slate-500">{t(`درس واحد باليوم يناسب وقتك (${answers.minutes} دقيقة)، وكل ١٠ دروس فحص قصير.`, `One lesson a day fits your time (${answers.minutes} min), with a short check every 10 lessons.`)}</p>
+              <p className="mt-3 text-[11px] font-bold text-slate-500">{t(`وقتك ${answers.minutes} دقيقة باليوم، وكل ١٠ دروس فحص قصير.`, `${answers.minutes} min a day, with a short check every 10 lessons.`)}</p>
             </GoldCard>
 
             {/* «الباقة المناسبة» — reserved slot for a future plan suggestion by level/goal. Intentionally empty: no prices, no payment code. */}
             <div data-slot="suggested-plan" hidden aria-hidden />
 
+            {(saved || draftRec) && <PlanPicker rec={saved || draftRec!} uid={uid} profile={profile} fresh={!saved} value={chosenPlan} onPick={pickPlan} busy={planBusy} />}
+
             {preview ? (
               <>
                 <PrimaryButton className="w-full py-3.5 text-base" disabled={saving || !!saved} onClick={save} data-testid="onboarding-save-mine">
-                  {saved ? t('انحفظ كمسارك ✓', 'Saved as your path ✓') : saving ? t('جارٍ الحفظ…', 'Saving…') : t('احفظه كمساري', 'Save as my path')}
+                  {saved ? t('انحفظ كمسارك ✓', 'Saved as your path ✓') : saving ? t('جارٍ الحفظ…', 'Saving…') : planPick ? t('احفظه كمساري (مع الخطة)', 'Save as my path (with plan)') : t('احفظه كمساري', 'Save as my path')}
                 </PrimaryButton>
                 <button onClick={() => onStartLesson(saved || previewRec(), !saved)} className="w-full py-3 rounded-xl border-2 border-[#C49E3A] text-[#E6C36A] font-black text-sm" data-testid="onboarding-start">
                   {saved ? t('ابدأ أول درس', 'Start first lesson') : t('جرّب أول درس (بدون حفظ)', 'Try first lesson (not saved)')}
                 </button>
-                <button onClick={() => { setAns({}); setPlacement(null); setSaved(null); setStep(0); }} className="text-[12px] font-bold text-white/60 underline" data-testid="onboarding-again">{t('جرّب من جديد', 'Try again')}</button>
+                <button onClick={() => { setAns({}); setPlacement(null); setSaved(null); setPlanPick(null); setStep(0); }} className="text-[12px] font-bold text-white/60 underline" data-testid="onboarding-again">{t('جرّب من جديد', 'Try again')}</button>
               </>
             ) : (
-              <PrimaryButton className="w-full py-4 text-base" disabled={!saved} onClick={() => saved && onStartLesson(saved, false)} data-testid="onboarding-start">
-                {saved ? t('ابدأ أول درس', 'Start first lesson') : t('جارٍ حفظ مسارك…', 'Saving your path…')}
+              <PrimaryButton className="w-full py-4 text-base" disabled={!saved?.plan || planBusy} onClick={() => saved?.plan && onStartLesson(saved, false)} data-testid="onboarding-start">
+                {!saved ? t('جارٍ حفظ مسارك…', 'Saving your path…') : planBusy ? t('جارٍ حفظ خطتك…', 'Saving your plan…') : saved.plan ? t('ابدأ أول درس', 'Start first lesson') : t('اختر خطتك أول ☝️', 'Pick your plan first ☝️')}
               </PrimaryButton>
             )}
           </div>

@@ -23,7 +23,9 @@ import { loadExamResults, readExamResults, type ExamResults } from './saraExamSy
 export type PlanKind = 'lesson' | 'review' | 'test' | 'exam' | 'catchup';
 export interface PlanTask { key: string; kind: PlanKind; trackId: string; trackAr: string; titleAr: string; order?: number; levelId?: string; setId?: string; open: boolean; reasonAr: string }
 export interface PlanDay { dayIdx: number; labelAr: string; study: boolean; tasks: PlanTask[] }
-export interface SaraPlan { weekStart: string; createdAt: number; perDay: number; studyDays: number[]; isNew: boolean; focusAr: string[]; days: PlanDay[]; priorityTrackId?: string; fromBasket?: boolean }
+export interface SaraPlan { weekStart: string; createdAt: number; perDay: number; studyDays: number[]; isNew: boolean; focusAr: string[]; days: PlanDay[]; priorityTrackId?: string; fromBasket?: boolean;
+  /** Built from the onboarding path plan (lib/pathPlan) — tasks may point at tutor tracks; done-state via pathTaskDone. */
+  fromPath?: boolean; pathOption?: 'light' | 'medium' | 'intense' }
 export interface PlanState { unlocked: Record<string, number>; passedTests: Set<string>; exam: ExamResults }
 
 export const CORE_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];

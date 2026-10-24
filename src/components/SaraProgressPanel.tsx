@@ -55,6 +55,22 @@ export const SaraProgressPanel: React.FC<{ uid: string; compact?: boolean; pickC
           {d.path.checks ? ` · ${L(`مراجعات المسار ${d.path.checks}`, `Path checks ${d.path.checks}`)}` : ''}
         </p>
       )}
+      {d.plan && (
+        <div data-testid="report-plan" className="mb-2 rounded-2xl bg-[#0a2d5c] border border-[#C49E3A]/40 px-3 py-2 text-white/85">
+          <p className="text-[12px] font-black">{d.plan.icon} {L('الخطة', 'Plan')}: <span style={{ color: GOLD }}>{L(d.plan.titleAr, d.plan.titleEn)}</span>
+            <span className="font-bold text-white/70"> · {L(`${d.plan.lessonsPerWeek} دروس بالأسبوع · هذا الأسبوع ${d.plan.done}/${d.plan.planned}`, `${d.plan.lessonsPerWeek} lessons/week · this week ${d.plan.done}/${d.plan.planned}`)}</span></p>
+          {d.plan.levelFinish && <p className="text-[11px] font-bold text-white/70">{L(`يخلص «${d.plan.levelTitleAr}» تقريباً ${new Date(d.plan.levelFinish + 'T00:00:00').toLocaleDateString('ar-SA', { day: 'numeric', month: 'long' })}`, `“${d.plan.levelTitleEn}” done around ${new Date(d.plan.levelFinish + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`)}
+            {d.plan.lastCheck ? ` · ${d.plan.lastCheck === 'up' ? L('آخر فحص: انتقل لمستوى أعلى ⬆️', 'Last check: moved up ⬆️') : d.plan.lastCheck === 'review' ? L('آخر فحص: مراجعة 🔁', 'Last check: review 🔁') : L('آخر فحص: جيد 👍', 'Last check: good 👍')}` : ''}</p>}
+          <div className="mt-1.5 grid grid-cols-7 gap-1">
+            {d.plan.rows.map(r => (
+              <div key={r.date} data-testid="report-plan-day" className={`rounded-lg px-1 py-1 text-center ${r.today ? 'bg-[#C49E3A] text-[#002147]' : 'bg-white/5'}`}>
+                <p className="text-[9.5px] font-black">{en ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][r.dayIdx] : ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'][r.dayIdx]}</p>
+                <p className="text-[11px] leading-tight" title={r.items.map(i => L(i.labelAr, i.labelEn)).join('\n')}>{r.items.length ? r.items.map((i, k) => <span key={k}>{i.done ? '✅' : r.past ? '⏭️' : '•'}</span>) : '—'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {!d.hasAny ? <p className="text-[12px] font-bold text-white/70">{L('ما فيه نشاط محفوظ مع سارة أو المعلمين للحين.', 'No saved activity with Sara or the teachers yet.')}</p> : <>
         <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'} gap-2`}>
           <Tile label={L('دروس سارة المجتازة', "Sara lessons passed")} value={String(d.sara.reduce((s, r) => s + r.passed, 0))} note={d.lastAt ? L(`آخر تقدم ${date(d.lastAt)}`, `Last progress ${date(d.lastAt)}`) : undefined} />

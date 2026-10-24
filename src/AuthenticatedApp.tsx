@@ -90,8 +90,9 @@ const OnboardingFlow = lazy(() => import('./components/onboarding/OnboardingFlow
 const TodayPathCard = lazy(() => import('./components/onboarding/PathHome').then(m => ({ default: m.TodayPathCard })));
 const PathLessonView = lazy(() => import('./components/onboarding/PathViews').then(m => ({ default: m.PathLessonView })));
 const PathCheckView = lazy(() => import('./components/onboarding/PathViews').then(m => ({ default: m.PathCheckView })));
+const PathPlanScreen = lazy(() => import('./components/onboarding/PathPlan').then(m => ({ default: m.PathPlanScreen })));
 import { shouldGateOnboarding, readLocalOnboarding } from './lib/onboardingGate';
-const ONBOARDING_FULLSCREEN: AppView[] = ['onboarding', 'onboarding-preview', 'path-lesson', 'path-check'];
+const ONBOARDING_FULLSCREEN: AppView[] = ['onboarding', 'onboarding-preview', 'path-lesson', 'path-check', 'path-plan'];
 /** Admin-only (MASTER_ADMINS): run the whole onboarding in preview mode; nothing is saved unless «احفظه كمساري». */
 const OnboardingPreviewButton = ({ email, isRtl, onNavigate }: { email?: string | null; isRtl: boolean; onNavigate?: (v: AppView) => void }) =>
   onNavigate && MASTER_ADMINS.includes((email || '').toLowerCase()) ? (
@@ -1691,7 +1692,7 @@ const StudentHome = ({
 
         {/* «ابدأ درس اليوم» (student's path) or the small «حدّد مسارك» banner */}
         <Suspense fallback={null}>
-          <TodayPathCard uid={profile.uid} profile={profile} onSetPath={() => onNavigate('onboarding')} onOpenLesson={() => onNavigate('path-lesson')} onOpenCheck={() => onNavigate('path-check')} />
+          <TodayPathCard uid={profile.uid} profile={profile} onSetPath={() => onNavigate('onboarding')} onOpenLesson={() => onNavigate('path-lesson')} onOpenCheck={() => onNavigate('path-check')} onChangePlan={() => onNavigate('path-plan')} />
         </Suspense>
         <OnboardingPreviewButton email={profile.email} isRtl={isRtl} onNavigate={onNavigate} />
 
@@ -5114,6 +5115,18 @@ export default function AuthenticatedApp({
   // Onboarding: unsaved preview record (admin) and an explicit lesson to reopen (review after a path check).
   const [pathPreviewRec, setPathPreviewRec] = useState<any>(null);
   const [pathAt, setPathAt] = useState<any>(null);
+  // Sara's smart plan (path mode) → «ابدأ» on a path task opens that exact lesson / exercise / check.
+  useEffect(() => {
+    const h = (e: Event) => {
+      const d = (e as CustomEvent).detail || {};
+      if (d.check) { setView('path-check'); return; }
+      if (!d.trackId) return;
+      setPathPreviewRec(null); setPathAt({ step: { kind: d.stepKind || 'sara', trackId: d.trackId, startOrder: 1 }, order: Number(d.order) || 1 }); setView('path-lesson');
+    };
+    const hp = () => setView('path-plan');
+    window.addEventListener('academy:open-path-task', h); window.addEventListener('academy:open-path-plan', hp);
+    return () => { window.removeEventListener('academy:open-path-task', h); window.removeEventListener('academy:open-path-plan', hp); };
+  }, []);
   const onboardingGated = useRef(false);
   useEffect(() => {
     if (!userProfile || onboardingGated.current) return;
@@ -6938,6 +6951,11 @@ export default function AuthenticatedApp({
       return <PathCheckView uid={currentUser.uid} profile={userProfile} rec={rec} onBack={() => setView('dashboard')}
         onUpdated={(r) => setUserProfile({ ...(userProfile as any), onboarding: r } as any)}
         onReview={(step, order) => { setPathPreviewRec(null); setPathAt({ step, order }); setView('path-lesson'); }} />;
+    }
+    if (view === 'path-plan' && userProfile) {
+      const rec = readLocalOnboarding(currentUser.uid) || (userProfile as any).onboarding;
+      return <PathPlanScreen uid={currentUser.uid} profile={userProfile} rec={rec} onClose={() => setView('dashboard')}
+        onSaved={(r) => setUserProfile({ ...(userProfile as any), onboarding: r } as any)} />;
     }
     if (view === 'sara-continue') {
       return <SaraContinueView uid={currentUser.uid} unlockAll={saraUnlockAll} onClose={() => setView('dashboard')} />;

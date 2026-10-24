@@ -10,6 +10,7 @@ import { TUTOR_TRACKS } from '../data/tutorTracks';
 import { FILL_BLANK_LESSONS, FILL_BLANK_TRACK_ID } from '../data/saraTracks/fillBlank';
 import { TUTOR_FILL_BLANK_TRACKS } from '../data/fillBlankTracks';
 import { LEGACY_TRACK_IDS, migrateLegacyCount } from '../data/saraTracks/fromCurriculum';
+import { liveWeek } from './pathPlan';
 
 /**
  * Sara + Teachers' Class progress for the parent report / progress analytics. REAL stored data only, read-only:
@@ -30,6 +31,9 @@ export interface SaraReport {
   exams: { sets: number; correct: number; total: number };
   /** Onboarding path (users/{uid}.onboarding) — null when the student has not set one. */
   path: { titleAr: string; titleEn: string; level: string | null; minutes: number; checks: number } | null;
+  /** Chosen path plan (onboarding.plan) — this week Sun→Sat with real done-state; null when no plan was chosen. */
+  plan: { titleAr: string; titleEn: string; icon: string; lessonsPerWeek: number; done: number; planned: number; levelFinish: string | null; levelTitleAr: string; levelTitleEn: string; lastCheck: 'up' | 'keep' | 'review' | null;
+    rows: { date: string; dayIdx: number; today: boolean; past: boolean; items: { labelAr: string; labelEn: string; done: boolean }[] }[] } | null;
   words: number;
   hasAny: boolean;
 }
@@ -90,5 +94,16 @@ export async function loadSaraReport(uid: string): Promise<SaraReport | null> {
   const ob = u.onboarding && u.onboarding.done ? u.onboarding : null;
   const PI: Record<string, [string, string]> = { 'from-zero': ['مسار من الصفر', 'From-zero path'], kids: ['مسار الأطفال', 'Kids path'], exams: ['مسار الاختبارات', 'Exams path'], work: ['مسار العمل', 'Work path'], sara: ['مسار سارة حسب المستوى', "Sara's level path"] };
   const path = ob && PI[ob.path] ? { titleAr: PI[ob.path][0], titleEn: PI[ob.path][1], level: ob.placement?.level || null, minutes: Number(ob.answers?.minutes) || 0, checks: Array.isArray(ob.checkpoints) ? ob.checkpoints.length : 0 } : null;
-  return { path, sara, tutors, lastAt: Number(u.saraTrackProgressAt) || 0, lastTrack: u.saraLastTrack || null, board, calls, tests, exams, words, hasAny };
+  let plan: SaraReport['plan'] = null;
+  try {
+    const lw = ob?.plan ? liveWeek(ob, uid, u) : null;
+    if (lw) {
+      const lessons = lw.rows.flatMap(r => r.cells.filter(c => c.kind === 'lesson'));
+      const cps = Array.isArray(ob.checkpoints) ? ob.checkpoints : [];
+      plan = { titleAr: lw.option.titleAr, titleEn: lw.option.titleEn, icon: lw.option.icon, lessonsPerWeek: lw.option.lessonsPerWeek, done: lessons.filter(c => c.done).length, planned: lessons.length,
+        levelFinish: lw.sim.levelFinish, levelTitleAr: lw.sim.levelTitleAr, levelTitleEn: lw.sim.levelTitleEn, lastCheck: cps.length ? cps[cps.length - 1].outcome : null,
+        rows: lw.rows.map(r => ({ date: r.date, dayIdx: r.dayIdx, today: r.state === 'today', past: r.state === 'past', items: r.beforePlan && r.state === 'past' ? [] : r.cells.map(c => ({ labelAr: c.labelAr, labelEn: c.labelEn, done: c.done })) })) };
+    }
+  } catch (e) { console.debug('report plan note:', e); }
+  return { path, plan, sara, tutors, lastAt: Number(u.saraTrackProgressAt) || 0, lastTrack: u.saraLastTrack || null, board, calls, tests, exams, words, hasAny };
 }
