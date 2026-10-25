@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Clapperboard, 
   ChevronLeft, 
   ChevronRight, 
   Volume2, 
-  Play, 
   CheckCircle2, 
-  Image as ImageIcon, 
-  Film,
-  Sparkles,
-  RefreshCw,
-  Info
+  Film, 
+  Info, 
+  ArrowLeft 
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { managedSpeak } from '../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface AnimatedStoryboardProps {
   lang: 'ar' | 'en';
@@ -39,7 +43,6 @@ interface Scene {
 
 export const AnimatedStoryboard: React.FC<AnimatedStoryboardProps> = ({
   lang,
-  userProfile,
   onBack,
   onXPAdded
 }) => {
@@ -110,13 +113,12 @@ export const AnimatedStoryboard: React.FC<AnimatedStoryboardProps> = ({
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-GB'; // British English for London feel!
+      utterance.lang = 'en-GB';
       utterance.rate = 0.85;
 
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => {
         setIsSpeaking(false);
-        // Mark scene as completed
         setScenesCompleted(prev => ({ ...prev, [currentSceneIdx]: true }));
       };
       utterance.onerror = () => setIsSpeaking(false);
@@ -146,236 +148,189 @@ export const AnimatedStoryboard: React.FC<AnimatedStoryboardProps> = ({
   const allCompleted = Object.keys(scenesCompleted).length === scenes.length;
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] pb-24 text-slate-800">
-      
-      {/* Decorative gradient header */}
-      <div className="absolute top-0 left-0 right-0 h-64 bg-gradient-to-b from-[#E0F2F1] to-transparent pointer-events-none" />
-
-      <div className="max-w-4xl mx-auto px-4 pt-6 relative z-10">
-
-        {/* Top Header / Breadcrumbs */}
-        <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-8 pb-4 border-b border-teal-100 ${isRtl ? 'md:flex-row-reverse text-right' : 'text-left'}`}>
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 bg-teal-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-teal-600/10 shrink-0">
-              <Clapperboard size={22} className="animate-pulse" />
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={isRtl ? 'font-arabic' : 'font-sans'}>
+      {/* Top Header Card */}
+      <GoldCard className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <TutorFace tutor="sara" size="md" />
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <ProgressPill>
+                {isRtl ? `المشهد ${currentSceneIdx + 1} من ${scenes.length}` : `Scene ${currentSceneIdx + 1} of ${scenes.length}`}
+              </ProgressPill>
             </div>
+            <h1 className="text-lg sm:text-xl font-black text-[#002147]">
+              {isRtl ? 'مسلسلات الكرتون: قصة سيناريو لندن 🎬' : 'Animated Series: London Storyboard 🎬'}
+            </h1>
+            <p className="text-xs text-[#002147]/70 font-bold mt-0.5">
+              {isRtl ? 'حولنا قصص "نور في لندن" لسيناريو كرتوني تفاعلي يعلمك المحاكاة وتأليف السيناريو' : 'Convert beautiful storylines into direct audio-enabled scene blocks'}
+            </p>
+          </div>
+        </div>
+
+        <GhostButton onClick={onBack}>
+          <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+          <span>{isRtl ? 'العودة للمنصة' : 'Back to Academy'}</span>
+        </GhostButton>
+      </GoldCard>
+
+      {/* Scene Navigation Tiles */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+        {scenes.map((sc, i) => (
+          <LessonTile
+            key={sc.sceneNum}
+            order={sc.sceneNum}
+            title={isRtl ? `المشهد ${sc.sceneNum}` : `Scene ${sc.sceneNum}`}
+            subtitle={sc.backgroundEn}
+            emoji={sc.emojiBg.slice(0, 2)}
+            active={i === currentSceneIdx}
+            done={!!scenesCompleted[i]}
+            onClick={() => setCurrentSceneIdx(i)}
+          />
+        ))}
+      </div>
+
+      {/* Main Interactive Stage */}
+      <GoldCard className="p-5 sm:p-7 space-y-5">
+        {/* Specs Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-3.5 rounded-2xl flex items-center gap-3">
+            <span className="text-2xl bg-white p-2 rounded-xl border border-[#C49E3A]/30">{currentScene.emojiBg}</span>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-[#002147] tracking-tight">
-                {isRtl ? 'مسلسلات الكرتون: قصة سيناريو لندن 🎬' : 'Animated Series: London Storyboard 🎬'}
-              </h1>
-              <p className="text-xs text-teal-800 font-bold tracking-widest mt-0.5">
-                {isRtl ? 'حولنا قصص "نور في لندن" لسيناريو كرتوني تفاعلي يعلمك المحاكاة وتأليف السيناريو' : 'Convert beautiful storylines into direct audio-enabled scene blocks'}
+              <span className="text-[10px] font-bold text-[#002147]/60 block uppercase">
+                {isRtl ? 'الموقع وخلفية المشهد 📍' : 'Scenic Background 📍'}
+              </span>
+              <strong className="text-xs sm:text-sm font-black text-[#002147] block">
+                {currentScene.backgroundEn}
+              </strong>
+              <p className="text-xs text-[#002147]/75 font-semibold">{isRtl ? currentScene.background : 'London Spotlight'}</p>
+            </div>
+          </div>
+
+          <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-3.5 rounded-2xl flex items-center gap-3">
+            <span className="text-2xl bg-white p-2 rounded-xl border border-[#C49E3A]/30">{currentScene.emojiChar}</span>
+            <div>
+              <span className="text-[10px] font-bold text-[#002147]/60 block uppercase">
+                {isRtl ? 'الشخصية المتحدثة 🎭' : 'Active Character 🎭'}
+              </span>
+              <strong className="text-xs sm:text-sm font-black text-[#002147] block">
+                {isRtl ? currentScene.character.split('(')[0] : 'Character Spotlight'}
+              </strong>
+              <p className="text-xs text-[#002147]/75 font-semibold truncate max-w-[200px]" title={currentScene.character}>
+                {isRtl ? currentScene.character : currentScene.characterEn}
               </p>
             </div>
           </div>
-
-          <button
-            onClick={onBack}
-            className={`flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-black text-xs transition-all cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
-          >
-            <span>{isRtl ? 'العودة للمنصة ↩️' : 'Back to Academy ↩️'}</span>
-          </button>
         </div>
 
-        {/* Scene Progress Indicators */}
-        <div className="flex items-center justify-center gap-2.5 mb-6">
-          {scenes.map((sc, i) => {
-            const isCurrent = i === currentSceneIdx;
-            const isPrevCompleted = scenesCompleted[i];
-
-            return (
-              <button
-                key={sc.sceneNum}
-                onClick={() => setCurrentSceneIdx(i)}
-                className={`w-9 h-9 rounded-full font-sans font-black text-xs flex items-center justify-center transition-all cursor-pointer border-2 ${
-                  isCurrent 
-                    ? 'bg-teal-600 border-teal-600 text-white shadow-md'
-                    : isPrevCompleted
-                      ? 'bg-emerald-50 border-emerald-400 text-emerald-800'
-                      : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50'
-                }`}
-              >
-                {isPrevCompleted ? '✓' : sc.sceneNum}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Main Interactive Stage */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden min-h-[460px] flex flex-col justify-between">
-          
-          {/* Stage Body */}
-          <div className="p-6 md:p-8 space-y-6 flex-1">
-            
-            {/* Top Stage Specs Card (Location / Character info) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              {/* Left spec card: Location Background */}
-              <div className="bg-[#FAF9F5] border border-stone-150 p-4 rounded-2xl flex items-center gap-3">
-                <span className="text-3xl bg-white p-2 rounded-xl shadow-3xs">{currentScene.emojiBg}</span>
-                <div>
-                  <span className="text-[9px] font-black text-stone-400 block uppercase tracking-wider">
-                    {isRtl ? 'الموقع الجغرافي وخلفية المشهد 📍' : 'SCENIC BACKGROUND 📍'}
-                  </span>
-                  <strong className="text-sm font-black text-[#002147] capitalize block mt-0.5">
-                    {currentScene.backgroundEn}
-                  </strong>
-                  <p className="text-xs text-slate-500 font-bold">{isRtl ? currentScene.background : 'London Spotlight'}</p>
-                </div>
-              </div>
-
-              {/* Right spec card: Character Description */}
-              <div className="bg-[#E0F2F1]/30 border border-teal-100 p-4 rounded-2xl flex items-center gap-3">
-                <span className="text-3xl bg-white p-2 rounded-xl shadow-3xs">{currentScene.emojiChar}</span>
-                <div>
-                  <span className="text-[9px] font-black text-teal-700 block uppercase tracking-wider">
-                    {isRtl ? 'الشخصية المتحدثة والأبعاد 🎭' : 'ACTIVE CHARACTER DESIGN 🎭'}
-                  </span>
-                  <strong className="text-sm font-black text-[#002147] block mt-0.5">
-                    {isRtl ? currentScene.character.split('(')[0] : 'Char Spotlight'}
-                  </strong>
-                  <p className="text-xs text-slate-500 font-bold max-w-xs truncate" title={currentScene.character}>
-                    {isRtl ? currentScene.character : currentScene.characterEn}
-                  </p>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Simulated TV / Screen Monitor */}
-            <div className="bg-slate-900 rounded-2xl border-4 border-slate-800 p-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[180px] text-center shadow-inner">
-              <div className="absolute top-3 left-4 flex items-center gap-1.5 text-rose-500 font-mono text-[9px]">
-                <span className="w-2 h-2 bg-rose-600 rounded-full animate-ping" />
-                <span>REC SCREEN</span>
-              </div>
-              <span className="absolute bottom-3 right-4 text-slate-600 font-mono text-[9px]">SCENE 0{currentScene.sceneNum} // SEC 04</span>
-
-              {/* Dialogue balloon */}
-              <div className="space-y-3 z-10 max-w-lg">
-                <p className="font-mono text-xs text-[#06B6D4] font-black tracking-widest block uppercase">
-                  {isRtl ? 'السيناريو المسجّل (AUDIO DIALOGUE)' : 'Dialogue Screen'}
-                </p>
-
-                <p className="font-sans font-black text-white text-xl md:text-2xl tracking-tight leading-relaxed italic">
-                  &ldquo; {currentScene.dialogue} &rdquo;
-                </p>
-
-                <p className="text-teal-400 font-bold text-xs">
-                  {currentScene.dialogueAr}
-                </p>
-              </div>
-
-              {/* Speaker wave visualization overlay */}
-              {isSpeaking && (
-                <div className="absolute inset-0 bg-[#000]/60 flex items-center justify-center gap-1 transition-all z-20">
-                  <span className="w-1.5 h-6 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                  <span className="w-1.5 h-10 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }} />
-                  <span className="w-1.5 h-14 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  <span className="w-1.5 h-8 bg-[#06B6D4] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
-                </div>
-              )}
-            </div>
-
-            {/* Technical Animation Notes block */}
-            <div className="bg-amber-50/50 border border-amber-100 p-4 rounded-xl space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-black text-amber-800">
-                <Film size={13} />
-                <span>{isRtl ? 'ملاحظة المخرج والتحريك (Director Notes):' : 'Animation & Camera Note:'}</span>
-              </div>
-              <p className="text-xs text-slate-600 font-bold leading-relaxed">
-                {isRtl ? currentScene.animation_note : currentScene.animation_note_en}
-              </p>
-            </div>
-
+        {/* Dialogue Monitor Screen */}
+        <div className="bg-[#002147] text-white rounded-2xl border-2 border-[#C49E3A] p-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[170px] text-center shadow-sm">
+          <div className="flex items-center justify-between w-full mb-3 text-[10px] text-[#E6C36A] font-mono">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-[#E6C36A] rounded-full animate-pulse" />
+              <span>SCENE 0{currentScene.sceneNum}</span>
+            </span>
+            <span>AUDIO DIALOGUE</span>
           </div>
 
-          {/* Stage Actions control board */}
-          <div className="bg-slate-50 border-t p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            
-            {/* Dialogue narrator */}
-            <button
-              onClick={() => speakDialogue(currentScene.dialogue)}
-              className={`px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs rounded-xl flex items-center gap-2 cursor-pointer transition-all shadow-md ${
-                isSpeaking ? 'animate-pulse' : ''
-              }`}
-            >
-              <Volume2 size={13} />
-              <span>{isRtl ? 'استمع للمشهد الصوتي 🔊' : 'Listen Voice Actor 🔊'}</span>
-            </button>
-
-            {/* Stepper buttons */}
-            <div className="flex items-center gap-2">
-              <button
-                disabled={currentSceneIdx === 0}
-                onClick={handlePrev}
-                className="p-2.5 bg-white border border-slate-200 text-[#002147] hover:bg-slate-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                <ChevronLeft size={16} />
-              </button>
-
-              <button
-                disabled={currentSceneIdx === scenes.length - 1}
-                onClick={handleNext}
-                className="p-2.5 bg-white border border-slate-200 text-[#002147] hover:bg-slate-50 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* Story rewards and recommendations */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-12 gap-6">
-          
-          {/* Left panel: Recommendations */}
-          <div className="md:col-span-8 bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
-            <h4 className="font-extrabold text-[#002147] text-sm flex items-center gap-2">
-              <Info size={15} className="text-teal-600" />
-              <span>{isRtl ? 'مفهوم لوحة القصة الكرتونية (Cartoon Storyboards)' : 'Why Storyboards?'}</span>
-            </h4>
-            <p className="text-xs text-slate-500 leading-relaxed font-bold">
-              {isRtl
-                ? 'فيديو الكرتون يبدأ دائماً بهذا الشكل! نقسم الأحداث إلى مشاهد، ثم نحدد حركة الشخصية والسيناريو الإنجليزي لتسهيل ترجمته رقمياً إلى كرتون ممتع ومتحرك.'
-                : 'Behind every beautiful cartoon is a detailed scene layout. Children get to visualize London and practice spoken English from Heathrow arrival to busy subway gaps.'}
+          <div className="space-y-2 max-w-lg">
+            <p className="text-lg sm:text-2xl font-black tracking-tight leading-relaxed text-white" dir="ltr">
+              &ldquo; {currentScene.dialogue} &rdquo;
+            </p>
+            <p className="text-xs sm:text-sm text-[#E6C36A] font-bold">
+              {currentScene.dialogueAr}
             </p>
           </div>
 
-          {/* Right panel: Bonus Reward claim */}
-          <div className="md:col-span-4 bg-teal-50 border border-teal-150 rounded-2xl p-5 flex flex-col justify-between text-center space-y-4">
-            <div>
-              <span className="text-2xl block mb-1">🎁</span>
-              <h4 className="font-black text-[#002147] text-xs uppercase tracking-wider">{isRtl ? 'جائزة الاستكشاف السينمائي' : 'Exploration Bonus'}</h4>
-              <p className="text-[10px] text-teal-700 font-bold mt-1">
-                {isRtl ? 'تصفح جميع مشاهد السيناريو الـ 4 لتفتح الجائزة!' : 'Complete viewing of all 4 video scripts!'}
-              </p>
+          {isSpeaking && (
+            <div className="mt-3 flex items-center gap-1">
+              <span className="w-1.5 h-3 bg-[#E6C36A] rounded-full animate-pulse" />
+              <span className="w-1.5 h-5 bg-[#E6C36A] rounded-full animate-pulse" />
+              <span className="w-1.5 h-7 bg-[#E6C36A] rounded-full animate-pulse" />
+              <span className="w-1.5 h-4 bg-[#E6C36A] rounded-full animate-pulse" />
             </div>
-
-            {allCompleted ? (
-              !xpClaimed ? (
-                <button
-                  onClick={handleClaimXP}
-                  className="w-full py-2 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all cursor-pointer"
-                >
-                  {isRtl ? 'حصد +25 نقطة سيناريست 🏆' : 'Claim +25 XP 🏆'}
-                </button>
-              ) : (
-                <span className="w-full py-2 bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1 border border-emerald-200">
-                  <CheckCircle2 size={13} />
-                  <span>{isRtl ? 'تم إضافة النقاط!' : 'Successfully Claimed!'}</span>
-                </span>
-              )
-            ) : (
-              <div className="w-full py-2 bg-slate-100 text-slate-400 font-extrabold text-xs rounded-xl border border-dashed text-center">
-                {isRtl ? `شاهدت ${Object.keys(scenesCompleted).length} من 4 مشاهد` : `Viewed ${Object.keys(scenesCompleted).length}/4 scenes`}
-              </div>
-            )}
-          </div>
-
+          )}
         </div>
 
+        {/* Technical Animation Notes */}
+        <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-4 rounded-xl space-y-1">
+          <div className="flex items-center gap-1.5 text-xs font-black text-[#002147]">
+            <Film size={14} className="text-[#C49E3A]" />
+            <span>{isRtl ? 'ملاحظة المخرج والتحريك (Director Notes):' : 'Animation & Camera Note:'}</span>
+          </div>
+          <p className="text-xs text-[#002147]/75 font-semibold leading-relaxed">
+            {isRtl ? currentScene.animation_note : currentScene.animation_note_en}
+          </p>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#C49E3A]/20 pt-4">
+          <PrimaryButton onClick={() => speakDialogue(currentScene.dialogue)}>
+            <Volume2 size={15} />
+            <span>{isRtl ? 'استمع للمشهد الصوتي 🔊' : 'Listen Voice Actor 🔊'}</span>
+          </PrimaryButton>
+
+          <div className="flex items-center gap-2">
+            <GhostButton
+              disabled={currentSceneIdx === 0}
+              onClick={handlePrev}
+            >
+              <ChevronLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+              <span>{isRtl ? 'السابق' : 'Previous'}</span>
+            </GhostButton>
+
+            <GhostButton
+              disabled={currentSceneIdx === scenes.length - 1}
+              onClick={handleNext}
+            >
+              <span>{isRtl ? 'التالي' : 'Next'}</span>
+              <ChevronRight size={16} className={isRtl ? 'rotate-180' : ''} />
+            </GhostButton>
+          </div>
+        </div>
+      </GoldCard>
+
+      {/* Bottom Information & Bonus Reward */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <GoldCard className="md:col-span-8 p-4 sm:p-5 space-y-2">
+          <h4 className="font-black text-[#002147] text-sm flex items-center gap-2">
+            <Info size={15} className="text-[#C49E3A]" />
+            <span>{isRtl ? 'مفهوم لوحة القصة الكرتونية (Cartoon Storyboards)' : 'Why Storyboards?'}</span>
+          </h4>
+          <p className="text-xs text-[#002147]/75 leading-relaxed font-semibold">
+            {isRtl
+              ? 'فيديو الكرتون يبدأ دائماً بهذا الشكل! نقسم الأحداث إلى مشاهد، ثم نحدد حركة الشخصية والسيناريو الإنجليزي لتسهيل ترجمته رقمياً إلى كرتون ممتع ومتحرك.'
+              : 'Behind every beautiful cartoon is a detailed scene layout. Children get to visualize London and practice spoken English from Heathrow arrival to busy subway gaps.'}
+          </p>
+        </GoldCard>
+
+        <GoldCard className="md:col-span-4 p-4 sm:p-5 flex flex-col justify-between text-center space-y-3 bg-[#fdfaf3]">
+          <div>
+            <span className="text-2xl block mb-1">🎁</span>
+            <h4 className="font-black text-[#002147] text-xs uppercase tracking-wider">{isRtl ? 'جائزة الاستكشاف السينمائي' : 'Exploration Bonus'}</h4>
+            <p className="text-[11px] text-[#002147]/70 font-semibold mt-0.5">
+              {isRtl ? 'تصفح جميع مشاهد السيناريو الـ 4 لتفتح الجائزة!' : 'Complete viewing of all 4 video scripts!'}
+            </p>
+          </div>
+
+          {allCompleted ? (
+            !xpClaimed ? (
+              <PrimaryButton onClick={handleClaimXP} className="w-full text-xs py-2">
+                {isRtl ? 'حصد +25 نقطة سيناريست 🏆' : 'Claim +25 XP 🏆'}
+              </PrimaryButton>
+            ) : (
+              <span className="w-full py-2 bg-[#002147] text-[#E6C36A] font-black text-xs rounded-xl flex items-center justify-center gap-1">
+                <CheckCircle2 size={13} />
+                <span>{isRtl ? 'تم إضافة النقاط!' : 'Successfully Claimed!'}</span>
+              </span>
+            )
+          ) : (
+            <div className="w-full py-2 bg-white text-[#002147]/60 font-black text-xs rounded-xl border border-[#C49E3A]/40 text-center">
+              {isRtl ? `شاهدت ${Object.keys(scenesCompleted).length} من 4 مشاهد` : `Viewed ${Object.keys(scenesCompleted).length}/4 scenes`}
+            </div>
+          )}
+        </GoldCard>
       </div>
-    </div>
+    </SectionShell>
   );
 };

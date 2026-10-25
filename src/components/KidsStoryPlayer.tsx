@@ -6,24 +6,29 @@ import {
   Volume2, 
   MessageSquare, 
   BookOpen, 
-  Sparkles, 
   Star, 
   Mic, 
   CheckCircle2, 
-  Check, 
   X, 
-  Heart, 
+  Trophy, 
+  Square, 
+  Play, 
+  Pause,
   BadgeHelp,
-  Trophy,
-  Plane,
-  RotateCcw,
-  Square,
-  Play,
-  Pause
+  Headphones
 } from 'lucide-react';
 import { KidStory } from '../data/kidsStories';
 import { speakAcademyText, cancelAllSpeech, createManagedAudio } from '../lib/audio';
 import confetti from 'canvas-confetti';
+import {
+  SectionShell,
+  GoldCard,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface KidsStoryPlayerProps {
   lang: 'ar' | 'en';
@@ -188,7 +193,6 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
       };
 
       recorder.onstop = () => {
-        // Stop all tracks in the stream
         stream.getTracks().forEach(track => track.stop());
         
         let mimeType = 'audio/webm';
@@ -215,7 +219,6 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
       setMediaRecorder(recorder);
       setIsRecording(true);
     } catch {
-      // Offline / permission simulation fallback
       setIsRecording(true);
       setRecordSuccess(false);
     }
@@ -225,7 +228,6 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
     if (mediaRecorder && isRecording) {
       mediaRecorder.stop();
     } else if (isRecording) {
-      // simulated finish
       setIsRecording(false);
       setRecordSuccess(true);
       triggerSuccessConfetti();
@@ -268,525 +270,465 @@ export const KidsStoryPlayer: React.FC<KidsStoryPlayerProps> = ({
   const currentPercent = (currentStage / 5) * 100;
 
   return (
-    <div className="flex-1 bg-[#faf8f5] min-h-screen py-8 px-4 md:py-12 md:px-8 text-right" dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Immersive Theme Kid Header */}
-        <header className="flex justify-between items-center bg-white border-2 border-[#e1deda] px-6 py-4 rounded-[2rem] shadow-sm mb-8 flex-row-reverse">
-          <div className="flex items-center gap-4">
-            <img 
-              src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%2310b981%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%230d9488%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
-              alt="Kids London Story Icon"
-              referrerPolicy="no-referrer"
-              className="w-12 h-12 bg-amber-100 rounded-2xl object-cover border-2 border-amber-200/50 shadow-sm shrink-0"
-            />
-            <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-amber-600 block">
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={isRtl ? 'font-arabic' : 'font-sans'}>
+      {/* Top Header Card */}
+      <GoldCard className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <TutorFace tutor="sara" size="md" />
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <ProgressPill>
                 {story.series} • {isRtl ? `الحلقة ${story.episode}` : `Episode ${story.episode}`}
-              </span>
-              <h1 className="text-xl font-black text-[#002147]">
-                {isRtl ? story.title_ar : story.title_en}
-              </h1>
+              </ProgressPill>
             </div>
+            <h1 className="text-lg sm:text-xl font-black text-[#002147]">
+              {isRtl ? story.title_ar : story.title_en}
+            </h1>
           </div>
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs font-black text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-2xl transition-colors cursor-pointer"
+        </div>
+        <GhostButton onClick={onBack}>
+          <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+          <span>{isRtl ? 'بوابة المغامرات' : 'Adventures Portal'}</span>
+        </GhostButton>
+      </GoldCard>
+
+      {/* Story Metadata & Trackers */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+        <GoldCard className="p-3 text-center">
+          <span className="text-[10px] font-bold text-[#002147]/60 block uppercase mb-1">
+            {isRtl ? 'الموقع الجغرافي' : 'Location'}
+          </span>
+          <span className="font-black text-xs sm:text-sm text-[#002147] flex items-center justify-center gap-1">
+            📍 {story.location}
+          </span>
+        </GoldCard>
+        <GoldCard className="p-3 text-center">
+          <span className="text-[10px] font-bold text-[#002147]/60 block uppercase mb-1">
+            {isRtl ? 'المجموعة العمرية' : 'Age range'}
+          </span>
+          <span className="font-black text-xs sm:text-sm text-[#002147] flex items-center justify-center gap-1">
+            👶 {story.age_range} {isRtl ? 'سنة' : 'years'}
+          </span>
+        </GoldCard>
+        <GoldCard className="p-3 text-center">
+          <span className="text-[10px] font-bold text-[#002147]/60 block uppercase mb-1">
+            {isRtl ? 'المستوى اللغوي' : 'Proficiency check'}
+          </span>
+          <span className="px-2.5 py-0.5 bg-[#002147] text-[#E6C36A] text-xs font-black rounded-full inline-block">
+            {story.level}
+          </span>
+        </GoldCard>
+        <GoldCard className="p-3 text-center">
+          <span className="text-[10px] font-bold text-[#002147]/60 block uppercase mb-1">
+            {isRtl ? 'المدة التقديرية' : 'Duration'}
+          </span>
+          <span className="font-black text-xs sm:text-sm text-[#002147] flex items-center justify-center gap-1">
+            ⏱️ {story.duration_minutes} {isRtl ? 'دقيقة' : 'mins'}
+          </span>
+        </GoldCard>
+      </div>
+
+      {/* Stage Step Trail */}
+      <GoldCard className="p-3.5 sm:p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2 text-xs font-bold text-[#002147]">
+          <div className="flex items-center gap-2">
+            <ProgressPill>{currentStage} / 5</ProgressPill>
+            <span className="font-black text-[#002147]">
+              {currentStage === 1 && (isRtl ? 'الحوار الثنائي المقروء' : 'Double Bilingual Scene')}
+              {currentStage === 2 && (isRtl ? 'قاموس الكلمات الذهبية' : 'Golden Dictionary')}
+              {currentStage === 3 && (isRtl ? 'التصويب التفاعلي للذكاء' : 'Interactive Blank Test')}
+              {currentStage === 4 && (isRtl ? 'تحدي تقليد الشخصيات' : 'Character Acting Challenge')}
+              {currentStage === 5 && (isRtl ? 'التكريم ووسام البطولة' : 'Hero Crown & Certificate')}
+            </span>
+          </div>
+          <span className="text-[11px] font-bold text-[#002147]/65">
+            {isRtl ? 'مسيرة القصة اليوم' : 'Mission Map'}
+          </span>
+        </div>
+        <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/30 h-2.5 rounded-full overflow-hidden">
+          <div 
+            className="bg-[#C49E3A] h-full transition-all duration-300"
+            style={{ width: `${currentPercent}%` }}
+          />
+        </div>
+      </GoldCard>
+
+      {/* Main Interactive Stage Sandbox */}
+      <GoldCard className="p-5 sm:p-7 relative min-h-[460px] overflow-hidden">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`story-stage-${currentStage}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="h-full flex flex-col justify-between"
           >
-            <ArrowLeft size={16} className="rtl:rotate-180 shrink-0" />
-            <span>{isRtl ? 'بوابة المغامرات' : 'Adventures Portal'}</span>
-          </button>
-        </header>
-
-        {/* Level & Location Tracker Card */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white border border-[#e1deda] p-4 rounded-2xl text-center">
-            <span className="text-[9px] font-black text-slate-400 block uppercase mb-1">{isRtl ? 'الموقع الجغرافي' : 'Location'}</span>
-            <span className="font-extrabold text-sm text-[#002147] flex items-center justify-center gap-1">
-              📍 {story.location}
-            </span>
-          </div>
-          <div className="bg-white border border-[#e1deda] p-4 rounded-2xl text-center">
-            <span className="text-[9px] font-black text-slate-400 block uppercase mb-1">{isRtl ? 'المجموعة العمرية' : 'Age range'}</span>
-            <span className="font-extrabold text-sm text-[#002147] flex items-center justify-center gap-1">
-              👶 {story.age_range} {isRtl ? 'سنة' : 'years'}
-            </span>
-          </div>
-          <div className="bg-white border border-[#e1deda] p-4 rounded-2xl text-center">
-            <span className="text-[9px] font-black text-slate-400 block uppercase mb-1">{isRtl ? 'المستوى اللغوي' : 'Proficiency check'}</span>
-            <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-700 text-xs font-black rounded-lg inline-block border border-amber-500/15">
-              {story.level}
-            </span>
-          </div>
-          <div className="bg-white border border-[#e1deda] p-4 rounded-2xl text-center">
-            <span className="text-[9px] font-black text-slate-400 block uppercase mb-1">{isRtl ? 'المدة التقديرية' : 'Duration'}</span>
-            <span className="font-extrabold text-sm text-[#002147] flex items-center justify-center gap-1">
-              ⏱️ {story.duration_minutes} {isRtl ? 'دقيقة' : 'mins'}
-            </span>
-          </div>
-        </div>
-
-        {/* Kid Stage Step Trail */}
-        <div className="bg-white border border-slate-200 p-6 rounded-[2rem] shadow-xs mb-8">
-          <div className="flex justify-between items-center mb-3 text-xs font-bold text-slate-500 flex-row-reverse">
-            <span>{isRtl ? 'مسيرة القصة اليوم' : 'Mission map'} • {currentStage} / 5</span>
-            <span className="font-black text-amber-600 uppercase flex items-center gap-1.5 direction-rtl">
-              <span>🌟</span>
-              <span>
-                {currentStage === 1 && (isRtl ? 'الحوار الثنائي المقروء' : 'Double Bilingual Scene')}
-                {currentStage === 2 && (isRtl ? 'قاموس الكلمات الذهبية' : 'Golden Dictionary')}
-                {currentStage === 3 && (isRtl ? 'التصويب التفاعلي للذكاء' : 'Interactive Blank Test')}
-                {currentStage === 4 && (isRtl ? 'تحدي تقليد الشخصيات' : 'Character Acting Challenge')}
-                {currentStage === 5 && (isRtl ? 'التكريم ووسام البطولة' : 'Hero Crown & Certificate')}
-              </span>
-            </span>
-          </div>
-          <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-            <motion.div 
-              className="bg-amber-500 h-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${currentPercent}%` }}
-              transition={{ duration: 0.3 }}
-            />
-          </div>
-        </div>
-
-        {/* Outer Sandbox Panel */}
-        <div className="bg-white border-2 border-[#e1deda] rounded-[2.5rem] p-6 md:p-10 shadow-md relative min-h-[460px] overflow-hidden mb-8">
-          
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`story-stage-${currentStage}`}
-              initial={{ opacity: 0, scale: 0.98, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: -10 }}
-              className="h-full flex flex-col justify-between"
-            >
-
-               {/* Stage 1: Dialogue stream */}
-               {currentStage === 1 && (
-                 <div className="space-y-6">
-                   <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
-                     <img 
-                       src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23002147%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%231e4b8f%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
-                       alt="Big Ben London Adventure"
-                       referrerPolicy="no-referrer"
-                       className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
-                     />
-                     <div className="text-right flex-1">
-                       <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                         <MessageSquare className="text-amber-500 hover:scale-115 transition-transform" />
-                         <span>{isRtl ? 'حوار المحطة: استمع واقرأ بصوتك الفخم!' : 'The Station Dialogue: Tap & Practice!'}</span>
-                       </h2>
-                       <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.story_dialogue.instructions_ar}</p>
-                     </div>
-                   </div>
-
-                   {/* Autoplay sequential reader row */}
-                   <div className={`flex ${isRtl ? 'justify-start flex-row-reverse' : 'justify-start'} items-center gap-2 bg-amber-50/40 p-3 rounded-[1.5rem] border border-amber-100`}>
-                     <button
-                       onClick={startFullDialogueReading}
-                       className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black text-[11px] transition-all shadow-xs border cursor-pointer hover:scale-102 active:scale-98 ${
-                         isPlayingFullDialogue 
-                           ? 'bg-rose-50 text-rose-600 border-rose-200 animate-pulse' 
-                           : 'bg-amber-500 hover:bg-amber-600 text-white border-amber-600 shadow-sm'
-                       }`}
-                     >
-                       {isPlayingFullDialogue ? (
-                         <>
-                           <Pause size={12} className="animate-pulse" />
-                           <span>{isRtl ? 'إيقاف الاستماع التلقائي ⏹️' : 'Stop Autoplay Reader ⏹️'}</span>
-                         </>
-                       ) : (
-                         <>
-                           <Play size={11} fill="currentColor" />
-                           <span>{isRtl ? 'استمع إلى الحوار كاملاً بالإنجليزية 🔊' : 'Read Full Dialogue in English 🔊'}</span>
-                         </>
-                       )}
-                     </button>
-                     <p className={`text-[10px] text-slate-500 font-bold ${isRtl ? 'text-right' : 'text-left'} flex-1`}>
-                       {isRtl ? 'يمكنك الاستماع إلى الحادثة بالكامل بصوت بشري راقٍ أو تفعيل الكلمات مفرداً !' : 'Listen to the entire conversation sequentially or tap individual cards!'}
-                     </p>
-                   </div>
-
-                   <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                     {story.sections.story_dialogue.lines.map((ln, idx) => {
-                       const isNoor = ln.speaker === 'Noor';
-                       const isLineActive = activeSpeechLine === idx;
-                       
-                       return (
-                         <div 
-                           key={`ln-${idx}`}
-                           onClick={() => playTTS(ln.english, 'en', idx)}
-                           className={`p-4 md:p-5 rounded-2xl border transition-all cursor-pointer relative group flex flex-col items-end text-right ${
-                             isNoor 
-                               ? 'bg-amber-50/50 border-amber-200/60 hover:bg-amber-50 mr-8 md:mr-12' 
-                               : 'bg-[#f8fafc]/90 border-slate-200 hover:bg-slate-50 ml-8 md:ml-12'
-                           } ${isLineActive ? 'ring-2 ring-amber-500 bg-amber-50 shadow-md border-amber-300' : 'shadow-xs'}`}
-                         >
-                           <div className={`absolute top-3 ${isNoor ? 'left-4' : 'left-4'} opacity-40 group-hover:opacity-100 transition-opacity`}>
-                             <Volume2 size={16} className="text-slate-400 group-hover:text-amber-500" />
-                           </div>
-
-                           <div className="flex items-center gap-2 mb-2 flex-row-reverse">
-                             <span className={`w-2.5 h-2.5 rounded-full ${isNoor ? 'bg-amber-500' : 'bg-slate-500'}`} />
-                             <span className="font-extrabold text-[#002147] text-xs uppercase tracking-wider">
-                               {getSpeakerLabel(ln.speaker, isRtl)}
-                             </span>
-                           </div>
-
-                           <p className="font-mono font-black text-[#002147] text-sm md:text-base mb-1 direction-ltr text-center w-full">
-                             {ln.english}
-                           </p>
-                           
-                           {/* Beautiful segmented listen row */}
-                           <div className="w-full flex justify-between items-center mt-3 pt-2.5 border-t border-dashed border-slate-200/80 flex-row">
-                             <button 
-                               onClick={(e) => {
-                                 e.stopPropagation();
-                                 playTTS(ln.english, 'en', idx);
-                               }}
-                               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[9.5px] font-black transition-all cursor-pointer shadow-xs active:scale-95 ${
-                                 isLineActive
-                                   ? 'bg-amber-500 text-white border-amber-500'
-                                   : 'bg-white hover:bg-amber-50 text-amber-600 border-amber-200 hover:border-amber-400'
-                               }`}
-                             >
-                               <Volume2 size={11} className={isLineActive ? 'animate-bounce' : ''} />
-                               <span>{isRtl ? 'قراءة العبارة 🔊' : 'Speak Text 🔊'}</span>
-                             </button>
-                             <p className="text-slate-600 text-xs font-semibold leading-relaxed text-right flex-1 select-none pr-3">
-                               {ln.arabic}
-                             </p>
-                           </div>
-                         </div>
-                       );
-                     })}
-                   </div>
-                 </div>
-               )}
-
-              {/* Stage 2: Mini Dictionary Table */}
-              {currentStage === 2 && (
-                <div className="space-y-6">
-                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
-                    <img 
-                      src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23ec4899%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23db2777%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
-                      alt="Golden Dictionary Book"
-                      referrerPolicy="no-referrer"
-                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
-                    />
-                    <div className="text-right flex-1">
-                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                        <BookOpen className="text-amber-500 hover:scale-115 transition-transform" />
-                        <span>{isRtl ? 'قاموس نور للكلمات الذهبية السريعة:' : 'Noor\'s Golden Mini-Dictionary:'}</span>
-                      </h2>
-                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.mini_dictionary.instructions_ar}</p>
-                    </div>
+            {/* Stage 1: Dialogue stream */}
+            {currentStage === 1 && (
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 border-b border-[#C49E3A]/20 pb-4">
+                  <TutorFace tutor="sara" size="sm" />
+                  <div className="flex-1">
+                    <h2 className="text-lg sm:text-xl font-black text-[#002147] flex items-center gap-2">
+                      <MessageSquare className="text-[#C49E3A]" size={20} />
+                      <span>{isRtl ? 'حوار المحطة: استمع واقرأ بصوتك الفخم!' : 'The Station Dialogue: Tap & Practice!'}</span>
+                    </h2>
+                    <p className="text-xs text-[#002147]/70 font-bold mt-0.5">{story.sections.story_dialogue.instructions_ar}</p>
                   </div>
+                </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {story.sections.mini_dictionary.words.map((w, idx) => (
+                {/* Autoplay sequential reader row */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-[#fdfaf3] p-3 rounded-2xl border border-[#C49E3A]/40">
+                  <PrimaryButton onClick={startFullDialogueReading} className="text-xs">
+                    {isPlayingFullDialogue ? (
+                      <>
+                        <Pause size={13} />
+                        <span>{isRtl ? 'إيقاف الاستماع التلقائي' : 'Stop Autoplay Reader'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play size={13} fill="currentColor" />
+                        <span>{isRtl ? 'استمع إلى الحوار كاملاً بالإنجليزية' : 'Read Full Dialogue in English'}</span>
+                      </>
+                    )}
+                  </PrimaryButton>
+                  <p className="text-xs text-[#002147]/70 font-bold flex-1">
+                    {isRtl ? 'يمكنك الاستماع إلى الحوار بالكامل أو الضغط على كل بطاقة لسماعها مفرداً.' : 'Listen to the entire conversation sequentially or tap individual cards!'}
+                  </p>
+                </div>
+
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                  {story.sections.story_dialogue.lines.map((ln, idx) => {
+                    const isNoor = ln.speaker === 'Noor';
+                    const isLineActive = activeSpeechLine === idx;
+                    
+                    return (
                       <div 
-                        key={`vocab-${idx}`}
-                        className="bg-[#faf8f5] p-5 rounded-3xl border border-[#e1deda] hover:border-amber-500/40 transition-colors relative overflow-hidden text-right flex flex-col justify-between"
+                        key={`ln-${idx}`}
+                        onClick={() => playTTS(ln.english, 'en', idx)}
+                        className={`p-4 rounded-2xl border transition-all cursor-pointer relative ${
+                          isNoor 
+                            ? 'bg-[#fdfaf3] border-[#C49E3A]/50' 
+                            : 'bg-white border-[#002147]/20 hover:border-[#C49E3A]/60'
+                        } ${isLineActive ? 'ring-2 ring-[#C49E3A] border-[#C49E3A]' : ''}`}
                       >
-                        {w.important && (
-                          <div className="absolute top-3 left-3 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-xs">
-                            <Star size={10} fill="white" />
-                            <span>{isRtl ? 'مستحسن ومهم' : 'VITAL'}</span>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-[#C49E3A]" />
+                            <span className="font-black text-[#002147] text-xs uppercase tracking-wider">
+                              {getSpeakerLabel(ln.speaker, isRtl)}
+                            </span>
                           </div>
-                        )}
+                          <GhostButton 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              playTTS(ln.english, 'en', idx);
+                            }}
+                            className="!py-1 !px-2.5 text-[11px]"
+                          >
+                            <Volume2 size={13} className={isLineActive ? 'text-[#C49E3A]' : ''} />
+                            <span>{isRtl ? 'استمع' : 'Listen'}</span>
+                          </GhostButton>
+                        </div>
 
-                        <div className="flex justify-between items-center flex-row-reverse mb-2 mt-1">
-                          <span className="font-mono font-black text-lg text-[#002147]">{w.word}</span>
-                          <button 
+                        <p className="font-mono font-black text-[#002147] text-sm sm:text-base mb-1" dir="ltr">
+                          {ln.english}
+                        </p>
+                        <p className="text-[#002147]/70 text-xs font-semibold leading-relaxed pt-1 border-t border-[#C49E3A]/20">
+                          {ln.arabic}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Stage 2: Mini Dictionary Table */}
+            {currentStage === 2 && (
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 border-b border-[#C49E3A]/20 pb-4">
+                  <TutorFace tutor="sara" size="sm" />
+                  <div className="flex-1">
+                    <h2 className="text-lg sm:text-xl font-black text-[#002147] flex items-center gap-2">
+                      <BookOpen className="text-[#C49E3A]" size={20} />
+                      <span>{isRtl ? 'قاموس نور للكلمات الذهبية السريعة:' : 'Noor\'s Golden Mini-Dictionary:'}</span>
+                    </h2>
+                    <p className="text-xs text-[#002147]/70 font-bold mt-0.5">{story.sections.mini_dictionary.instructions_ar}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {story.sections.mini_dictionary.words.map((w, idx) => (
+                    <div 
+                      key={`vocab-${idx}`}
+                      className="bg-[#fdfaf3] p-4 rounded-2xl border border-[#C49E3A]/40 flex flex-col justify-between"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-mono font-black text-base sm:text-lg text-[#002147]">{w.word}</span>
+                        <div className="flex items-center gap-2">
+                          {w.important && (
+                            <span className="bg-[#002147] text-[#E6C36A] text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Star size={10} fill="currentColor" />
+                              <span>{isRtl ? 'مهم' : 'Vital'}</span>
+                            </span>
+                          )}
+                          <GhostButton 
                             onClick={() => playTTS(w.word, 'en')}
-                            className="bg-white hover:bg-amber-50 text-slate-500 hover:text-amber-600 p-2 rounded-xl shadow-xs border border-[#e1deda] transition-all"
+                            className="!p-1.5"
                           >
                             <Volume2 size={14} />
-                          </button>
+                          </GhostButton>
                         </div>
-                        <p className="text-slate-600 text-sm font-bold mt-1">{w.meaning_ar}</p>
                       </div>
-                    ))}
+                      <p className="text-[#002147]/80 text-xs sm:text-sm font-bold">{w.meaning_ar}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Stage 3: Fill practice */}
+            {currentStage === 3 && (
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 border-b border-[#C49E3A]/20 pb-4">
+                  <TutorFace tutor="sara" size="sm" />
+                  <div className="flex-1">
+                    <h2 className="text-lg sm:text-xl font-black text-[#002147] flex items-center gap-2">
+                      <BadgeHelp className="text-[#C49E3A]" size={20} />
+                      <span>{isRtl ? 'لغز المطار: أكمل الفراغات!' : 'The Airport Puzzle: Word Drop!'}</span>
+                    </h2>
+                    <p className="text-xs text-[#002147]/70 font-bold mt-0.5">{story.sections.practice.instructions_ar}</p>
                   </div>
                 </div>
-              )}
 
-              {/* Stage 3: Fill section */}
-              {currentStage === 3 && (
-                <div className="space-y-6">
-                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
-                    <img 
-                      src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%230ea5e9%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%232563eb%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
-                      alt="Airport Puzzle Journey"
-                      referrerPolicy="no-referrer"
-                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
-                    />
-                    <div className="text-right flex-1">
-                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                        <BadgeHelp className="text-amber-500 hover:scale-115 transition-transform" />
-                        <span>{isRtl ? 'لغز المطار: أكمل الفراغات!' : 'The Airport Puzzle: Word Drop!'}</span>
-                      </h2>
-                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.practice.instructions_ar}</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    {story.sections.practice.questions.map((q, idx) => {
-                      const ans = selectedAnswers[idx];
-                      const correctAns = story.sections.practice.questions[idx].correct;
-                      const isCorrect = ans === correctAns;
-                      
-                      return (
-                        <div key={`pq-${idx}`} className="bg-slate-50 border border-[#e1deda] p-5 rounded-2xl relative">
-                          
-                          {/* Header label */}
-                          <div className="flex justify-between items-center mb-2 flex-row-reverse">
-                            <span className="text-[10px] uppercase font-black tracking-wider text-slate-400">
-                              {isRtl ? `تحدي رقم ${idx + 1}` : `CHALLENGE #${idx + 1}`}
-                            </span>
-                            <button
-                              onClick={() => playTTS(q.sentence.replace('_____', 'blank'), 'en')}
-                              className="text-slate-400 hover:text-slate-600 p-1"
-                            >
-                              <Volume2 size={13} />
-                            </button>
-                          </div>
-
-                          {/* Sentence render */}
-                          <p className="font-mono font-bold text-center text-slate-800 text-base md:text-lg mb-4 direction-ltr">
-                            {q.sentence.split('_____').map((segment, sIdx) => (
-                              <React.Fragment key={`s-${sIdx}`}>
-                                {segment}
-                                {sIdx === 0 && (
-                                  <span className={`inline-block px-3 py-1 border rounded-lg text-sm font-mono tracking-wide mx-1.5 min-w-[75px] text-center shadow-inner ${
-                                    ans 
-                                      ? (isCorrect ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-rose-100 text-rose-800 border-rose-300') 
-                                      : 'bg-white text-slate-300 border-slate-200'
-                                  }`}>
-                                    {ans || '.....'}
-                                  </span>
-                                )}
-                              </React.Fragment>
-                            ))}
-                          </p>
-
-                          {/* Trigger Options */}
-                          <div className="flex justify-center gap-3">
-                            {q.options.map(opt => {
-                              const isThisSelected = ans === opt;
-                              return (
-                                <button
-                                  key={opt}
-                                  onClick={() => selectAnswer(idx, opt)}
-                                  className={`px-4 py-2 border rounded-xl font-mono text-xs font-black tracking-wide cursor-pointer select-none transition-all ${
-                                    isThisSelected 
-                                      ? (isCorrect ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-rose-600 text-white border-rose-600 shadow-md')
-                                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                                  }`}
-                                >
-                                  {opt}
-                                </button>
-                              );
-                            })}
-                          </div>
-
-                          {/* Instant review check */}
-                          {ans && (
-                            <div className={`mt-3 text-xs font-black text-center flex items-center justify-center gap-1.5 ${isCorrect ? 'text-emerald-600' : 'text-rose-500'}`}>
-                              {isCorrect ? (
-                                <>
-                                  <CheckCircle2 size={12} />
-                                  <span>{isRtl ? 'إجابة ممتازة فصيحة!' : 'Perfect choice!'}</span>
-                                </>
-                              ) : (
-                                <>
-                                  <X size={12} />
-                                  <span>{isRtl ? `غير دقيقة! الكلمة الفصيحة هي: ${q.correct}` : `Try again! Elite is: ${q.correct}`}</span>
-                                </>
-                              )}
-                            </div>
-                          )}
-
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Stage 4: Speaking challenge acting as Noor */}
-              {currentStage === 4 && (
-                <div className="space-y-6">
-                  <div className="flex flex-col md:flex-row-reverse gap-4 items-center border-b border-slate-100 pb-4">
-                    <img 
-                      src="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23ec4899%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23db2777%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%AB%3C/text%3E%3C/svg%3E" 
-                      alt="Voice acting microphone"
-                      referrerPolicy="no-referrer"
-                      className="w-24 h-20 object-cover rounded-2xl border border-amber-200 shadow-xs shrink-0"
-                    />
-                    <div className="text-right flex-1">
-                      <h2 className="text-xl md:text-2xl font-black text-[#002147] flex items-center gap-2 justify-end">
-                        <Mic className="text-amber-500 hover:scale-115 transition-transform" />
-                        <span>{isRtl ? 'تحدي تقمص الشخصية: تكلم مثل نور!' : 'Character Voice Gym: Speak like Noor!'}</span>
-                      </h2>
-                      <p className="text-xs text-amber-600 font-bold mt-1">{story.sections.acting_challenge.instructions_ar}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-amber-50/20 border-2 border-dashed border-[#e1deda] p-6 md:p-8 rounded-[2rem] text-center space-y-4">
+                <div className="space-y-4">
+                  {story.sections.practice.questions.map((q, idx) => {
+                    const ans = selectedAnswers[idx];
+                    const correctAns = story.sections.practice.questions[idx].correct;
+                    const isCorrect = ans === correctAns;
                     
-                    <div className="bg-white p-5 rounded-2xl border border-amber-100 max-w-sm mx-auto shadow-xs">
-                      <span className="text-[9px] font-black text-amber-600 block uppercase mb-1">{isRtl ? 'اقرأ الجملة بلهجة تسائلية شجاعة:' : 'READ LOUDLY WITH COURAGE:'}</span>
-                      <p className="font-mono font-black text-[#002147] text-lg md:text-xl">
-                        "{story.sections.acting_challenge.sentence}"
-                      </p>
-                      <button
-                        onClick={() => playTTS(story.sections.acting_challenge.sentence, 'en')}
-                        className="mt-3 text-[10px] text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 mx-auto bg-indigo-50 px-3 py-1 rounded-lg transition-colors border border-indigo-100"
-                      >
-                        <Volume2 size={12} />
-                        <span>{isRtl ? 'الاستماع للفظ التدريبي' : 'Listen Coach'}</span>
-                      </button>
-                    </div>
-
-                    <div className="py-2">
-                       {isRecording ? (
-                          <div className="flex flex-col items-center justify-center space-y-2">
-                            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping inline-block" />
-                            <span className="text-xs font-black text-rose-500 animate-pulse">{isRtl ? 'جارٍ تسجيل تلاوتك الآن...' : 'Listening stream live...'} ({duration}s)</span>
-                          </div>
-                       ) : (
-                          <span className="text-xs text-slate-400 font-bold">
-                            {recordSuccess ? (isRtl ? 'تم التحليل الفوري للمطابقة بنفحات فخر!' : 'Voice matched & compiled successfully!') : (isRtl ? 'الميكروفون مهيأ ومستعد للاستقبال' : 'Mic waiting for your command')}
-                          </span>
-                       )}
-                    </div>
-
-                    <div className="flex justify-center gap-3 flex-wrap">
-                      {isRecording ? (
-                        <button
-                          onClick={handleStopRecord}
-                          className="bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-5 py-3 rounded-2xl flex items-center gap-2 shadow-md cursor-pointer animate-pulse"
-                        >
-                          <Square size={14} fill="white" />
-                          <span>{isRtl ? 'استعراض النتيجة' : 'Analyze results'}</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={handleStartRecord}
-                          className="bg-[#002147] hover:bg-indigo-800 text-white font-black text-xs px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md cursor-pointer transition-transform active:scale-95"
-                        >
-                          <Mic size={14} />
-                          <span>{recordSuccess ? (isRtl ? 'إعادة تسجيل الصوت 🔄' : 'Re-record 🔄') : (isRtl ? 'اضغط وتكلم الآن 🗣️' : 'Press to Speak Now 🗣️')}</span>
-                        </button>
-                      )}
-
-                      {recordSuccess && audioUrl && (
-                        <button
-                          onClick={() => {
-                            const speech = createManagedAudio(audioUrl);
-                            speech.play();
-                          }}
-                          className="bg-white border border-[#e1deda] hover:bg-slate-100 text-[#002147] font-bold text-xs px-4 py-3 rounded-xl flex items-center gap-1.5 transition-colors"
-                        >
-                          <span>🎧</span>
-                          <span>{isRtl ? 'استمع لتسجيلك الخاص' : 'Play back'}</span>
-                        </button>
-                      )}
-                    </div>
-
-                    {recordSuccess && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 p-4 rounded-xl max-w-sm mx-auto text-right flex items-center gap-2.5 flex-row-reverse"
-                      >
-                        <span className="text-xl">🏆</span>
-                        <div>
-                          <p className="font-extrabold text-xs">{isRtl ? 'تم التحقق بنجاح مبهر لتقليد نور!' : 'Noor acting match accept!'}</p>
-                          <p className="text-[10px] text-slate-500 font-semibold font-mono">Accuracy index: 95% • Fluency score: Top Tier</p>
+                    return (
+                      <div key={`pq-${idx}`} className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-4 sm:p-5 rounded-2xl">
+                        <div className="flex justify-between items-center mb-2">
+                          <ProgressPill className="text-[10px]">
+                            {isRtl ? `تحدي رقم ${idx + 1}` : `Challenge #${idx + 1}`}
+                          </ProgressPill>
+                          <GhostButton
+                            onClick={() => playTTS(q.sentence.replace('_____', 'blank'), 'en')}
+                            className="!p-1.5"
+                          >
+                            <Volume2 size={13} />
+                          </GhostButton>
                         </div>
-                      </motion.div>
+
+                        {/* Sentence */}
+                        <p className="font-mono font-bold text-center text-[#002147] text-sm sm:text-base mb-4" dir="ltr">
+                          {q.sentence.split('_____').map((segment, sIdx) => (
+                            <React.Fragment key={`s-${sIdx}`}>
+                              {segment}
+                              {sIdx === 0 && (
+                                <span className={`inline-block px-3 py-1 border rounded-lg text-xs sm:text-sm font-mono mx-1 min-w-[70px] text-center ${
+                                  ans 
+                                    ? (isCorrect ? 'bg-green-100 text-green-900 border-green-500 font-black' : 'bg-red-100 text-red-900 border-red-500 font-black') 
+                                    : 'bg-white text-[#002147]/40 border-[#C49E3A]/40'
+                                }`}>
+                                  {ans || '.....'}
+                                </span>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </p>
+
+                        {/* Options */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {q.options.map(opt => {
+                            const isThisSelected = ans === opt;
+                            const optState = ans ? (isThisSelected ? (isCorrect ? 'correct' : 'wrong') : 'normal') : 'normal';
+                            return (
+                              <AnswerOption
+                                key={opt}
+                                label={<span className="font-mono text-center block w-full">{opt}</span>}
+                                selected={isThisSelected}
+                                state={optState}
+                                onClick={() => selectAnswer(idx, opt)}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        {/* Feedback message */}
+                        {ans && (
+                          <div className={`mt-3 text-xs font-black text-center flex items-center justify-center gap-1.5 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                            {isCorrect ? (
+                              <>
+                                <CheckCircle2 size={14} />
+                                <span>{isRtl ? 'إجابة ممتازة فصيحة!' : 'Perfect choice!'}</span>
+                              </>
+                            ) : (
+                              <>
+                                <X size={14} />
+                                <span>{isRtl ? `غير دقيقة! الكلمة الفصيحة هي: ${q.correct}` : `Try again! The correct word is: ${q.correct}`}</span>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Stage 4: Speaking challenge acting as Noor */}
+            {currentStage === 4 && (
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 border-b border-[#C49E3A]/20 pb-4">
+                  <TutorFace tutor="sara" size="sm" />
+                  <div className="flex-1">
+                    <h2 className="text-lg sm:text-xl font-black text-[#002147] flex items-center gap-2">
+                      <Mic className="text-[#C49E3A]" size={20} />
+                      <span>{isRtl ? 'تحدي تقمص الشخصية: تكلم مثل نور!' : 'Character Voice Gym: Speak like Noor!'}</span>
+                    </h2>
+                    <p className="text-xs text-[#002147]/70 font-bold mt-0.5">{story.sections.acting_challenge.instructions_ar}</p>
+                  </div>
+                </div>
+
+                <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-5 sm:p-7 rounded-2xl text-center space-y-4">
+                  <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#C49E3A]/40 max-w-md mx-auto shadow-sm">
+                    <span className="text-[10px] font-black text-[#C49E3A] block uppercase mb-1">
+                      {isRtl ? 'اقرأ الجملة بلهجة تسائلية شجاعة:' : 'Read loudly with courage:'}
+                    </span>
+                    <p className="font-mono font-black text-[#002147] text-base sm:text-lg" dir="ltr">
+                      "{story.sections.acting_challenge.sentence}"
+                    </p>
+                    <GhostButton
+                      onClick={() => playTTS(story.sections.acting_challenge.sentence, 'en')}
+                      className="mt-3 mx-auto"
+                    >
+                      <Volume2 size={13} />
+                      <span>{isRtl ? 'الاستماع للفظ التدريبي' : 'Listen Coach'}</span>
+                    </GhostButton>
+                  </div>
+
+                  <div className="py-2">
+                    {isRecording ? (
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse inline-block" />
+                        <span className="text-xs font-black text-red-600">
+                          {isRtl ? 'جارٍ تسجيل صوتك الآن...' : 'Recording in progress...'} ({duration}s)
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[#002147]/65 font-bold">
+                        {recordSuccess 
+                          ? (isRtl ? 'تم التحليل الفوري للمطابقة بنجاح!' : 'Voice matched successfully!') 
+                          : (isRtl ? 'الميكروفون مهيأ ومستعد للاستقبال' : 'Mic waiting for your command')}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex justify-center gap-3 flex-wrap">
+                    {isRecording ? (
+                      <PrimaryButton onClick={handleStopRecord} className="!bg-red-700 !border-red-800 text-white">
+                        <Square size={14} fill="currentColor" />
+                        <span>{isRtl ? 'استعراض النتيجة' : 'Analyze results'}</span>
+                      </PrimaryButton>
+                    ) : (
+                      <PrimaryButton onClick={handleStartRecord}>
+                        <Mic size={14} />
+                        <span>{recordSuccess ? (isRtl ? 'إعادة تسجيل الصوت 🔄' : 'Re-record 🔄') : (isRtl ? 'اضغط وتكلم الآن 🗣️' : 'Press to Speak Now 🗣️')}</span>
+                      </PrimaryButton>
                     )}
 
-                  </div>
-                </div>
-              )}
-
-              {/* Stage 5: Hero complete / Encouragement & completion trigger */}
-              {currentStage === 5 && (
-                <div className="flex flex-col justify-between h-full space-y-6">
-                  
-                  <div className="space-y-4">
-                     <div className="text-center pt-2">
-                       <div className="w-16 h-16 bg-amber-500/10 text-amber-500 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-amber-500/15 animate-bounce">
-                         <Trophy size={36} />
-                       </div>
-                       <h2 className="text-2xl md:text-3xl font-black text-[#002147]">
-                         {isRtl ? 'لقد تم تنصيبك كبطل للحلقة!' : 'Official Hero of the Episode!'}
-                       </h2>
-                       <p className="text-xs text-amber-600 font-extrabold tracking-widest mt-1">
-                         +150 XP VIP BONUS COMPLETE
-                       </p>
-                     </div>
-
-                     <div className="bg-indigo-50/50 border border-indigo-100 p-6 rounded-2xl relative text-right">
-                       <span className="absolute top-2 left-3 text-[8px] font-mono tracking-widest text-[#002147] uppercase opacity-40">Mascot encouragement</span>
-                       <h4 className="font-extrabold text-slate-800 mb-2">{isRtl ? 'تهنئة باسم الخليل الخاصة لك:' : 'VIP Mentor Note:'}</h4>
-                       <p className="text-sm text-slate-600 font-semibold !leading-relaxed whitespace-pre-line leading-relaxed">
-                         {story.sections.encouragement.content_ar}
-                       </p>
-                     </div>
+                    {recordSuccess && audioUrl && (
+                      <GhostButton
+                        onClick={() => {
+                          const speech = createManagedAudio(audioUrl);
+                          speech.play();
+                        }}
+                      >
+                        <Headphones size={14} />
+                        <span>{isRtl ? 'استمع لتسجيلك الخاص' : 'Play back'}</span>
+                      </GhostButton>
+                    )}
                   </div>
 
-                  <div className="pt-4 flex flex-col items-center">
-                    <button
-                      onClick={() => onComplete(150)}
-                      className="bg-[#002147] hover:bg-[#b48e56] text-white font-black text-sm md:text-base py-4 px-10 rounded-[2rem] shadow-xl transition-all cursor-pointer flex items-center gap-2 justify-center max-w-sm w-full"
-                    >
-                      <span>{isRtl ? 'حصد الجائزة ونقاط البطولة ✨' : 'Claim Hero Reward +150 XP ✨'}</span>
-                    </button>
-                    
-                    <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-wide tracking-widest mt-3 text-center">
-                      {isRtl ? 'أكاديمية باسم الخليل • مغامرات لندن التفاعلية • اكتملت السلسلة بنجاح 🌟' : 'Basim Alkhalil Interactive London Adventures • Series Complete 🌟'}
-                    </p>
-                  </div>
-
-                </div>
-              )}
-
-              {/* Dynamic Walkthrough Arrows */}
-              {currentStage < 5 && (
-                <div className="flex justify-between items-center border-t border-slate-100 pt-5 mt-6 flex-row-reverse">
-                  <button
-                    onClick={handleNext}
-                    className="bg-[#002147] hover:bg-blue-800 text-white font-black text-xs md:text-sm py-2.5 px-5 rounded-2xl flex items-center gap-1.5 shadow-sm cursor-pointer transition-transform active:scale-95"
-                  >
-                    <span>{isRtl ? 'المرحلة التالية' : 'Next block'}</span>
-                    <ArrowRight size={15} className="rtl:rotate-180" />
-                  </button>
-
-                  {currentStage > 1 && (
-                    <button
-                      onClick={handleBack}
-                      className="text-slate-500 hover:text-slate-800 font-bold text-xs md:text-sm py-2.5 px-5 rounded-2xl flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-                    >
-                      <ArrowLeft size={15} className="rtl:rotate-180" />
-                      <span>{isRtl ? 'السابق' : 'Prev block'}</span>
-                    </button>
+                  {recordSuccess && (
+                    <div className="bg-green-50 border border-green-600/30 text-green-900 p-3.5 rounded-xl max-w-sm mx-auto text-center flex items-center justify-center gap-2">
+                      <span className="text-xl">🏆</span>
+                      <div>
+                        <p className="font-extrabold text-xs">{isRtl ? 'تم التحقق بنجاح مبهر لتقليد نور!' : 'Noor acting match accepted!'}</p>
+                        <p className="text-[10px] text-green-800/80 font-mono font-bold">Accuracy index: 95% • Fluency score: Top Tier</p>
+                      </div>
+                    </div>
                   )}
                 </div>
-              )}
+              </div>
+            )}
 
-            </motion.div>
-          </AnimatePresence>
+            {/* Stage 5: Hero complete */}
+            {currentStage === 5 && (
+              <div className="flex flex-col justify-between h-full space-y-6">
+                <div className="space-y-4 text-center">
+                  <div className="w-16 h-16 bg-[#002147] text-[#E6C36A] border-2 border-[#C49E3A] rounded-3xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+                    <Trophy size={32} />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black text-[#002147]">
+                    {isRtl ? 'لقد تم تنصيبك كبطل للحلقة!' : 'Official Hero of the Episode!'}
+                  </h2>
+                  <div className="flex justify-center">
+                    <ProgressPill className="text-xs">
+                      +150 XP VIP BONUS COMPLETE
+                    </ProgressPill>
+                  </div>
 
-        </div>
+                  <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-5 rounded-2xl max-w-lg mx-auto text-start">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <TutorFace tutor="sara" size="sm" />
+                      <h4 className="font-black text-[#002147] text-sm">{isRtl ? 'تهنئة باسم الخليل الخاصة لك:' : 'VIP Mentor Note:'}</h4>
+                    </div>
+                    <p className="text-xs sm:text-sm text-[#002147]/85 font-semibold leading-relaxed whitespace-pre-line">
+                      {story.sections.encouragement.content_ar}
+                    </p>
+                  </div>
+                </div>
 
-      </div>
-    </div>
+                <div className="pt-2 flex flex-col items-center">
+                  <PrimaryButton
+                    onClick={() => onComplete(150)}
+                    className="py-3 px-8 text-sm sm:text-base w-full max-w-sm"
+                  >
+                    <span>{isRtl ? 'حصد الجائزة ونقاط البطولة ✨' : 'Claim Hero Reward +150 XP ✨'}</span>
+                  </PrimaryButton>
+                  
+                  <p className="text-[10px] text-[#002147]/60 font-bold uppercase tracking-wider mt-3 text-center">
+                    {isRtl ? 'أكاديمية باسم الخليل • مغامرات لندن التفاعلية • اكتملت السلسلة بنجاح 🌟' : 'Basim Alkhalil Interactive London Adventures • Series Complete 🌟'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Dynamic Walkthrough Arrows */}
+            {currentStage < 5 && (
+              <div className="flex justify-between items-center border-t border-[#C49E3A]/20 pt-4 mt-6">
+                {currentStage > 1 ? (
+                  <GhostButton onClick={handleBack}>
+                    <ArrowLeft size={15} className={isRtl ? 'rotate-180' : ''} />
+                    <span>{isRtl ? 'السابق' : 'Prev block'}</span>
+                  </GhostButton>
+                ) : <div />}
+
+                <PrimaryButton onClick={handleNext}>
+                  <span>{isRtl ? 'المرحلة التالية' : 'Next block'}</span>
+                  <ArrowRight size={15} className={isRtl ? 'rotate-180' : ''} />
+                </PrimaryButton>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </GoldCard>
+    </SectionShell>
   );
 };

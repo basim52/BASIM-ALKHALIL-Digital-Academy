@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState } from 'react';
 import { 
   Compass, 
   Sparkles, 
@@ -9,18 +8,21 @@ import {
   ArrowLeft, 
   CheckCircle2, 
   HelpCircle, 
-  BookOpen, 
   GitBranch, 
-  Award, 
-  Flame, 
-  Play, 
-  Pause,
-  ChevronRight,
-  Languages,
-  Footprints
+  Languages
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { speakAcademyText, cancelAllSpeech } from '../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace,
+} from './ui/academy';
 
 interface VocabItem {
   word: string;
@@ -70,8 +72,7 @@ const STORY_THEMES = [
     titleEn: 'Noor\'s Adventures in London',
     descAr: 'رافق نور من مطار هيثرو إلى قطار الأنفاق ومتاحف وجامعات بريطانيا',
     descEn: 'Navigate London Heathrow, Tube, royal museums & historical Oxford',
-    icon: '🇬🇧',
-    coverImage: 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%23f59e0b%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%23ea580c%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%9B%EF%B8%8F%3C/text%3E%3C/svg%3E'
+    icon: '🇬🇧'
   },
   {
     id: 'Galaxy Explorer',
@@ -79,8 +80,7 @@ const STORY_THEMES = [
     titleEn: 'Galaxy Space Explorer',
     descAr: 'انطلق في مهمة استكشاف علمية مع طاقم دولي وتواصل بلغة العلوم',
     descEn: 'Embark on an interstellar scientific mission with an international crew',
-    icon: '🚀',
-    coverImage: 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%230ea5e9%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%232563eb%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E'
+    icon: '🚀'
   },
   {
     id: 'Oxford Detective',
@@ -88,8 +88,7 @@ const STORY_THEMES = [
     titleEn: 'The Mystery of Oxford Castle',
     descAr: 'فك شفرات المخطوطات القديمة وابحث عن الأدلة اللغوية المخفية',
     descEn: 'Decipher ancient manuscripts and solve linguistic clues in ancient libraries',
-    icon: '🕵️',
-    coverImage: 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20400%20300%27%3E%3Cdefs%3E%3ClinearGradient%20id=%27g%27%20x1=%270%27%20y1=%270%27%20x2=%271%27%20y2=%271%27%3E%3Cstop%20offset=%270%27%20stop-color=%27%234f46e5%27/%3E%3Cstop%20offset=%271%27%20stop-color=%27%237c3aed%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width=%27400%27%20height=%27300%27%20fill=%27url(%23g)%27/%3E%3Ccircle%20cx=%27200%27%20cy=%27150%27%20r=%2795%27%20fill=%27white%27%20fill-opacity=%27.16%27/%3E%3Ctext%20x=%27200%27%20y=%27152%27%20font-size=%27120%27%20text-anchor=%27middle%27%20dominant-baseline=%27central%27%3E%F0%9F%8F%BA%3C/text%3E%3C/svg%3E'
+    icon: '🕵️'
   }
 ];
 
@@ -119,7 +118,7 @@ export const BranchingStoryEngine: React.FC<BranchingStoryEngineProps> = ({
   const [isCheckAnswered, setIsCheckAnswered] = useState(false);
   const [isCheckCorrect, setIsCheckCorrect] = useState(false);
 
-  // Fetch Story Chapter / Branch from Gemini 3.8
+  // Fetch Story Chapter / Branch from Gemini
   const fetchNextChapter = async (choiceText: string | null = null) => {
     setLoading(true);
     cancelAllSpeech();
@@ -222,354 +221,300 @@ export const BranchingStoryEngine: React.FC<BranchingStoryEngineProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 p-3 sm:p-6" dir={isRtl ? 'rtl' : 'ltr'}>
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={isRtl ? 'font-arabic' : 'font-sans'}>
       {/* HEADER BAR */}
-      <div className="max-w-4xl mx-auto flex items-center justify-between mb-6">
-        <button
-          onClick={isStarted ? handleReset : onBack}
-          className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm shadow-sm transition-all cursor-pointer"
-        >
-          <ArrowLeft size={18} className={isRtl ? 'rotate-180' : ''} />
+      <GoldCard className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
+        <GhostButton onClick={isStarted ? handleReset : onBack}>
+          <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
           <span>{isStarted ? (isRtl ? 'اختيار قصة أخرى' : 'Change Adventure') : (isRtl ? 'العودة' : 'Back')}</span>
-        </button>
+        </GhostButton>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-black rounded-full shadow-sm">
-            <GitBranch size={14} className="animate-pulse" />
-            Gemini 3.8 Branching Stories
-          </span>
-          <span className="text-xs font-bold text-slate-500 hidden sm:inline-block">
-            {isRtl ? 'القصص التفاعلية متعددة النهايات' : 'Branching Interactive Stories'}
-          </span>
+          <ProgressPill>
+            <GitBranch size={13} className="text-[#C49E3A]" />
+            <span>Gemini 3.8 Branching Stories</span>
+          </ProgressPill>
+          <TutorFace tutor="sara" size="sm" />
         </div>
-      </div>
+      </GoldCard>
 
-      <div className="max-w-4xl mx-auto">
-        {/* SETUP SCREEN */}
-        {!isStarted ? (
-          <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 space-y-8">
-            <div className="text-center max-w-2xl mx-auto">
-              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl mx-auto flex items-center justify-center font-black mb-4 shadow-inner">
-                <Compass size={32} />
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
-                {isRtl ? 'عالم القصص التفاعلية متعددة النهايات 🌟' : 'Branching Interactive Story Engine 🌟'}
-              </h1>
-              <p className="text-sm text-slate-500 font-medium">
-                {isRtl 
-                  ? 'أنت البطل الذي يقرر مسار القصة! كل اختيار تتخذه بالإنجليزية يُصيغ أحداثاً جديدة مدعومة بالذكاء الاصطناعي Gemini 3.8'
-                  : 'You are the protagonist! Every decision in English steers the plot into fresh AI-generated chapters.'}
-              </p>
-            </div>
+      {/* SETUP SCREEN */}
+      {!isStarted ? (
+        <GoldCard className="p-5 sm:p-8 space-y-6">
+          <div className="text-center max-w-xl mx-auto space-y-3">
+            <TutorFace tutor="sara" size="md" className="mx-auto" />
+            <h1 className="text-xl sm:text-2xl font-black text-[#002147]">
+              {isRtl ? 'عالم القصص التفاعلية متعددة النهايات 🌟' : 'Branching Interactive Story Engine 🌟'}
+            </h1>
+            <p className="text-xs sm:text-sm text-[#002147]/70 font-semibold leading-relaxed">
+              {isRtl 
+                ? 'أنت البطل الذي يقرر مسار القصة! كل اختيار تتخذه بالإنجليزية يُصيغ أحداثاً جديدة مدعومة بالذكاء الاصطناعي.'
+                : 'You are the protagonist! Every decision in English steers the plot into fresh AI-generated chapters.'}
+            </p>
+          </div>
 
-            {/* THEME SELECTION */}
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase mb-3">
-                {isRtl ? '1. اختر عالم المغامرة:' : '1. Select Adventure Realm:'}
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {STORY_THEMES.map((th) => {
-                  const isSelected = selectedTheme.id === th.id;
-                  return (
-                    <button
-                      key={th.id}
-                      type="button"
-                      onClick={() => setSelectedTheme(th)}
-                      className={`relative text-left p-4 rounded-2xl border-2 transition-all overflow-hidden flex flex-col justify-between group cursor-pointer ${
-                        isSelected
-                          ? 'border-emerald-500 bg-emerald-50/50 shadow-md scale-[1.02]'
-                          : 'border-slate-200 bg-white hover:border-slate-300'
-                      }`}
-                    >
-                      <div className="h-28 -mx-4 -mt-4 mb-3 overflow-hidden">
-                        <img 
-                          src={th.coverImage} 
-                          alt={th.titleEn} 
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-lg">{th.icon}</span>
-                          <h3 className="font-black text-sm text-slate-900 leading-tight">
-                            {isRtl ? th.titleAr : th.titleEn}
-                          </h3>
-                        </div>
-                        <p className="text-[11px] text-slate-500 line-clamp-2">
-                          {isRtl ? th.descAr : th.descEn}
-                        </p>
-                      </div>
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 bg-emerald-600 text-white rounded-full p-1 shadow-md">
-                          <CheckCircle2 size={14} />
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* CEFR LEVEL SELECTION */}
-            <div>
-              <label className="block text-xs font-black text-slate-500 uppercase mb-2">
-                {isRtl ? '2. المستوى اللغوي المستهدف (CEFR):' : '2. Target CEFR Level:'}
-              </label>
-              <div className="grid grid-cols-6 gap-2">
-                {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
-                  <button
-                    key={lvl}
-                    type="button"
-                    onClick={() => setSelectedLevel(lvl)}
-                    className={`py-2.5 rounded-xl border text-xs font-black transition-all ${
-                      selectedLevel === lvl
-                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    {lvl}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* START BUTTON */}
-            <div className="pt-4 text-center">
-              <button
-                onClick={handleStartAdventure}
-                className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:opacity-95 text-white rounded-2xl font-black text-base shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 mx-auto cursor-pointer"
-              >
-                <Footprints size={20} />
-                <span>{isRtl ? 'ابدأ مغامرتك الشيقة الآن 🚀' : 'Begin Your Adventure Now 🚀'}</span>
-              </button>
+          {/* THEME SELECTION */}
+          <div>
+            <label className="block text-xs font-black text-[#002147]/70 uppercase mb-2.5">
+              {isRtl ? '1. اختر عالم المغامرة:' : '1. Select Adventure Realm:'}
+            </label>
+            <div className="space-y-2">
+              {STORY_THEMES.map((th, idx) => {
+                const isSelected = selectedTheme.id === th.id;
+                return (
+                  <LessonTile
+                    key={th.id}
+                    order={idx + 1}
+                    title={isRtl ? th.titleAr : th.titleEn}
+                    subtitle={isRtl ? th.descAr : th.descEn}
+                    emoji={th.icon}
+                    active={isSelected}
+                    onClick={() => setSelectedTheme(th)}
+                  />
+                );
+              })}
             </div>
           </div>
-        ) : (
-          /* ACTIVE STORY INTERFACE */
-          <div className="space-y-6">
-            {/* PROGRESS BAR */}
-            {currentNode && (
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                <div className="text-xs font-black text-slate-700 shrink-0 flex items-center gap-1.5">
-                  <Compass size={16} className="text-emerald-600" />
+
+          {/* CEFR LEVEL SELECTION */}
+          <div>
+            <label className="block text-xs font-black text-[#002147]/70 uppercase mb-2.5">
+              {isRtl ? '2. المستوى اللغوي المستهدف (CEFR):' : '2. Target CEFR Level:'}
+            </label>
+            <div className="grid grid-cols-6 gap-2">
+              {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map((lvl) => (
+                <GhostButton
+                  key={lvl}
+                  active={selectedLevel === lvl}
+                  onClick={() => setSelectedLevel(lvl)}
+                  className="!py-2 !px-1 text-xs sm:text-sm font-black justify-center"
+                >
+                  {lvl}
+                </GhostButton>
+              ))}
+            </div>
+          </div>
+
+          {/* START BUTTON */}
+          <div className="pt-2 text-center">
+            <PrimaryButton
+              onClick={handleStartAdventure}
+              className="w-full sm:w-auto px-8 py-3 text-sm sm:text-base mx-auto"
+            >
+              <Compass size={18} />
+              <span>{isRtl ? 'ابدأ مغامرتك الشيقة الآن 🚀' : 'Begin Your Adventure Now 🚀'}</span>
+            </PrimaryButton>
+          </div>
+        </GoldCard>
+      ) : (
+        /* ACTIVE STORY INTERFACE */
+        <div className="space-y-4">
+          {/* PROGRESS BAR */}
+          {currentNode && (
+            <GoldCard className="p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <TutorFace tutor="sara" size="sm" />
+                <span className="text-xs sm:text-sm font-black text-[#002147] flex items-center gap-1.5">
+                  <Compass size={15} className="text-[#C49E3A]" />
                   <span>{currentNode.chapterTitle}</span>
-                </div>
-                <div className="flex-1 bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                </span>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="flex-1 sm:w-48 bg-[#fdfaf3] border border-[#C49E3A]/30 h-2.5 rounded-full overflow-hidden">
                   <div 
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500" 
+                    className="bg-[#C49E3A] h-full transition-all duration-500" 
                     style={{ width: `${currentNode.progressPercentage}%` }}
                   />
                 </div>
-                <span className="text-xs font-black text-slate-500">
-                  {currentNode.progressPercentage}%
-                </span>
+                <ProgressPill>{currentNode.progressPercentage}%</ProgressPill>
               </div>
-            )}
+            </GoldCard>
+          )}
 
-            {/* MAIN STORY SCENE CARD */}
-            {loading ? (
-              <div className="bg-white rounded-3xl p-12 text-center shadow-sm border border-slate-200 space-y-4">
-                <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-600 rounded-full animate-spin mx-auto" />
-                <h3 className="text-base font-black text-slate-900">
-                  {isRtl ? 'يقوم Gemini 3.8 Flash بصياغة المشهد التالي بناءً على اختيارك...' : 'Gemini 3.8 is weaving the next scene based on your decision...'}
-                </h3>
-                <p className="text-xs text-slate-400 font-medium">
-                  {isRtl ? 'تحليل القواعد والمفردات المستهدفة...' : 'Analyzing targeted grammar & linguistic nuances...'}
+          {/* MAIN STORY SCENE CARD */}
+          {loading ? (
+            <GoldCard className="p-10 text-center space-y-4">
+              <div className="w-10 h-10 border-4 border-[#002147]/20 border-t-[#002147] rounded-full animate-spin mx-auto" />
+              <h3 className="text-sm sm:text-base font-black text-[#002147]">
+                {isRtl ? 'يقوم Gemini بصياغة المشهد التالي بناءً على اختيارك...' : 'Gemini is weaving the next scene based on your decision...'}
+              </h3>
+              <p className="text-xs text-[#002147]/60 font-semibold">
+                {isRtl ? 'تحليل القواعد والمفردات المستهدفة...' : 'Analyzing targeted grammar & linguistic nuances...'}
+              </p>
+            </GoldCard>
+          ) : currentNode ? (
+            <GoldCard className="p-5 sm:p-7 space-y-5">
+              {/* TOOLBAR: AUDIO & ARABIC TRANSLATION */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#C49E3A]/20 pb-3">
+                <GhostButton
+                  onClick={handleToggleAudio}
+                  active={isPlayingAudio}
+                >
+                  {isPlayingAudio ? <VolumeX size={15} /> : <Volume2 size={15} />}
+                  <span>{isPlayingAudio ? (isRtl ? 'إيقاف الصوت' : 'Stop Audio') : (isRtl ? 'استمع للمشهد بصوت ناطق أصلي' : 'Listen with Native Voice')}</span>
+                </GhostButton>
+
+                <GhostButton
+                  onClick={() => setShowArabicTranslation(!showArabicTranslation)}
+                  active={showArabicTranslation}
+                >
+                  <Languages size={15} />
+                  <span>{showArabicTranslation ? (isRtl ? 'إخفاء الترجمة' : 'Hide Arabic') : (isRtl ? 'ترجمة سياقية 🌐' : 'Show Arabic 🌐')}</span>
+                </GhostButton>
+              </div>
+
+              {/* SCENE TEXT (ENGLISH) */}
+              <div className="bg-[#fdfaf3] p-5 sm:p-6 rounded-2xl border border-[#C49E3A]/40">
+                <p className="text-base sm:text-lg leading-relaxed text-[#002147] font-medium" dir="ltr">
+                  {currentNode.sceneTextEn}
                 </p>
               </div>
-            ) : currentNode ? (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
-                {/* TOOLBAR: AUDIO & ARABIC TRANSLATION */}
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                  <button
-                    onClick={handleToggleAudio}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                      isPlayingAudio
-                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
-                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
-                    }`}
-                  >
-                    {isPlayingAudio ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                    <span>{isPlayingAudio ? (isRtl ? 'إيقاف الصوت' : 'Stop Audio') : (isRtl ? 'استمع للمشهد بصوت ناطق أصلي' : 'Listen with Native Voice')}</span>
-                  </button>
 
-                  <button
-                    onClick={() => setShowArabicTranslation(!showArabicTranslation)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <Languages size={15} />
-                    <span>{showArabicTranslation ? (isRtl ? 'إخفاء الترجمة' : 'Hide Arabic') : (isRtl ? 'ترجمة سياقية 🌐' : 'Show Arabic 🌐')}</span>
-                  </button>
+              {/* ARABIC TRANSLATION DRAWER */}
+              {showArabicTranslation && (
+                <div className="bg-[#fdfaf3] border border-[#C49E3A]/60 p-4 rounded-2xl text-xs sm:text-sm text-[#002147] leading-relaxed font-semibold">
+                  💡 <strong>{isRtl ? 'الترجمة السياقية للأحداث:' : 'Contextual Arabic Summary:'}</strong> {currentNode.sceneTextAr}
                 </div>
+              )}
 
-                {/* SCENE TEXT (ENGLISH) */}
-                <div className="bg-slate-50/70 p-6 rounded-2xl border border-slate-200/80">
-                  <p className="text-base sm:text-lg font-serif leading-relaxed text-slate-800">
-                    {currentNode.sceneTextEn}
-                  </p>
-                </div>
-
-                {/* ARABIC TRANSLATION DRAWER */}
-                {showArabicTranslation && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-2xl text-xs sm:text-sm text-emerald-900 leading-relaxed font-medium"
-                  >
-                    💡 <strong>{isRtl ? 'الترجمة السياقية للأحداث:' : 'Contextual Arabic Summary:'}</strong> {currentNode.sceneTextAr}
-                  </motion.div>
-                )}
-
-                {/* TARGET VOCABULARY PILLS */}
-                {currentNode.targetedVocab && currentNode.targetedVocab.length > 0 && (
-                  <div>
-                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <Sparkles size={13} className="text-amber-500" />
-                      {isRtl ? 'المفردات المستهدفة في هذا المشهد:' : 'Target Vocabulary in Scene:'}
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      {currentNode.targetedVocab.map((v) => (
-                        <div 
-                          key={v.word}
-                          className="bg-white border border-slate-200 hover:border-emerald-300 p-3 rounded-xl flex items-center justify-between shadow-xs transition-all"
-                        >
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-black text-xs text-slate-900">{v.word}</span>
-                              <span className="text-[10px] text-slate-400 font-mono">{v.ipa}</span>
-                            </div>
-                            <div className="text-[11px] font-bold text-emerald-700">{v.meaningAr}</div>
+              {/* TARGET VOCABULARY */}
+              {currentNode.targetedVocab && currentNode.targetedVocab.length > 0 && (
+                <div>
+                  <h4 className="text-[11px] font-black text-[#002147]/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <Sparkles size={13} className="text-[#C49E3A]" />
+                    <span>{isRtl ? 'المفردات المستهدفة في هذا المشهد:' : 'Target Vocabulary in Scene:'}</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {currentNode.targetedVocab.map((v) => (
+                      <div 
+                        key={v.word}
+                        className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-3 rounded-xl flex items-center justify-between"
+                      >
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-black text-xs text-[#002147]">{v.word}</span>
+                            <span className="text-[10px] text-[#002147]/60 font-mono">{v.ipa}</span>
                           </div>
-                          <button
-                            onClick={() => handlePlayVocab(v.word)}
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                            title={isRtl ? 'نطق الكلمة' : 'Pronounce'}
-                          >
-                            <Volume2 size={14} />
-                          </button>
+                          <div className="text-[11px] font-bold text-[#C49E3A]">{v.meaningAr}</div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* COMPREHENSION CHECK CHECKPOINT */}
-                {currentNode.comprehensionCheck && (
-                  <div className="bg-gradient-to-r from-amber-50/80 to-orange-50/80 border border-amber-200 rounded-2xl p-5">
-                    <div className="flex items-center gap-2 mb-2">
-                      <HelpCircle size={16} className="text-amber-600" />
-                      <h4 className="text-xs font-black text-amber-900 uppercase tracking-wider">
-                        {isRtl ? 'فحص الاستيعاب السريع لفتح الخيارات التالية:' : 'Comprehension Checkpoint:'}
-                      </h4>
-                    </div>
-                    <p className="text-xs sm:text-sm font-black text-slate-800 mb-3">
-                      {currentNode.comprehensionCheck.question}
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {currentNode.comprehensionCheck.options.map((opt, idx) => {
-                        const isSelected = selectedCheckOption === idx;
-                        const isCorrectOpt = idx === currentNode.comprehensionCheck?.correctIndex;
-
-                        return (
-                          <button
-                            key={opt}
-                            disabled={isCheckAnswered}
-                            onClick={() => handleCheckAnswer(idx)}
-                            className={`p-3 rounded-xl border text-xs font-bold text-left transition-all ${
-                              isCheckAnswered
-                                ? isCorrectOpt
-                                  ? 'bg-emerald-600 border-emerald-600 text-white'
-                                  : isSelected
-                                  ? 'bg-rose-600 border-rose-600 text-white'
-                                  : 'bg-white border-slate-200 text-slate-400'
-                                : 'bg-white border-amber-200/80 text-slate-800 hover:bg-amber-100/50'
-                            }`}
-                          >
-                            {opt}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {isCheckAnswered && (
-                      <div className="mt-3 text-xs font-bold text-slate-700">
-                        {isCheckCorrect ? (
-                          <span className="text-emerald-700 flex items-center gap-1">
-                            <CheckCircle2 size={14} /> {isRtl ? 'أحسنت! إجابة صحيحة. تم فتح خيارات المسار.' : 'Well done! Choices unlocked.'}
-                          </span>
-                        ) : (
-                          <span className="text-rose-700">
-                            {isRtl ? 'فهم تقريبي جيد! يمكنك الآن اختيار الخطوة التالية.' : 'Good attempt! You may now pick your next choice.'}
-                          </span>
-                        )}
-                        <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                          💡 {currentNode.comprehensionCheck.explanationAr}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* BRANCHING DECISION CHOICES */}
-                {currentNode.isEnding ? (
-                  /* Adventure Ending Celebration */
-                  <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 p-8 rounded-3xl text-white text-center space-y-4 shadow-lg">
-                    <div className="text-4xl">🏆✨</div>
-                    <h3 className="text-2xl font-black">
-                      {isRtl ? 'نهاية أسطورية للمغامرة!' : 'Epic Adventure Completed!'}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-emerald-100 max-w-md mx-auto">
-                      {isRtl 
-                        ? 'أظهرت طلاقة لغوية مذهلة وقدرة رائعة على اتخاذ القرارات باللغة الإنجليزية في مواقف واقعية.'
-                        : 'You navigated authentic English decisions with stunning fluency and poise.'}
-                    </p>
-                    <button
-                      onClick={handleReset}
-                      className="px-6 py-3 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl font-black text-xs shadow-md transition-all cursor-pointer"
-                    >
-                      {isRtl ? 'خوض مغامرة تفاعلية جديدة 🔄' : 'Start a New Story Branch 🔄'}
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-                      <GitBranch size={16} className="text-emerald-600" />
-                      <span>{isRtl ? 'ماذا يجب أن يفعل البطل الآن؟ (اختر مسارك):' : 'What should the protagonist do next? (Choose your path):'}</span>
-                    </h4>
-
-                    <div className="space-y-3">
-                      {currentNode.choices.map((choice, cIdx) => (
-                        <button
-                          key={choice.id || cIdx}
-                          onClick={() => fetchNextChapter(choice.textEn)}
-                          className="w-full text-left p-4 sm:p-5 bg-white hover:bg-emerald-50/50 border-2 border-slate-200 hover:border-emerald-500 rounded-2xl transition-all group flex items-center justify-between gap-4 cursor-pointer shadow-xs hover:shadow-sm"
+                        <GhostButton
+                          onClick={() => handlePlayVocab(v.word)}
+                          className="!p-1.5"
+                          title={isRtl ? 'نطق الكلمة' : 'Pronounce'}
                         >
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="w-6 h-6 rounded-full bg-slate-900 group-hover:bg-emerald-600 text-white flex items-center justify-center font-black text-xs shrink-0 transition-colors">
+                          <Volume2 size={13} />
+                        </GhostButton>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* COMPREHENSION CHECK CHECKPOINT */}
+              {currentNode.comprehensionCheck && (
+                <div className="bg-[#fdfaf3] border border-[#C49E3A]/50 rounded-2xl p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <HelpCircle size={16} className="text-[#C49E3A]" />
+                    <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider">
+                      {isRtl ? 'فحص الاستيعاب السريع لفتح الخيارات التالية:' : 'Comprehension Checkpoint:'}
+                    </h4>
+                  </div>
+                  <p className="text-xs sm:text-sm font-black text-[#002147] mb-3">
+                    {currentNode.comprehensionCheck.question}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {currentNode.comprehensionCheck.options.map((opt, idx) => {
+                      const isSelected = selectedCheckOption === idx;
+                      const isCorrectOpt = idx === currentNode.comprehensionCheck?.correctIndex;
+                      const optState = isCheckAnswered ? (isCorrectOpt ? 'correct' : isSelected ? 'wrong' : 'normal') : 'normal';
+
+                      return (
+                        <AnswerOption
+                          key={opt}
+                          disabled={isCheckAnswered}
+                          selected={isSelected}
+                          state={optState}
+                          label={opt}
+                          onClick={() => handleCheckAnswer(idx)}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {isCheckAnswered && (
+                    <div className="mt-3 text-xs font-bold text-[#002147]">
+                      {isCheckCorrect ? (
+                        <span className="text-green-700 flex items-center gap-1 font-black">
+                          <CheckCircle2 size={14} /> {isRtl ? 'أحسنت! إجابة صحيحة. تم فتح خيارات المسار.' : 'Well done! Choices unlocked.'}
+                        </span>
+                      ) : (
+                        <span className="text-red-700 font-black">
+                          {isRtl ? 'فهم تقريبي جيد! يمكنك الآن اختيار الخطوة التالية.' : 'Good attempt! You may now pick your next choice.'}
+                        </span>
+                      )}
+                      <p className="text-[11px] text-[#002147]/70 font-semibold mt-1">
+                        💡 {currentNode.comprehensionCheck.explanationAr}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* BRANCHING DECISION CHOICES */}
+              {currentNode.isEnding ? (
+                /* Adventure Ending Celebration */
+                <div className="bg-[#002147] text-white p-6 sm:p-8 rounded-2xl border-2 border-[#C49E3A] text-center space-y-4">
+                  <div className="text-4xl">🏆✨</div>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#E6C36A]">
+                    {isRtl ? 'نهاية أسطورية للمغامرة!' : 'Epic Adventure Completed!'}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-white/85 max-w-md mx-auto leading-relaxed">
+                    {isRtl 
+                      ? 'أظهرت طلاقة لغوية مذهلة وقدرة رائعة على اتخاذ القرارات باللغة الإنجليزية في مواقف واقعية.'
+                      : 'You navigated authentic English decisions with stunning fluency and poise.'}
+                  </p>
+                  <PrimaryButton onClick={handleReset} className="mx-auto">
+                    <RotateCcw size={14} />
+                    <span>{isRtl ? 'خوض مغامرة تفاعلية جديدة 🔄' : 'Start a New Story Branch 🔄'}</span>
+                  </PrimaryButton>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <GitBranch size={16} className="text-[#C49E3A]" />
+                    <span>{isRtl ? 'ماذا يجب أن يفعل البطل الآن؟ (اختر مسارك):' : 'What should the protagonist do next? (Choose your path):'}</span>
+                  </h4>
+
+                  <div className="space-y-2.5">
+                    {currentNode.choices.map((choice, cIdx) => (
+                      <AnswerOption
+                        key={choice.id || cIdx}
+                        onClick={() => fetchNextChapter(choice.textEn)}
+                        label={
+                          <div className="py-0.5 text-start w-full">
+                            <div className="flex items-center gap-2 mb-0.5" dir="ltr">
+                              <span className="w-5 h-5 rounded-full bg-[#002147] text-[#E6C36A] flex items-center justify-center font-black text-xs shrink-0">
                                 {cIdx + 1}
                               </span>
-                              <span className="text-sm font-black text-slate-900 group-hover:text-emerald-950 transition-colors">
+                              <span className="text-xs sm:text-sm font-black text-[#002147]">
                                 {choice.textEn}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-500 group-hover:text-slate-700 ml-8">
+                            <p className="text-xs text-[#002147]/70 font-bold ml-7" dir="rtl">
                               {choice.textAr}
                             </p>
                           </div>
-                          <ChevronRight size={18} className="text-slate-400 group-hover:text-emerald-600 shrink-0 group-hover:translate-x-1 transition-all" />
-                        </button>
-                      ))}
-                    </div>
+                        }
+                      />
+                    ))}
                   </div>
-                )}
-              </div>
-            ) : null}
-          </div>
-        )}
-      </div>
-    </div>
+                </div>
+              )}
+            </GoldCard>
+          ) : null}
+        </div>
+      )}
+    </SectionShell>
   );
 };
