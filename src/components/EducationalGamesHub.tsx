@@ -1,3 +1,4 @@
+// design-harmony batch 11
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -59,6 +60,15 @@ import {
   culturalFestivalLocationsData
 } from './EducationalGamesData';
 import { managedSpeak } from '../lib/audio';
+import { 
+  SectionShell, 
+  GoldCard, 
+  LessonTile, 
+  PrimaryButton, 
+  GhostButton, 
+  ProgressPill, 
+  TutorFace 
+} from './ui/academy';
 
 interface EducationalGamesHubProps {
   lang: 'ar' | 'en';
@@ -876,59 +886,61 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
     return (
       <div className="space-y-8">
         {/* Elite Banner */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 rounded-3xl p-6 md:p-8 border border-[#002147]/30 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-[#002147]/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-36 h-36 bg-[#C49E3A]/5 rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
-            <div className="space-y-3 text-center lg:text-left">
-              <span className="px-3 py-1 bg-[#002147]/20 text-[#E4C77A] border border-[#002147]/40 rounded-full text-[11px] font-black uppercase tracking-wider font-mono">
-                {isRtl ? 'الدليل الاستراتيجي لتطور الطفل' : 'SYSTÈMATIC GROWTH ARCHITECTURE'}
-              </span>
-              <h2 className="text-xl md:text-3xl font-black text-[#FDCB6E] tracking-tight">
-                {isRtl ? 'الخطة التطويرية الاحترافية لألعاب الأكاديمية 📈✨' : 'Elite Game Development & Learning Plan 📈✨'}
-              </h2>
-              <p className="text-xs text-slate-300 font-medium leading-relaxed max-w-3xl">
+        <GoldCard className="p-6">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-center lg:text-start flex-1">
+              <div className="flex items-center gap-3 justify-center lg:justify-start flex-wrap">
+                <TutorFace tutor="sara" size="md" />
+                <div>
+                  <ProgressPill className="text-[10px]">
+                    {isRtl ? 'الدليل الاستراتيجي لتطور الطفل' : 'SYSTEMATIC GROWTH ARCHITECTURE'}
+                  </ProgressPill>
+                  <h2 className="text-xl sm:text-2xl font-black text-[#002147] tracking-tight mt-1">
+                    {isRtl ? 'الخطة التطويرية الاحترافية لألعاب الأكاديمية 📈✨' : 'Elite Game Development & Learning Plan 📈✨'}
+                  </h2>
+                </div>
+              </div>
+              <p className="text-xs text-[#002147]/75 font-bold leading-relaxed max-w-3xl">
                 {isRtl 
                   ? 'بصفتك طالباً متميزاً في الأكاديمية الدولية، صممنا لك مصفوفة تدريبية مبنية على معايير تربوية عالمية لربط الميكرو-ألعاب بمستويات الإطار الأوروبي المشترك (CEFR)، وتتبع المهارات اللفظية والذوق الاجتماعي الرفيع خطوة بخطوة.'
                   : 'As an elite student at the Academy, we constructed this systematic educational planner. It matches all 20 mini-games to international standards (CEFR) and tracks children behavioral etiquette and vocabulary speed, level by level.'}
               </p>
             </div>
             
-            <div className="flex items-center gap-4 bg-slate-950/70 p-4 rounded-2xl border border-slate-800">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#FDCB6E] to-amber-500 rounded-xl flex items-center justify-center text-2xl shadow-lg">
+            <div className="flex items-center gap-3 bg-[#fdfaf3] p-3.5 rounded-2xl border border-[#C49E3A]/30 shrink-0">
+              <div className="w-12 h-12 bg-[#002147] text-[#E6C36A] rounded-xl flex items-center justify-center text-xl shadow-sm">
                 🏆
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-widest">{isRtl ? 'مجموع نقاط التأهيل' : 'AGGREGATE XP CREDIT'}</span>
-                <span className="text-lg font-black text-white font-mono">{totalXP} XP</span>
+                <span className="text-[10px] text-[#002147]/60 font-bold block uppercase tracking-widest">{isRtl ? 'مجموع نقاط التأهيل' : 'AGGREGATE XP CREDIT'}</span>
+                <span className="text-base font-black text-[#002147] font-mono">{totalXP} XP</span>
               </div>
             </div>
           </div>
-        </div>
+        </GoldCard>
 
         {/* Plan Navigation Sub-Tabs */}
-        <div className="flex flex-wrap gap-2.5 border-b border-slate-800 pb-4">
+        <div className="flex flex-wrap gap-2 border-b border-[#C49E3A]/25 pb-4">
           {[
             { id: 'roadmap' as const, labelAr: '🎯 خارطة طريق المسارات الأكاديمية', labelEn: 'Curriculum Roadmap' },
             { id: 'daily' as const, labelAr: '📅 الجدول التدريبي اليومي', labelEn: 'Daily Routine' },
             { id: 'skills' as const, labelAr: '📊 مصفوفة جدارة المهارات', labelEn: 'Skill Competencies' },
             { id: 'certificates' as const, labelAr: '👑 شهادات ودبلوما التميز', labelEn: 'Honorary Diplomas' }
           ].map(tab => (
-            <button
+            <GhostButton
               key={tab.id}
               onClick={() => {
                 setPlanTab(tab.id);
                 speakFeedback(isRtl ? `فتح ${tab.labelAr}` : `Opening ${tab.labelEn}`);
               }}
-              className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 border ${
+              className={`text-xs ${
                 planTab === tab.id
-                  ? 'bg-gradient-to-r from-[#002147] to-[#00183a] text-white border-[#002147]/60 shadow-lg'
-                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-slate-200 border-slate-800/80'
+                  ? '!bg-[#002147] !text-[#E6C36A] !border-[#C49E3A] font-black shadow-sm'
+                  : ''
               }`}
             >
               <span>{isRtl ? tab.labelAr : tab.labelEn}</span>
-            </button>
+            </GhostButton>
           ))}
         </div>
 
@@ -945,28 +957,28 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {/* TRACK 1 */}
-                <div className="bg-[#1e2324] rounded-2xl p-5 border border-[#C49E3A]/20 shadow-md relative overflow-hidden flex flex-col justify-between">
+                <GoldCard className="p-5 flex flex-col justify-between space-y-4">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="px-2.5 py-0.5 bg-[#C49E3A]/20 text-[#E4C77A] border border-[#C49E3A]/30 rounded-full text-[10px] font-black uppercase tracking-wider font-mono">
+                      <ProgressPill className="text-[10px] font-mono">
                         {isRtl ? 'المستوى 1: التأسيس والتهجئة السريعة' : 'Level 1: Phonics & Spelling'}
-                      </span>
-                      <span className="text-xs font-bold text-slate-400">CEFR: A1 - A2</span>
+                      </ProgressPill>
+                      <span className="text-xs font-bold text-[#002147]/70">CEFR: A1 - A2</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-white mt-1">
+                      <h4 className="text-sm font-black text-[#002147] mt-1">
                         {isRtl ? 'مسار اللفظ السليم والسرعة الإملائية ⚡' : 'Spelling & Acoustics Track ⚡'}
                       </h4>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                      <p className="text-[11px] text-[#002147]/75 font-medium leading-relaxed mt-2">
                         {isRtl 
                           ? 'يهتم هذا المسار بتمكين الطفل من حفظ مخارج الحروف الإنجليزية المانحة للثقة، وكشف التهجئة السريعة عبر ربط الحواس بالتكامل الصوتي والمحاكاة الذكية.'
                           : 'This track solidifies foundational spelling speed, vocabulary letter recognition, and proper pronunciation detection by utilizing fast reactions and auditory cues.'}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-slate-950/40 rounded-xl space-y-2">
+                    <div className="p-3 bg-[#fdfaf3] rounded-xl border border-[#C49E3A]/25 space-y-2">
                       <span className="text-[9px] uppercase font-black text-[#C49E3A] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
-                      <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-350 font-bold">
+                      <div className="grid grid-cols-2 gap-2 text-[10px] text-[#002147] font-bold">
                         <div>⚔️ {isRtl ? 'معركة الكلمات (2)' : 'Word Battle (#2)'}</div>
                         <div>⚔️ {isRtl ? 'بطل الإملاء (6)' : 'Spelling Hero (#6)'}</div>
                         <div>⚔️ {isRtl ? 'محقق النطق (9)' : 'Acoustic Detective (#9)'}</div>
@@ -975,51 +987,51 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
+                      <div className="flex justify-between text-[10px] font-black text-[#002147]/70 font-mono">
                         <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
-                        <span className="text-[#E4C77A]">—</span>
+                        <span className="text-[#C49E3A]">—</span>
                       </div>
-                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/30 h-2 rounded-full overflow-hidden">
                         <div className="bg-[#C49E3A] h-full rounded-full" style={{ width: '0%' }} />
                       </div>
                     </div>
                   </div>
 
-                  <button
+                  <PrimaryButton
                     onClick={() => {
                       selectGame('game_006');
                       speakFeedback("Launching Spelling Hero!");
                     }}
-                    className="w-full mt-5 py-2.5 bg-[#002147] hover:bg-[#C49E3A] text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="w-full mt-5"
                   >
                     <Play className="w-3.5 h-3.5" />
-                    {isRtl ? 'البدء بتحدي الإملاء السريع' : 'Launch Speed Challenge'}
-                  </button>
-                </div>
+                    <span>{isRtl ? 'البدء بتحدي الإملاء السريع' : 'Launch Speed Challenge'}</span>
+                  </PrimaryButton>
+                </GoldCard>
 
                 {/* TRACK 2 */}
-                <div className="bg-[#1e2324] rounded-2xl p-5 border border-emerald-500/20 shadow-md relative overflow-hidden flex flex-col justify-between">
+                <GoldCard className="p-5 flex flex-col justify-between space-y-4">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-[10px] font-black uppercase tracking-wider font-mono">
+                      <ProgressPill className="text-[10px] font-mono">
                         {isRtl ? 'المستوى 2: النحو والمنطق اللغوي' : 'Level 2: Syntactic Grammar'}
-                      </span>
-                      <span className="text-xs font-bold text-slate-400">CEFR: A2 - B1</span>
+                      </ProgressPill>
+                      <span className="text-xs font-bold text-[#002147]/70">CEFR: A2 - B1</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-white mt-1">
+                      <h4 className="text-sm font-black text-[#002147] mt-1">
                         {isRtl ? 'مسار تركيب وصياغة العبارات 🧪' : 'Sentence Architecture Track 🧪'}
                       </h4>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                      <p className="text-[11px] text-[#002147]/75 font-medium leading-relaxed mt-2">
                         {isRtl 
                           ? 'يقود الطفل من مرحلة الكلمة المفردة إلى إتقان بناء الجمل الطويلة والقصيرة، فهم أحكام الفاعل والفعل والمفعول بطريقة طهي واختيار منطقي شيق.'
                           : 'Transitions students from isolation of words to composing grammatically precise, flowing English sentences, masterfully explaining the parts of speech.'}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-slate-950/40 rounded-xl space-y-2">
-                      <span className="text-[9px] uppercase font-black text-[#FDCB6E] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
-                      <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-350 font-bold">
+                    <div className="p-3 bg-[#fdfaf3] rounded-xl border border-[#C49E3A]/25 space-y-2">
+                      <span className="text-[9px] uppercase font-black text-[#C49E3A] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] text-[#002147] font-bold">
                         <div>⚔️ {isRtl ? 'كنز المعرفة (1)' : 'Treasure Hunt (#1)'}</div>
                         <div>⚔️ {isRtl ? 'سلالم القواعد (3)' : 'Snakes & Ladders (#3)'}</div>
                         <div>⚔️ {isRtl ? 'بستان المطر (7)' : 'Grammar Garden (#7)'}</div>
@@ -1028,51 +1040,51 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
+                      <div className="flex justify-between text-[10px] font-black text-[#002147]/70 font-mono">
                         <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
-                        <span className="text-emerald-400">—</span>
+                        <span className="text-[#C49E3A]">—</span>
                       </div>
-                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '0%' }} />
+                      <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/30 h-2 rounded-full overflow-hidden">
+                        <div className="bg-[#002147] h-full rounded-full" style={{ width: '0%' }} />
                       </div>
                     </div>
                   </div>
 
-                  <button
+                  <PrimaryButton
                     onClick={() => {
                       selectGame('game_018');
                       speakFeedback("Launching Phrase Chef!");
                     }}
-                    className="w-full mt-5 py-2.5 bg-[#002147] hover:bg-[#00306b] text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="w-full mt-5"
                   >
                     <Play className="w-3.5 h-3.5" />
-                    {isRtl ? 'اطبخ طبقاً نحوياً الآن' : 'Start Grammar Stove'}
-                  </button>
-                </div>
+                    <span>{isRtl ? 'اطبخ طبقاً نحوياً الآن' : 'Start Grammar Stove'}</span>
+                  </PrimaryButton>
+                </GoldCard>
 
                 {/* TRACK 3 */}
-                <div className="bg-[#1e2324] rounded-2xl p-5 border border-[#C49E3A]/20 shadow-md relative overflow-hidden flex flex-col justify-between">
+                <GoldCard className="p-5 flex flex-col justify-between space-y-4">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="px-2.5 py-0.5 bg-[#C49E3A]/20 text-[#E4C77A] border border-[#C49E3A]/30 rounded-full text-[10px] font-black uppercase tracking-wider font-mono">
+                      <ProgressPill className="text-[10px] font-mono">
                         {isRtl ? 'المستوى 3: بروتوكول والآداب الراقية' : 'Level 3: Protocol & Etiquette'}
-                      </span>
-                      <span className="text-xs font-bold text-slate-400">CEFR: B1 - B2</span>
+                      </ProgressPill>
+                      <span className="text-xs font-bold text-[#002147]/70">CEFR: B1 - B2</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-white mt-1">
+                      <h4 className="text-sm font-black text-[#002147] mt-1">
                         {isRtl ? 'مسار سفير الأدب والذوق العالمي 👑' : 'Global Courtesy & Etiquette Track 👑'}
                       </h4>
-                      <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                      <p className="text-[11px] text-[#002147]/75 font-medium leading-relaxed mt-2">
                         {isRtl 
                           ? 'أهم ميزة حصرية بالبرنامج؛ غرس عادات وأخلاقيات السلوك السليم والمحادثات الطيبة والاعتذار وبناء الروابط الأخلاقية واكتشاف التقاليد الدولية بلباقة مكثفة.'
                           : 'Our flagship training path. Infuses high-etiquette table manners, greeting conventions, and polite social behaviors, aligning linguistic progress with emotional intelligence.'}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-slate-950/40 rounded-xl space-y-2">
-                      <span className="text-[9px] uppercase font-black text-[#E4C77A] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
-                      <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-350 font-bold">
+                    <div className="p-3 bg-[#fdfaf3] rounded-xl border border-[#C49E3A]/25 space-y-2">
+                      <span className="text-[9px] uppercase font-black text-[#C49E3A] block font-mono tracking-widest">{isRtl ? 'الألعاب المخصصة لهذا المسار' : 'CORE CURRICULUM GAMES'}</span>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] text-[#002147] font-bold">
                         <div>⚔️ {isRtl ? 'سفير الحوار (5)' : 'Dialogue Ambassador (#5)'}</div>
                         <div>⚔️ {isRtl ? 'مملكة الأدب (11)' : 'Etiquette Palace (#11)'}</div>
                         <div>⚔️ {isRtl ? 'بستان المشاعر (17)' : 'Empathy Garden (#17)'}</div>
@@ -1081,27 +1093,27 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-black text-slate-400 font-mono">
+                      <div className="flex justify-between text-[10px] font-black text-[#002147]/70 font-mono">
                         <span>{isRtl ? 'الإنجاز الأكاديمي' : 'SYLLABUS PROGRESS'}</span>
-                        <span className="text-[#E4C77A]">—</span>
+                        <span className="text-[#C49E3A]">—</span>
                       </div>
-                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/30 h-2 rounded-full overflow-hidden">
                         <div className="bg-[#C49E3A] h-full rounded-full" style={{ width: '0%' }} />
                       </div>
                     </div>
                   </div>
 
-                  <button
+                  <PrimaryButton
                     onClick={() => {
                       selectGame('game_020');
                       speakFeedback("Launching Festival of Cultures!");
                     }}
-                    className="w-full mt-5 py-2.5 bg-[#002147] hover:bg-[#C49E3A] text-white rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-1"
+                    className="w-full mt-5"
                   >
                     <Play className="w-3.5 h-3.5" />
-                    {isRtl ? 'ممارسة آداب السفر العالمية' : 'Practice World Etiquette'}
-                  </button>
-                </div>
+                    <span>{isRtl ? 'ممارسة آداب السفر العالمية' : 'Practice World Etiquette'}</span>
+                  </PrimaryButton>
+                </GoldCard>
 
               </div>
             </motion.div>
@@ -1114,12 +1126,12 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6 max-w-3xl mx-auto"
             >
-              <div className="bg-[#1e2324] rounded-2xl p-6 border border-slate-800 space-y-4">
-                <div className="flex items-center gap-2 text-amber-400 font-black">
-                  <Clock className="w-5 h-5" />
+              <GoldCard className="p-6 space-y-4">
+                <div className="flex items-center gap-2 text-[#002147] font-black">
+                  <Clock className="w-5 h-5 text-[#C49E3A]" />
                   <h3>{isRtl ? 'البرنامج التدريبي المقترح لهذا اليوم 📅' : 'Daily Personalized Routine Plan'}</h3>
                 </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
+                <p className="text-[11px] text-[#002147]/75 font-medium leading-relaxed">
                   {isRtl 
                     ? 'لتحقيق الجدوى القصوى وتجنب الإجهاد اللفظي، تقترح الأكاديمية لعب 3 ميكرو-ألعاب يومياً (إحماء صوتي، تحدي قواعد، وممارسة ذوقيات) لجمع 100 XP يومياً.'
                     : 'To secure prime development without stress, we advise playing exactly three modules daily. Complete these steps now to maximize retention and credit 100 XP.'}
@@ -1129,61 +1141,61 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 <div className="space-y-4 mt-4">
                   
                   {/* Step 1 */}
-                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#002147]/30 transition-all">
-                    <span className="text-2xl mt-1">🌅</span>
+                  <div className="flex items-center gap-4 p-4 bg-[#fdfaf3] rounded-xl border border-[#C49E3A]/25 hover:border-[#002147]/40 transition-all">
+                    <span className="text-2xl shrink-0">🌅</span>
                     <div className="flex-1 space-y-1">
-                      <span className="text-[10px] font-mono text-[#E4C77A] font-extrabold uppercase tracking-wider block">
+                      <span className="text-[10px] font-mono text-[#C49E3A] font-extrabold uppercase tracking-wider block">
                         {isRtl ? 'المهمة 1: الإحماء الصباحي اللفظي' : 'STEP 1: MORNING LANGUAGE WARM-UP'}
                       </span>
-                      <h4 className="text-xs font-extrabold text-white">{isRtl ? 'محقق النطق والتدقيق السمعي' : 'Pronunciation Detective (Acoustic Training)'}</h4>
-                      <p className="text-[10px] text-slate-400">{isRtl ? 'سماع الفروقات الصوتية الدقيقة بين الكلمات الإنجليزية الصعبة.' : 'Discern and sort subtle vowel phonetic contrasts.'}</p>
+                      <h4 className="text-xs font-extrabold text-[#002147]">{isRtl ? 'محقق النطق والتدقيق السمعي' : 'Pronunciation Detective (Acoustic Training)'}</h4>
+                      <p className="text-[10px] text-[#002147]/70 font-medium">{isRtl ? 'سماع الفروقات الصوتية الدقيقة بين الكلمات الإنجليزية الصعبة.' : 'Discern and sort subtle vowel phonetic contrasts.'}</p>
                     </div>
-                    <button
+                    <PrimaryButton
+                      className="!py-1 !px-3 text-xs"
                       onClick={() => selectGame('game_009')}
-                      className="px-3 py-1 bg-[#002147] hover:bg-[#00183a] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
                     >
-                      {isRtl ? 'ابدأ' : 'Play'}
-                    </button>
+                      <span>{isRtl ? 'ابدأ' : 'Play'}</span>
+                    </PrimaryButton>
                   </div>
 
                   {/* Step 2 */}
-                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#002147]/30 transition-all">
-                    <span className="text-2xl mt-1">🧪</span>
+                  <div className="flex items-center gap-4 p-4 bg-[#fdfaf3] rounded-xl border border-[#C49E3A]/25 hover:border-[#002147]/40 transition-all">
+                    <span className="text-2xl shrink-0">🧪</span>
                     <div className="flex-1 space-y-1">
-                      <span className="text-[10px] font-mono text-amber-400 font-extrabold uppercase tracking-wider block">
+                      <span className="text-[10px] font-mono text-[#C49E3A] font-extrabold uppercase tracking-wider block">
                         {isRtl ? 'المهمة 2: بناء القواعد والمنطق' : 'STEP 2: MIDDAY THEORETICAL SYNTAX'}
                       </span>
-                      <h4 className="text-xs font-extrabold text-white">{isRtl ? 'طباخ العبارات وصياغة الطعام النحوي' : 'Phrase Chef (Assemble Subject-Verb-Object)'}</h4>
-                      <p className="text-[10px] text-slate-400">{isRtl ? 'طهي المكونات اللغوية المختلفة لتقديم إملاء وقواعد مثالية.' : 'Compose perfect sentences under correct grammatical recipes.'}</p>
+                      <h4 className="text-xs font-extrabold text-[#002147]">{isRtl ? 'طباخ العبارات وصياغة الطعام النحوي' : 'Phrase Chef (Assemble Subject-Verb-Object)'}</h4>
+                      <p className="text-[10px] text-[#002147]/70 font-medium">{isRtl ? 'طهي المكونات اللغوية المختلفة لتقديم إملاء وقواعد مثالية.' : 'Compose perfect sentences under correct grammatical recipes.'}</p>
                     </div>
-                    <button
+                    <PrimaryButton
+                      className="!py-1 !px-3 text-xs"
                       onClick={() => selectGame('game_018')}
-                      className="px-3 py-1 bg-[#C49E3A] text-slate-950 text-[10px] font-bold rounded-lg cursor-pointer my-auto"
                     >
-                      {isRtl ? 'ابدأ' : 'Play'}
-                    </button>
+                      <span>{isRtl ? 'ابدأ' : 'Play'}</span>
+                    </PrimaryButton>
                   </div>
 
                   {/* Step 3 */}
-                  <div className="flex gap-4 p-4.5 bg-slate-950/40 rounded-xl border border-slate-800 hover:border-[#002147]/30 transition-all">
-                    <span className="text-2xl mt-1">👑</span>
+                  <div className="flex items-center gap-4 p-4 bg-[#fdfaf3] rounded-xl border border-[#C49E3A]/25 hover:border-[#002147]/40 transition-all">
+                    <span className="text-2xl shrink-0">👑</span>
                     <div className="flex-1 space-y-1">
-                      <span className="text-[10px] font-mono text-[#E4C77A] font-extrabold uppercase tracking-wider block">
+                      <span className="text-[10px] font-mono text-[#C49E3A] font-extrabold uppercase tracking-wider block">
                         {isRtl ? 'المهمة 3: بروتوكول آداب المجتمع' : 'STEP 3: EVENING SOCIAL PROTOCOLS'}
                       </span>
-                      <h4 className="text-xs font-extrabold text-white">{isRtl ? 'مملكة الأدب وبناء أبراج القصر الملكي' : 'Kingdom of Etiquette (High Etiquette Quest)'}</h4>
-                      <p className="text-[10px] text-slate-400">{isRtl ? 'حل مسائل السلوك والذوق الراقي لبناء الغرف الملكية الخمس لقصرك.' : 'Unlock royal rooms by proving top-tier host and guest table manners.'}</p>
+                      <h4 className="text-xs font-extrabold text-[#002147]">{isRtl ? 'مملكة الأدب وبناء أبراج القصر الملكي' : 'Kingdom of Etiquette (High Etiquette Quest)'}</h4>
+                      <p className="text-[10px] text-[#002147]/70 font-medium">{isRtl ? 'حل مسائل السلوك والذوق الراقي لبناء الغرف الملكية الخمس لقصرك.' : 'Unlock royal rooms by proving top-tier host and guest table manners.'}</p>
                     </div>
-                    <button
+                    <PrimaryButton
+                      className="!py-1 !px-3 text-xs"
                       onClick={() => selectGame('game_011')}
-                      className="px-3 py-1 bg-[#002147] hover:bg-[#00183a] text-white text-[10px] font-bold rounded-lg cursor-pointer my-auto"
                     >
-                      {isRtl ? 'ابدأ' : 'Play'}
-                    </button>
+                      <span>{isRtl ? 'ابدأ' : 'Play'}</span>
+                    </PrimaryButton>
                   </div>
 
                 </div>
-              </div>
+              </GoldCard>
             </motion.div>
           )}
 
@@ -1194,12 +1206,12 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6 max-w-2xl mx-auto"
             >
-              <div className="bg-[#1e2324] rounded-2xl p-6 border border-slate-800 space-y-6">
-                <div className="border-b border-slate-800 pb-3">
-                  <h3 className="text-xs font-black text-[#FDCB6E] uppercase tracking-wider font-mono">
+              <GoldCard className="p-6 space-y-6">
+                <div className="border-b border-[#C49E3A]/25 pb-3">
+                  <h3 className="text-xs font-black text-[#002147] uppercase tracking-wider font-mono">
                     {isRtl ? 'تشريح مهارات الجدارة والسلوك 📊' : 'Behavioral & Linguistic Competency Index'}
                   </h3>
-                  <p className="text-[10px] text-slate-400 mt-1">
+                  <p className="text-[10px] text-[#002147]/70 font-medium mt-1">
                     {isRtl ? 'لا توجد بيانات قياس محفوظة بعد — سيظهر هذا المؤشر عند توفر نتائج حقيقية.' : 'No measured data yet — this index appears once real results exist.'}
                   </p>
                 </div>
@@ -1208,13 +1220,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   {/* Skill 1 */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
-                      <span className="text-slate-200">{isRtl ? '👂 دقة الاستماع وتمييز مخارج الحروف' : 'Acoustic Auditory & Sounds Distinction'}</span>
-                      <span className="text-[#E4C77A] font-mono">—</span>
+                      <span className="text-[#002147]">{isRtl ? '👂 دقة الاستماع وتمييز مخارج الحروف' : 'Acoustic Auditory & Sounds Distinction'}</span>
+                      <span className="text-[#C49E3A] font-mono">—</span>
                     </div>
-                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-[#002147] to-[#C49E3A] h-full rounded-full" style={{ width: '0%' }} />
+                    <div className="w-full bg-[#fdfaf3] h-2.5 rounded-full overflow-hidden border border-[#C49E3A]/30">
+                      <div className="bg-[#002147] h-full rounded-full" style={{ width: '0%' }} />
                     </div>
-                    <p className="text-[9px] text-slate-400 italic">
+                    <p className="text-[9px] text-[#002147]/70 font-medium italic">
                       {isRtl ? 'ممتاز جداً! تذكر ممارسة لعبة "محقق النطق" يومياً لرفعه إلى 95%.' : 'Fabulous response. Replay Pronunciation Detective to boost it.'}
                     </p>
                   </div>
@@ -1222,13 +1234,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   {/* Skill 2 */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
-                      <span className="text-slate-200">{isRtl ? '👑 الذكاء الاجتماعي وبوتوكول الرد اللبق' : 'Social Manners & Diplomacy Greeting'}</span>
-                      <span className="text-[#E4C77A] font-mono">—</span>
+                      <span className="text-[#002147]">{isRtl ? '👑 الذكاء الاجتماعي وبوتوكول الرد اللبق' : 'Social Manners & Diplomacy Greeting'}</span>
+                      <span className="text-[#C49E3A] font-mono">—</span>
                     </div>
-                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-[#002147] to-[#C49E3A] h-full rounded-full" style={{ width: '0%' }} />
+                    <div className="w-full bg-[#fdfaf3] h-2.5 rounded-full overflow-hidden border border-[#C49E3A]/30">
+                      <div className="bg-[#002147] h-full rounded-full" style={{ width: '0%' }} />
                     </div>
-                    <p className="text-[9px] text-slate-400 italic">
+                    <p className="text-[9px] text-[#002147]/70 font-medium italic">
                       {isRtl ? 'أنت رائع في مهارات اللباقة! تواصل التقدم في "سفير الحوار" و"فارس الكلمة المهذبة".' : 'Stellar achievement. Complete Dialogue Ambassador to keep it pristine.'}
                     </p>
                   </div>
@@ -1236,13 +1248,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   {/* Skill 3 */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
-                      <span className="text-slate-200">{isRtl ? '🧪 بناء العبارات وصياغة التركيب النحوي' : 'Syntax Compose & Grammatical Harmony'}</span>
+                      <span className="text-[#002147]">{isRtl ? '🧪 بناء العبارات وصياغة التركيب النحوي' : 'Syntax Compose & Grammatical Harmony'}</span>
                       <span className="text-[#C49E3A] font-mono">—</span>
                     </div>
-                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-[#002147] to-[#C49E3A] h-full rounded-full" style={{ width: '0%' }} />
+                    <div className="w-full bg-[#fdfaf3] h-2.5 rounded-full overflow-hidden border border-[#C49E3A]/30">
+                      <div className="bg-[#002147] h-full rounded-full" style={{ width: '0%' }} />
                     </div>
-                    <p className="text-[9px] text-slate-400 italic">
+                    <p className="text-[9px] text-[#002147]/70 font-medium italic">
                       {isRtl ? 'منطقة تطوير رئيسية! تدرب على لعب "طباخ العبارات" و"بستان القواعد" لتعلم الفاعل والمفعول.' : 'Important improvement zone. Play Phrase Chef and Grammar Garden to strengthen sentence structures.'}
                     </p>
                   </div>
@@ -1250,13 +1262,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   {/* Skill 4 */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
-                      <span className="text-slate-200">{isRtl ? '⚡ سرعة البديهة والتهجئة الفورية' : 'Speed Spelling & Direct Lexicon Retrieval'}</span>
-                      <span className="text-rose-400 font-mono">—</span>
+                      <span className="text-[#002147]">{isRtl ? '⚡ سرعة البديهة والتهجئة الفورية' : 'Speed Spelling & Direct Lexicon Retrieval'}</span>
+                      <span className="text-[#C49E3A] font-mono">—</span>
                     </div>
-                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-rose-600 to-rose-400 h-full rounded-full" style={{ width: '0%' }} />
+                    <div className="w-full bg-[#fdfaf3] h-2.5 rounded-full overflow-hidden border border-[#C49E3A]/30">
+                      <div className="bg-[#002147] h-full rounded-full" style={{ width: '0%' }} />
                     </div>
-                    <p className="text-[9px] text-slate-400 italic">
+                    <p className="text-[9px] text-[#002147]/70 font-medium italic">
                       {isRtl ? 'سرعة طيبة في الاستدعاء اللفظي إملائياً! درب بديهتك مجدداً في "بطل الإملاء".' : 'Great spelling response. Push hard in Spelling Hero meteor levels to touch 90%.'}
                     </p>
                   </div>
@@ -1264,18 +1276,18 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   {/* Skill 5 */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-extrabold">
-                      <span className="text-slate-200">{isRtl ? '❤️ الذكاء العاطفي والتعاطف اللفظي' : 'Linguistic Empathy & Emotional Intelligence'}</span>
-                      <span className="text-[#FDCB6E] font-mono">—</span>
+                      <span className="text-[#002147]">{isRtl ? '❤️ الذكاء العاطفي والتعاطف اللفظي' : 'Linguistic Empathy & Emotional Intelligence'}</span>
+                      <span className="text-[#C49E3A] font-mono">—</span>
                     </div>
-                    <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full" style={{ width: '0%' }} />
+                    <div className="w-full bg-[#fdfaf3] h-2.5 rounded-full overflow-hidden border border-[#C49E3A]/30">
+                      <div className="bg-[#002147] h-full rounded-full" style={{ width: '0%' }} />
                     </div>
-                    <p className="text-[9px] text-slate-400 italic">
+                    <p className="text-[9px] text-[#002147]/70 font-medium italic">
                       {isRtl ? 'عالي جداً! لقد نجحت زوهورك في حديقة المشاعر بسبب طيبة عباراتك في مساعدة الآخرين.' : 'Empathetic work. Rewarding results achieved by comforting Flowers of Garden of Emotions.'}
                     </p>
                   </div>
                 </div>
-              </div>
+              </GoldCard>
             </motion.div>
           )}
 
@@ -1286,7 +1298,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <p className="text-xs text-slate-450 font-bold text-center">
+              <p className="text-xs text-[#002147]/80 font-bold text-center">
                 {isRtl 
                   ? 'يتم منح وتفصيل هذه الدبلوما بشكل حصري للمشتركين بعد تخطي حدود معينة للنقاط والـ XP.'
                   : 'Honorary credentials authorized dynamically from child session performance thresholds. Click to print and cherish.'}
@@ -1295,58 +1307,58 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 {/* CERT 1 */}
-                <div className="bg-[#1e2324] rounded-2xl p-5 border border-amber-500/30 text-center space-y-4 shadow-lg hover:border-amber-400 transition-all flex flex-col justify-between">
+                <GoldCard className="p-5 text-center space-y-4 flex flex-col justify-between">
                   <div className="space-y-2">
                     <span className="text-4xl block animate-bounce">🎓</span>
-                    <h4 className="text-xs font-black text-white">{isRtl ? 'دبلوما سفير الدبلوماسية ولغويات الأدب' : 'Linguistic Courtesy Envoy Diploma'}</h4>
-                    <p className="text-[10px] text-slate-400">{isRtl ? 'تُمنح لإتقان آداب السلوك الحواري والرد المهذب والاعتذار.' : 'Authorized for polite reply systems and social dining mannerism.'}</p>
-                    <span className="inline-block px-2.5 py-0.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9px] font-mono rounded font-bold">{isRtl ? 'جاهزة للاستلام' : 'AVAILABLE NOW'}</span>
+                    <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'دبلوما سفير الدبلوماسية ولغويات الأدب' : 'Linguistic Courtesy Envoy Diploma'}</h4>
+                    <p className="text-[10px] text-[#002147]/70 font-medium">{isRtl ? 'تُمنح لإتقان آداب السلوك الحواري والرد المهذب والاعتذار.' : 'Authorized for polite reply systems and social dining mannerism.'}</p>
+                    <ProgressPill className="text-[9px] font-mono font-bold">{isRtl ? 'جاهزة للاستلام' : 'AVAILABLE NOW'}</ProgressPill>
                   </div>
-                  <button
+                  <PrimaryButton
                     onClick={() => {
                       setSelectedCertificateId('cert_etiquette');
                       speakFeedback("Displaying Courtesy Envoy Diploma. Congratulations!");
                     }}
-                    className="w-full py-2 bg-[#C49E3A] hover:bg-[#b08c2f] text-slate-900 rounded-xl text-[10px] font-black tracking-wider transition-all cursor-pointer"
+                    className="w-full text-[10px]"
                   >
-                    👑 {isRtl ? 'عرض واستلام الشهادة' : 'Claim & View Royal Award'}
-                  </button>
-                </div>
+                    👑 <span>{isRtl ? 'عرض واستلام الشهادة' : 'Claim & View Royal Award'}</span>
+                  </PrimaryButton>
+                </GoldCard>
 
                 {/* CERT 2 */}
-                <div className="bg-[#1e2324] rounded-2xl p-5 border border-[#C49E3A]/30 text-center space-y-4 shadow-lg hover:border-[#C49E3A]/60 transition-all flex flex-col justify-between">
+                <GoldCard className="p-5 text-center space-y-4 flex flex-col justify-between">
                   <div className="space-y-2">
                     <span className="text-4xl block">🖋️</span>
-                    <h4 className="text-xs font-black text-white">{isRtl ? 'شهادة خبير التهجئة والاسترداد اللفظي' : 'Master of Phonetics & Spelling Specialist'}</h4>
-                    <p className="text-[10px] text-slate-400">{isRtl ? 'تُمنح لسرعة البديهة والتهجي الإملائي للكلمات المركبة الصعبة.' : 'Credentials for extreme velocity vocabulary meteor typing.'}</p>
-                    <span className="inline-block px-2.5 py-0.5 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9px] font-mono rounded font-bold">{isRtl ? 'جاهزة للاستلام' : 'AVAILABLE NOW'}</span>
+                    <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'شهادة خبير التهجئة والاسترداد اللفظي' : 'Master of Phonetics & Spelling Specialist'}</h4>
+                    <p className="text-[10px] text-[#002147]/70 font-medium">{isRtl ? 'تُمنح لسرعة البديهة والتهجي الإملائي للكلمات المركبة الصعبة.' : 'Credentials for extreme velocity vocabulary meteor typing.'}</p>
+                    <ProgressPill className="text-[9px] font-mono font-bold">{isRtl ? 'جاهزة للاستلام' : 'AVAILABLE NOW'}</ProgressPill>
                   </div>
-                  <button
+                  <PrimaryButton
                     onClick={() => {
                       setSelectedCertificateId('cert_spelling');
                       speakFeedback("Displaying Master of Phonetics Certificate. Congratulations!");
                     }}
-                    className="w-full py-2 bg-[#002147] hover:bg-[#C49E3A] text-white rounded-xl text-[10px] font-black tracking-wider transition-all cursor-pointer"
+                    className="w-full text-[10px]"
                   >
-                    👑 {isRtl ? 'عرض واستلام الشهادة' : 'Claim & View Royal Award'}
-                  </button>
-                </div>
+                    👑 <span>{isRtl ? 'عرض واستلام الشهادة' : 'Claim & View Royal Award'}</span>
+                  </PrimaryButton>
+                </GoldCard>
 
                 {/* CERT 3 */}
-                <div className="bg-[#1e2324] rounded-2xl p-5 border border-slate-800 text-center space-y-4 shadow-md opacity-70 flex flex-col justify-between">
+                <GoldCard className="p-5 text-center space-y-4 flex flex-col justify-between opacity-80">
                   <div className="space-y-2">
                     <span className="text-4xl block grayscale opacity-60">🔮</span>
-                    <h4 className="text-xs font-black text-slate-400">{isRtl ? 'دكتور القواعد وسيد المنطق النحوي' : 'Doctor of Syntax & Grammar Fellowship'}</h4>
-                    <p className="text-[10px] text-slate-500">{isRtl ? 'تُمنح لإتقان طبخ وفك شفرات النحو الإنجليزي المعقد.' : 'Eminent fellowship honoring pure logical sentence composition.'}</p>
-                    <span className="inline-block px-2.5 py-0.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[9px] font-mono rounded font-bold">{isRtl ? 'مقفل - يتطلب 200 XP إضافي' : 'LOCKED - REQUIRES 200 MORE XP'}</span>
+                    <h4 className="text-xs font-black text-[#002147]/60">{isRtl ? 'دكتور القواعد وسيد المنطق النحوي' : 'Doctor of Syntax & Grammar Fellowship'}</h4>
+                    <p className="text-[10px] text-[#002147]/50 font-medium">{isRtl ? 'تُمنح لإتقان طبخ وفك شفرات النحو الإنجليزي المعقد.' : 'Eminent fellowship honoring pure logical sentence composition.'}</p>
+                    <span className="inline-block px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 text-[9px] font-mono rounded-full font-bold">{isRtl ? 'مقفل - يتطلب 200 XP إضافي' : 'LOCKED - REQUIRES 200 MORE XP'}</span>
                   </div>
-                  <button
+                  <GhostButton
                     disabled
-                    className="w-full py-2 bg-slate-800 text-slate-500 rounded-xl text-[10px] font-black cursor-not-allowed"
+                    className="w-full text-[10px] opacity-60 cursor-not-allowed"
                   >
-                    🔒 {isRtl ? 'مقفل حالياً' : 'Locked Credentials'}
-                  </button>
-                </div>
+                    🔒 <span>{isRtl ? 'مقفل حالياً' : 'Locked Credentials'}</span>
+                  </GhostButton>
+                </GoldCard>
 
               </div>
             </motion.div>
@@ -1360,40 +1372,40 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+              className="fixed inset-0 bg-[#002147]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
             >
               <motion.div
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
-                className="bg-[#121617] rounded-3xl p-6 md:p-10 border-4 border-amber-500 max-w-2xl w-full text-center relative shadow-2xl space-y-6"
+                className="bg-[#fdfaf3] rounded-3xl p-6 md:p-10 border-4 border-[#C49E3A] max-w-2xl w-full text-center relative shadow-2xl space-y-6"
               >
                 {/* Closed Close trigger */}
-                <button
+                <GhostButton
                   onClick={() => setSelectedCertificateId(null)}
-                  className="absolute top-4 right-4 w-8 h-8 bg-slate-800 hover:bg-slate-700 text-slate-450 border border-slate-705 rounded-full flex items-center justify-center font-bold cursor-pointer"
+                  className="absolute top-4 right-4 !p-2 !rounded-full text-[#002147]"
                 >
                   ✕
-                </button>
+                </GhostButton>
 
                 {/* Certificate Border Details */}
-                <div className="border border-double border-amber-600/40 p-6 md:p-8 space-y-6 rounded-2xl bg-amber-500/[0.01]">
+                <div className="border border-double border-[#C49E3A]/60 p-6 md:p-8 space-y-6 rounded-2xl bg-white/60">
                   
                   {/* Crest Header */}
                   <div className="space-y-1.5 text-center">
                     <span className="text-3xl block">💎⚜️💎</span>
-                    <h5 className="text-[10px] font-black text-amber-500 uppercase font-mono tracking-widest leading-none">
+                    <h5 className="text-[10px] font-black text-[#C49E3A] uppercase font-mono tracking-widest leading-none">
                       {isRtl ? 'أكاديمية أكسفورد الرقمية الدولية للصغار والآداب' : 'OXFORD DIGITAL EXCELLENCE EDUCATION FOUNDATION'}
                     </h5>
-                    <p className="text-[8px] text-slate-500 uppercase tracking-widest font-mono">Certified Honor Registry #O-2026</p>
+                    <p className="text-[8px] text-[#002147]/60 uppercase tracking-widest font-mono">Certified Honor Registry #O-2026</p>
                   </div>
 
                   {/* Title */}
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-black text-slate-400 block uppercase tracking-wide font-mono">
+                    <span className="text-[10px] font-black text-[#002147]/70 block uppercase tracking-wide font-mono">
                       {isRtl ? 'رقعة تقدير وشهادة تقدير وتفوق' : 'CREDENTIAL DIPLOMA OF PRIMACY'}
                     </span>
-                    <h3 className="text-md md:text-xl font-black text-[#FDCB6E] tracking-normal font-sans">
+                    <h3 className="text-md md:text-xl font-black text-[#002147] tracking-normal font-sans">
                       {selectedCertificateId === 'cert_etiquette' 
                         ? (isRtl ? 'دبلوما سفير الدبلوماسية ورائد الرد الطيِّب السليم 👑' : 'Ambassador Extraordinary of High Society Courtesy 👑')
                         : (isRtl ? 'شهادة خبير التهجئة والاسترداد اللفظي والأبجدية ⚡' : 'Elite Fellowship of Acoustics & Ultra spelling ⚡')
@@ -1403,11 +1415,11 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                   {/* Body Paragraph */}
                   <div className="space-y-4">
-                    <p className="text-[10px] text-slate-400">{isRtl ? 'بموجب هذه الوثيقة، يُثبت مجلس الأكاديمية وباسل المرشد أن:' : 'Be it known that the Academic Council hereby awards and confirms:'}</p>
-                    <div className="px-6 py-2 border-b border-amber-600/30 max-w-xs mx-auto text-center">
-                      <span className="text-md md:text-lg font-black text-white font-mono tracking-wide">{candidateName}</span>
+                    <p className="text-[10px] text-[#002147]/70 font-medium">{isRtl ? 'بموجب هذه الوثيقة، يُثبت مجلس الأكاديمية وباسل المرشد أن:' : 'Be it known that the Academic Council hereby awards and confirms:'}</p>
+                    <div className="px-6 py-2 border-b border-[#C49E3A]/40 max-w-xs mx-auto text-center">
+                      <span className="text-md md:text-lg font-black text-[#002147] font-mono tracking-wide">{candidateName}</span>
                     </div>
-                    <p className="text-[10px] text-slate-300 leading-relaxed max-w-lg mx-auto">
+                    <p className="text-[10px] text-[#002147]/80 font-medium leading-relaxed max-w-lg mx-auto">
                       {selectedCertificateId === 'cert_etiquette' ? (
                         isRtl 
                           ? 'قد نفذ واجتاز بامتياز فائق العشرين تحدياً بأكاديمية الأدب، وأثبت تفهم وافٍ لقيم التعاون الرفيع والمجاملات الكريمة وبناء قصر آداب السلوك وسلوك الغد المهذب.'
@@ -1421,22 +1433,22 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   </div>
 
                   {/* Signatures and Seal */}
-                  <div className="flex justify-between items-end pt-4 mt-6 border-t border-slate-900">
+                  <div className="flex justify-between items-end pt-4 mt-6 border-t border-[#C49E3A]/30">
                     <div className="text-left font-mono">
-                      <p className="text-[8px] text-slate-500">{isRtl ? 'رئيس هيئة التعليم:' : 'Chancellor of Council:'}</p>
-                      <p className="text-[10px] font-black text-amber-500 italic mt-0.5">Dr. Basil Al-Murshid</p>
+                      <p className="text-[8px] text-[#002147]/60">{isRtl ? 'رئيس هيئة التعليم:' : 'Chancellor of Council:'}</p>
+                      <p className="text-[10px] font-black text-[#C49E3A] italic mt-0.5">Dr. Basil Al-Murshid</p>
                     </div>
                     
                     {/* Simulated Shiny Gold Seal */}
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 border border-yellow-250 flex items-center justify-center shadow-lg shadow-yellow-500/10 text-lg relative group">
-                      <div className="absolute inset-1 rounded-full border border-dashed border-amber-800 flex items-center justify-center font-bold text-[8px] text-amber-950 font-mono">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#E4C77A] via-[#C49E3A] to-[#8C6D23] border border-[#E4C77A] flex items-center justify-center shadow-md text-lg relative">
+                      <div className="absolute inset-1 rounded-full border border-dashed border-[#002147] flex items-center justify-center font-bold text-[8px] text-[#002147] font-mono">
                         OXFORD
                       </div>
                     </div>
 
                     <div className="text-right font-mono">
-                      <p className="text-[8px] text-slate-500">{isRtl ? 'عميد القبول وأعراف السلوك:' : 'Dean of Manners & Courtesy:'}</p>
-                      <p className="text-[10px] font-black text-amber-500 italic mt-0.5">Court of Etiquette</p>
+                      <p className="text-[8px] text-[#002147]/60">{isRtl ? 'عميد القبول وأعراف السلوك:' : 'Dean of Manners & Courtesy:'}</p>
+                      <p className="text-[10px] font-black text-[#C49E3A] italic mt-0.5">Court of Etiquette</p>
                     </div>
                   </div>
 
@@ -1444,21 +1456,21 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                 {/* Claim Buttons */}
                 <div className="flex gap-4">
-                  <button
+                  <PrimaryButton
                     onClick={() => {
                       speakFeedback(isRtl ? "مبارك الفوز والتميز الرائع!" : "Splendid work! We are so proud of you.");
                       alert(isRtl ? "احسنت الاختيار! تم تحميل الشهادة وطباعتها بنجاح إلى ملف التميز بباحة مكتبتك! 🏆📄" : "Diploma certified! Saved securely inside your personal academic dashboard collection! 🏆📄");
                     }}
-                    className="flex-1 py-3 bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-500 hover:to-yellow-600 text-slate-950 rounded-xl text-xs font-black shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+                    className="flex-1 py-3"
                   >
-                    🚀 {isRtl ? 'تحميل وطباعة الشهادة 📄' : 'Download and Print Certificate 📄'}
-                  </button>
-                  <button
+                    🚀 <span>{isRtl ? 'تحميل وطباعة الشهادة 📄' : 'Download and Print Certificate 📄'}</span>
+                  </PrimaryButton>
+                  <GhostButton
                     onClick={() => setSelectedCertificateId(null)}
-                    className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="px-6 py-3"
                   >
-                    {isRtl ? 'إغلاق' : 'Dismiss'}
-                  </button>
+                    <span>{isRtl ? 'إغلاق' : 'Dismiss'}</span>
+                  </GhostButton>
                 </div>
 
               </motion.div>
@@ -1470,781 +1482,693 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#2D3436] text-slate-100 flex flex-col font-sans select-none pb-20">
-      {/* Interactive header leveraging dynamic CSS values */}
-      <header className="bg-gradient-to-r from-[#002147] to-[#00183a] py-6 px-6 md:px-12 text-white shadow-md relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none" />
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 z-10 relative">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center transition-all cursor-pointer"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </button>
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="space-y-6 select-none pb-12">
+        {/* Hub Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#C49E3A]/20 pb-4">
+          <div className="flex items-center gap-3">
+            <GhostButton onClick={onBack}>
+              <ArrowLeft className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
+              <span>{isRtl ? 'العودة' : 'Back'}</span>
+            </GhostButton>
             <div>
-              <span className="text-[10px] font-black uppercase bg-[#FDCB6E] text-slate-900 py-0.5 px-2.5 rounded tracking-wider">
-                {isRtl ? 'بوابة المغامرات والآداب' : 'Adventure Playzone'}
-              </span>
-              <h1 className="text-xl md:text-2xl font-black text-white mt-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase bg-[#002147] text-[#E6C36A] py-0.5 px-2.5 rounded tracking-wider">
+                  {isRtl ? 'بوابة المغامرات والآداب' : 'Adventure Playzone'}
+                </span>
+              </div>
+              <h1 className="text-xl md:text-2xl font-black text-[#002147] mt-1">
                 {isRtl ? 'الألعاب التعليمية والآداب الراقية 🎮💎' : 'Educational Games & Manners Palace 🎮💎'}
               </h1>
             </div>
           </div>
 
           {/* Points earned */}
-          <div className="flex items-center gap-2.5 bg-slate-900/40 px-4 py-2 rounded-2xl border border-white/10 backdrop-blur-sm">
-            <span className="text-xl">🌟</span>
-            <div>
-              <span className="text-[10px] block font-bold text-[#FDCB6E] uppercase tracking-wider">{isRtl ? 'درجات الجلسة' : 'Session Merits'}</span>
-              <span className="text-md font-black text-[#C49E3A] font-mono">+{sessionXP} XP</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <ProgressPill>
+              <span>🌟</span>
+              <span className="text-[11px] font-bold uppercase">{isRtl ? 'درجات الجلسة:' : 'Session:'}</span>
+              <span className="font-black text-[#002147]">+{sessionXP} XP</span>
+            </ProgressPill>
           </div>
         </div>
-      </header>
 
-      {/* Main Body */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 mt-8 flex-1 w-full">
-        <AnimatePresence mode="wait">
-          {!activeGameId ? (
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              className="space-y-8"
-            >
-              {/* Introduction Banner with Mentor Basil */}
-              <div className="bg-[#1e2324] rounded-3xl p-6 md:p-8 border border-slate-700/60 shadow-xl flex flex-col md:flex-row items-center gap-6 justify-between relative overflow-hidden">
-                <div className="absolute right-0 top-0 w-32 h-32 bg-[#002147]/5 rounded-full pointer-events-none" />
-                <div className="space-y-3">
-                  <span className="px-2.5 py-0.5 bg-[#002147]/20 text-[#002147] border border-[#002147]/30 rounded-full text-[11px] font-bold">
-                    {isRtl ? 'بوابة الألعاب المطورة بالكامل 🧪✨' : 'Radically Transformed Play Portal 🧪✨'}
-                  </span>
-                  <h2 className="text-xl md:text-2xl font-black text-[#FDCB6E]">
-                    {isRtl ? 'واحة الألعاب الذكية والمطورة! 🦁✨' : 'The Smart Gamified Games Oasis! 🦁✨'}
-                  </h2>
-                  <p className="text-xs text-slate-300 font-medium leading-relaxed max-w-3xl">
-                    {isRtl 
-                      ? 'مرحباً بك في البوابة التفاعلية الشاملة بحلتها الجديدة. تم تطوير الواحة لتوفر لك طريق المهام والمستويات المفتوحة، ومختبر الابتكار لتوليد ألعاب لا حصر لها بذكائنا الاصطناعي، إلى جانب بازار الأوسمة والملصقات الفخرية الممتعة!'
-                      : 'Welcome to the newly re-imagined playroom. Explore custom visual roadmap quests, create your own endless custom games using the AI Innovation Lab, and display your achievements with badges and reward stickers!'}
-                  </p>
+        {/* Main Body */}
+        <div>
+          <AnimatePresence mode="wait">
+            {!activeGameId ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="space-y-6"
+              >
+                {/* Introduction Banner with Mentor Basil */}
+                <GoldCard className="relative overflow-hidden">
+                  <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
+                    <div className="space-y-2">
+                      <span className="inline-block px-2.5 py-0.5 bg-[#002147]/10 text-[#002147] border border-[#C49E3A]/40 rounded-full text-[11px] font-bold">
+                        {isRtl ? 'بوابة الألعاب المطورة بالكامل 🧪✨' : 'Radically Transformed Play Portal 🧪✨'}
+                      </span>
+                      <h2 className="text-xl md:text-2xl font-black text-[#002147]">
+                        {isRtl ? 'واحة الألعاب الذكية والمطورة! 🦁✨' : 'The Smart Gamified Games Oasis! 🦁✨'}
+                      </h2>
+                      <p className="text-xs text-[#002147]/80 font-medium leading-relaxed max-w-3xl">
+                        {isRtl 
+                          ? 'مرحباً بك في البوابة التفاعلية الشاملة بحلتها الجديدة. تم تطوير الواحة لتوفر لك طريق المهام والمستويات المفتوحة، ومختبر الابتكار لتوليد ألعاب لا حصر لها بذكائنا الاصطناعي، إلى جانب بازار الأوسمة والملصقات الفخرية الممتعة!'
+                          : 'Welcome to the newly re-imagined playroom. Explore custom visual roadmap quests, create your own endless custom games using the AI Innovation Lab, and display your achievements with badges and reward stickers!'}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center shrink-0 cursor-pointer" onClick={() => { playSound('powerup'); speakFeedback(isRtl ? "مرحباً بك يا بطل في واحة الألعاب الذكية!" : "Welcome back hero, to the smart games oasis!"); }}>
+                      <span className="text-5xl animate-bounce">🦁</span>
+                      <span className="text-[10px] text-[#002147]/60 font-bold mt-1">{isRtl ? 'اضغط باسل' : 'Tap Basil'}</span>
+                    </div>
+                  </div>
+                </GoldCard>
+
+                {/* RADICAL LOBBY NAVIGATION TABS */}
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                  <GhostButton
+                    active={lobbyTab === 'roadmap'}
+                    onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
+                  >
+                    <Compass className="w-4 h-4" />
+                    <span>{isRtl ? 'خريطة طريق المهام 🧭' : 'Adventure Roadmap 🧭'}</span>
+                  </GhostButton>
+                  <GhostButton
+                    active={lobbyTab === 'catalog'}
+                    onClick={() => { setLobbyTab('catalog'); playSound('click'); }}
+                  >
+                    <Gamepad2 className="w-4 h-4" />
+                    <span>{isRtl ? 'منصة الألعاب العشرين 🎮' : 'Arcade Cabinet 🎮'}</span>
+                  </GhostButton>
+                  <GhostButton
+                    active={lobbyTab === 'sandbox'}
+                    onClick={() => { setLobbyTab('sandbox'); playSound('click'); }}
+                  >
+                    <Sparkles className="w-4 h-4 text-[#C49E3A]" />
+                    <span>{isRtl ? 'مختبر الابتكار بالذكاء الاصطناعي 🧪' : 'AI Game Sandbox 🧪'}</span>
+                  </GhostButton>
+                  <GhostButton
+                    active={lobbyTab === 'achievements'}
+                    onClick={() => { setLobbyTab('achievements'); playSound('click'); }}
+                  >
+                    <Trophy className="w-4 h-4" />
+                    <span>{isRtl ? 'بازار الأوسمة والملصقات 🏆' : 'Badges & Stickers 🏆'}</span>
+                  </GhostButton>
                 </div>
-                <div className="flex flex-col items-center shrink-0">
-                  <span className="text-5xl animate-bounce cursor-pointer" onClick={() => { playSound('powerup'); speakFeedback(isRtl ? "مرحباً بك يا بطل في واحة الألعاب الذكية!" : "Welcome back hero, to the smart games oasis!"); }}>🦁</span>
-                  <span className="text-[10px] text-slate-400 font-bold mt-1">{isRtl ? 'اضغط باسل' : 'Tap Basil'}</span>
-                </div>
-              </div>
 
-              {/* RADICAL LOBBY NAVIGATION TABS */}
-              <div className="bg-slate-900/60 p-2 rounded-2xl border border-slate-800/80 flex flex-wrap gap-2 justify-center md:justify-start">
-                <button
-                  onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
-                    lobbyTab === 'roadmap'
-                      ? 'bg-[#002147] text-white shadow-lg shadow-[#002147]/20'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`}
-                >
-                  <Compass className="w-4 h-4" />
-                  {isRtl ? 'خريطة طريق المهام 🧭' : 'Adventure Roadmap 🧭'}
-                </button>
-                <button
-                  onClick={() => { setLobbyTab('catalog'); playSound('click'); }}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
-                    lobbyTab === 'catalog'
-                      ? 'bg-[#002147] text-white shadow-lg shadow-[#002147]/20'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`}
-                >
-                  <Gamepad2 className="w-4 h-4" />
-                  {isRtl ? 'منصة الألعاب العشرين 🎮' : 'Arcade Cabinet 🎮'}
-                </button>
-                <button
-                  onClick={() => { setLobbyTab('sandbox'); playSound('click'); }}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer relative overflow-hidden ${
-                    lobbyTab === 'sandbox'
-                      ? 'bg-[#C49E3A] text-slate-900 shadow-lg shadow-[#C49E3A]/20 font-black'
-                      : 'text-[#C49E3A] hover:bg-slate-800'
-                  }`}
-                >
-                  <Sparkles className="w-4 h-4 animate-pulse text-[#D63031]" />
-                  {isRtl ? 'مختبر الابتكار بالذكاء الاصطناعي 🧪' : 'AI Game Sandbox 🧪'}
-                  <span className="absolute -top-1 -right-4 px-3 bg-red-500 text-white text-[7px] rotate-12 uppercase font-black tracking-widest">AI</span>
-                </button>
-                <button
-                  onClick={() => { setLobbyTab('achievements'); playSound('click'); }}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
-                    lobbyTab === 'achievements'
-                      ? 'bg-[#FDCB6E] text-slate-900 shadow-lg shadow-[#FDCB6E]/20'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`}
-                >
-                  <Trophy className="w-4 h-4" />
-                  {isRtl ? 'بازار الأوسمة والملصقات 🏆' : 'Badges & Stickers 🏆'}
-                </button>
-              </div>
+                {/* TAB CONTENT: ROADMAP */}
+                {lobbyTab === 'roadmap' && (() => {
+                  const totalXP = (userProfile?.points || 0) + sessionXP;
+                  const stages = [
+                    {
+                      id: 1,
+                      titleAr: 'المرحلة الأولى: ميناء المغامرين ⚓',
+                      titleEn: 'Stage 1: Explorer\'s Port ⚓',
+                      reqXp: 0,
+                      gameIds: ['game_001', 'game_002', 'game_003', 'game_009']
+                    },
+                    {
+                      id: 2,
+                      titleAr: 'المرحلة الثانية: وادي القواعد الساحر 🧙‍♂️',
+                      titleEn: 'Stage 2: Wizard\'s Grammar Valley 🧙‍♂️',
+                      reqXp: 100,
+                      gameIds: ['game_004', 'game_006', 'game_007', 'game_010', 'game_013']
+                    },
+                    {
+                      id: 3,
+                      titleAr: 'المرحلة الثالثة: بحر الكلمات الفصيحة 🌊',
+                      titleEn: 'Stage 3: Sea of Eloquent Words 🌊',
+                      reqXp: 250,
+                      gameIds: ['game_014', 'game_016', 'game_018', 'game_019']
+                    },
+                    {
+                      id: 4,
+                      titleAr: 'المرحلة الرابعة: قلعة الآداب والذوق 👑',
+                      titleEn: 'Stage 4: Palace of High Etiquette 👑',
+                      reqXp: 450,
+                      gameIds: ['game_005', 'game_008', 'game_011', 'game_012', 'game_017', 'game_020']
+                    }
+                  ];
 
-              {/* TAB CONTENT: ROADMAP */}
-              {lobbyTab === 'roadmap' && (() => {
-                const totalXP = (userProfile?.points || 0) + sessionXP;
-                const stages = [
-                  {
-                    id: 1,
-                    titleAr: 'المرحلة الأولى: ميناء المغامرين ⚓',
-                    titleEn: 'Stage 1: Explorer\'s Port ⚓',
-                    reqXp: 0,
-                    gameIds: ['game_001', 'game_002', 'game_003', 'game_009']
-                  },
-                  {
-                    id: 2,
-                    titleAr: 'المرحلة الثانية: وادي القواعد الساحر 🧙‍♂️',
-                    titleEn: 'Stage 2: Wizard\'s Grammar Valley 🧙‍♂️',
-                    reqXp: 100,
-                    gameIds: ['game_004', 'game_006', 'game_007', 'game_010', 'game_013']
-                  },
-                  {
-                    id: 3,
-                    titleAr: 'المرحلة الثالثة: بحر الكلمات الفصيحة 🌊',
-                    titleEn: 'Stage 3: Sea of Eloquent Words 🌊',
-                    reqXp: 250,
-                    gameIds: ['game_014', 'game_016', 'game_018', 'game_019']
-                  },
-                  {
-                    id: 4,
-                    titleAr: 'المرحلة الرابعة: قلعة الآداب والذوق 👑',
-                    titleEn: 'Stage 4: Palace of High Etiquette 👑',
-                    reqXp: 450,
-                    gameIds: ['game_005', 'game_008', 'game_011', 'game_012', 'game_017', 'game_020']
-                  }
-                ];
+                  return (
+                    <div className="space-y-6 py-2">
+                      {stages.map((stg, sIdx) => {
+                        const isUnlocked = totalXP >= stg.reqXp;
+                        const stageGames = gamesList.filter(g => stg.gameIds.includes(g.id));
 
-                return (
-                  <div className="space-y-10 py-4 relative">
-                    <div className="absolute top-10 bottom-10 left-4 md:left-1/2 w-1 bg-gradient-to-b from-[#002147] to-[#C49E3A] transform md:-translate-x-1/2 opacity-20 pointer-events-none" />
+                        return (
+                          <GoldCard key={stg.id} className={!isUnlocked ? 'opacity-70 bg-[#fdfaf3]' : ''}>
+                            <div className="space-y-4">
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[#C49E3A]/20 pb-3">
+                                <div className="flex items-center gap-3">
+                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${
+                                    isUnlocked 
+                                      ? 'bg-[#002147] text-[#E6C36A]' 
+                                      : 'bg-[#002147]/20 text-[#002147]/60'
+                                  }`}>
+                                    {stg.id}
+                                  </span>
+                                  <div>
+                                    <h3 className="text-sm sm:text-base font-black text-[#002147] flex items-center gap-2">
+                                      {isRtl ? stg.titleAr : stg.titleEn}
+                                      {!isUnlocked && (
+                                        <span className="text-[10px] px-2 py-0.5 bg-[#002147]/10 text-[#002147] border border-[#C49E3A]/30 rounded-full font-bold">
+                                          🔒 {isRtl ? 'مغلق' : 'Locked'}
+                                        </span>
+                                      )}
+                                    </h3>
+                                    <p className="text-[11px] text-[#002147]/70 font-medium mt-0.5">
+                                      {isRtl 
+                                        ? `تطلب هذه المرحلة ${stg.reqXp} من نقاط الفوز الكلية للفتح.`
+                                        : `This stage requires ${stg.reqXp} cumulative XP merits to unlock.`}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div>
+                                  <ProgressPill>
+                                    {isUnlocked 
+                                      ? (isRtl ? '🔓 متاح للجميع' : '🔓 OPEN ACCESS') 
+                                      : (isRtl ? `🔒 مغلق (متبقي ${stg.reqXp - totalXP} XP)` : `🔒 LOCKED (${stg.reqXp - totalXP} XP remaining)`)}
+                                  </ProgressPill>
+                                </div>
+                              </div>
 
-                    {stages.map((stg, sIdx) => {
-                      const isUnlocked = totalXP >= stg.reqXp;
-                      const stageGames = gamesList.filter(g => stg.gameIds.includes(g.id));
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                                {stageGames.map((game, gIdx) => {
+                                  const gameGlobalIdx = gamesList.findIndex(g => g.id === game.id) + 1;
+                                  return (
+                                    <LessonTile
+                                      key={game.id}
+                                      order={gameGlobalIdx > 0 ? gameGlobalIdx : gIdx + 1}
+                                      title={isRtl ? game.titleAr : game.titleEn}
+                                      subtitle={isRtl ? game.descriptionAr : game.descriptionEn}
+                                      level={game.difficulty}
+                                      locked={!isUnlocked}
+                                      onClick={() => {
+                                        if (isUnlocked) {
+                                          selectGame(game.id);
+                                        }
+                                      }}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </GoldCard>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
 
+                {/* TAB CONTENT: CATALOG */}
+                {lobbyTab === 'catalog' && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between border-b border-[#C49E3A]/20 pb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {categories.map(c => (
+                          <GhostButton
+                            key={c.id}
+                            active={activeCategory === c.id}
+                            onClick={() => { playSound('click'); setActiveCategory(c.id); }}
+                          >
+                            <span>{isRtl ? c.labelAr : c.labelEn}</span>
+                          </GhostButton>
+                        ))}
+                      </div>
+
+                      {activeCategory !== 'plan' && (
+                        <div className="relative w-full md:w-64">
+                          <Search className={`w-4 h-4 text-[#002147]/50 absolute top-3 ${isRtl ? 'right-3' : 'left-3'}`} />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder={isRtl ? "البحث عن لعبة..." : "Search games..."}
+                            className={`w-full ${isRtl ? 'pr-9 pl-4' : 'pl-9 pr-4'} py-2 bg-white border border-[#C49E3A]/40 rounded-xl text-xs text-[#002147] placeholder-[#002147]/50 focus:outline-none focus:border-[#002147] transition-all`}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {activeCategory === 'plan' ? (
+                      renderDevelopmentPlan()
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {filteredGames.map((game) => {
+                            const originalIdx = gamesList.findIndex(g => g.id === game.id) + 1;
+                            return (
+                              <LessonTile
+                                key={game.id}
+                                order={originalIdx}
+                                title={isRtl ? game.titleAr : game.titleEn}
+                                subtitle={isRtl ? game.descriptionAr : game.descriptionEn}
+                                level={game.difficulty}
+                                onClick={() => selectGame(game.id)}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        {filteredGames.length === 0 && (
+                          <GoldCard className="text-center py-12">
+                            <span className="text-4xl block mb-2">🔍</span>
+                            <p className="text-xs font-bold text-[#002147]/70">
+                              {isRtl ? 'لا توجد ألعاب مطابقة لهذا البحث.' : 'No matching activities inside our registry.'}
+                            </p>
+                          </GoldCard>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TAB CONTENT: AI CREATIVE WORKSPACE (SANDBOX) */}
+                {lobbyTab === 'sandbox' && (
+                  <GoldCard className="p-6 md:p-8 space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-[#C49E3A]" />
+                        <h3 className="text-lg md:text-xl font-black text-[#002147]">
+                          {isRtl ? 'مختبر ألعاب باسل بالذكاء الاصطناعي 🧪✨' : 'Mentor Basil\'s Custom AI Game Lab 🧪✨'}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-[#002147]/80 leading-relaxed max-w-2xl">
+                        {isRtl 
+                          ? 'ألا تجد اللعبة التي تفضلها تماماً؟ اكتب أي فكرة أو اهتمام يدور ببالك (مثل: رحلة الديناصورات، مغامرة ماين كرافت، الفضاء الشاسع، أو قواعد اللغة الإنجليزية في الطائرة) وسيقوم باسل بتوليد قصة شيقة وأسئلة مخصصة لك بالكامل فوراً!'
+                          : 'Cannot find your exact theme? Simply input any topic or interest of yours (e.g. Dinosaur Era, Space Journeys, Minecraft rules, Plane Conversation) and Basil will build an interactive custom story game just for you on the fly!'}
+                      </p>
+                    </div>
+
+                    {!sandboxGame && !sandboxLoading && (
+                      <div className="space-y-6 pt-2">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-[#002147] block">
+                            {isRtl ? 'أدخل فكرتك المفضلة أو موضوع اللعبة الجديد: ✍️' : 'Write your custom theme or lesson topic here: ✍️'}
+                          </label>
+                          <div className="flex flex-col md:flex-row gap-3">
+                            <input
+                              type="text"
+                              value={sandboxTheme}
+                              onChange={(e) => setSandboxTheme(e.target.value)}
+                              placeholder={isRtl ? "مثال: رحلة سفاري الديناصورات أو مغامرة فضاء..." : "e.g. Dinosaur Safari adventure, Minecraft Builder..."}
+                              className="flex-1 px-4 py-3 bg-white border border-[#C49E3A]/40 rounded-xl text-xs text-[#002147] placeholder-[#002147]/50 focus:outline-none focus:border-[#002147] font-medium transition-all"
+                            />
+                            <PrimaryButton
+                              onClick={() => handleGenerateSandboxGame(sandboxTheme)}
+                              disabled={!sandboxTheme.trim()}
+                              className="shrink-0"
+                            >
+                              <Sparkles className="w-4 h-4" />
+                              <span>{isRtl ? 'توليد اللعبة المخصصة 🚀' : 'Build Custom Game 🚀'}</span>
+                            </PrimaryButton>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                          <span className="text-[11px] font-bold text-[#002147]/70 block">{isRtl ? 'أو اختر أحد الأفكار الجاهزة المقترحة سريعاً:' : 'Or tap a rapid preset to launch immediately:'}</span>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { labelAr: "مستكشف الديناصورات 🦕", labelEn: "Dinosaur Explorer 🦕", term: "Dinosaurs safari grammar" },
+                              { labelAr: "رحلة الفضاء السحيق 🚀", labelEn: "Deep Space Journey 🚀", term: "Deep Space Journey verbs" },
+                              { labelAr: "فرسان القلعة الوسطى ⚔️", labelEn: "Medieval Knights ⚔️", term: "Medieval Knights grammar and honor" },
+                              { labelAr: "بناء ماين كرافت 🧱", labelEn: "Minecraft Architecture 🧱", term: "Minecraft builder spelling" },
+                              { labelAr: "أدب الشاي الملكي ☕", labelEn: "Royal Tea Party Manners ☕", term: "Royal Tea manners and social etiquette" }
+                            ].map((preset, idx) => (
+                              <GhostButton
+                                key={idx}
+                                onClick={() => { setSandboxTheme(isRtl ? preset.labelAr : preset.labelEn); handleGenerateSandboxGame(preset.term); }}
+                              >
+                                <span>{isRtl ? preset.labelAr : preset.labelEn}</span>
+                              </GhostButton>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {sandboxLoading && (
+                      <div className="py-12 flex flex-col items-center justify-center space-y-4">
+                        <div className="relative w-16 h-16">
+                          <div className="absolute inset-0 rounded-full border-4 border-[#002147]/10" />
+                          <div className="absolute inset-0 rounded-full border-4 border-[#C49E3A] border-t-transparent animate-spin" />
+                          <span className="absolute inset-0 flex items-center justify-center text-lg">🧪</span>
+                        </div>
+                        <div className="text-center space-y-1">
+                          <p className="text-xs font-black text-[#002147]">{isRtl ? 'يتم الآن صياغة واجهة اللعبة بالكامل...' : 'Compiling the ultimate tailored game...'}</p>
+                          <p className="text-[10px] text-[#002147]/60 font-medium">{isRtl ? 'يقوم باسل بالتعاون مع الذكاء الاصطناعي ببناء قصة وأسئلة فريدة' : 'Basil is co-authoring a custom gameplay script and audio'}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {sandboxGame && !sandboxCompleted && (() => {
+                      const currentQuestion = sandboxGame.questions[sandboxCurrentQuestionIdx];
+                      if (!currentQuestion) return null;
                       return (
-                        <motion.div
-                          initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: sIdx * 0.1 }}
-                          key={stg.id}
-                          className={`relative bg-[#1e2324] rounded-3xl p-6 border ${
-                            isUnlocked 
-                              ? 'border-[#002147]/40 shadow-[#002147]/5 shadow-xl' 
-                              : 'border-slate-800/80 opacity-60'
-                          }`}
-                        >
-                          <div className={`absolute left-4 md:left-1/2 top-6 w-8 h-8 rounded-full flex items-center justify-center font-black text-xs transform md:-translate-x-1/2 z-10 transition-all ${
-                            isUnlocked 
-                              ? 'bg-[#002147] text-white shadow-md shadow-[#002147]/30 ring-4 ring-[#002147]/10' 
-                              : 'bg-slate-800 text-slate-500'
-                          }`}>
-                            {stg.id}
+                        <div className="space-y-6 pt-2">
+                          <div className="bg-[#fdfaf3] p-4 rounded-2xl border border-[#C49E3A]/40">
+                            <span className="text-[10px] uppercase font-black tracking-wider text-[#002147] block mb-1">📖 {isRtl ? 'المقدمة الغامرة' : 'Immersive Backstory'}</span>
+                            <p className="text-xs font-medium leading-relaxed text-[#002147]/90">
+                              {isRtl ? sandboxGame.story.ar : sandboxGame.story.en}
+                            </p>
                           </div>
 
-                          <div className="md:px-8 space-y-4">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-700/40 pb-3">
-                              <div>
-                                <h3 className="text-md font-black text-white flex items-center gap-2">
-                                  {isRtl ? stg.titleAr : stg.titleEn}
-                                  {!isUnlocked && <span className="text-xs px-2.5 py-0.5 bg-red-950/40 text-red-400 border border-red-900/40 rounded-full font-bold">🔒 {isRtl ? 'مغلق' : 'Locked'}</span>}
-                                </h3>
-                                <p className="text-[10px] text-slate-400 font-bold mt-1">
-                                  {isRtl 
-                                    ? `تطلب هذه المرحلة ${stg.reqXp} من نقاط الفوز الكلية للفتح.`
-                                    : `This stage requires ${stg.reqXp} cumulative XP merits to unlock.`}
-                                </p>
-                              </div>
-                              <span className="text-xs font-mono font-bold text-slate-500">
-                                {isUnlocked 
-                                  ? (isRtl ? '🔓 متاح للجميع' : '🔓 OPEN ACCESS') 
-                                  : (isRtl ? `🔒 مغلق (متبقي ${stg.reqXp - totalXP} XP)` : `🔒 LOCKED (${stg.reqXp - totalXP} XP remaining)`)}
-                              </span>
+                          <div className="flex justify-between items-center bg-[#fdfaf3] px-4 py-2 rounded-xl border border-[#C49E3A]/20">
+                            <span className="text-[10px] font-bold text-[#002147]/70">
+                              {isRtl 
+                                ? `السؤال ${sandboxCurrentQuestionIdx + 1} من ٣` 
+                                : `Challenge ${sandboxCurrentQuestionIdx + 1} of 3`}
+                            </span>
+                            <div className="flex gap-1">
+                              {[0, 1, 2].map((dot) => (
+                                <div 
+                                  key={dot} 
+                                  className={`w-2 h-2 rounded-full transition-all ${
+                                    dot <= sandboxCurrentQuestionIdx 
+                                      ? 'bg-[#002147]' 
+                                      : 'bg-[#002147]/20'
+                                  }`} 
+                                />
+                              ))}
                             </div>
+                          </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
-                              {stageGames.map((game) => {
-                                const IconComp = game.icon;
+                          <div className="space-y-4">
+                            <h4 className="text-sm md:text-md font-black text-[#002147] bg-[#fdfaf3] p-4 rounded-xl border border-[#C49E3A]/40 text-center font-sans">
+                              {currentQuestion.q}
+                            </h4>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              {currentQuestion.opts.map((opt: string, oIdx: number) => {
+                                const isSelected = sandboxSelectedOpt === oIdx;
+                                const isCorrectAnswer = oIdx === currentQuestion.ansIdx;
+                                const showSuccessBorder = sandboxSelectedOpt !== null && isCorrectAnswer;
+                                const showFailBorder = sandboxSelectedOpt !== null && isSelected && !isCorrectAnswer;
+
                                 return (
-                                  <div
-                                    key={game.id}
-                                    className={`p-4 rounded-2xl border transition-all flex flex-col justify-between h-[155px] relative overflow-hidden group ${
-                                      isUnlocked
-                                        ? 'bg-slate-900/60 border-slate-800 hover:border-[#002147]/50 hover:bg-slate-800/40'
-                                        : 'bg-slate-900/20 border-slate-900/40 select-none'
+                                  <button
+                                    key={oIdx}
+                                    onClick={() => handleAnswerSandbox(oIdx)}
+                                    disabled={sandboxSelectedOpt !== null}
+                                    className={`p-3.5 rounded-xl text-xs font-bold text-start transition-all cursor-pointer flex items-center justify-between border ${
+                                      sandboxSelectedOpt === null
+                                        ? 'bg-white hover:bg-[#fdfaf3] text-[#002147] border-[#C49E3A]/40 hover:border-[#002147]'
+                                        : showSuccessBorder
+                                          ? 'bg-emerald-50 border-emerald-500 text-emerald-900 font-black'
+                                          : showFailBorder
+                                            ? 'bg-rose-50 border-rose-500 text-rose-900 font-black'
+                                            : 'bg-slate-100 border-slate-200 text-slate-400'
                                     }`}
                                   >
-                                    <div className="flex justify-between items-start">
-                                      <div className={`p-2 rounded-lg ${isUnlocked ? game.color : 'bg-slate-800 text-slate-600'} text-white`}>
-                                        <IconComp className="w-4 h-4" />
-                                      </div>
-                                      <span className="text-[9px] font-bold text-[#FDCB6E] bg-slate-900/60 px-2 py-0.5 rounded-md">
-                                        {game.difficulty}
-                                      </span>
-                                    </div>
-
-                                    <div className="mt-2.5">
-                                      <h4 className="text-xs font-black text-white group-hover:text-[#FDCB6E] transition-all">
-                                        {isRtl ? game.titleAr : game.titleEn}
-                                      </h4>
-                                      <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed mt-1">
-                                        {isRtl ? game.descriptionAr : game.descriptionEn}
-                                      </p>
-                                    </div>
-
-                                    {isUnlocked ? (
-                                      <button
-                                        onClick={() => selectGame(game.id)}
-                                        className="w-full mt-3 py-1.5 bg-[#002147] hover:bg-[#00183a] text-white text-[10px] font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer"
-                                      >
-                                        <Play className="w-3 h-3" />
-                                        {isRtl ? 'ابدأ اللعب الآن' : 'Launch Game'}
-                                      </button>
-                                    ) : (
-                                      <div className="w-full mt-3 py-1.5 bg-slate-800/40 text-slate-600 text-[10px] font-black rounded-lg flex items-center justify-center gap-1">
-                                        <span>🔒 {isRtl ? 'المرحلة مغلقة' : 'Stage Locked'}</span>
-                                      </div>
+                                    <span>{opt}</span>
+                                    {sandboxSelectedOpt !== null && isCorrectAnswer && (
+                                      <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                                     )}
-                                  </div>
+                                    {sandboxSelectedOpt !== null && isSelected && !isCorrectAnswer && (
+                                      <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                                    )}
+                                  </button>
                                 );
                               })}
                             </div>
                           </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
 
-              {/* TAB CONTENT: CATALOG */}
-              {lobbyTab === 'catalog' && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="flex flex-col md:flex-row gap-4 items-center justify-between border-b border-slate-700/30 pb-4">
-                    <div className="flex flex-wrap gap-1.5">
-                      {categories.map(c => (
-                        <button
-                          key={c.id}
-                          onClick={() => { playSound('click'); setActiveCategory(c.id); }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                            activeCategory === c.id 
-                              ? 'bg-[#002147] text-white shadow-md' 
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                          }`}
-                        >
-                          {isRtl ? c.labelAr : c.labelEn}
-                        </button>
-                      ))}
-                    </div>
-
-                    {activeCategory !== 'plan' && (
-                      <div className="relative w-full md:w-64">
-                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder={isRtl ? "البحث عن لعبة..." : "Search games..."}
-                          className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-[#444C4E] rounded-xl text-xs text-white focus:outline-none focus:border-[#002147] transition-all"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {activeCategory === 'plan' ? (
-                    renderDevelopmentPlan()
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredGames.map((game, idx) => {
-                        const IconComp = game.icon;
-                        return (
-                          <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            key={game.id}
-                            className="bg-[#1e2324] hover:bg-slate-800/80 rounded-2xl p-5 border border-slate-700/60 hover:border-[#002147]/60 transition-all flex flex-col justify-between h-[230px] group shadow-sm relative overflow-hidden"
-                          >
-                            <div className="absolute top-2 right-2 text-[10px] font-mono text-slate-500 font-bold">
-                              #{idx+1}
-                            </div>
-
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-start">
-                                <div className={`p-2.5 rounded-xl ${game.color} text-white`}>
-                                  <IconComp className="w-5 h-5" />
-                                </div>
-                                <span className="text-[10px] font-black text-[#FDCB6E] bg-slate-900/40 px-2.5 py-1 rounded-lg">
-                                  {game.difficulty}
-                                </span>
-                              </div>
-
-                              <div>
-                                <h3 className="text-[14px] font-black text-white group-hover:text-[#FDCB6E] transition-all">
-                                  {isRtl ? game.titleAr : game.titleEn}
-                                </h3>
-                                <p className="text-[11px] text-slate-300 font-medium leading-relaxed line-clamp-3 mt-1.5">
-                                  {isRtl ? game.descriptionAr : game.descriptionEn}
+                          {sandboxShowExplanation && (
+                            <motion.div 
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="p-4 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-xl flex items-start gap-3.5"
+                            >
+                              <span className="text-3xl shrink-0">🦁</span>
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-black text-[#002147] block">{isRtl ? 'باسل يوضح الفكرة 💡' : 'Basil Explains 💡'}</span>
+                                <p className="text-xs text-[#002147]/80 font-medium leading-relaxed">
+                                  {isRtl ? currentQuestion.explanation.ar : currentQuestion.explanation.en}
                                 </p>
                               </div>
+                            </motion.div>
+                          )}
+
+                          {sandboxSelectedOpt !== null && (
+                            <div className="flex justify-end">
+                              <PrimaryButton onClick={handleNextSandboxQuestion}>
+                                <span>{sandboxCurrentQuestionIdx === 2 ? (isRtl ? 'عرض نتائج المهام 🏆' : 'See Quest Results 🏆') : (isRtl ? 'التالي ➡️' : 'Next Challenge ➡️')}</span>
+                                <ArrowRight className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
+                              </PrimaryButton>
                             </div>
-
-                            <button
-                              onClick={() => selectGame(game.id)}
-                              className="w-full mt-4 py-2 bg-slate-700/80 hover:bg-[#002147] text-white hover:text-white rounded-xl text-[11px] font-black tracking-wider transition-all flex items-center justify-center gap-1 cursor-pointer"
-                            >
-                              <Play className="w-3.5 h-3.5" />
-                              {isRtl ? 'انطلق والعب الآن' : 'Unleash Gameplay'}
-                            </button>
-                          </motion.div>
-                        );
-                      })}
-
-                      {filteredGames.length === 0 && (
-                        <div className="col-span-full text-center py-12 bg-[#1e2324] rounded-2xl border border-slate-700/60">
-                          <span className="text-4xl block mb-2">🔍</span>
-                          <p className="text-xs font-bold text-slate-400">
-                            {isRtl ? 'لا توجد ألعاب مطابقة لهذا البحث.' : 'No matching activities inside our registry.'}
-                          </p>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
+                      );
+                    })()}
 
-              {/* TAB CONTENT: AI CREATIVE WORKSPACE (SANDBOX) */}
-              {lobbyTab === 'sandbox' && (
-                <div className="bg-[#1e2324] rounded-3xl p-6 md:p-8 border border-slate-700/60 relative overflow-hidden shadow-2xl space-y-6 animate-fadeIn">
-                  <div className="absolute right-0 top-0 w-48 h-48 bg-[#C49E3A]/5 rounded-full pointer-events-none" />
-
-                  <div className="space-y-2">
-                    <h3 className="text-lg md:text-xl font-black text-[#C49E3A] flex items-center gap-2">
-                      <Sparkles className="w-5 h-5" />
-                      {isRtl ? 'مختبر ألعاب باسل بالذكاء الاصطناعي 🧪✨' : 'Mentor Basil\'s Custom AI Game Lab 🧪✨'}
-                    </h3>
-                    <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-                      {isRtl 
-                        ? 'ألا تجد اللعبة التي تفضلها تماماً؟ اكتب أي فكرة أو اهتمام يدور ببالك (مثل: رحلة الديناصورات، مغامرة ماين كرافت، الفضاء الشاسع، أو قواعد اللغة الإنجليزية في الطائرة) وسيقوم باسل بتوليد قصة شيقة وأسئلة مخصصة لك بالكامل فوراً!'
-                        : 'Cannot find your exact theme? Simply input any topic or interest of yours (e.g. Dinosaur Era, Space Journeys, Minecraft rules, Plane Conversation) and Basil will build an interactive custom story game just for you on the fly!'}
-                    </p>
-                  </div>
-
-                  {!sandboxGame && !sandboxLoading && (
-                    <div className="space-y-6 pt-2">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-300 block">
-                          {isRtl ? 'أدخل فكرتك المفضلة أو موضوع اللعبة الجديد: ✍️' : 'Write your custom theme or lesson topic here: ✍️'}
-                        </label>
-                        <div className="flex flex-col md:flex-row gap-3">
-                          <input
-                            type="text"
-                            value={sandboxTheme}
-                            onChange={(e) => setSandboxTheme(e.target.value)}
-                            placeholder={isRtl ? "مثال: رحلة سفاري الديناصورات أو مغامرة فضاء..." : "e.g. Dinosaur Safari adventure, Minecraft Builder..."}
-                            className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#C49E3A] font-medium transition-all"
-                          />
-                          <button
-                            onClick={() => handleGenerateSandboxGame(sandboxTheme)}
-                            disabled={!sandboxTheme.trim()}
-                            className="px-6 py-3 bg-[#C49E3A] hover:bg-[#00b2ae] disabled:bg-slate-800 disabled:text-slate-500 text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center gap-2"
-                          >
-                            <Sparkles className="w-4 h-4 text-slate-900" />
-                            {isRtl ? 'توليد اللعبة المخصصة 🚀' : 'Build Custom Game 🚀'}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3 pt-2">
-                        <span className="text-[11px] font-bold text-slate-400 block">{isRtl ? 'أو اختر أحد الأفكار الجاهزة المقترحة سريعاً:' : 'Or tap a rapid preset to launch immediately:'}</span>
-                        <div className="flex flex-wrap gap-2">
-                          {[
-                            { labelAr: "مستكشف الديناصورات 🦕", labelEn: "Dinosaur Explorer 🦕", term: "Dinosaurs safari grammar" },
-                            { labelAr: "رحلة الفضاء السحيق 🚀", labelEn: "Deep Space Journey 🚀", term: "Deep Space Journey verbs" },
-                            { labelAr: "فرسان القلعة الوسطى ⚔️", labelEn: "Medieval Knights ⚔️", term: "Medieval Knights grammar and honor" },
-                            { labelAr: "بناء ماين كرافت 🧱", labelEn: "Minecraft Architecture 🧱", term: "Minecraft builder spelling" },
-                            { labelAr: "أدب الشاي الملكي ☕", labelEn: "Royal Tea Party Manners ☕", term: "Royal Tea manners and social etiquette" }
-                          ].map((preset, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => { setSandboxTheme(isRtl ? preset.labelAr : preset.labelEn); handleGenerateSandboxGame(preset.term); }}
-                              className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-[11px] font-bold transition-all cursor-pointer"
-                            >
-                              {isRtl ? preset.labelAr : preset.labelEn}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {sandboxLoading && (
-                    <div className="py-12 flex flex-col items-center justify-center space-y-4">
-                      <div className="relative w-16 h-16">
-                        <div className="absolute inset-0 rounded-full border-4 border-slate-800" />
-                        <div className="absolute inset-0 rounded-full border-4 border-[#C49E3A] border-t-transparent animate-spin" />
-                        <span className="absolute inset-0 flex items-center justify-center text-lg">🧪</span>
-                      </div>
-                      <div className="text-center space-y-1">
-                        <p className="text-xs font-black text-[#C49E3A]">{isRtl ? 'يتم الآن صياغة واجهة اللعبة بالكامل...' : 'Compiling the ultimate tailored game...'}</p>
-                        <p className="text-[10px] text-slate-400">{isRtl ? 'يقوم باسل بالتعاون مع الذكاء الاصطناعي ببناء قصة وأسئلة فريدة' : 'Basil is co-authoring a custom gameplay script and audio'}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {sandboxGame && !sandboxCompleted && (() => {
-                    const currentQuestion = sandboxGame.questions[sandboxCurrentQuestionIdx];
-                    if (!currentQuestion) return null;
-                    return (
-                      <div className="space-y-6 pt-2 animate-fadeIn">
-                        <div className="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-                          <span className="text-[10px] uppercase font-black tracking-wider text-[#C49E3A] block mb-1">📖 {isRtl ? 'المقدمة الغامرة' : 'Immersive Backstory'}</span>
-                          <p className="text-xs font-medium leading-relaxed text-slate-200">
-                            {isRtl ? sandboxGame.story.ar : sandboxGame.story.en}
-                          </p>
-                        </div>
-
-                        <div className="flex justify-between items-center bg-slate-900/30 px-4 py-2 rounded-xl">
-                          <span className="text-[10px] font-bold text-slate-400">
+                    {sandboxCompleted && sandboxGame && (
+                      <motion.div 
+                        initial={{ scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="text-center space-y-6 py-6"
+                      >
+                        <span className="text-6xl block animate-bounce">🏆🧪</span>
+                        <div className="space-y-2">
+                          <h4 className="text-lg font-black text-[#002147]">
+                            {isRtl ? 'تم إكمال المهمة المبتكرة بنجاح!' : 'Innovative Quest Successfully Mastered!'}
+                          </h4>
+                          <p className="text-xs text-[#002147]/80 font-medium">
                             {isRtl 
-                              ? `السؤال ${sandboxCurrentQuestionIdx + 1} من ٣` 
-                              : `Challenge ${sandboxCurrentQuestionIdx + 1} of 3`}
+                              ? `مبارك يا بطل! لقد تغلبت على التحديات الثلاث بنجاح مع موضوع "${sandboxGame.theme}"`
+                              : `Outstanding! You fully resolved the tailored challenges for topic "${sandboxGame.theme}"`}
+                          </p>
+                        </div>
+
+                        <div className="max-w-md mx-auto bg-[#fdfaf3] border-2 border-dashed border-[#C49E3A] p-5 rounded-2xl space-y-3 relative">
+                          <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-[#002147] text-[#E6C36A] text-[10px] font-black rounded-full uppercase tracking-widest">
+                            {isRtl ? 'شهادة إنجاز ذكية' : 'AI Academic Certificate'}
                           </span>
-                          <div className="flex gap-1">
-                            {[0, 1, 2].map((dot) => (
-                              <div 
-                                key={dot} 
-                                className={`w-2 h-2 rounded-full transition-all ${
-                                  dot <= sandboxCurrentQuestionIdx 
-                                    ? 'bg-[#C49E3A]' 
-                                    : 'bg-slate-700'
-                                }`} 
-                              />
-                            ))}
+                          <div className="pt-3">
+                            <span className="text-2xl font-black text-[#002147] font-mono">{sandboxScore} / 3</span>
+                            <span className="text-[10px] text-[#002147]/60 block font-bold uppercase mt-1">{isRtl ? 'النتيجة النهائية' : 'Final Assessment'}</span>
+                          </div>
+                          <p className="text-[11px] text-[#002147]/80 font-sans italic px-4 leading-relaxed">
+                            {isRtl 
+                              ? `"تثبت هذه الوثيقة أن بطلنا قد أثبت مرونة لغوية ذكية، وحل جميع المهام بنجاح فائق."`
+                              : `"This document certifies that our brave learner successfully resolved custom AI problems with marvelous vocabulary skills."`}
+                          </p>
+                          <span className="text-[9px] text-[#C49E3A] font-black block mt-1">✓ VERIFIED BY BASIL DIGITAL ACADEMY</span>
+                        </div>
+
+                        <div className="flex justify-center gap-3">
+                          <GhostButton
+                            onClick={() => { setSandboxGame(null); setSandboxTheme(''); playSound('click'); }}
+                          >
+                            <span>{isRtl ? 'موضوع مخصص آخر 🧪' : 'Try Another Theme 🧪'}</span>
+                          </GhostButton>
+                          <PrimaryButton
+                            onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
+                          >
+                            <span>{isRtl ? 'العودة لخريطة المهام' : 'Back to Roadmap'}</span>
+                          </PrimaryButton>
+                        </div>
+                      </motion.div>
+                    )}
+                  </GoldCard>
+                )}
+
+                {/* TAB CONTENT: ACHIEVEMENTS BAZAAR */}
+                {lobbyTab === 'achievements' && (() => {
+                  const totalXP = (userProfile?.points || 0) + sessionXP;
+                  const level = Math.floor(totalXP / 150) + 1;
+                  const currentLevelXP = totalXP % 150;
+                  const xpPercent = Math.min(100, Math.floor((currentLevelXP / 150) * 100));
+
+                  const badgesList = [
+                    { 
+                      id: 'first_win', 
+                      titleAr: 'أول فوز 🏅', 
+                      titleEn: 'First Win 🏅', 
+                      descAr: 'اجمع نقاطاً في أي لعبة تعليمية.', 
+                      descEn: 'Gain merits in any educational playroom.',
+                      unlocked: sessionXP > 0 
+                    },
+                    { 
+                      id: 'word_knight', 
+                      titleAr: 'فارس الكلمات ⚔️', 
+                      titleEn: 'Word Knight ⚔️', 
+                      descAr: 'الوصول إلى المستوى الثالث في الأكاديمية.', 
+                      descEn: 'Reach academy level 3.',
+                      unlocked: level >= 3 
+                    },
+                    { 
+                      id: 'explorer', 
+                      titleAr: 'مستكشف الواحة 🧭', 
+                      titleEn: 'Oasis Explorer 🧭', 
+                      descAr: 'لعب لعبتين مختلفتين على الأقل.', 
+                      descEn: 'Launch and complete at least 2 distinct games.',
+                      unlocked: gamesPlayedCount >= 2 
+                    },
+                    { 
+                      id: 'ai_brain', 
+                      titleAr: 'العقل المفكر 🧪', 
+                      titleEn: 'The Brain 🧪', 
+                      descAr: 'إكمال تحدي واحد بالذكاء الاصطناعي مخصص.', 
+                      descEn: 'Solve a custom AI Sandbox game successfully.',
+                      unlocked: sandboxAnswers.length > 0 
+                    },
+                    { 
+                      id: 'ambassador', 
+                      titleAr: 'سفير الأدب 👑', 
+                      titleEn: 'Manners Master 👑', 
+                      descAr: 'احصل على ٨٠ درجة فوز كلية أو أكثر.', 
+                      descEn: 'Attain 80 cumulative session XP or more.',
+                      unlocked: sessionXP >= 80 
+                    }
+                  ];
+
+                  const stickersList = [
+                    { id: 'basil_lion', emoji: '🦁', nameAr: 'باسل المحفز', nameEn: 'Basil the Motivator', levelReq: 1 },
+                    { id: 'gold_shine', emoji: '⭐', nameAr: 'بريق الذهب', nameEn: 'Gold Glint', levelReq: 2 },
+                    { id: 'rocket', emoji: '🚀', nameAr: 'صاروخ المعرفة', nameEn: 'Intellect Rocket', levelReq: 4 },
+                    { id: 'chest', emoji: '💎', nameAr: 'صندوق الكنز', nameEn: 'Merit Chest', levelReq: 6 }
+                  ];
+
+                  return (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <GoldCard className="flex flex-col justify-between space-y-6">
+                        <div className="space-y-3 text-center lg:text-left">
+                          <span className="text-4xl block">👑</span>
+                          <div>
+                            <h4 className="text-md font-black text-[#002147]">{isRtl ? 'مستواك الأكاديمي الحالي' : 'Academy Progress Rank'}</h4>
+                            <span className="text-xs text-[#002147]/60 font-bold uppercase mt-0.5 block">{isRtl ? 'مسار رتبة باسل' : 'Basil\'s Path'}</span>
                           </div>
                         </div>
 
-                        <div className="space-y-4">
-                          <h4 className="text-sm md:text-md font-black text-white bg-slate-900 p-4 rounded-xl border border-slate-800 text-center font-sans">
-                            {currentQuestion.q}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-xs font-mono font-bold">
+                            <span className="text-[#002147]">LEVEL {level}</span>
+                            <span className="text-[#002147]/60">{currentLevelXP} / 150 XP</span>
+                          </div>
+                          <div className="w-full bg-[#fdfaf3] h-3.5 rounded-full overflow-hidden border border-[#C49E3A]/40 p-0.5">
+                            <div 
+                              className="bg-[#002147] h-full rounded-full transition-all duration-500"
+                              style={{ width: `${xpPercent}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-[#002147]/70 block font-bold text-center">
+                            {isRtl 
+                              ? `تحتاج إلى ${150 - currentLevelXP} نقطة أخرى للوصول للمستوى التالي 🚀` 
+                              : `Acquire ${150 - currentLevelXP} more XP to reach level ${level + 1} 🚀`}
+                          </span>
+                        </div>
+
+                        <div className="bg-[#fdfaf3] p-4 rounded-2xl border border-[#C49E3A]/40">
+                          <span className="text-[10px] text-[#002147] font-black uppercase tracking-wider block mb-1">📊 {isRtl ? 'إحصائيات الجلسة الحالية' : 'Session Metrics'}</span>
+                          <div className="grid grid-cols-2 gap-3 pt-1 text-center font-mono">
+                            <div className="bg-white p-2.5 rounded-xl border border-[#C49E3A]/40">
+                              <span className="text-sm font-black text-[#002147] block">+{sessionXP}</span>
+                              <span className="text-[8px] text-[#002147]/60 block font-bold uppercase mt-0.5">{isRtl ? 'النقاط المكتسبة' : 'XP Merited'}</span>
+                            </div>
+                            <div className="bg-white p-2.5 rounded-xl border border-[#C49E3A]/40">
+                              <span className="text-sm font-black text-[#002147] block">{gamesPlayedCount}</span>
+                              <span className="text-[8px] text-[#002147]/60 block font-bold uppercase mt-0.5">{isRtl ? 'الألعاب الملعوبة' : 'Games Run'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </GoldCard>
+
+                      <div className="lg:col-span-2 space-y-6">
+                        <GoldCard className="space-y-4">
+                          <h4 className="text-sm font-black text-[#002147] border-b border-[#C49E3A]/20 pb-2.5">
+                            🏆 {isRtl ? 'أوسمة الاستحقاق المكتسبة' : 'Earned Badges of Honor'}
                           </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {badgesList.map((badge) => (
+                              <div 
+                                key={badge.id}
+                                className={`p-3.5 rounded-2xl border flex items-center gap-3.5 transition-all ${
+                                  badge.unlocked 
+                                    ? 'bg-white border-[#C49E3A]' 
+                                    : 'bg-[#fdfaf3]/60 border-[#C49E3A]/20 opacity-40 select-none'
+                                }`}
+                              >
+                                <span className="text-2xl shrink-0">{badge.unlocked ? '✨' : '🔒'}</span>
+                                <div className="space-y-0.5">
+                                  <span className={`text-xs font-black block ${badge.unlocked ? 'text-[#002147]' : 'text-[#002147]/40'}`}>
+                                    {isRtl ? badge.titleAr : badge.titleEn}
+                                  </span>
+                                  <p className="text-[10px] text-[#002147]/70 font-medium leading-normal">
+                                    {isRtl ? badge.descAr : badge.descEn}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </GoldCard>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {currentQuestion.opts.map((opt: string, oIdx: number) => {
-                              const isSelected = sandboxSelectedOpt === oIdx;
-                              const isCorrectAnswer = oIdx === currentQuestion.ansIdx;
-                              const showSuccessBorder = sandboxSelectedOpt !== null && isCorrectAnswer;
-                              const showFailBorder = sandboxSelectedOpt !== null && isSelected && !isCorrectAnswer;
-
+                        <GoldCard className="space-y-4">
+                          <h4 className="text-sm font-black text-[#002147] border-b border-[#C49E3A]/20 pb-2.5">
+                            🖼️ {isRtl ? 'ألبوم ملصقات باسل الرقمي' : 'Basil\'s Collectible Sticker Album'}
+                          </h4>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {stickersList.map((stk) => {
+                              const isStkUnlocked = level >= stk.levelReq;
                               return (
-                                <button
-                                  key={oIdx}
-                                  onClick={() => handleAnswerSandbox(oIdx)}
-                                  disabled={sandboxSelectedOpt !== null}
-                                  className={`p-3.5 rounded-xl text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
-                                    sandboxSelectedOpt === null
-                                      ? 'bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-800 hover:border-[#C49E3A]/40'
-                                      : showSuccessBorder
-                                        ? 'bg-green-950/40 border-green-500 text-green-300 font-black'
-                                        : showFailBorder
-                                          ? 'bg-red-950/40 border-red-500 text-red-300 font-black'
-                                          : 'bg-slate-950/20 border-slate-900 text-slate-500'
+                                <div 
+                                  key={stk.id}
+                                  className={`p-4 rounded-2xl border text-center flex flex-col items-center justify-center space-y-2 transition-all ${
+                                    isStkUnlocked 
+                                      ? 'bg-white border-[#C49E3A] shadow-sm' 
+                                      : 'bg-[#fdfaf3]/60 border-[#C49E3A]/20 opacity-30 select-none'
                                   }`}
                                 >
-                                  <span>{opt}</span>
-                                  {sandboxSelectedOpt !== null && isCorrectAnswer && (
-                                    <Check className="w-4 h-4 text-green-400 shrink-0" />
-                                  )}
-                                  {sandboxSelectedOpt !== null && isSelected && !isCorrectAnswer && (
-                                    <XCircle className="w-4 h-4 text-red-400 shrink-0" />
-                                  )}
-                                </button>
+                                  <span className={`text-4xl transition-all ${isStkUnlocked ? 'scale-100' : 'scale-90 filter grayscale'}`}>
+                                    {isStkUnlocked ? stk.emoji : '🔒'}
+                                  </span>
+                                  <div className="space-y-0.5">
+                                    <span className={`text-[10px] font-black block ${isStkUnlocked ? 'text-[#002147]' : 'text-[#002147]/40'}`}>
+                                      {isRtl ? stk.nameAr : stk.nameEn}
+                                    </span>
+                                    <span className="text-[8px] text-[#002147]/60 font-bold block">
+                                      {isRtl ? `مستوى ${stk.levelReq}` : `Lvl ${stk.levelReq}`}
+                                    </span>
+                                  </div>
+                                </div>
                               );
                             })}
                           </div>
-                        </div>
-
-                        {sandboxShowExplanation && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="p-4 bg-slate-900 border border-slate-800 rounded-xl flex items-start gap-3.5"
-                          >
-                            <span className="text-3xl shrink-0">🦁</span>
-                            <div className="space-y-1">
-                              <span className="text-[10px] font-black text-[#FDCB6E] block">{isRtl ? 'باسل يوضح الفكرة 💡' : 'Basil Explains 💡'}</span>
-                              <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                                {isRtl ? currentQuestion.explanation.ar : currentQuestion.explanation.en}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {sandboxSelectedOpt !== null && (
-                          <div className="flex justify-end">
-                            <button
-                              onClick={handleNextSandboxQuestion}
-                              className="px-5 py-2.5 bg-[#C49E3A] hover:bg-[#00b2ae] text-slate-900 font-black text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
-                            >
-                              <span>{sandboxCurrentQuestionIdx === 2 ? (isRtl ? 'عرض نتائج المهام 🏆' : 'See Quest Results 🏆') : (isRtl ? 'التالي ➡️' : 'Next Challenge ➡️')}</span>
-                              <ArrowRight className="w-3.5 h-3.5 text-slate-900" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {sandboxCompleted && sandboxGame && (
-                    <motion.div 
-                      initial={{ scale: 0.95, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="text-center space-y-6 py-6"
-                    >
-                      <span className="text-6xl block animate-bounce">🏆🧪</span>
-                      <div className="space-y-2">
-                        <h4 className="text-lg font-black text-[#C49E3A]">
-                          {isRtl ? 'تم إكمال المهمة المبتكرة بنجاح!' : 'Innovative Quest Successfully Mastered!'}
-                        </h4>
-                        <p className="text-xs text-slate-300 font-medium">
-                          {isRtl 
-                            ? `مبارك يا بطل! لقد تغلبت على التحديات الثلاث بنجاح مع موضوع "${sandboxGame.theme}"`
-                            : `Outstanding! You fully resolved the tailored challenges for topic "${sandboxGame.theme}"`}
-                        </p>
-                      </div>
-
-                      <div className="max-w-md mx-auto bg-slate-900 border-2 border-dashed border-[#C49E3A]/40 p-5 rounded-2xl space-y-3 relative">
-                        <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 bg-[#C49E3A] text-slate-900 text-[10px] font-black rounded-full uppercase tracking-widest">
-                          {isRtl ? 'شهادة إنجاز ذكية' : 'AI Academic Certificate'}
-                        </span>
-                        <div className="pt-3">
-                          <span className="text-2xl font-black text-[#FDCB6E] font-mono">{sandboxScore} / 3</span>
-                          <span className="text-[10px] text-slate-400 block font-bold uppercase mt-1">{isRtl ? 'النتيجة النهائية' : 'Final Assessment'}</span>
-                        </div>
-                        <p className="text-[11px] text-slate-300 font-sans italic px-4 leading-relaxed">
-                          {isRtl 
-                            ? `"تثبت هذه الوثيقة أن بطلنا قد أثبت مرونة لغوية ذكية، وحل جميع المهام بنجاح فائق."`
-                            : `"This document certifies that our brave learner successfully resolved custom AI problems with marvelous vocabulary skills."`}
-                        </p>
-                        <span className="text-[9px] text-[#C49E3A] font-black block mt-1">✓ VERIFIED BY BASIL DIGITAL ACADEMY</span>
-                      </div>
-
-                      <div className="flex justify-center gap-3">
-                        <button
-                          onClick={() => { setSandboxGame(null); setSandboxTheme(''); playSound('click'); }}
-                          className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-black text-xs rounded-xl transition-all cursor-pointer"
-                        >
-                          {isRtl ? 'موضوع مخصص آخر 🧪' : 'Try Another Theme 🧪'}
-                        </button>
-                        <button
-                          onClick={() => { setLobbyTab('roadmap'); playSound('click'); }}
-                          className="px-5 py-2.5 bg-[#002147] hover:bg-[#00183a] text-white font-black text-xs rounded-xl transition-all cursor-pointer"
-                        >
-                          {isRtl ? 'العودة لخريطة المهام' : 'Back to Roadmap'}
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </div>
-              )}
-
-              {/* TAB CONTENT: ACHIEVEMENTS BAZAAR */}
-              {lobbyTab === 'achievements' && (() => {
-                const totalXP = (userProfile?.points || 0) + sessionXP;
-                const level = Math.floor(totalXP / 150) + 1;
-                const currentLevelXP = totalXP % 150;
-                const xpPercent = Math.min(100, Math.floor((currentLevelXP / 150) * 100));
-
-                const badgesList = [
-                  { 
-                    id: 'first_win', 
-                    titleAr: 'أول فوز 🏅', 
-                    titleEn: 'First Win 🏅', 
-                    descAr: 'اجمع نقاطاً في أي لعبة تعليمية.', 
-                    descEn: 'Gain merits in any educational playroom.',
-                    unlocked: sessionXP > 0 
-                  },
-                  { 
-                    id: 'word_knight', 
-                    titleAr: 'فارس الكلمات ⚔️', 
-                    titleEn: 'Word Knight ⚔️', 
-                    descAr: 'الوصول إلى المستوى الثالث في الأكاديمية.', 
-                    descEn: 'Reach academy level 3.',
-                    unlocked: level >= 3 
-                  },
-                  { 
-                    id: 'explorer', 
-                    titleAr: 'مستكشف الواحة 🧭', 
-                    titleEn: 'Oasis Explorer 🧭', 
-                    descAr: 'لعب لعبتين مختلفتين على الأقل.', 
-                    descEn: 'Launch and complete at least 2 distinct games.',
-                    unlocked: gamesPlayedCount >= 2 
-                  },
-                  { 
-                    id: 'ai_brain', 
-                    titleAr: 'العقل المفكر 🧪', 
-                    titleEn: 'The Brain 🧪', 
-                    descAr: 'إكمال تحدي واحد بالذكاء الاصطناعي مخصص.', 
-                    descEn: 'Solve a custom AI Sandbox game successfully.',
-                    unlocked: sandboxAnswers.length > 0 
-                  },
-                  { 
-                    id: 'ambassador', 
-                    titleAr: 'سفير الأدب 👑', 
-                    titleEn: 'Manners Master 👑', 
-                    descAr: 'احصل على ٨٠ درجة فوز كلية أو أكثر.', 
-                    descEn: 'Attain 80 cumulative session XP or more.',
-                    unlocked: sessionXP >= 80 
-                  }
-                ];
-
-                const stickersList = [
-                  { id: 'basil_lion', emoji: '🦁', nameAr: 'باسل المحفز', nameEn: 'Basil the Motivator', levelReq: 1 },
-                  { id: 'gold_shine', emoji: '⭐', nameAr: 'بريق الذهب', nameEn: 'Gold Glint', levelReq: 2 },
-                  { id: 'rocket', emoji: '🚀', nameAr: 'صاروخ المعرفة', nameEn: 'Intellect Rocket', levelReq: 4 },
-                  { id: 'chest', emoji: '💎', nameAr: 'صندوق الكنز', nameEn: 'Merit Chest', levelReq: 6 }
-                ];
-
-                return (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
-                    <div className="bg-[#1e2324] rounded-3xl p-6 border border-slate-700/60 shadow-xl flex flex-col justify-between space-y-6">
-                      <div className="space-y-3 text-center lg:text-left">
-                        <span className="text-4xl block animate-pulse">👑</span>
-                        <div>
-                          <h4 className="text-md font-black text-white">{isRtl ? 'مستواك الأكاديمي الحالي' : 'Academy Progress Rank'}</h4>
-                          <span className="text-xs text-slate-400 font-bold uppercase mt-0.5 block">{isRtl ? 'مسار رتبة باسل' : 'Basil\'s Path'}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center text-xs font-mono font-bold">
-                          <span className="text-[#C49E3A]">LEVEL {level}</span>
-                          <span className="text-slate-400">{currentLevelXP} / 150 XP</span>
-                        </div>
-                        <div className="w-full bg-slate-900 h-3.5 rounded-full overflow-hidden border border-slate-800 p-0.5">
-                          <div 
-                            className="bg-gradient-to-r from-[#002147] to-[#C49E3A] h-full rounded-full transition-all duration-500"
-                            style={{ width: `${xpPercent}%` }}
-                          />
-                        </div>
-                        <span className="text-[10px] text-slate-500 block font-bold text-center">
-                          {isRtl 
-                            ? `تحتاج إلى ${150 - currentLevelXP} نقطة أخرى للوصول للمستوى التالي 🚀` 
-                            : `Acquire ${150 - currentLevelXP} more XP to reach level ${level + 1} 🚀`}
-                        </span>
-                      </div>
-
-                      <div className="bg-slate-900/40 p-4 rounded-2xl border border-slate-800/40">
-                        <span className="text-[10px] text-[#FDCB6E] font-black uppercase tracking-wider block mb-1">📊 {isRtl ? 'إحصائيات الجلسة الحالية' : 'Session Metrics'}</span>
-                        <div className="grid grid-cols-2 gap-3 pt-1 text-center font-mono">
-                          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-900">
-                            <span className="text-sm font-black text-white block">+{sessionXP}</span>
-                            <span className="text-[8px] text-slate-400 block font-bold uppercase mt-0.5">{isRtl ? 'النقاط المكتسبة' : 'XP Merited'}</span>
-                          </div>
-                          <div className="bg-slate-950/40 p-2.5 rounded-xl border border-slate-900">
-                            <span className="text-sm font-black text-white block">{gamesPlayedCount}</span>
-                            <span className="text-[8px] text-slate-400 block font-bold uppercase mt-0.5">{isRtl ? 'الألعاب الملعوبة' : 'Games Run'}</span>
-                          </div>
-                        </div>
+                        </GoldCard>
                       </div>
                     </div>
-
-                    <div className="lg:col-span-2 space-y-6">
-                      <div className="bg-[#1e2324] rounded-3xl p-6 border border-slate-700/60 shadow-xl space-y-4">
-                        <h4 className="text-sm font-black text-white border-b border-slate-700/40 pb-2.5">
-                          🏆 {isRtl ? 'أوسمة الاستحقاق المكتسبة' : 'Earned Badges of Honor'}
-                        </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {badgesList.map((badge) => (
-                            <div 
-                              key={badge.id}
-                              className={`p-3.5 rounded-2xl border flex items-center gap-3.5 transition-all ${
-                                badge.unlocked 
-                                  ? 'bg-slate-900/60 border-slate-800' 
-                                  : 'bg-slate-900/10 border-slate-950 opacity-40 select-none'
-                              }`}
-                            >
-                              <span className="text-2xl shrink-0">{badge.unlocked ? '✨' : '🔒'}</span>
-                              <div className="space-y-0.5">
-                                <span className={`text-xs font-black block ${badge.unlocked ? 'text-[#FDCB6E]' : 'text-slate-500'}`}>
-                                  {isRtl ? badge.titleAr : badge.titleEn}
-                                </span>
-                                <p className="text-[10px] text-slate-400 font-medium leading-normal">
-                                  {isRtl ? badge.descAr : badge.descEn}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="bg-[#1e2324] rounded-3xl p-6 border border-slate-700/60 shadow-xl space-y-4">
-                        <h4 className="text-sm font-black text-white border-b border-slate-700/40 pb-2.5">
-                          🖼️ {isRtl ? 'ألبوم ملصقات باسل الرقمي' : 'Basil\'s Collectible Sticker Album'}
-                        </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                          {stickersList.map((stk) => {
-                            const isStkUnlocked = level >= stk.levelReq;
-                            return (
-                              <div 
-                                key={stk.id}
-                                className={`p-4 rounded-2xl border text-center flex flex-col items-center justify-center space-y-2 transition-all ${
-                                  isStkUnlocked 
-                                    ? 'bg-slate-900/60 border-slate-800 shadow-md shadow-white/5' 
-                                    : 'bg-slate-900/10 border-slate-950 opacity-30 select-none'
-                                }`}
-                              >
-                                <span className={`text-4xl transition-all ${isStkUnlocked ? 'scale-100 animate-bounce' : 'scale-90 filter grayscale'}`}>
-                                  {isStkUnlocked ? stk.emoji : '🔒'}
-                                </span>
-                                <div className="space-y-0.5">
-                                  <span className={`text-[10px] font-black block ${isStkUnlocked ? 'text-white' : 'text-slate-500'}`}>
-                                    {isRtl ? stk.nameAr : stk.nameEn}
-                                  </span>
-                                  <span className="text-[8px] text-slate-400 font-bold block">
-                                    {isRtl ? `مستوى ${stk.levelReq}` : `Lvl ${stk.levelReq}`}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
+                  );
+                })()}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="bg-white rounded-3xl p-6 md:p-8 border border-[#C49E3A]/40 max-w-4xl mx-auto relative shadow-md"
+              >
+                {/* Back to games list */}
+                <div className="flex justify-between items-center border-b border-[#C49E3A]/20 pb-4 mb-6">
+                  <GhostButton
+                    onClick={() => {
+                      setActiveGameId(null);
+                      speakFeedback(isRtl ? "تمت العودة للواحة الرائعة" : "Back to the lobby center");
+                    }}
+                  >
+                    <ArrowLeft className={`w-3.5 h-3.5 ${isRtl ? 'rotate-180' : ''}`} />
+                    <span>{isRtl ? 'العودة لواحة الألعاب' : 'Exit to Lobby'}</span>
+                  </GhostButton>
+                  <div className={isRtl ? 'text-left' : 'text-right'}>
+                    <h3 className="text-sm font-black text-[#002147]">
+                      {isRtl ? gamesList.find(g => g.id === activeGameId)?.titleAr : gamesList.find(g => g.id === activeGameId)?.titleEn}
+                    </h3>
+                    <span className="text-[10px] text-[#002147]/60 font-bold uppercase tracking-wider block">
+                      {isRtl ? 'العيد العشرون للألعاب التعليمية' : '20th Academic Series'}
+                    </span>
                   </div>
-                );
-              })()}
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="bg-[#1e2324] rounded-3xl p-6 md:p-8 border border-slate-700/60 max-w-4xl mx-auto relative shadow-2xl"
-            >
-              {/* Back to games list */}
-              <div className="flex justify-between items-center border-b border-slate-700/60 pb-4 mb-6">
-                <button
-                  onClick={() => {
-                    setActiveGameId(null);
-                    speakFeedback(isRtl ? "تمت العودة للواحة الرائعة" : "Back to the lobby center");
-                  }}
-                  className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-black flex items-center gap-2 cursor-pointer transition-all"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  {isRtl ? 'العودة لواحة الألعاب' : 'Exit to Lobby'}
-                </button>
-                <div className="text-right">
-                  <h3 className="text-sm font-black text-[#FDCB6E]">
-                    {isRtl ? gamesList.find(g => g.id === activeGameId)?.titleAr : gamesList.find(g => g.id === activeGameId)?.titleEn}
-                  </h3>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
-                    {isRtl ? 'العيد العشرون للألعاب التعليمية' : '20th Academic Series'}
-                  </span>
                 </div>
-              </div>
 
               {/* Collapsible How-to-Play Instructions Block */}
               {activeGameId && gameInstructions[activeGameId] && (
@@ -3942,7 +3866,8 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </main>
-    </div>
+        </div>
+      </div>
+    </SectionShell>
   );
 };
