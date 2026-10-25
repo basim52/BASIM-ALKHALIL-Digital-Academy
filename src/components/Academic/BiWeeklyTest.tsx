@@ -4,18 +4,23 @@ import {
   ArrowLeft, 
   Volume2, 
   Trophy, 
-  Star, 
   RotateCcw,
   CheckCircle2,
-  XCircle,
-  HelpCircle,
-  Sparkles,
-  Award
+  Sparkles
 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { UserProfile } from '../../types';
 import { managedSpeak } from '../../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace
+} from '../ui/academy';
 
 interface Question {
   id: number;
@@ -262,6 +267,7 @@ export const BiWeeklyTest: React.FC<BiWeeklyTestProps> = ({
   onComplete
 }) => {
   const isRtl = lang === 'ar';
+  const t = (ar: string, en: string) => isRtl ? ar : en;
   const normLevel = level.toLowerCase();
   const questions = LEVEL_QUESTIONS[normLevel] || LEVEL_QUESTIONS['a1'];
   
@@ -355,198 +361,175 @@ export const BiWeeklyTest: React.FC<BiWeeklyTestProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20 relative overflow-hidden flex flex-col items-center justify-start p-4">
-      {/* Cool animated vector circles */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-1/2 translate-y-1/2" />
-
-      {/* Header bar */}
-      <div className="w-full max-w-4xl flex items-center justify-between p-4 z-10">
-        <button
-          onClick={onBack}
-          className="w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-[#002147] hover:scale-110 active:scale-95 transition-all border border-slate-50"
-        >
-          <ArrowLeft size={22} className={isRtl ? 'rotate-180' : ''} />
-        </button>
-
-        <div className="flex-1 text-center">
-          <span className="text-xs font-black text-indigo-600 tracking-widest uppercase">
-            {isRtl ? `مستوى الخطة الدراسية: ${level}` : `Study Plan Level: ${level}`}
-          </span>
-          <h1 className="text-lg md:text-2xl font-black text-[#002147] mt-1 leading-tight">
-            {isRtl ? 'الاختبار الدوري الشامل' : 'Bi-Weekly Comprehensive Test'}
-          </h1>
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={`pb-20 ${isRtl ? 'font-arabic' : 'font-sans'}`}>
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b border-[#C49E3A]/25">
+        <div className="flex items-center gap-3">
+          <TutorFace tutor="sara" size="md" />
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-black text-[#002147] tracking-tight">
+                {t('الاختبار الدوري الشامل', 'Bi-Weekly Comprehensive Test')}
+              </h1>
+              <ProgressPill>
+                {t(`مستوى الخطة: ${level.toUpperCase()}`, `Plan Level: ${level.toUpperCase()}`)}
+              </ProgressPill>
+            </div>
+            <p className="text-xs text-[#002147]/70 font-bold mt-0.5">
+              {t('تقييم أكاديمي نصف شهري لقياس مستوى التمكن اللغوي واستحقاق شهادة الإتقان', 'Bi-weekly academic assessment measuring language mastery and progress towards certification')}
+            </p>
+          </div>
         </div>
 
-        <div className="w-12" />
+        <GhostButton onClick={onBack}>
+          <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+          <span>{t('العودة للخطة', 'Back to Planner')}</span>
+        </GhostButton>
       </div>
 
       <AnimatePresence mode="wait">
         {!showResult ? (
           <motion.div
             key={`step-${currentStep}`}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40 }}
-            className="w-full max-w-3xl mt-6 z-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-3xl mx-auto mt-4"
           >
-            <div className="bg-white rounded-[2.5rem] p-6 md:p-12 shadow-2xl border-4 border-slate-50 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-amber-500" />
-              
-              {/* Head stats row */}
-              <div className="flex justify-between items-center mb-8">
-                <span className="text-xs font-bold text-slate-400">
-                  {isRtl ? `السؤال ${currentStep + 1} من ${questions.length}` : `Question ${currentStep + 1} of ${questions.length}`}
-                </span>
+            <GoldCard className="p-6 sm:p-8">
+              {/* Question progress and audio */}
+              <div className="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-[#C49E3A]/20">
+                <ProgressPill>
+                  {t(`السؤال ${currentStep + 1} من ${questions.length}`, `Question ${currentStep + 1} of ${questions.length}`)}
+                </ProgressPill>
 
-                <button
+                <GhostButton
                   onClick={() => speakText(currentQuestion.text)}
-                  className="w-10 h-10 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center transition-all cursor-pointer"
-                  title={isRtl ? 'استمع للسؤال' : 'Listen to Question'}
+                  title={t('استمع للسؤال', 'Listen to Question')}
                 >
-                  <Volume2 size={18} />
-                </button>
+                  <Volume2 size={16} />
+                  <span>{t('استمع للسؤال', 'Listen')}</span>
+                </GhostButton>
               </div>
 
               {/* Quiz question label */}
-              <h2 className="text-xl md:text-3xl font-black text-[#002147] leading-tight mb-8 font-mono text-center">
+              <h2 className="text-lg sm:text-2xl font-black text-[#002147] leading-relaxed mb-6 font-mono text-center">
                 {currentQuestion.text}
               </h2>
 
-              {/* Options */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Options rendered via AnswerOption */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                 {currentQuestion.options.map((option, idx) => {
                   const isSelected = selectedIdx === idx;
-                  const isCorrectAnswer = idx === currentQuestion.correct;
-                  let cardStyle = 'border-slate-100 hover:border-indigo-300 hover:bg-indigo-50/10';
-
-                  if (isConfirmed) {
-                    if (isCorrectAnswer) {
-                      cardStyle = 'border-emerald-500 bg-emerald-50/50 text-emerald-900';
-                    } else if (isSelected) {
-                      cardStyle = 'border-rose-500 bg-rose-50/50 text-rose-900';
-                    } else {
-                      cardStyle = 'border-slate-100 opacity-60';
-                    }
-                  } else if (isSelected) {
-                    cardStyle = 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-300';
-                  }
+                  const isCorrect = idx === currentQuestion.correct;
+                  const optionState = isConfirmed
+                    ? (isCorrect ? 'correct' : (isSelected ? 'wrong' : 'normal'))
+                    : 'normal';
 
                   return (
-                    <button
+                    <AnswerOption
                       key={idx}
-                      onClick={() => handleOptionClick(idx)}
+                      label={option}
+                      state={optionState}
+                      selected={isSelected}
                       disabled={isConfirmed}
-                      className={`p-5 rounded-2xl border-2 font-black transition-all flex items-center justify-between text-left ${cardStyle}`}
-                    >
-                      <span className="text-sm md:text-base">{option}</span>
-                      {isConfirmed && isCorrectAnswer && (
-                        <CheckCircle2 size={20} className="text-emerald-500 flex-shrink-0" />
-                      )}
-                      {isConfirmed && isSelected && !isCorrectAnswer && (
-                        <XCircle size={20} className="text-rose-500 flex-shrink-0" />
-                      )}
-                    </button>
+                      onClick={() => handleOptionClick(idx)}
+                    />
                   );
                 })}
               </div>
 
-              {/* Show explanation after confirmation */}
+              {/* Grammar explanation after confirmation */}
               {isConfirmed && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 text-xs md:text-sm text-indigo-950 font-bold"
-                >
-                  <div className="flex items-center gap-2 mb-1.5 text-indigo-700 font-extrabold">
-                    <Sparkles size={16} />
-                    <span>{isRtl ? 'الشرح والتحليل اللغوي' : 'Grammar Explanation'}</span>
+                <div className="mb-6 p-4 rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 text-xs sm:text-sm text-[#002147]">
+                  <div className="flex items-center gap-2 mb-1.5 font-black text-[#002147]">
+                    <Sparkles size={16} className="text-[#C49E3A] shrink-0" />
+                    <span>{t('الشرح والتحليل اللغوي', 'Grammar Explanation')}</span>
                   </div>
-                  <p>{isRtl ? currentQuestion.explanationAr : currentQuestion.explanation}</p>
-                </motion.div>
+                  <p className="font-bold leading-relaxed">
+                    {isRtl ? currentQuestion.explanationAr : currentQuestion.explanation}
+                  </p>
+                </div>
               )}
 
               {/* Footer action buttons */}
-              <div className="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-6">
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#C49E3A]/20">
                 {!isConfirmed ? (
-                  <button
+                  <PrimaryButton
                     onClick={handleConfirm}
                     disabled={selectedIdx === null}
-                    className={`px-8 py-3 rounded-xl font-black text-xs md:text-sm transition-all shadow-md flex items-center gap-2 uppercase tracking-wider ${
-                      selectedIdx !== null
-                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                        : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
-                    }`}
                   >
-                    {isRtl ? 'تأكيد الإجابة' : 'Confirm'}
-                  </button>
+                    <span>{t('تأكيد الإجابة', 'Confirm Answer')}</span>
+                  </PrimaryButton>
                 ) : (
-                  <button
-                    onClick={handleNext}
-                    className="px-8 py-3 rounded-xl bg-[#002147] hover:bg-slate-800 text-white font-black text-xs md:text-sm transition-all shadow-md flex items-center gap-2 uppercase tracking-wider"
-                  >
+                  <PrimaryButton onClick={handleNext}>
                     <span>
                       {currentStep === questions.length - 1
-                        ? (isRtl ? 'إنهاء الامتحان ورصد الدرجة' : 'Finish & Grade')
-                        : (isRtl ? 'السؤال التالي' : 'Next Question')}
+                        ? t('إنهاء الامتحان ورصد الدرجة', 'Finish & Grade')
+                        : t('السؤال التالي', 'Next Question')}
                     </span>
-                  </button>
+                  </PrimaryButton>
                 )}
               </div>
-            </div>
+            </GoldCard>
           </motion.div>
         ) : (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-xl mt-12 z-10 text-center"
+            key="test-result"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-xl mx-auto mt-6 text-center"
           >
-            <div className="bg-white rounded-[3.5rem] p-10 shadow-2xl border-4 border-slate-50 relative overflow-hidden flex flex-col items-center">
-              <div className="w-32 h-32 bg-amber-400 text-white rounded-full flex items-center justify-center shadow-xl mb-6">
-                <Trophy size={60} className="animate-bounce" />
+            <GoldCard className="p-8 sm:p-10 flex flex-col items-center">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[#002147] text-[#E6C36A] border-2 border-[#C49E3A] flex items-center justify-center shadow-md mb-4">
+                <Trophy size={42} />
               </div>
 
-              <h2 className="text-2xl md:text-4xl font-extrabold text-[#002147] mb-2 leading-tight">
-                {isRtl ? 'تم اجتياز الاختبار الدوري بنجاح!' : 'Test Completed Successfully!'}
+              <h2 className="text-xl sm:text-2xl font-black text-[#002147] mb-2 leading-tight">
+                {t('تم اجتياز الاختبار الدوري بنجاح!', 'Test Completed Successfully!')}
               </h2>
               
-              <div className="flex bg-slate-50 rounded-2xl p-4 gap-6 px-8 mb-6 border border-slate-100 mt-4 shadow-sm">
+              <div className="flex items-center justify-center gap-4 sm:gap-6 bg-[#fdfaf3] rounded-2xl p-4 border border-[#C49E3A]/30 my-4 w-full max-w-md">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-slate-400 block tracking-widest">
-                    {isRtl ? 'الدرجة الكلية' : 'SCORE'}
+                  <span className="text-[10px] font-black uppercase text-[#002147]/60 block tracking-widest">
+                    {t('الدرجة الكلية', 'SCORE')}
                   </span>
-                  <span className="text-xl font-black text-[#002147]">
+                  <span className="text-lg sm:text-xl font-black text-[#002147]">
                     {score} / {questions.length}
                   </span>
                 </div>
-                <div className="w-[1px] bg-slate-200" />
+                <div className="w-px h-8 bg-[#C49E3A]/30" />
                 <div>
-                  <span className="text-[10px] font-black uppercase text-slate-400 block tracking-widest">
-                    {isRtl ? 'المعدل والتقييم' : 'GRADE'}
+                  <span className="text-[10px] font-black uppercase text-[#002147]/60 block tracking-widest">
+                    {t('المعدل والتقييم', 'GRADE')}
                   </span>
-                  <span className="text-xl font-black text-emerald-600">
+                  <span className="text-lg sm:text-xl font-black text-emerald-700">
                     {questions.length > 0 ? Math.round((score / questions.length) * 100) : 0}%
                   </span>
                 </div>
-                <div className="w-[1px] bg-slate-200" />
+                <div className="w-px h-8 bg-[#C49E3A]/30" />
                 <div>
-                  <span className="text-[10px] font-black uppercase text-slate-300 block tracking-widest">
-                    {isRtl ? 'نقاط الخبرة' : 'REWARD'}
+                  <span className="text-[10px] font-black uppercase text-[#002147]/60 block tracking-widest">
+                    {t('نقاط الخبرة', 'REWARD')}
                   </span>
-                  <span className="text-xl font-black text-amber-500 flex items-center gap-0.5">
+                  <span className="text-lg sm:text-xl font-black text-[#C49E3A]">
                     +100 XP
                   </span>
                 </div>
               </div>
 
-              <p className="text-slate-500 text-xs md:text-sm mb-8 leading-relaxed font-semibold max-w-sm">
-                {isRtl
-                  ? 'تم رصد نتيجتك وحفظها في صفحة تقدمك الدراسي، وقد حصلت على مكافأة 100 نقطة إضافية لحسابك!'
-                  : 'Your score has been successfully cataloged and recorded in your Academic History. Keep up the amazing work!'}
+              <p className="text-[#002147]/75 text-xs sm:text-sm mb-6 leading-relaxed font-bold max-w-md">
+                {t(
+                  'تم رصد نتيجتك وحفظها في صفحة تقدمك الدراسي، وقد حصلت على مكافأة 100 نقطة إضافية لحسابك!',
+                  'Your score has been successfully cataloged and recorded in your Academic History. Keep up the amazing work!'
+                )}
               </p>
 
-              <div className="w-full flex flex-col gap-3">
-                <button
+              <div className="w-full flex flex-col sm:flex-row gap-3 justify-center">
+                <GhostButton
                   onClick={() => {
                     setCurrentStep(0);
                     setSelectedIdx(null);
@@ -554,25 +537,26 @@ export const BiWeeklyTest: React.FC<BiWeeklyTestProps> = ({
                     setScore(0);
                     setShowResult(false);
                   }}
-                  className="w-full py-4 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-2xl font-black text-xs md:text-sm tracking-wider uppercase transition-all flex items-center justify-center gap-2"
+                  className="py-3 px-5 flex-1"
                 >
                   <RotateCcw size={16} />
-                  <span>{isRtl ? 'إعادة المحاولة مجدداً' : 'Retake Test'}</span>
-                </button>
+                  <span>{t('إعادة المحاولة مجدداً', 'Retake Test')}</span>
+                </GhostButton>
 
-                <button
+                <PrimaryButton
                   onClick={() => {
                     onComplete(score, questions.length);
                   }}
-                  className="w-full py-4 bg-[#002147] hover:bg-slate-800 text-white rounded-2xl font-black text-xs md:text-sm tracking-widest uppercase transition-all shadow-lg shadow-blue-900/10"
+                  className="py-3 px-5 flex-1"
                 >
-                  {isRtl ? 'العودة لجدول الخطة' : 'Back to Planner'}
-                </button>
+                  <CheckCircle2 size={16} />
+                  <span>{t('العودة لجدول الخطة', 'Back to Planner')}</span>
+                </PrimaryButton>
               </div>
-            </div>
+            </GoldCard>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </SectionShell>
   );
 };
