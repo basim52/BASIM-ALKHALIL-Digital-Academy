@@ -1,4 +1,4 @@
-// design-harmony batch 11
+// design-harmony batch 11 & batch 12
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
@@ -66,6 +66,7 @@ import {
   LessonTile, 
   PrimaryButton, 
   GhostButton, 
+  AnswerOption,
   ProgressPill, 
   TutorFace 
 } from './ui/academy';
@@ -2172,20 +2173,20 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
               {/* Collapsible How-to-Play Instructions Block */}
               {activeGameId && gameInstructions[activeGameId] && (
-                <div id="game-instructions-container" className="bg-slate-900/40 rounded-2xl border border-slate-700/60 mb-6 overflow-hidden">
+                <div id="game-instructions-container" className="bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 mb-6 overflow-hidden">
                   <button 
                     id="toggle-instructions-btn"
                     onClick={() => {
                       setShowInstructions(!showInstructions);
                       speakFeedback(isRtl ? "طريقة لعب اللعبة" : "how to play instruction manual");
                     }}
-                    className="w-full px-5 py-3.5 bg-slate-900/60 flex justify-between items-center text-xs font-black text-slate-200 hover:text-white transition-all cursor-pointer"
+                    className="w-full px-5 py-3.5 bg-white flex justify-between items-center text-xs font-black text-[#002147] transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
-                      <HelpCircle className="w-4 h-4 text-[#FDCB6E]" />
+                      <HelpCircle className="w-4 h-4 text-[#C49E3A]" />
                       <span className="tracking-tight">{isRtl ? 'كيفية اللعب وطريقة الفوز 🎮' : 'How to Play & Victory Plan 🎮'}</span>
                     </div>
-                    <span className="text-[10px] px-2.5 py-1 bg-slate-800 rounded-lg text-slate-400 font-bold whitespace-nowrap">
+                    <span className="text-[10px] px-2.5 py-1 bg-[#fdfaf3] rounded-lg text-[#002147]/70 font-bold whitespace-nowrap border border-[#C49E3A]/30">
                       {showInstructions ? (isRtl ? 'إخفاء الدليل' : 'Hide Guide') : (isRtl ? 'عرض طريقة اللعب' : 'Show Instructions')}
                     </span>
                   </button>
@@ -2198,7 +2199,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="px-5 py-4 border-t border-slate-700/40 bg-[#1e2324]/40 text-slate-300 text-xs leading-relaxed font-sans space-y-2 whitespace-pre-line">
+                        <div className="px-5 py-4 border-t border-[#C49E3A]/20 bg-[#fdfaf3] text-[#002147]/80 text-xs leading-relaxed font-sans space-y-2 whitespace-pre-line">
                           {isRtl ? gameInstructions[activeGameId].ar : gameInstructions[activeGameId].en}
                         </div>
                       </motion.div>
@@ -2212,13 +2213,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_001' && (
                 <div className="space-y-6">
-                  <p className="text-xs font-bold text-slate-300">
+                  <p className="text-xs font-bold text-[#002147]/80">
                     {isRtl 
                       ? "اضغط على مربعات الخريطة المجاورة للتحرك نحو الكنز عند الإحداثي [7,7]. كل خطوة تطالبك بإجابة سؤال إنجليزي!"
                       : "Tap a adjacent grid cell to sail your ship. Answering the puzzle correctly claims the land and adds dynamic merits!"}
                   </p>
 
-                  <div className="grid grid-cols-8 gap-1.5 max-w-md mx-auto bg-slate-900 p-3 rounded-2xl border border-slate-700 text-center">
+                  <div className="grid grid-cols-8 gap-1.5 max-w-md mx-auto bg-[#fdfaf3] p-3 rounded-2xl border border-[#C49E3A]/40 text-center">
                     {Array.from({ length: 8 }).map((_, r) => (
                       Array.from({ length: 8 }).map((_, c) => {
                         const isPlayer = piratePos[0] === r && piratePos[1] === c;
@@ -2236,10 +2237,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             }}
                             className={`aspect-square rounded-lg text-xs flex items-center justify-center font-black transition-all ${
                               isPlayer 
-                                ? 'bg-[#002147] text-white ring-2 ring-white scale-105' 
+                                ? 'bg-[#002147] text-[#E6C36A] ring-2 ring-[#C49E3A] scale-105' 
                                 : isTreasure 
-                                  ? 'bg-[#FDCB6E] text-slate-900 animate-pulse font-serif text-md' 
-                                  : 'bg-slate-800 hover:bg-slate-700 text-slate-500 hover:text-slate-200'
+                                  ? 'bg-[#C49E3A] text-[#002147] animate-pulse font-serif text-md' 
+                                  : 'bg-white hover:bg-[#fdfaf3] text-[#002147]/40 hover:text-[#002147] border border-[#C49E3A]/20'
                             }`}
                           >
                             {isPlayer ? "⛵" : isTreasure ? "👑" : ""}
@@ -2250,40 +2251,40 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                   </div>
 
                   {showMapModal && (
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-5 bg-[#2D3436] rounded-2xl border border-slate-700 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-amber-400 font-bold">⏱️ {mapTimer}s remaining</span>
-                        <h4 className="text-xs font-extrabold text-white">{isRtl ? 'سؤال التحقق البحري' : 'Nautical Grid Quiz'}</h4>
-                      </div>
-                      <p className="text-xs font-bold font-mono text-slate-300">
-                        {treasureMapQuestions[activeMapQuestionIdx].q}
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {treasureMapQuestions[activeMapQuestionIdx].opts.map((opt, oIdx) => (
-                          <button
-                            key={oIdx}
-                            onClick={() => {
-                              if (opt === treasureMapQuestions[activeMapQuestionIdx].ans) {
-                                triggerPointsReward(15, isRtl ? 'كنز المعرفة الجغرافي' : 'Knowledge Treasure Explorer', 'game_001');
-                                speakFeedback("Awesome move!");
-                                if (pendingMove) {
-                                  setPiratePos(pendingMove);
-                                  if (pendingMove[0] === 7 && pendingMove[1] === 7) {
-                                    alert(isRtl ? "تهانينا! لقد وصلت إلى كنز المعرفة المفقود بنجاح مميز! 🏆" : "Amazing! You have conquered the remote Gold Treasure! 🏆");
-                                    setPiratePos([0, 0]);
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                      <GoldCard className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <ProgressPill>⏱️ {mapTimer}s remaining</ProgressPill>
+                          <h4 className="text-xs font-extrabold text-[#002147]">{isRtl ? 'سؤال التحقق البحري' : 'Nautical Grid Quiz'}</h4>
+                        </div>
+                        <p className="text-xs font-bold font-mono text-[#002147] bg-[#fdfaf3] p-3 rounded-xl border border-[#C49E3A]/30">
+                          {treasureMapQuestions[activeMapQuestionIdx].q}
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {treasureMapQuestions[activeMapQuestionIdx].opts.map((opt, oIdx) => (
+                            <AnswerOption
+                              key={oIdx}
+                              label={opt}
+                              onClick={() => {
+                                if (opt === treasureMapQuestions[activeMapQuestionIdx].ans) {
+                                  triggerPointsReward(15, isRtl ? 'كنز المعرفة الجغرافي' : 'Knowledge Treasure Explorer', 'game_001');
+                                  speakFeedback("Awesome move!");
+                                  if (pendingMove) {
+                                    setPiratePos(pendingMove);
+                                    if (pendingMove[0] === 7 && pendingMove[1] === 7) {
+                                      alert(isRtl ? "تهانينا! لقد وصلت إلى كنز المعرفة المفقود بنجاح مميز! 🏆" : "Amazing! You have conquered the remote Gold Treasure! 🏆");
+                                      setPiratePos([0, 0]);
+                                    }
                                   }
+                                } else {
+                                  speakFeedback("Wrong guess, try another route!");
                                 }
-                              } else {
-                                speakFeedback("Wrong guess, try another route!");
-                              }
-                              setShowMapModal(false);
-                            }}
-                            className="p-3 bg-slate-800 hover:bg-[#002147] text-white font-bold rounded-xl text-[11px] transition-all cursor-pointer text-center"
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
+                                setShowMapModal(false);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </GoldCard>
                     </motion.div>
                   )}
                 </div>
@@ -2294,32 +2295,34 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_002' && (
                 <div className="space-y-6 text-center">
-                  <span className="text-xs bg-[#rose-500]/10 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full font-black">
-                    {isRtl ? 'الجولة ' : 'Round '}{battleRound} / 10
-                  </span>
+                  <div>
+                    <ProgressPill>
+                      {isRtl ? 'الجولة ' : 'Round '}{battleRound} / 10
+                    </ProgressPill>
+                  </div>
                   
                   <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto my-4">
-                    <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                    <GoldCard className="p-4 text-center">
                       <span className="text-xl">🤵</span>
-                      <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'نقاطك' : 'Your Score'}</p>
-                      <p className="text-md font-black text-emerald-400 font-mono">{battlePlayerScore}</p>
-                    </div>
-                    <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                      <p className="text-[10px] text-[#002147]/60 font-bold">{isRtl ? 'نقاطك' : 'Your Score'}</p>
+                      <p className="text-md font-black text-[#002147] font-mono">{battlePlayerScore}</p>
+                    </GoldCard>
+                    <GoldCard className="p-4 text-center">
                       <span className="text-xl">🤖</span>
-                      <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'روبوت رونالد' : 'Robo Ronald'}</p>
-                      <p className="text-md font-black text-rose-400 font-mono">{battleBotScore}</p>
-                    </div>
+                      <p className="text-[10px] text-[#002147]/60 font-bold">{isRtl ? 'روبوت رونالد' : 'Robo Ronald'}</p>
+                      <p className="text-md font-black text-rose-600 font-mono">{battleBotScore}</p>
+                    </GoldCard>
                   </div>
 
-                  <div className="p-8 bg-slate-900 rounded-3xl border border-slate-700/60 relative overflow-hidden min-h-[140px] flex items-center justify-center">
+                  <GoldCard className="p-8 bg-[#fdfaf3] relative overflow-hidden min-h-[140px] flex items-center justify-center">
                     {isWordVisible ? (
-                      <motion.h4 initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="text-xl font-black text-[#FDCB6E] tracking-widest font-mono">
+                      <motion.h4 initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="text-xl font-black text-[#002147] tracking-widest font-mono">
                         {displayWord}
                       </motion.h4>
                     ) : (
-                      <span className="text-xs text-slate-400 font-bold">??? ({isRtl ? 'اكتب الكلمة الآن!' : 'Type the word now!'})</span>
+                      <span className="text-xs text-[#002147]/60 font-bold">??? ({isRtl ? 'اكتب الكلمة الآن!' : 'Type the word now!'})</span>
                     )}
-                  </div>
+                  </GoldCard>
 
                   <form 
                     onSubmit={(e) => {
@@ -2353,11 +2356,11 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       value={battleTypeInput}
                       onChange={(e) => setBattleTypeInput(e.target.value)}
                       placeholder={isRtl ? "اكتب هنا بسرعة..." : "Spell word rapidly..."}
-                      className="w-full text-center px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none"
+                      className="w-full text-center px-4 py-2 bg-white border border-[#C49E3A]/40 rounded-xl text-[#002147] text-xs focus:outline-none focus:border-[#002147]"
                     />
-                    <button type="submit" className="w-full py-2 bg-rose-500 rounded-xl text-xs font-black text-white hover:bg-rose-600">
-                      {isRtl ? 'تفجير الحفل ➔' : 'Cast Typing Spell ➔'}
-                    </button>
+                    <PrimaryButton type="submit" className="w-full">
+                      <span>{isRtl ? 'تفجير الحفل ➔' : 'Cast Typing Spell ➔'}</span>
+                    </PrimaryButton>
                   </form>
                 </div>
               )}
@@ -2368,8 +2371,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {activeGameId === 'game_003' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-300 font-bold">{isRtl ? 'موقعك الحالي:' : 'Your Location:'} <span className="text-emerald-400 font-black">Tile {snakesPlayerPos}</span></span>
-                    <button
+                    <ProgressPill>
+                      {isRtl ? 'موقعك الحالي: ' : 'Your Location: '} Tile {snakesPlayerPos}
+                    </ProgressPill>
+                    <PrimaryButton
                       onClick={() => {
                         const roll = Math.floor(Math.random() * 6) + 1;
                         setSnakesLastRoll(roll);
@@ -2385,45 +2390,44 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         });
                         setSnakesQuizActive(true);
                       }}
-                      className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-black hover:bg-emerald-600 transition-all cursor-pointer"
                     >
-                      🎲 {isRtl ? 'دحرج النرد الروحي' : 'Roll Grammar Dice'}
-                    </button>
+                      <span>🎲 {isRtl ? 'دحرج النرد الروحي' : 'Roll Grammar Dice'}</span>
+                    </PrimaryButton>
                   </div>
 
                   {snakesLastRoll > 0 && (
-                    <p className="text-center text-xs font-bold text-amber-300">{isRtl ? `حصلت على نرد بقيمة: ${snakesLastRoll}` : `You rolled a beautiful: ${snakesLastRoll}`}</p>
+                    <p className="text-center text-xs font-bold text-[#002147]">{isRtl ? `حصلت على نرد بقيمة: ${snakesLastRoll}` : `You rolled a beautiful: ${snakesLastRoll}`}</p>
                   )}
 
                   {snakesQuizActive && (
-                    <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="p-5 bg-[#2D3436] rounded-2xl border border-slate-700 space-y-4">
-                      <p className="text-xs font-extrabold text-slate-300">{snakesQuizItem.q}</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {snakesQuizItem.opts.map((opt, oIdx) => (
-                          <button
-                            key={oIdx}
-                            onClick={() => {
-                              if (opt === snakesQuizItem.ans) {
-                                triggerPointsReward(15, isRtl ? 'سلالم وثعابين القواعد' : 'Dice Grammar Solver', 'game_003');
-                                speakFeedback("Correct! You climb the ladders.");
-                                const nextPos = Math.min(100, snakesPlayerPos + snakesLastRoll + 8);
-                                setSnakesPlayerPos(nextPos);
-                                if (nextPos >= 100) {
-                                  alert(isRtl ? "مبروك! لقد وصلت إلى الخانة 100 وحققت الفوز الأكاديمي الشامخ!" : "Supreme Victory! Reached 100 points tile!");
-                                  setSnakesPlayerPos(1);
+                    <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }}>
+                      <GoldCard className="space-y-4">
+                        <p className="text-xs font-extrabold text-[#002147]">{snakesQuizItem.q}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {snakesQuizItem.opts.map((opt, oIdx) => (
+                            <AnswerOption
+                              key={oIdx}
+                              label={opt}
+                              onClick={() => {
+                                if (opt === snakesQuizItem.ans) {
+                                  triggerPointsReward(15, isRtl ? 'سلالم وثعابين القواعد' : 'Dice Grammar Solver', 'game_003');
+                                  speakFeedback("Correct! You climb the ladders.");
+                                  const nextPos = Math.min(100, snakesPlayerPos + snakesLastRoll + 8);
+                                  setSnakesPlayerPos(nextPos);
+                                  if (nextPos >= 100) {
+                                    alert(isRtl ? "مبروك! لقد وصلت إلى الخانة 100 وحققت الفوز الأكاديمي الشامخ!" : "Supreme Victory! Reached 100 points tile!");
+                                    setSnakesPlayerPos(1);
+                                  }
+                                } else {
+                                  speakFeedback("Alas! A snake bit you.");
+                                  setSnakesPlayerPos(Math.max(1, snakesPlayerPos - 5));
                                 }
-                              } else {
-                                speakFeedback("Alas! A snake bit you.");
-                                setSnakesPlayerPos(Math.max(1, snakesPlayerPos - 5));
-                              }
-                              setSnakesQuizActive(false);
-                            }}
-                            className="p-3 bg-slate-800 hover:bg-emerald-500 text-white rounded-xl text-xs font-black text-center cursor-pointer transition-all"
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
+                                setSnakesQuizActive(false);
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </GoldCard>
                     </motion.div>
                   )}
                 </div>
@@ -2434,13 +2438,14 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_004' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-700">
+                  <GoldCard className="flex flex-col sm:flex-row justify-between items-center gap-3">
                     <div>
-                      <span className="text-[10px] text-slate-400 font-bold block">{isRtl ? 'ذهب المتجر' : 'Market Gold'}</span>
-                      <span className="text-md font-black text-amber-400 font-mono">💰 {traderGold} Gold</span>
+                      <ProgressPill>
+                        💰 {traderGold} {isRtl ? 'ذهب' : 'Gold'}
+                      </ProgressPill>
                     </div>
                     <div className="flex gap-2">
-                      <button 
+                      <GhostButton 
                         onClick={() => {
                           if (traderGold >= 5) {
                             setTraderGold(prev => prev - 5);
@@ -2450,11 +2455,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("Bought a vowel!");
                           }
                         }}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[10px] font-bold cursor-pointer"
                       >
-                        {isRtl ? 'شراء حرف علة (5 ذهب)' : 'Buy Vowel (5g)'}
-                      </button>
-                      <button
+                        <span>{isRtl ? 'شراء حرف علة (5 ذهب)' : 'Buy Vowel (5g)'}</span>
+                      </GhostButton>
+                      <GhostButton
                         onClick={() => {
                           if (traderGold >= 10) {
                             setTraderGold(prev => prev - 10);
@@ -2464,21 +2468,20 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("Bought a consonant!");
                           }
                         }}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[10px] font-bold cursor-pointer"
                       >
-                        {isRtl ? 'شراء حرف ساكن (10 ذهب)' : 'Buy Consonant (10g)'}
-                      </button>
+                        <span>{isRtl ? 'شراء حرف ساكن (10 ذهب)' : 'Buy Consonant (10g)'}</span>
+                      </GhostButton>
                     </div>
-                  </div>
+                  </GoldCard>
 
                   <div className="space-y-2">
-                    <span className="text-[10px] uppercase font-black tracking-wider text-slate-400 block">{isRtl ? 'حقيبة الحروف الحالية:' : 'Your Active Letter Vault:'}</span>
+                    <span className="text-[10px] uppercase font-black tracking-wider text-[#002147]/70 block">{isRtl ? 'حقيبة الحروف الحالية:' : 'Your Active Letter Vault:'}</span>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(traderLetters).map(([letter, count]) => (
                         count > 0 && (
-                          <div key={letter} className="px-3 py-2 bg-[#002147] text-white font-black font-mono rounded-xl flex items-center gap-2">
+                          <div key={letter} className="px-3 py-2 bg-[#002147] text-[#E6C36A] font-black font-mono rounded-xl flex items-center gap-2 border border-[#C49E3A]/40 shadow-sm">
                             <span>{letter}</span>
-                            <span className="text-[9px] bg-slate-900/40 px-1.5 py-0.5 rounded-md font-sans">x{count}</span>
+                            <span className="text-[9px] bg-white/20 text-white px-1.5 py-0.5 rounded-md font-sans">x{count}</span>
                           </div>
                         )
                       ))}
@@ -2491,9 +2494,9 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       value={craftedWordInput}
                       onChange={(e) => setCraftedWordInput(e.target.value.toUpperCase())}
                       placeholder={isRtl ? "اكتب كلمة لتجميعها وبيعها..." : "Type crafted words of your letters..."}
-                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs font-mono tracking-widest focus:outline-none"
+                      className="w-full px-4 py-2.5 bg-white border border-[#C49E3A]/40 rounded-xl text-[#002147] text-xs font-mono tracking-widest focus:outline-none focus:border-[#002147]"
                     />
-                    <button
+                    <PrimaryButton
                       onClick={() => {
                         const word = craftedWordInput.trim().toUpperCase();
                         if (word.length < 2) return;
@@ -2525,20 +2528,20 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                            speakFeedback("Missing letters to forge this academic word!");
                          }
                        }}
-                       className="w-full py-3 bg-[#FDCB6E] text-slate-900 rounded-xl text-xs font-black uppercase tracking-wider hover:brightness-115 transition-all cursor-pointer"
+                       className="w-full"
                      >
-                       💰 {isRtl ? 'بيع الكلمة وصرف الأرباح' : 'Sell to Second-hand Market Node'}
-                     </button>
+                       <span>💰 {isRtl ? 'بيع الكلمة وصرف الأرباح' : 'Sell to Second-hand Market Node'}</span>
+                     </PrimaryButton>
                    </div>
 
-                   <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-700 text-center">
-                     <p className="text-[10px] font-bold text-[#C49E3A]">
+                   <GoldCard className="p-3 bg-[#fdfaf3] text-center">
+                     <p className="text-[10px] font-bold text-[#002147]">
                        {isRtl ? '💡 كلمات متميزة نوصي بصنعها للحصول على 2x ذهب إضافي:' : '💡 Premium high-value targets for 2x GOLD boost:'}
                      </p>
-                     <p className="text-[10px] text-slate-400 font-mono mt-1">
+                     <p className="text-[10px] text-[#002147]/70 font-mono mt-1">
                        CAT, STREET, BREAD, DENTIST, SWEET, ACTIVE, GREAT
                      </p>
-                   </div>
+                   </GoldCard>
                  </div>
               )}
 
@@ -2547,25 +2550,34 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_005' && (
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold uppercase font-mono">
-                    <span>{isRtl ? 'حوار ' : 'Scenario '}{dialogueIndex + 1} / {dialogueAmbassadorScenariosData.length}</span>
-                    <span className="text-emerald-400">{Math.round(dialoguePoliteness * 100)}% {isRtl ? 'أدب' : 'Polite'}</span>
+                  <div className="flex justify-between items-center text-[10px]">
+                    <ProgressPill>{isRtl ? 'حوار ' : 'Scenario '}{dialogueIndex + 1} / {dialogueAmbassadorScenariosData.length}</ProgressPill>
+                    <ProgressPill>{Math.round(dialoguePoliteness * 100)}% {isRtl ? 'أدب' : 'Polite'}</ProgressPill>
                   </div>
 
-                  <div className="p-5 bg-slate-900 rounded-2xl border border-slate-700 text-center">
+                  <GoldCard className="p-5 text-center bg-[#fdfaf3]">
                     <span className="text-2xl block mb-2">🤝</span>
-                    <h4 className="text-xs font-bold text-slate-300">
+                    <h4 className="text-xs font-bold text-[#002147]">
                       {isRtl 
                         ? dialogueAmbassadorScenariosData[dialogueIndex].situationAr 
                         : dialogueAmbassadorScenariosData[dialogueIndex].situationEn}
                     </h4>
-                  </div>
+                  </GoldCard>
 
                   <div className="grid grid-cols-1 gap-3">
                     {dialogueAmbassadorScenariosData[dialogueIndex].options.map((opt, oIdx) => (
-                      <button
+                      <AnswerOption
                         key={oIdx}
                         disabled={dialogueChosenOption !== null}
+                        state={dialogueChosenOption === oIdx ? (opt.s > 0 ? 'correct' : 'wrong') : 'normal'}
+                        label={
+                          <div className="text-start">
+                            <p className="font-mono text-xs font-bold">{opt.t}</p>
+                            {dialogueChosenOption === oIdx && (
+                              <p className="text-[10px] mt-1.5 opacity-80 italic font-sans">{opt.f}</p>
+                            )}
+                          </div>
+                        }
                         onClick={() => {
                           setDialogueChosenOption(oIdx);
                           const scoreImpact = opt.s;
@@ -2577,27 +2589,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("Consider a gentler style.");
                           }
                         }}
-                        className={`p-4 rounded-xl border-2 text-left text-xs font-black transition-all ${
-                          dialogueChosenOption === oIdx
-                            ? opt.s > 0
-                              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
-                              : 'bg-red-500/20 border-red-500 text-red-300'
-                            : dialogueChosenOption !== null
-                              ? 'bg-slate-800/40 border-slate-700 text-slate-500 cursor-not-allowed text-opacity-50'
-                              : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200 cursor-pointer'
-                        }`}
-                      >
-                        <p className="font-mono">{opt.t}</p>
-                        {dialogueChosenOption === oIdx && (
-                          <p className="text-[10px] mt-1.5 opacity-80 italic font-sans text-slate-400">{opt.f}</p>
-                        )}
-                      </button>
+                      />
                     ))}
                   </div>
 
                   {dialogueChosenOption !== null && (
                     <div className="flex justify-end mt-4">
-                      <button
+                      <PrimaryButton
                         onClick={() => {
                           if (dialogueIndex < dialogueAmbassadorScenariosData.length - 1) {
                             setDialogueIndex(prev => prev + 1);
@@ -2609,12 +2607,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             setDialoguePoliteness(1.0);
                           }
                         }}
-                        className="px-5 py-2.5 bg-[#002147] hover:bg-[#00183a] text-white rounded-xl text-xs font-black cursor-pointer"
                       >
-                        {dialogueIndex < dialogueAmbassadorScenariosData.length - 1 
-                          ? (isRtl ? "الحوار التالي ➡️" : "Next Scenario ➡️")
-                          : (isRtl ? "إعادة السلسلة 🔄" : "Replay Series 🔄")}
-                      </button>
+                        <span>
+                          {dialogueIndex < dialogueAmbassadorScenariosData.length - 1 
+                            ? (isRtl ? "الحوار التالي ➡️" : "Next Scenario ➡️")
+                            : (isRtl ? "إعادة السلسلة 🔄" : "Replay Series 🔄")}
+                        </span>
+                      </PrimaryButton>
                     </div>
                   )}
                 </div>
@@ -2626,16 +2625,16 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {activeGameId === 'game_006' && (
                 <div className="space-y-6 text-center">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-red-400 font-bold">{isRtl ? 'القلوب:' : 'Shield Lives:'} {"❤️".repeat(spellingLives)}</span>
-                    <span className="text-[#C49E3A] font-mono font-black">Score: {spellingScore}</span>
+                    <ProgressPill>{isRtl ? 'القلوب: ' : 'Shield Lives: '} {"❤️".repeat(spellingLives)}</ProgressPill>
+                    <ProgressPill>Score: {spellingScore}</ProgressPill>
                   </div>
 
-                  <div className="p-8 bg-slate-900 rounded-3xl border border-slate-700 min-h-[140px] flex flex-col justify-center items-center relative overflow-hidden">
-                    <span className="text-3xl text-rose-500 animate-bounce block mb-2 font-mono">☄️</span>
-                    <h4 className="text-lg font-black text-rose-400 tracking-wider">
+                  <GoldCard className="p-8 bg-[#fdfaf3] min-h-[140px] flex flex-col justify-center items-center relative overflow-hidden">
+                    <span className="text-3xl text-[#002147] animate-bounce block mb-2 font-mono">☄️</span>
+                    <h4 className="text-lg font-black text-[#002147] tracking-wider">
                       {spellingHeroTargetsData[spellingHeroIndex]}
                     </h4>
-                  </div>
+                  </GoldCard>
 
                   <input
                     type="text"
@@ -2653,7 +2652,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       }
                     }}
                     placeholder={isRtl ? "تهجّ الكلمة هنا بسرعة..." : "Type the meteor word to blast..."}
-                    className="w-full text-center px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs tracking-widest focus:outline-none"
+                    className="w-full text-center px-4 py-2 bg-white border border-[#C49E3A]/40 rounded-xl text-[#002147] text-xs tracking-widest focus:outline-none focus:border-[#002147]"
                   />
                 </div>
               )}
@@ -2663,7 +2662,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_007' && (
                 <div className="space-y-6">
-                  <p className="text-xs text-slate-300 font-bold">
+                  <p className="text-xs text-[#002147]/80 font-bold">
                     {isRtl 
                       ? "اضغط على قطب الأعشاب الصحيحة لسقي بستان القواعد لتنمو الست زهرات الثمينة بشكل كامل!"
                       : "Pluck the past participle verbs to spray water and spur growth on your study garden plants!"}
@@ -2671,12 +2670,12 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
 
                   <div className="grid grid-cols-6 gap-3 text-center my-4">
                     {gardenPlants.map((lvl, index) => (
-                      <div key={index} className="p-3 bg-slate-900 rounded-2xl border border-slate-700">
-                        <span className="text-3xl block">
+                      <GoldCard key={index} className="p-3 text-center bg-[#fdfaf3]">
+                        <span className="text-2xl sm:text-3xl block">
                           {lvl === 1 ? '🌱' : lvl === 2 ? '🌿' : lvl === 3 ? '🥦' : '🌸'}
                         </span>
-                        <span className="text-[9px] block text-slate-400 font-bold mt-1">Stage {lvl}/4</span>
-                      </div>
+                        <span className="text-[9px] block text-[#002147]/70 font-bold mt-1">Stage {lvl}/4</span>
+                      </GoldCard>
                     ))}
                   </div>
 
@@ -2685,8 +2684,9 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       grammarGardenRaindropsData[(gardenRaindropIdx * 2) % grammarGardenRaindropsData.length],
                       grammarGardenRaindropsData[((gardenRaindropIdx * 2) + 1) % grammarGardenRaindropsData.length]
                     ].map((item, idx) => (
-                      <button
+                      <AnswerOption
                         key={idx}
+                        label={item.word}
                         onClick={() => {
                           if (item.correct) {
                             triggerPointsReward(15, isRtl ? 'سقي نباتات بستان القواعد' : 'Grammar Garden Sprayer', 'game_007');
@@ -2702,10 +2702,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("A drop of salty rain, wrong choice!");
                           }
                         }}
-                        className="px-4 py-2.5 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-black text-slate-200 transition-all cursor-pointer text-center"
-                      >
-                        {item.word}
-                      </button>
+                      />
                     ))}
                   </div>
                 </div>
@@ -2717,40 +2714,41 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {activeGameId === 'game_008' && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                      <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'فروسيتك النبيلة' : 'Knight HP'}</p>
-                      <div className="w-full bg-slate-900 h-2 rounded mt-1.5 overflow-hidden">
-                        <div className="bg-emerald-500 h-full transition-all" style={{ width: `${knightHP}%` }} />
+                    <GoldCard className="p-4">
+                      <p className="text-[10px] text-[#002147]/70 font-bold">{isRtl ? 'فروسيتك النبيلة' : 'Knight HP'}</p>
+                      <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/30 h-2.5 rounded mt-1.5 overflow-hidden">
+                        <div className="bg-[#002147] h-full transition-all" style={{ width: `${knightHP}%` }} />
                       </div>
-                      <span className="text-[10px] font-bold text-slate-300 font-mono mt-1 block">{knightHP} / 100</span>
-                    </div>
+                      <span className="text-[10px] font-bold text-[#002147] font-mono mt-1 block">{knightHP} / 100</span>
+                    </GoldCard>
 
-                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                      <p className="text-[10px] text-slate-400 font-bold">{isRtl ? 'تنين الوقاحة السيء' : 'Rudeness Dragon HP'}</p>
-                      <div className="w-full bg-slate-900 h-2 rounded mt-1.5 overflow-hidden">
+                    <GoldCard className="p-4">
+                      <p className="text-[10px] text-[#002147]/70 font-bold">{isRtl ? 'تنين الوقاحة السيء' : 'Rudeness Dragon HP'}</p>
+                      <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/30 h-2.5 rounded mt-1.5 overflow-hidden">
                         <div className="bg-rose-500 h-full transition-all" style={{ width: `${dragonHP}%` }} />
                       </div>
-                      <span className="text-[10px] font-bold text-slate-300 font-mono mt-1 block">{dragonHP} / 100</span>
-                    </div>
+                      <span className="text-[10px] font-bold text-[#002147] font-mono mt-1 block">{dragonHP} / 100</span>
+                    </GoldCard>
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 max-h-[100px] overflow-y-auto text-[10px] text-slate-300 font-mono space-y-1">
+                  <GoldCard className="p-4 max-h-[100px] overflow-y-auto text-[10px] text-[#002147]/80 font-mono space-y-1 bg-[#fdfaf3]">
                     {battleLog.map((log, lIdx) => (
                       <p key={lIdx}>➔ {log}</p>
                     ))}
-                  </div>
+                  </GoldCard>
 
-                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-700 text-center text-xs font-black text-amber-400">
-                    <p className="text-[10px] text-slate-500 uppercase font-mono mb-1">{isRtl ? 'الهجوم الحالي للتنين:' : 'DRAGON OFFENSIVE:'}</p>
+                  <GoldCard className="p-4 text-center text-xs font-black text-[#002147] bg-[#fdfaf3]">
+                    <p className="text-[10px] text-[#002147]/60 uppercase font-mono mb-1">{isRtl ? 'الهجوم الحالي للتنين:' : 'DRAGON OFFENSIVE:'}</p>
                     {isRtl 
                       ? politeKnightDragonAttacksData[dragonAttackIdx].attackAr 
                       : politeKnightDragonAttacksData[dragonAttackIdx].attackEn}
-                  </div>
+                  </GoldCard>
 
                   <div className="grid grid-cols-1 gap-2.5">
                     {politeKnightDragonAttacksData[dragonAttackIdx].options.map((opt, oIdx) => (
-                      <button
+                      <AnswerOption
                         key={oIdx}
+                        label={opt.text}
                         onClick={() => {
                           if (opt.dmg > 0) {
                             setDragonHP(prev => Math.max(0, prev - opt.dmg));
@@ -2776,10 +2774,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             setDragonAttackIdx(prev => (prev + 1) % politeKnightDragonAttacksData.length);
                           }
                         }}
-                        className="p-3 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-left text-xs font-black transition-all cursor-pointer font-mono"
-                      >
-                        {opt.text}
-                      </button>
+                      />
                     ))}
                   </div>
                 </div>
@@ -2790,12 +2785,12 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_009' && (
                 <div className="space-y-6 text-center">
-                  <h4 className="text-xs font-black text-[#FDCB6E]">
+                  <h4 className="text-xs font-black text-[#002147]">
                     {isRtl ? 'اضغط لسماع الكلمة المخفية، ثم طابق إملاء الحروف المناسبة!' : 'Listen closely to the audio clip, then diagnose spelling clues:'}
                   </h4>
 
-                  <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold max-w-xs mx-auto">
-                    <span>{isRtl ? 'قضية رقم: ' : 'Case: '}{detectiveIndex + 1} / {pronunciationDetectivePairsData.length}</span>
+                  <div className="flex justify-center items-center max-w-xs mx-auto">
+                    <ProgressPill>{isRtl ? 'قضية رقم: ' : 'Case: '}{detectiveIndex + 1} / {pronunciationDetectivePairsData.length}</ProgressPill>
                   </div>
 
                   <button
@@ -2803,15 +2798,16 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       const correctWord = pronunciationDetectivePairsData[detectiveIndex].correct;
                       speakFeedback(correctWord, 'en');
                     }}
-                    className="w-20 h-20 bg-[#002147] hover:bg-[#00183a] text-white rounded-full flex items-center justify-center text-3xl mx-auto shadow-md transition-all cursor-pointer animate-pulse"
+                    className="w-20 h-20 bg-[#002147] hover:bg-[#00183a] text-[#E6C36A] rounded-full flex items-center justify-center text-3xl mx-auto shadow-md transition-all cursor-pointer animate-pulse ring-4 ring-[#C49E3A]/40"
                   >
                     🔊
                   </button>
 
                   <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
                     {pronunciationDetectivePairsData[detectiveIndex].choices.map((word) => (
-                      <button
+                      <AnswerOption
                         key={word}
+                        label={word}
                         onClick={() => {
                           const ans = pronunciationDetectivePairsData[detectiveIndex].correct;
                           if (word === ans) {
@@ -2822,10 +2818,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("Close sound, but incorrect spelling target!");
                           }
                         }}
-                        className="p-3 bg-slate-800 hover:bg-[#00306b] text-white rounded-xl text-xs font-black font-mono transition-all text-center cursor-pointer"
-                      >
-                        {word}
-                      </button>
+                      />
                     ))}
                   </div>
                 </div>
@@ -2836,18 +2829,18 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_010' && (
                 <div className="space-y-6">
-                  <p className="text-xs text-slate-300 font-bold">
+                  <p className="text-xs text-[#002147]/80 font-bold">
                     {isRtl 
                       ? "املأ الفراغات بالجر والمحاذاة الصحيحة لكشف قطع لوحة طعام العائلة السعيدة!"
                       : "Unveil jigsaw parts of dining graphics by spelling active prepositions!"}
                   </p>
 
-                  <div className="grid grid-cols-3 gap-1.5 max-w-xs mx-auto aspect-square bg-slate-900 p-2 rounded-2xl border border-slate-700">
+                  <div className="grid grid-cols-3 gap-1.5 max-w-xs mx-auto aspect-square bg-[#fdfaf3] p-2 rounded-2xl border border-[#C49E3A]/40">
                     {puzzleUnveiled.map((unveiled, index) => (
                       <div
                         key={index}
                         className={`aspect-square rounded-lg flex items-center justify-center text-xl transition-all ${
-                          unveiled ? 'bg-gradient-to-tr from-emerald-500 to-[#C49E3A]' : 'bg-slate-800 text-slate-600'
+                          unveiled ? 'bg-[#002147] text-[#E6C36A]' : 'bg-white text-[#002147]/30 border border-[#C49E3A]/20'
                         }`}
                       >
                         {unveiled ? "🥗" : "❓"}
@@ -2855,15 +2848,16 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     ))}
                   </div>
 
-                  <div className="p-4 bg-slate-900 rounded-xl border border-slate-700 text-center space-y-3">
-                    <p className="text-xs font-mono text-[#FDCB6E]">
+                  <GoldCard className="p-4 text-center space-y-3 bg-[#fdfaf3]">
+                    <p className="text-xs font-mono text-[#002147] font-bold">
                       {isRtl ? 'الجزء ' : 'Piece '}{puzzleSentenceIndex+1} / 9: {picturePuzzleListData[puzzleSentenceIndex].sentence}
                     </p>
 
                     <div className="grid grid-cols-3 gap-2">
                       {picturePuzzleListData[puzzleSentenceIndex].options.map((option, idx) => (
-                        <button
+                        <AnswerOption
                           key={idx}
+                          label={option}
                           onClick={() => {
                             const correctAns = picturePuzzleListData[puzzleSentenceIndex].ans;
                             if (option === correctAns) {
@@ -2885,13 +2879,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Try another preposition!");
                             }
                           }}
-                          className="p-2 bg-slate-800 hover:bg-[#002147] text-white rounded-lg text-[10px] font-black cursor-pointer transition-all text-center"
-                        >
-                          {option}
-                        </button>
+                        />
                       ))}
                     </div>
-                  </div>
+                  </GoldCard>
                 </div>
               )}
 
@@ -2902,25 +2893,26 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 const currentChallenge = kingdomOfEtiquetteRoomsData[etiquetteRoomChallenge % kingdomOfEtiquetteRoomsData.length];
                 return (
                   <div className="space-y-6">
-                    <div className="bg-slate-900 p-5 rounded-2xl border border-slate-700 text-center space-y-2">
+                    <GoldCard className="p-5 text-center space-y-2 bg-[#fdfaf3]">
                       <span className="text-4xl">🏰</span>
-                      <h4 className="text-xs font-black text-white">{isRtl ? 'الموقع الحالي في قلعة الذوق' : 'Fortress Location Unlocked'}</h4>
-                      <p className="text-xs font-bold text-amber-300">
+                      <h4 className="text-xs font-black text-[#002147]">{isRtl ? 'الموقع الحالي في قلعة الذوق' : 'Fortress Location Unlocked'}</h4>
+                      <p className="text-xs font-bold text-[#002147]">
                         {isRtl ? currentChallenge.roomNameAr : currentChallenge.roomNameEn}
                       </p>
-                      <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono font-bold block w-max mx-auto">
+                      <ProgressPill>
                         {isRtl ? 'غرف مبنية: ' : 'Rooms Built: '}{kingdomRoomsUnlocked} / {kingdomOfEtiquetteRoomsData.length}
-                      </span>
-                    </div>
+                      </ProgressPill>
+                    </GoldCard>
 
-                    <p className="text-xs font-bold text-slate-300">
+                    <p className="text-xs font-bold text-[#002147]/80">
                       {isRtl ? currentChallenge.challengeAr : currentChallenge.challengeEn}
                     </p>
 
                     <div className="grid grid-cols-1 gap-2.5">
                       {currentChallenge.options.map((opt, oIdx) => (
-                        <button
+                        <AnswerOption
                           key={oIdx}
+                          label={opt}
                           onClick={() => {
                             if (oIdx === currentChallenge.correctIdx) {
                               triggerPointsReward(20, isRtl ? 'بناء غرف مدرسة الأدب والذوق' : 'Fortress of Courtesy Constructor', 'game_011');
@@ -2938,10 +2930,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Think of a more polite pathway!");
                             }
                           }}
-                          className="p-3 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-left text-xs font-black font-mono cursor-pointer transition-all border border-slate-700/60"
-                        >
-                          {opt}
-                        </button>
+                        />
                       ))}
                     </div>
                   </div>
@@ -3100,34 +3089,29 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 return (
                   <div id="game-12-coop-race" className="space-y-6">
                     {/* Header Info */}
-                    <div className="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-slate-700/50">
+                    <div className="flex justify-between items-center bg-[#fdfaf3] p-4 rounded-2xl border border-[#C49E3A]/40 shadow-sm">
                       <div>
-                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block bg-[#C49E3A]/10 text-[#E4C77A] px-2 py-0.5 rounded-md inline-block">
-                          {isRtl ? "تذكرة التعاون بمسار السباق" : "Co-op Boarding Pass"}
-                        </span>
-                        <div className="flex items-center gap-1.5 mt-1.5">
-                          <span className="text-sm font-black text-[#FDCB6E]">
+                        <ProgressPill>{isRtl ? "تذكرة التعاون بمسار السباق" : "Co-op Boarding Pass"}</ProgressPill>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-xs font-bold text-[#002147]">
                             {isRtl ? "تحدي اللباقة النشط: " : "Active Etiquette Goal: "}
                           </span>
-                          <span className="text-xs bg-[#002147] text-white px-2.5 py-0.5 rounded-full font-black">
-                            {isRtl ? `المرحلة ${ (raceChallengeIndex % friendshipChallenges.length) + 1 }` : `Stage ${ (raceChallengeIndex % friendshipChallenges.length) + 1 }`}
-                          </span>
+                          <ProgressPill>{isRtl ? `المرحلة ${(raceChallengeIndex % friendshipChallenges.length) + 1}` : `Stage ${(raceChallengeIndex % friendshipChallenges.length) + 1}`}</ProgressPill>
                         </div>
                       </div>
-                      <button
+                      <GhostButton
                         id="reset-race-btn"
                         onClick={resetRaceGame}
-                        className="text-[10px] font-black bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 px-3.5 py-1.5 rounded-xl border border-rose-500/25 cursor-pointer transition-all active:scale-95"
                       >
                         {isRtl ? "إعادة تهيئة المسار 🔄" : "Reset Race 🔄"}
-                      </button>
+                      </GhostButton>
                     </div>
 
                     {/* TWO RUNNING TRACKS (LANES) */}
-                    <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-800 space-y-5">
-                      <div className="text-xs text-left font-black text-slate-300 border-b border-slate-800 pb-2 flex justify-between items-center">
+                    <GoldCard className="space-y-4">
+                      <div className="text-xs font-bold text-[#002147] border-b border-[#C49E3A]/20 pb-2 flex justify-between items-center">
                         <span className="flex items-center gap-1.5">🏁 {isRtl ? "مسار سباق التعاون الثنائي" : "Dual Cooperative Race Lanes"}</span>
-                        <span className="text-[10px] text-slate-400 font-normal">
+                        <span className="text-[11px] text-[#002147]/70 font-medium">
                           {isRtl ? "الهدف للوصول: 100%" : "Goal: Reach 100% first"}
                         </span>
                       </div>
@@ -3135,16 +3119,18 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       {/* Lane 1: Player 1 (🦁) */}
                       <div id="player-1-lane" className="space-y-1.5 relative">
                         <div className="flex justify-between items-center text-xs">
-                          <span className={`font-black flex items-center gap-1 ${raceCurrentPlayer === 1 ? 'text-[#FDCB6E]' : 'text-slate-400'}`}>
+                          <span className={`font-bold flex items-center gap-1 ${raceCurrentPlayer === 1 ? 'text-[#002147]' : 'text-[#002147]/60'}`}>
                             🦁 {isRtl ? "اللاعب 1 (أسد الشجاعة)" : "Player 1 (Lion)"}
-                            {raceCurrentPlayer === 1 && <span className="bg-[#FDCB6E]/10 text-[#FDCB6E] text-[9px] px-1.5 py-0.2 rounded-full border border-[#FDCB6E]/20 font-bold ml-1">{isRtl ? "دوره الحالي" : "Active Turn"}</span>}
+                            {raceCurrentPlayer === 1 && (
+                              <span className="bg-[#C49E3A]/20 text-[#002147] text-[10px] px-2 py-0.5 rounded-full font-bold ml-1 border border-[#C49E3A]/40">
+                                {isRtl ? "دوره الحالي" : "Active Turn"}
+                              </span>
+                            )}
                           </span>
-                          <span className="font-mono font-bold text-slate-400">{friendshipProgress}%</span>
+                          <span className="font-mono font-bold text-[#002147]">{friendshipProgress}%</span>
                         </div>
-                        <div className="w-full bg-slate-950 border border-slate-800 h-10 rounded-2xl relative flex items-center overflow-hidden">
-                          {/* Progress bar background indicator */}
-                          <div className="bg-gradient-to-r from-[#002147]/30 to-[#002147] h-full transition-all duration-300" style={{ width: `${friendshipProgress}%` }} />
-                          {/* Moving Lion emoji */}
+                        <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/40 h-10 rounded-xl relative flex items-center overflow-hidden">
+                          <div className="bg-[#002147] h-full transition-all duration-300" style={{ width: `${friendshipProgress}%` }} />
                           <div 
                             className="absolute transition-all duration-500 text-2xl flex items-center justify-center pb-1"
                             style={{ 
@@ -3156,23 +3142,25 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           >
                             🦁
                           </div>
-                          <span className="absolute right-4 text-[9px] font-black tracking-widest text-slate-500 uppercase">FINISH 🏁</span>
+                          <span className="absolute right-4 text-[9px] font-black tracking-widest text-[#002147]/60 uppercase">FINISH 🏁</span>
                         </div>
                       </div>
 
                       {/* Lane 2: Player 2 (🦄) */}
                       <div id="player-2-lane" className="space-y-1.5 relative">
                         <div className="flex justify-between items-center text-xs">
-                          <span className={`font-black flex items-center gap-1 ${raceCurrentPlayer === 2 ? 'text-[#FDCB6E]' : 'text-slate-400'}`}>
+                          <span className={`font-bold flex items-center gap-1 ${raceCurrentPlayer === 2 ? 'text-[#002147]' : 'text-[#002147]/60'}`}>
                             🦄 {isRtl ? "اللاعب 2 (وحيد القرن اللبق)" : "Player 2 (Unicorn)"}
-                            {raceCurrentPlayer === 2 && <span className="bg-[#FDCB6E]/10 text-[#FDCB6E] text-[9px] px-1.5 py-0.2 rounded-full border border-[#FDCB6E]/20 font-bold ml-1">{isRtl ? "دوره الحالي" : "Active Turn"}</span>}
+                            {raceCurrentPlayer === 2 && (
+                              <span className="bg-[#C49E3A]/20 text-[#002147] text-[10px] px-2 py-0.5 rounded-full font-bold ml-1 border border-[#C49E3A]/40">
+                                {isRtl ? "دوره الحالي" : "Active Turn"}
+                              </span>
+                            )}
                           </span>
-                          <span className="font-mono font-bold text-slate-400">{friendshipProgress2}%</span>
+                          <span className="font-mono font-bold text-[#002147]">{friendshipProgress2}%</span>
                         </div>
-                        <div className="w-full bg-slate-950 border border-slate-800 h-10 rounded-2xl relative flex items-center overflow-hidden">
-                          {/* Progress bar background indicator */}
-                          <div className="bg-gradient-to-r from-[#C49E3A]/30 to-[#C49E3A] h-full transition-all duration-300" style={{ width: `${friendshipProgress2}%` }} />
-                          {/* Moving Unicorn emoji */}
+                        <div className="w-full bg-[#fdfaf3] border border-[#C49E3A]/40 h-10 rounded-xl relative flex items-center overflow-hidden">
+                          <div className="bg-[#C49E3A] h-full transition-all duration-300" style={{ width: `${friendshipProgress2}%` }} />
                           <div 
                             className="absolute transition-all duration-500 text-2xl flex items-center justify-center pb-1"
                             style={{ 
@@ -3184,120 +3172,111 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                           >
                             🦄
                           </div>
-                          <span className="absolute right-4 text-[9px] font-black tracking-widest text-slate-500 uppercase">FINISH 🏁</span>
+                          <span className="absolute right-4 text-[9px] font-black tracking-widest text-[#002147]/60 uppercase">FINISH 🏁</span>
                         </div>
                       </div>
-                    </div>
+                    </GoldCard>
 
                     {/* VICTORY OVERLAY CARD */}
                     {raceWinner && (
-                      <div className="bg-[#C49E3A]/10 border-2 border-[#C49E3A]/40 p-6 rounded-2xl text-center space-y-4 animate-bounce">
-                        <p className="text-2xl">🏆👑🎉</p>
-                        <h4 className="text-md font-black text-white">
+                      <GoldCard className="text-center space-y-4">
+                        <p className="text-3xl">🏆👑🎉</p>
+                        <h4 className="text-base font-bold text-[#002147]">
                           {isRtl 
                             ? `تهانينا الحارة! فاز اللاعب ${raceWinner === 1 ? 'الأول 🦁' : 'الثاني 🦄'} بالسباق!` 
                             : `Outstanding! Player ${raceWinner === 1 ? '1 🦁' : '2 🦄'} has Crossed the Finish Line!`}
                         </h4>
-                        <p className="text-xs text-slate-300 max-w-sm mx-auto animate-pulse">
+                        <p className="text-xs text-[#002147]/80 max-w-sm mx-auto">
                           {isRtl 
                             ? "أنهى البطلان السباق الرائع بفضل العبارات الذكية والتعاون اللبق! تم تسجيل نقاط إضافية." 
                             : "Both companions successfully pushed their physical state thanks to prompt language and etiquette support."}
                         </p>
-                        <button
+                        <PrimaryButton
                           onClick={resetRaceGame}
-                          className="px-6 py-2 bg-[#C49E3A] hover:bg-[#C49E3A]/90 text-slate-950 font-black rounded-xl text-xs transition-all active:scale-95 cursor-pointer"
                         >
                           {isRtl ? "ابدأ سباقاً جديداً 🔄" : "Start New Race 🔄"}
-                        </button>
-                      </div>
+                        </PrimaryButton>
+                      </GoldCard>
                     )}
 
                     {!raceWinner && (
-                      <div className="space-y-5">
+                      <div className="space-y-4">
                         {/* CHALLENGE CARD */}
-                        <div className="bg-gradient-to-br from-slate-900 to-slate-900/60 p-5 rounded-2xl border border-slate-700/50 space-y-3.5 relative overflow-hidden">
-                          {/* Glow background accent */}
-                          <div className="absolute -right-20 -top-20 w-44 h-44 bg-[#002147]/10 rounded-full blur-3xl pointer-events-none" />
-
+                        <GoldCard className="space-y-3">
                           <div className="flex justify-between items-center">
-                            <span className="text-[10px] bg-[#002147]/20 text-slate-200 px-3 py-1 rounded-full font-black border border-[#002147]/30">
-                              {isRtl ? `بطاقة تعاون: دور اللاعب ${raceCurrentPlayer}` : `Co-op Challenge: Player ${raceCurrentPlayer}'s Turn`}
-                            </span>
-                            <span className="text-xs text-[#FDCB6E] font-black flex items-center gap-1 animate-pulse">
+                            <ProgressPill>{isRtl ? `بطاقة تعاون: دور اللاعب ${raceCurrentPlayer}` : `Co-op Challenge: Player ${raceCurrentPlayer}'s Turn`}</ProgressPill>
+                            <span className="text-xs text-[#002147] font-bold flex items-center gap-1">
                               {raceCurrentPlayer === 1 ? "🦁 Player 1" : "🦄 Player 2"}
                             </span>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <h4 className="text-sm font-black text-white">{isRtl ? currentChallenge.titleAr : currentChallenge.titleEn}</h4>
-                            <p className="text-xs text-slate-400 leading-relaxed">
+                          <div className="space-y-1">
+                            <h4 className="text-sm font-bold text-[#002147]">{isRtl ? currentChallenge.titleAr : currentChallenge.titleEn}</h4>
+                            <p className="text-xs text-[#002147]/80 leading-relaxed">
                               {isRtl ? currentChallenge.descAr : currentChallenge.descEn}
                             </p>
                           </div>
-                        </div>
+                        </GoldCard>
 
                         {/* SUGGESTED INTERACTIVE CHIPS/CARDS */}
-                        <div className="space-y-2 bg-slate-900/20 p-4 rounded-xl border border-slate-800">
-                          <span className="text-[10px] text-slate-400 block font-bold mb-1">
+                        <div className="space-y-2 bg-[#fdfaf3] p-4 rounded-xl border border-[#C49E3A]/30">
+                          <span className="text-[11px] text-[#002147] block font-bold mb-1">
                             {isRtl ? "💡 انقر على العبارة المناسبة لإرسالها فوراً والتقدم السريع:" : "💡 Click to select and send the phrase instantly:"}
                           </span>
                           <div className="flex flex-wrap gap-2">
                             {currentChallenge.suggestions.map((sug) => (
-                              <button
+                              <GhostButton
                                 key={sug.phrase}
                                 onClick={() => handleCoopSubmit(sug.phrase)}
-                                className="px-3.5 py-2 bg-slate-800/80 hover:bg-[#002147] hover:text-white text-slate-200 rounded-xl text-xs font-black transition-all flex items-center gap-1 cursor-pointer border border-slate-700 active:scale-95"
                               >
                                 <span>{sug.phrase}</span>
-                                <span className="text-[10px] text-slate-400 group-hover:text-slate-200 font-normal">
+                                <span className="text-[10px] opacity-75 font-normal ml-1">
                                   ({sug.trans})
                                 </span>
-                              </button>
+                              </GhostButton>
                             ))}
                           </div>
                         </div>
 
                         {/* INPUT CONTROL FIELD (MANUAL OPTION) */}
                         <div className="space-y-3">
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={raceInput}
-                              onChange={(e) => setRaceInput(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleCoopSubmit();
-                                }
-                              }}
-                              placeholder={isRtl ? "أو تدرب على كتابتها يدوياً بالإنجليزية هنا..." : "Or practice typing it manually here..."}
-                              className="w-full text-center px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs font-mono font-bold focus:outline-none focus:border-[#002147]/60 focus:ring-1 focus:ring-[#002147]/60"
-                            />
-                          </div>
+                          <input
+                            type="text"
+                            value={raceInput}
+                            onChange={(e) => setRaceInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleCoopSubmit();
+                              }
+                            }}
+                            placeholder={isRtl ? "أو تدرب على كتابتها يدوياً بالإنجليزية هنا..." : "Or practice typing it manually here..."}
+                            className="w-full text-center px-4 py-3 bg-white border border-[#C49E3A]/40 rounded-xl text-[#002147] text-xs font-mono font-bold focus:outline-none focus:border-[#002147]"
+                          />
 
                           {raceFeedback && (
-                            <p className="text-xs font-bold text-[#FDCB6E]/90 text-center animate-fade-in font-mono">
+                            <p className="text-xs font-bold text-[#002147] text-center font-mono">
                               {raceFeedback}
                             </p>
                           )}
 
                           {/* ACTION BUTTONS */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            <button
+                            <PrimaryButton
                               id="submit-cheer-btn"
                               onClick={() => handleCoopSubmit()}
                               disabled={!raceInput.trim()}
-                              className="w-full py-3.5 bg-[#002147] hover:bg-[#00183a] disabled:opacity-50 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shadow-lg shadow-[#002147]/20"
+                              className="w-full"
                             >
                               🚀 {isRtl ? "تحقق وأرسل المكتوب يدوياً (15+ خطوة)" : "Verify & Boost manual (15+ Steps)"}
-                            </button>
+                            </PrimaryButton>
 
-                            <button
+                            <GhostButton
                               id="slow-advance-btn"
                               onClick={handleSlowAdvance}
-                              className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer border border-slate-700/50"
+                              className="w-full"
                             >
                               🚶‍♂️ {isRtl ? "تجاوز فردي ببطء دون عبارة (5+ خطوات)" : "Pass Slowly Individually (5+ Steps)"}
-                            </button>
+                            </GhostButton>
                           </div>
                         </div>
                       </div>
@@ -3313,32 +3292,30 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 const currentItem = wordMarketRustyWordsData[marketWordIndex % wordMarketRustyWordsData.length];
                 return (
                   <div className="space-y-6">
-                    <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-700">
+                    <div className="flex justify-between items-center bg-[#fdfaf3] p-4 rounded-xl border border-[#C49E3A]/40">
                       <div>
-                        <span className="text-[10px] text-slate-400 font-bold block">{isRtl ? 'محفظة التداول' : 'Wallet Wealth'}</span>
-                        <span className="text-md font-black text-amber-300 font-mono">💰 {marketGold} Gold</span>
+                        <span className="text-[10px] text-[#002147]/70 font-bold block">{isRtl ? 'محفظة التداول' : 'Wallet Wealth'}</span>
+                        <ProgressPill>💰 {marketGold} Gold</ProgressPill>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] text-slate-400 font-bold block">{isRtl ? 'السلعة في المتجر' : 'Market Item'}</span>
-                        <span className="text-xs bg-[#002147]/20 px-2 py-0.5 rounded font-mono font-bold text-white border border-[#002147]/30">
-                          {marketWordIndex + 1} / {wordMarketRustyWordsData.length}
-                        </span>
+                        <span className="text-[10px] text-[#002147]/70 font-bold block">{isRtl ? 'السلعة في المتجر' : 'Market Item'}</span>
+                        <ProgressPill>{marketWordIndex + 1} / {wordMarketRustyWordsData.length}</ProgressPill>
                       </div>
                     </div>
 
-                    <div className="p-4 bg-slate-900/60 rounded-xl border border-slate-800 text-center space-y-1">
-                      <p className="text-[10px] uppercase tracking-widest text-[#C49E3A] font-black">{isRtl ? 'الكلمة الأساسية المكسورة' : 'CURRENCY ROOT ELEMENT'}</p>
-                      <h4 className="text-xl font-bold font-mono text-white tracking-widest">{currentItem.display}</h4>
-                      <p className="text-[10px] text-slate-400">{isRtl ? 'أصل الكلمة بحاجة لربط بادئة أو لاحقة صحيحة' : 'Reforge the concept by splicing its prefix/suffix extension'}</p>
-                    </div>
+                    <GoldCard className="text-center space-y-1">
+                      <p className="text-[10px] uppercase tracking-widest text-[#C49E3A] font-bold">{isRtl ? 'الكلمة الأساسية المكسورة' : 'CURRENCY ROOT ELEMENT'}</p>
+                      <h4 className="text-2xl font-bold font-mono text-[#002147] tracking-widest">{currentItem.display}</h4>
+                      <p className="text-[11px] text-[#002147]/70">{isRtl ? 'أصل الكلمة بحاجة لربط بادئة أو لاحقة صحيحة' : 'Reforge the concept by splicing its prefix/suffix extension'}</p>
+                    </GoldCard>
 
-                    <p className="text-xs font-bold text-slate-300 text-center">
+                    <p className="text-xs font-bold text-[#002147] text-center">
                       {isRtl ? 'اختر إضافة بادئة أو لاحقة للترميم وتحقيق الربح المالي الكثيف:' : 'Snap prefix or suffix to fix broken dictionary concepts:'}
                     </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {currentItem.options.map((opt, oIdx) => (
-                        <button
+                        <GoldCard
                           key={oIdx}
                           onClick={() => {
                             if (opt.isCorrect) {
@@ -3357,11 +3334,11 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Oops! Spelling or meaning doesn't match root grammar. Try the other splice!");
                             }
                           }}
-                          className="p-4 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-center space-y-1.5 cursor-pointer transition-all border border-slate-700/60 active:scale-95"
+                          className="text-center space-y-1.5 cursor-pointer hover:border-[#002147] transition-all"
                         >
-                          <h5 className="font-mono text-xs font-bold text-white">{opt.text}</h5>
-                          <p className="text-[10px] text-slate-400">{isRtl ? 'التجميع المقترح:' : 'Result:'} <b className="text-[#C49E3A]">{opt.res}</b></p>
-                        </button>
+                          <h5 className="font-mono text-sm font-bold text-[#002147]">{opt.text}</h5>
+                          <p className="text-xs text-[#002147]/70">{isRtl ? 'التجميع المقترح:' : 'Result:'} <b className="text-[#C49E3A]">{opt.res}</b></p>
+                        </GoldCard>
                       ))}
                     </div>
                   </div>
@@ -3375,20 +3352,20 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 const currentPuzzle = politenessCiphersListData[cipherIndex % politenessCiphersListData.length];
                 return (
                   <div className="space-y-6 text-center">
-                    <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold font-mono uppercase">
-                      <span>{isRtl ? 'الشيفرة ' : 'Cipher '}{cipherIndex + 1} / {politenessCiphersListData.length}</span>
-                      <span className="text-amber-400">{isRtl ? `إزاحة: ${currentPuzzle.keyShift}` : `Shift Key: ${currentPuzzle.keyShift}`}</span>
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <ProgressPill>{isRtl ? 'الشيفرة ' : 'Cipher '}{cipherIndex + 1} / {politenessCiphersListData.length}</ProgressPill>
+                      <ProgressPill>{isRtl ? `إزاحة: ${currentPuzzle.keyShift}` : `Shift Key: ${currentPuzzle.keyShift}`}</ProgressPill>
                     </div>
 
-                    <div className="p-5 bg-slate-900 rounded-2xl border border-slate-700 space-y-2">
-                      <span className="text-2xl">🔐</span>
-                      <p className="text-xs font-bold text-slate-300 font-mono tracking-wider select-all">
+                    <GoldCard className="space-y-2">
+                      <span className="text-3xl block">🔐</span>
+                      <p className="text-sm font-bold text-[#002147] font-mono tracking-wider select-all">
                         "{currentPuzzle.cipher}"
                       </p>
-                      <p className="text-[10px] text-slate-400 leading-relaxed italic">
+                      <p className="text-xs text-[#002147]/75 leading-relaxed italic">
                         💡 {isRtl ? currentPuzzle.hintAr : currentPuzzle.hintEn}
                       </p>
-                    </div>
+                    </GoldCard>
 
                     <input
                       type="text"
@@ -3403,16 +3380,16 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         }
                       }}
                       placeholder={isRtl ? "اكتب العبارة المفكوكة بالإنجليزية..." : `Translate: "${currentPuzzle.cipher}"...`}
-                      className="w-full text-center px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs font-mono tracking-wider focus:outline-none focus:border-[#002147]"
+                      className="w-full text-center px-4 py-3 bg-white border border-[#C49E3A]/40 rounded-xl text-[#002147] text-xs font-mono tracking-wider focus:outline-none focus:border-[#002147]"
                     />
 
                     {cipherDecrypted && (
                       <div className="space-y-4">
-                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold rounded-xl font-mono">
+                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-bold rounded-xl font-mono">
                           🔓 {isRtl ? `رائع! العبارة صحيحة: ${currentPuzzle.ans}` : `Success! Decrypted securely: ${currentPuzzle.ans}`}
                         </motion.div>
 
-                        <button
+                        <PrimaryButton
                           onClick={() => {
                             if (cipherIndex < politenessCiphersListData.length - 1) {
                               setCipherIndex(prev => prev + 1);
@@ -3425,10 +3402,9 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               setCipherDecrypted(false);
                             }
                           }}
-                          className="px-5 py-2.5 bg-[#C49E3A] hover:bg-[#C49E3A]/90 text-slate-950 rounded-xl text-xs font-black cursor-pointer shadow-lg shadow-[#C49E3A]/10 animate-pulse"
                         >
                           {isRtl ? "الشيفرة التالية ➡️" : "Next Cipher ➡️"}
-                        </button>
+                        </PrimaryButton>
                       </div>
                     )}
                   </div>
@@ -3440,23 +3416,23 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_015' && (
                 <div className="space-y-6">
-                  <div className="p-6 bg-slate-950 rounded-2xl border border-slate-900 text-center relative overflow-hidden">
-                    <span className="text-5xl block animate-pulse">🎭</span>
-                    <h5 className="text-xs font-bold text-[#FDCB6E] mt-2">{isRtl ? 'منزل الأمير والتنين المهذب' : 'The Prince and the Polite Dragon shadow screen'}</h5>
-                    <p className="text-[10px] text-slate-400 mt-1">
+                  <GoldCard className="text-center relative overflow-hidden space-y-2">
+                    <span className="text-5xl block">🎭</span>
+                    <h5 className="text-sm font-bold text-[#002147]">{isRtl ? 'منزل الأمير والتنين المهذب' : 'The Prince and the Polite Dragon shadow screen'}</h5>
+                    <p className="text-xs text-[#002147]/80">
                       {isRtl ? 'اكتب جملة يلقيها الأمير ليعلم فيها التنين آداب الجلوس أو الترحيب:' : 'Type a sentence spoken by the prince containing vocabulary of courtesy and moral values:'}
                     </p>
-                  </div>
+                  </GoldCard>
 
                   <textarea
                     rows={2}
                     value={theaterMoralInput}
                     onChange={(e) => setTheaterMoralInput(e.target.value)}
                     placeholder={isRtl ? "اكتب هنا بالإنجليزية..." : "Write a kind dialogue string here..."}
-                    className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none"
+                    className="w-full p-3 bg-white border border-[#C49E3A]/40 rounded-xl text-[#002147] text-xs focus:outline-none focus:border-[#002147]"
                   />
 
-                  <button
+                  <PrimaryButton
                     onClick={() => {
                       if (theaterMoralInput.toLowerCase().includes("please") || theaterMoralInput.toLowerCase().includes("thank") || theaterMoralInput.toLowerCase().includes("kind")) {
                         setTheaterFeedback(isRtl ? "تقييم باسل: ممتاز! لقنت التنين سلوكاً خلوكاً للغاية." : "Basil's shadow critic: 10/10. Supremely kind phraseology!");
@@ -3466,13 +3442,13 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                         setTheaterFeedback(isRtl ? "الحوار رائع، لكن حاول إدخال قيمة تهذيبية مثل please أو thank you لرفع التقييم!" : "Include words of courtesy to earn extra theater merits!");
                       }
                     }}
-                    className="w-full py-2.5 bg-[#002147] hover:bg-[#00183a] text-white rounded-xl text-xs font-black cursor-pointer transition-all text-center"
+                    className="w-full"
                   >
                     🎭 {isRtl ? 'عرض المشهد على الستارة والتقييم' : 'Submit Scene Description to Basil'}
-                  </button>
+                  </PrimaryButton>
 
                   {theaterFeedback && (
-                    <p className="text-center text-xs font-bold text-amber-300 italic">{theaterFeedback}</p>
+                    <p className="text-center text-xs font-bold text-[#002147] italic">{theaterFeedback}</p>
                   )}
                 </div>
               )}
@@ -3484,18 +3460,18 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 const currentPrompt = communicationBridgePromptsData[bridgeQuestionIndex % communicationBridgePromptsData.length];
                 return (
                   <div className="space-y-6">
-                    <p className="text-xs text-slate-300 font-bold">
+                    <p className="text-xs text-[#002147] font-bold text-center">
                       {isRtl 
                         ? "رتب الأخشاب لربط الجزيرتين عن طريق استصدار تتابع الجمل الشرطية والرد السليم!"
                         : "Bridge the academic waters by stacking the correct grammar planks!"}
                     </p>
 
-                    <div className="flex gap-2 justify-center py-4">
+                    <div className="flex gap-2 justify-center py-2">
                       {Array.from({ length: communicationBridgePromptsData.length }).map((_, bIdx) => (
                         <div 
                           key={bIdx}
-                          className={`w-10 h-6 rounded-lg transition-all flex items-center justify-center font-black text-[10px] ${
-                            bIdx < bridgePlanks ? 'bg-amber-600 border border-amber-700 text-amber-100 shadow-md' : 'bg-slate-800 border border-slate-700 text-slate-600'
+                          className={`w-10 h-6 rounded-lg transition-all flex items-center justify-center font-bold text-xs ${
+                            bIdx < bridgePlanks ? 'bg-[#002147] text-[#C49E3A] border border-[#002147] shadow-sm' : 'bg-white border border-[#C49E3A]/40 text-[#002147]/40'
                           }`}
                         >
                           {bIdx + 1}
@@ -3503,14 +3479,15 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       ))}
                     </div>
 
-                    <div className="p-5 bg-slate-900 rounded-2xl border border-slate-700 text-center font-mono">
-                      <p className="text-xs font-bold text-[#FDCB6E]">{currentPrompt.sentence}</p>
-                    </div>
+                    <GoldCard className="text-center font-mono">
+                      <p className="text-sm font-bold text-[#002147]">{currentPrompt.sentence}</p>
+                    </GoldCard>
 
-                    <div className="grid grid-cols-2 gap-3.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {currentPrompt.options.map((opt) => (
-                        <button
+                        <AnswerOption
                           key={opt}
+                          label={opt}
                           onClick={() => {
                             if (opt === currentPrompt.ans) {
                               triggerPointsReward(20, isRtl ? 'بناء جسور القواعد والشرطيات' : 'Bridge Builder Logic Solver', 'game_016');
@@ -3528,10 +3505,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Wrong verbal plank, bridge collapsed, try again!");
                             }
                           }}
-                          className="p-2.5 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-bold tracking-wider cursor-pointer font-mono border border-slate-700/60 active:scale-95"
-                        >
-                          {opt}
-                        </button>
+                        />
                       ))}
                     </div>
                   </div>
@@ -3543,23 +3517,24 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_017' && (
                 <div className="space-y-6 text-center">
-                  <div className="p-6 bg-slate-900 rounded-2xl border border-slate-700">
-                    <span className="text-4xl animate-pulse block">🥀</span>
-                    <h5 className="text-xs font-extrabold text-slate-200 mt-2">{isRtl ? 'زهرة الحزن تذبل!' : 'The sorrow flower is sad...'}</h5>
-                    <p className="text-[10px] text-slate-400 mt-1">
+                  <GoldCard className="space-y-2">
+                    <span className="text-4xl block">🥀</span>
+                    <h5 className="text-sm font-bold text-[#002147]">{isRtl ? 'زهرة الحزن تذبل!' : 'The sorrow flower is sad...'}</h5>
+                    <p className="text-xs text-[#002147]/80">
                       {isRtl ? 'انثر كلمات المواساة الإيجابية لإنقاذها وازدهار بستانك العاطفي:' : 'Pour words of sweet empathy and comfort to cheer the plant up:'}
                     </p>
-                  </div>
+                  </GoldCard>
 
-                  <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
                     {[
                       { txt: "Everything will be okay.", points: 15 },
                       { txt: "Do not complain.", points: 0 },
                       { txt: "I am always here for you.", points: 15 },
                       { txt: "Why are you sad?", points: 0 }
                     ].map((opt, oIdx) => (
-                      <button
+                      <AnswerOption
                         key={oIdx}
+                        label={opt.txt}
                         onClick={() => {
                           if (opt.points > 0) {
                             setEmotionFlowerStatus('blossoming');
@@ -3570,10 +3545,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("A cold shoulder, select positive encouragement!");
                           }
                         }}
-                        className="p-3 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-black transition-all cursor-pointer font-mono"
-                      >
-                        {opt.txt}
-                      </button>
+                      />
                     ))}
                   </div>
                 </div>
@@ -3586,37 +3558,38 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 const currentRecipe = phraseChefRecipesData[phraseChefRecipeIndex % phraseChefRecipesData.length];
                 return (
                   <div className="space-y-6">
-                    <div className="p-5 bg-slate-900 rounded-3xl border border-slate-700/60 text-center relative overflow-hidden">
-                      <div className="absolute top-2 right-4 text-[10px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700/40 font-bold">
-                        {isRtl ? 'طبق ' : 'Dish '}{phraseChefRecipeIndex + 1} / {phraseChefRecipesData.length}
+                    <GoldCard className="text-center relative overflow-hidden space-y-2">
+                      <div className="flex justify-between items-center mb-1">
+                        <ProgressPill>{isRtl ? 'طبق ' : 'Dish '}{phraseChefRecipeIndex + 1} / {phraseChefRecipesData.length}</ProgressPill>
+                        <span className="text-3xl block">🍲</span>
+                        <ProgressPill>CHEF MASTER</ProgressPill>
                       </div>
-                      <span className="text-4xl animate-bounce block">🍲</span>
-                      <h5 className="text-xs font-extrabold text-[#FDCB6E] mt-2">
+                      <h5 className="text-sm font-bold text-[#002147]">
                         {isRtl ? currentRecipe.titleAr : currentRecipe.titleEn}
                       </h5>
-                      <p className="text-[10px] text-[#C49E3A] mt-1">Select logic tokens: SUBJECT ➔ VERB ➔ OBJECT</p>
-                    </div>
+                      <p className="text-xs text-[#002147]/75 font-semibold">Select logic tokens: SUBJECT ➔ VERB ➔ OBJECT</p>
+                    </GoldCard>
 
-                    <div className="p-3 bg-slate-900/40 rounded-2xl border border-slate-800 text-center min-h-[50px] flex items-center justify-center gap-2 flex-wrap">
+                    <GoldCard className="text-center min-h-[52px] flex items-center justify-center gap-2 flex-wrap bg-[#fdfaf3]">
                       {phraseChefSelected.length === 0 ? (
-                        <p className="text-slate-500 font-bold text-xs italic">{isRtl ? 'حدد العناصر بالترتيب لبناء الجملة...' : 'Click tokens to assemble grammatically perfect sentence...'}</p>
+                        <p className="text-[#002147]/60 font-medium text-xs italic">{isRtl ? 'حدد العناصر بالترتيب لبناء الجملة...' : 'Click tokens to assemble grammatically perfect sentence...'}</p>
                       ) : (
                         phraseChefSelected.map((tok, tIdx) => (
                           <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             key={tIdx}
-                            className="px-3 py-1.5 bg-[#002147] rounded-xl text-xs font-mono font-black text-white border border-[#002147]/40 shadow-md flex items-center gap-1"
+                            className="px-3.5 py-1.5 bg-[#002147] rounded-xl text-xs font-mono font-bold text-[#C49E3A] border border-[#002147] shadow-sm flex items-center gap-1"
                           >
                             <span>{tok}</span>
                           </motion.div>
                         ))
                       )}
-                    </div>
+                    </GoldCard>
 
                     <div className="grid grid-cols-3 gap-2">
                       <div>
-                        <p className="text-[9px] uppercase font-black text-slate-500 mb-1.5 text-center">{isRtl ? 'فاعل' : 'Subject'}</p>
+                        <p className="text-xs uppercase font-bold text-[#002147]/70 mb-1.5 text-center">{isRtl ? 'فاعل' : 'Subject'}</p>
                         {currentRecipe.subjects.map(word => (
                           <button
                             key={word}
@@ -3625,10 +3598,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               if (phraseChefSelected.length >= 3) return;
                               setPhraseChefSelected(prev => [...prev, word]);
                             }}
-                            className={`w-full text-center py-2.5 rounded-lg text-[10px] font-bold text-white mb-2 cursor-pointer transition-all ${
+                            className={`w-full text-center py-2.5 rounded-xl text-xs font-bold mb-2 cursor-pointer transition-all border ${
                               phraseChefSelected.includes(word)
-                                ? 'bg-slate-900/30 text-slate-700 border border-slate-800/40 opacity-40 cursor-not-allowed'
-                                : 'bg-slate-800 hover:bg-[#002147] hover:scale-105 active:scale-95'
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                                : 'bg-white hover:bg-[#002147] hover:text-white text-[#002147] border-[#C49E3A]/40 shadow-sm active:scale-95'
                             }`}
                           >
                             {word}
@@ -3637,7 +3610,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       </div>
 
                       <div>
-                        <p className="text-[9px] uppercase font-black text-slate-500 mb-1.5 text-center">{isRtl ? 'فعل' : 'Verb'}</p>
+                        <p className="text-xs uppercase font-bold text-[#002147]/70 mb-1.5 text-center">{isRtl ? 'فعل' : 'Verb'}</p>
                         {currentRecipe.verbs.map(word => (
                           <button
                             key={word}
@@ -3646,10 +3619,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               if (phraseChefSelected.length >= 3) return;
                               setPhraseChefSelected(prev => [...prev, word]);
                             }}
-                            className={`w-full text-center py-2.5 rounded-lg text-[10px] font-bold text-white mb-2 cursor-pointer transition-all ${
+                            className={`w-full text-center py-2.5 rounded-xl text-xs font-bold mb-2 cursor-pointer transition-all border ${
                               phraseChefSelected.includes(word)
-                                ? 'bg-slate-900/30 text-slate-700 border border-slate-800/40 opacity-40 cursor-not-allowed'
-                                : 'bg-slate-800 hover:bg-[#002147] hover:scale-105 active:scale-95'
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                                : 'bg-white hover:bg-[#002147] hover:text-white text-[#002147] border-[#C49E3A]/40 shadow-sm active:scale-95'
                             }`}
                           >
                             {word}
@@ -3658,7 +3631,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                       </div>
 
                       <div>
-                        <p className="text-[9px] uppercase font-black text-slate-500 mb-1.5 text-center">{isRtl ? 'مفعول' : 'Object'}</p>
+                        <p className="text-xs uppercase font-bold text-[#002147]/70 mb-1.5 text-center">{isRtl ? 'مفعول' : 'Object'}</p>
                         {currentRecipe.objects.map(word => (
                           <button
                             key={word}
@@ -3667,10 +3640,10 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               if (phraseChefSelected.length >= 3) return;
                               setPhraseChefSelected(prev => [...prev, word]);
                             }}
-                            className={`w-full text-center py-2.5 rounded-lg text-[10px] font-bold text-white mb-2 cursor-pointer transition-all ${
+                            className={`w-full text-center py-2.5 rounded-xl text-xs font-bold mb-2 cursor-pointer transition-all border ${
                               phraseChefSelected.includes(word)
-                                ? 'bg-slate-900/30 text-slate-700 border border-slate-800/40 opacity-40 cursor-not-allowed'
-                                : 'bg-slate-800 hover:bg-[#002147] hover:scale-105 active:scale-95'
+                                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                                : 'bg-white hover:bg-[#002147] hover:text-white text-[#002147] border-[#C49E3A]/40 shadow-sm active:scale-95'
                             }`}
                           >
                             {word}
@@ -3680,7 +3653,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                     </div>
 
                     <div className="flex gap-2">
-                      <button
+                      <PrimaryButton
                         onClick={() => {
                           if (phraseChefSelected.length === 3) {
                             const isCorrect = phraseChefSelected[0] === currentRecipe.correctCombo[0] &&
@@ -3706,16 +3679,15 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                             speakFeedback("Make sure to pick all three ingredients!");
                           }
                         }}
-                        className="flex-1 py-3 bg-[#C49E3A] text-slate-900 rounded-xl text-xs font-black hover:bg-[#C49E3A] transition-all cursor-pointer active:scale-95"
+                        className="flex-1"
                       >
                         🔥 {isRtl ? 'طهي الطبق النحوي' : 'Fire up cooking stove'}
-                      </button>
-                      <button
+                      </PrimaryButton>
+                      <GhostButton
                         onClick={() => setPhraseChefSelected([])}
-                        className="px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95"
                       >
                         {isRtl ? 'تصفير' : 'Reset'}
-                      </button>
+                      </GhostButton>
                     </div>
                   </div>
                 );
@@ -3726,22 +3698,20 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
               {/* ---------------------------------------------------- */}
               {activeGameId === 'game_019' && (
                 <div className="space-y-6">
-                  <p className="text-xs text-slate-300 font-bold text-center">
+                  <p className="text-xs text-[#002147] font-bold text-center">
                     {isRtl 
                       ? "اكتب إملاء الحروف بشكل سليم لتشغيل مشاعل الكهف المظلم وكشف خريطة المتاهة المخفية!"
                       : "Defeat fog-of-war by proving correct spellings of complex vocabulary nouns!"}
                   </p>
 
-                  <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center text-xs">
-                    <span className="text-[#C49E3A] font-black uppercase font-mono tracking-widest text-[10px] block mb-1">
-                      {isRtl ? 'حالة الكهف' : 'CAVE LANTERNS LIT'}
-                    </span>
-                    <span className="font-mono text-white">
+                  <GoldCard className="text-center text-xs space-y-1">
+                    <ProgressPill>{isRtl ? 'حالة الكهف' : 'CAVE LANTERNS LIT'}</ProgressPill>
+                    <span className="font-mono text-sm font-bold text-[#002147] block mt-1">
                       💡 {caveUnveiled.filter(Boolean).length} / 25 {isRtl ? 'مشاعل مضيئة' : 'Torches Lit'}
                     </span>
-                  </div>
+                  </GoldCard>
 
-                  <div className="grid grid-cols-5 gap-1.5 max-w-xs mx-auto aspect-square bg-slate-950 p-2.5 rounded-2xl border border-slate-700 text-center">
+                  <div className="grid grid-cols-5 gap-2 max-w-xs mx-auto aspect-square bg-[#fdfaf3] p-3 rounded-2xl border border-[#C49E3A]/40 text-center">
                     {caveUnveiled.map((unveiled, index) => {
                       // pick word target dynamically from pool based on index
                       const wordToSpell = darkCaveSpellingPoolData[index % darkCaveSpellingPoolData.length];
@@ -3778,8 +3748,8 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Fog remains dense! Mistake committed.");
                             }
                           }}
-                          className={`aspect-square rounded-xl text-md flex items-center justify-center font-bold transition-all active:scale-90 ${
-                            unveiled ? 'bg-amber-400 text-slate-900 shadow-md shadow-amber-400/20' : 'bg-slate-800 text-slate-600'
+                          className={`aspect-square rounded-xl text-base flex items-center justify-center font-bold transition-all active:scale-90 border ${
+                            unveiled ? 'bg-[#C49E3A] text-[#002147] border-[#C49E3A] shadow-md' : 'bg-white text-[#002147]/30 border-[#C49E3A]/30 hover:border-[#002147]'
                           }`}
                         >
                           {unveiled ? "💡" : "🌫️"}
@@ -3801,47 +3771,46 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                 
                 return (
                   <div className="space-y-6">
-                    <p className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] text-center font-mono">
+                    <p className="text-xs uppercase font-bold tracking-widest text-[#002147] text-center font-mono">
                       {isRtl ? 'بوابة التعددية الثقافية والأدب العالمي' : 'GATEWAY TO GLOBAL COURTESY & DIPLOMACY'}
                     </p>
 
                     {/* Horizontal scrollable flag cards */}
-                    <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
                       {culturalFestivalLocationsData.map((country, idx) => {
                         const isSelected = normalizedCountry.toLowerCase().includes(
                           country.nameEn.replace(/ 🇯🇵| 🇫🇷| 🇸🇦| 🇮🇹| 🇮🇳| 🇬🇧/g, "").toLowerCase()
                         );
                         return (
-                          <button
+                          <GhostButton
                             key={idx}
+                            active={isSelected}
                             onClick={() => {
                               setCurrentCountry(country.nameEn);
                               speakFeedback(`Navigating to ${country.nameEn}`);
                             }}
-                            className={`flex-none px-3 py-2 bg-slate-900 hover:bg-[#002147] hover:text-white rounded-xl text-xs font-black cursor-pointer border transition-all active:scale-95 flex items-center gap-1 font-mono ${
-                              isSelected ? 'border-[#C49E3A] text-[#C49E3A]' : 'border-slate-800 text-slate-300'
-                            }`}
                           >
                             <span>{isRtl ? country.nameAr : country.nameEn}</span>
-                          </button>
+                          </GhostButton>
                         );
                       })}
                     </div>
 
-                    <div className="p-5 bg-slate-900 rounded-3xl border border-slate-700/60 space-y-2.5">
-                      <span className="text-3xl block animate-pulse">🌍</span>
-                      <p className="text-[10px] text-[#C49E3A] font-black uppercase font-mono tracking-widest">
-                        {isRtl ? 'الموقف الثقافي اللبق:' : 'CULTURAL SCENARIO CHALLENGE'}
-                      </p>
-                      <p className="text-xs font-medium text-slate-200 leading-relaxed font-sans select-none">
+                    <GoldCard className="space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <ProgressPill>{isRtl ? 'الموقف الثقافي اللبق:' : 'CULTURAL SCENARIO CHALLENGE'}</ProgressPill>
+                        <span className="text-3xl block">🌍</span>
+                      </div>
+                      <p className="text-xs font-medium text-[#002147] leading-relaxed select-none">
                         {isRtl ? currentCountryData.scenarioAr : currentCountryData.scenarioEn}
                       </p>
-                    </div>
+                    </GoldCard>
 
                     <div className="grid grid-cols-1 gap-2.5">
                       {currentCountryData.options.map((opt, idx) => (
-                        <button
+                        <AnswerOption
                           key={idx}
+                          label={opt.txt}
                           onClick={() => {
                             if (opt.correct) {
                               triggerPointsReward(25, isRtl ? 'سفير الثقافات العالمية' : 'Cultural Etiquette Globalist', 'game_020');
@@ -3854,10 +3823,7 @@ export const EducationalGamesHub: React.FC<EducationalGamesHubProps> = ({
                               speakFeedback("Traditional roots require a different tone, try again!");
                             }
                           }}
-                          className="p-3.5 bg-slate-800 hover:bg-[#002147] hover:text-white rounded-xl text-left text-xs font-black cursor-pointer transition-all active:scale-95 border border-slate-700/60 leading-relaxed font-mono"
-                        >
-                          {opt.txt}
-                        </button>
+                        />
                       ))}
                     </div>
                   </div>
