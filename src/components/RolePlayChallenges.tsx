@@ -1,30 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, 
-  Sparkles, 
   Volume2, 
   Mic, 
-  CheckCircle2, 
-  HelpCircle, 
-  BookOpen, 
-  RotateCcw, 
-  ArrowRight, 
   Award, 
-  Search,
-  MessageSquare,
-  Shield,
-  Clock,
-  ThumbsUp,
-  Smile,
-  Play,
+  ArrowLeft,
   Check,
-  Music,
-  ChevronRight,
-  ChevronLeft
+  CheckCircle2
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { managedSpeak } from '../lib/audio';
+import {
+  SectionShell,
+  GoldCard,
+  LessonTile,
+  PrimaryButton,
+  GhostButton,
+  AnswerOption,
+  ProgressPill,
+  TutorFace
+} from './ui/academy';
 
 interface ChallengeScenario {
   id: string;
@@ -121,7 +116,7 @@ const RESTAURANT_SCENARIOS: ChallengeScenario[] = [
     host_line_1: 'I hope you enjoyed your entrees. Is there anything else I can get for you today?',
     host_line_1_ar: 'أرجو أن تكونوا قد استمتعتم بالوجبات الأساسية. هل يمكنني جلب أي شيء آخر لكم اليوم؟',
     student_line_template: 'No, thank you. Could we have the ____, please?',
-    student_line_template_ar: 'لاص، شكراً لك. هل يمكننا الحصول على ____ من فضلك؟',
+    student_line_template_ar: 'لا، شكراً لك. هل يمكننا الحصول على ____ من فضلك؟',
     correct_blank: 'bill',
     options: ['bill', 'chef\'s bicycle', 'kitchen keys'],
     host_response: 'Certainly, sir. I will print the check and bring the credit card terminal right over.',
@@ -442,7 +437,7 @@ interface RolePlayChallengesProps {
 
 export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
   lang,
-  userProfile,
+  userProfile: _userProfile,
   onBack,
   onXPAdded
 }) => {
@@ -460,7 +455,7 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
   
   // Recording engines
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
+  const [_recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
   const [evaluationResult, setEvaluationResult] = useState<{
     score: number;
     recognizedText: string;
@@ -469,7 +464,7 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
   } | null>(null);
 
   const [completedScenarios, setCompletedScenarios] = useState<string[]>([]);
-  const [sessionXP, setSessionXP] = useState(0);
+  const [_sessionXP, setSessionXP] = useState(0);
 
   const recognitionRef = useRef<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -573,10 +568,8 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
         
         // Dynamically grade the pronunciation
         setTimeout(() => {
-          // If speech recognition failed to capture or returned empty, we simulate matching
           const speechResult = transcribedText || selectedOption || scenario.correct_blank;
           
-          // Let's verify how close it matches the correct blank
           const targetNorm = scenario.correct_blank.toLowerCase().trim();
           const speechNorm = speechResult.toLowerCase().trim();
           const matched = speechNorm.includes(targetNorm);
@@ -589,7 +582,6 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
             feedback_ar = `ممتاز جداً! تلفظك لجملة "${scenario.student_line_template.replace('____', scenario.correct_blank)}" سليم تماماً ونبرة صوتك مهذبة ومناسبة للتمثيل.`;
             feedback_en = `Perfect! Your utterance of "${scenario.student_line_template.replace('____', scenario.correct_blank)}" is exceptionally flawless and polite.`;
             
-            // Add scenario list
             if (!completedScenarios.includes(scenario.id)) {
               setCompletedScenarios(prev => [...prev, scenario.id]);
               setSessionXP(prev => prev + 20);
@@ -609,7 +601,6 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
 
           setStage('feedback');
 
-          // Play Chef/Waiter dynamic continuation audio response
           if (score >= 90) {
             setTimeout(() => {
               playSpeech(scenario.host_response, scenario.type === 'kids' ? 0.85 : 0.95);
@@ -622,7 +613,6 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
       rec.start();
     } catch (e) {
       console.error(e);
-      // Simulate fallback when mic is unavailable
       setIsRecording(false);
       alert(isRtl ? "لم نتمكن من تشغيل الميكروفون، سيتم تفعيل وضع التخمين التلقائي للتدريب." : "Microphone unavailable. Simulating selection with top options.");
       
@@ -660,430 +650,333 @@ export const RolePlayChallenges: React.FC<RolePlayChallengesProps> = ({
     return sc.type === filterType;
   });
 
+  // Tutor selection rule: "business" (Mohammed) for work/business scenarios and "sara" for the rest
+  const currentTutor = scenario 
+    ? (scenario.type === 'adults' ? 'business' : 'sara')
+    : (filterType === 'adults' ? 'business' : 'sara');
+
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-24 md:pb-12">
-      {/* Decorative Gradient Header */}
-      <div className="absolute top-0 left-0 right-0 h-56 bg-gradient-to-b from-blue-50 to-transparent pointer-events-none" />
-
-      <div className="max-w-6xl mx-auto px-4 pt-6 relative z-10">
-
-        {/* Header Breadcrumbs */}
-        <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-8 pb-4 border-b border-slate-100 ${isRtl ? 'md:flex-row-reverse text-right' : 'text-left'}`}>
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 bg-[#C49E3A] rounded-2xl flex items-center justify-center text-[#002147] shadow-lg shadow-[#C49E3A]/10 shrink-0">
-              <Users size={22} strokeWidth={2.5} />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black text-[#002147] tracking-tight">
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'} className={`pb-24 ${isRtl ? 'font-arabic' : 'font-sans'}`}>
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-[#C49E3A]/25">
+        <div className="flex items-center gap-3">
+          <TutorFace tutor={currentTutor} size="md" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-black text-[#002147] tracking-tight">
                 {isRtl ? 'حوارات المحاكاة والتمثيل 🎭' : 'Interactive Role-Play Challenges 🎭'}
               </h1>
-              <p className="text-xs text-slate-500 font-bold tracking-widest mt-0.5">
-                {isRtl ? 'املأ فراغ المحادثات في المطاعم وسجل جملتك التمثيلية لتقييم ذكي فوري' : 'Step into real restaurant situations. Build conversation flow & record roles'}
-              </p>
+              <ProgressPill>
+                <Award size={13} className="text-[#C49E3A]" />
+                <span>{completedScenarios.length} / 20 {isRtl ? 'مكتمل' : 'Done'}</span>
+              </ProgressPill>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Status indicators */}
-            <div className="bg-white border rounded-xl px-3 py-1.5 flex items-center gap-1.5 shadow-2xs text-xs font-black text-[#002147]">
-              <Award size={14} className="text-[#C49E3A]" />
-              <span>{completedScenarios.length} / 20 {isRtl ? 'مكتمل' : 'Done'}</span>
-            </div>
-            <button
-              onClick={onBack}
-              className={`flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl font-bold text-xs transition-all cursor-pointer ${isRtl ? 'flex-row-reverse' : ''}`}
-            >
-              <span>{isRtl ? 'العودة للمنصة ↩️' : 'Back to Academy ↩️'}</span>
-            </button>
+            <p className="text-xs text-[#002147]/70 font-bold mt-0.5">
+              {isRtl 
+                ? 'املأ فراغ المحادثات وسجل جملتك التمثيلية لتقييم ذكي فوري' 
+                : 'Step into real-life situations. Build conversation flow & record roles'}
+            </p>
           </div>
         </div>
 
-        {/* Master Workspace Split Layout */}
-        {!scenario ? (
-          <div className="space-y-6">
-            
-            {/* Filter Pill Badges */}
-            <div className={`flex items-center gap-2 ${isRtl ? 'justify-end' : 'justify-start'}`}>
-              {[
-                { id: 'all', label_ar: 'الكل 💎', label_en: 'All 💎' },
-                { id: 'kids', label_ar: 'ألعاب وصغار 🦁', label_en: 'Kids & Play 🦁' },
-                { id: 'adults', label_ar: 'عمل وكبار 👔', label_en: 'Adults & Business 👔' }
-              ].map(btn => (
-                <button
-                  key={btn.id}
-                  onClick={() => setFilterType(btn.id as any)}
-                  className={`px-4 py-2 text-xs font-black rounded-full border transition-all cursor-pointer ${
-                    filterType === btn.id
-                      ? 'bg-[#002147] text-[#C49E3A] border-[#002147] shadow-md scale-[1.02]'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  {isRtl ? btn.label_ar : btn.label_en}
-                </button>
-              ))}
-            </div>
+        <GhostButton onClick={onBack}>
+          <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+          <span>{isRtl ? 'العودة للمنصة' : 'Back to Academy'}</span>
+        </GhostButton>
+      </div>
 
-            {/* Grid of Interactive Role-Play Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredScenarios.map((sc) => {
-                const isDone = completedScenarios.includes(sc.id);
-                return (
-                  <div
-                    key={sc.id}
-                    className="bg-white rounded-2xl border border-slate-200/80 shadow-md shadow-slate-100/30 overflow-hidden hover:border-[#002147]/30 hover:shadow-xl transition-all flex flex-col justify-between"
-                  >
-                    <div className="p-5 space-y-4">
-                      {/* Top Badges */}
-                      <div className="flex items-center justify-between">
-                        <span className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-md ${
-                          sc.type === 'kids' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-blue-50 text-[#002147] border border-blue-100'
-                        }`}>
-                          {sc.type === 'kids' ? (isRtl ? 'للصغار واللعب' : 'KIDS') : (isRtl ? 'للكبار والعمل' : 'ADULTS')}
-                        </span>
-
-                        {isDone ? (
-                          <span className="flex items-center gap-1 text-[9px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100">
-                            <CheckCircle2 size={11} />
-                            {isRtl ? 'مكتمل +20 XP' : 'PASSED +20 XP'}
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-black text-slate-400">
-                            {isRtl ? '20 نقطة تفوق' : '20 XP Award'}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Scenario Title */}
-                      <div className={`space-y-1 ${isRtl ? 'text-right' : 'text-left'}`}>
-                        <h4 className="font-sans font-black text-slate-900 text-lg">
-                          {isRtl ? sc.title_ar : sc.title_en}
-                        </h4>
-                        <p className="text-xs text-slate-500 leading-relaxed font-semibold">
-                          {isRtl ? sc.situation_ar : sc.situation_en}
-                        </p>
-                      </div>
-
-                      {/* Small visual snippet preview */}
-                      <div className="bg-slate-50 rounded-xl p-3 border border-slate-100/60 flex items-start gap-2.5">
-                        <span className="text-xl mt-0.5 shrink-0">{sc.avatar_host}</span>
-                        <div className={`space-y-0.5 ${isRtl ? 'text-right' : 'text-left'}`}>
-                          <span className="text-[10px] font-bold text-slate-400 block">
-                            {isRtl ? sc.host_name_ar : sc.host_name_en}
-                          </span>
-                          <p className="text-xs text-slate-700 font-bold italic line-clamp-1">
-                            &ldquo;{sc.host_line_1}&rdquo;
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => handleStartChallenge(sc)}
-                      className="w-full bg-[#002147] hover:bg-[#002d5e] text-white py-3 px-4 font-black text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2 cursor-pointer border-t border-slate-100"
-                    >
-                      <span>{isRtl ? 'دخول المحاكاة التمثيلية 🎭' : 'Enter Interactive Role-Play 🎭'}</span>
-                      <ChevronRight size={14} className={isRtl ? 'rotate-180' : ''} />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
+      {/* Main Content Area */}
+      {!scenario ? (
+        /* Catalog list */
+        <div className="space-y-5">
+          {/* Filter Pills */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {[
+              { id: 'all', label_ar: 'الكل 💎', label_en: 'All 💎' },
+              { id: 'kids', label_ar: 'ألعاب وصغار 🦁', label_en: 'Kids & Play 🦁' },
+              { id: 'adults', label_ar: 'عمل وكبار 👔', label_en: 'Adults & Business 👔' }
+            ].map(btn => (
+              <GhostButton
+                key={btn.id}
+                active={filterType === btn.id}
+                onClick={() => setFilterType(btn.id as any)}
+                className="rounded-full px-4 py-1.5"
+              >
+                {isRtl ? btn.label_ar : btn.label_en}
+              </GhostButton>
+            ))}
           </div>
-        ) : (
-          /* Active Interactive Simulation Screen */
-          <div className="bg-white rounded-3xl border border-slate-200/70 shadow-xl overflow-hidden min-h-[500px] flex flex-col">
-            
-            {/* Top Workspace status bar */}
-            <div className="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setSelectedScenarioId(null)}
-                  className="w-8 h-8 rounded-full bg-white border flex items-center justify-center hover:bg-slate-50 cursor-pointer"
-                >
-                  <ChevronLeft size={16} className={isRtl ? 'rotate-180' : ''} />
-                </button>
-                <div>
-                  <span className="text-[9px] uppercase font-bold tracking-widest text-slate-400">
-                    {isRtl ? 'الموقف التمثيلي الجاري' : 'ACTIVE SIMULATION'}
-                  </span>
-                  <h3 className="text-sm font-black text-[#002147] line-clamp-1">
-                    {isRtl ? scenario.title_ar : scenario.title_en}
-                  </h3>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-3">
-                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md ${
-                  scenario.type === 'kids' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-[#002147]'
-                }`}>
-                  {scenario.type === 'kids' ? (isRtl ? 'وضع الصغار' : 'KIDS PLAY') : (isRtl ? 'مطعم رسمي' : 'ADULTS BIZ')}
+          {/* Scenario items mapped to LessonTile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {filteredScenarios.map((sc, index) => {
+              const isDone = completedScenarios.includes(sc.id);
+              return (
+                <LessonTile
+                  key={sc.id}
+                  order={index + 1}
+                  title={isRtl ? sc.title_ar : sc.title_en}
+                  subtitle={isRtl ? sc.situation_ar : sc.situation_en}
+                  level={sc.type === 'kids' ? (isRtl ? 'صغار' : 'KIDS') : (isRtl ? 'عمل' : 'BIZ')}
+                  emoji={sc.avatar_host}
+                  done={isDone}
+                  onClick={() => handleStartChallenge(sc)}
+                />
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        /* Active Simulation Screen */
+        <GoldCard className="p-5 sm:p-7 space-y-6">
+          {/* Top workspace bar */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-[#C49E3A]/25 pb-4">
+            <div className="flex items-center gap-3">
+              <GhostButton onClick={() => setSelectedScenarioId(null)}>
+                <ArrowLeft size={16} className={isRtl ? 'rotate-180' : ''} />
+                <span>{isRtl ? 'القائمة' : 'List'}</span>
+              </GhostButton>
+              <div>
+                <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] block">
+                  {isRtl ? 'الموقف التمثيلي الجاري' : 'ACTIVE SIMULATION'}
                 </span>
-                <span className="text-xs font-bold text-slate-500">
-                  {isRtl ? 'المحاور:' : 'Partner:'} <strong className="text-slate-800">{isRtl ? scenario.host_name_ar : scenario.host_name_en}</strong>
-                </span>
+                <h3 className="text-sm sm:text-base font-black text-[#002147]">
+                  {isRtl ? scenario.title_ar : scenario.title_en}
+                </h3>
               </div>
             </div>
 
-            {/* Simulated Restaurant Table backdrop */}
-            <div className="flex-1 p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch relative">
+            <div className="flex items-center gap-2">
+              <ProgressPill>
+                {scenario.type === 'kids' ? (isRtl ? 'وضع الصغار' : 'KIDS PLAY') : (isRtl ? 'أعمال وكبار' : 'BUSINESS')}
+              </ProgressPill>
+              <span className="text-xs font-bold text-[#002147]/70">
+                {isRtl ? 'المحاور:' : 'Partner:'} <strong className="text-[#002147]">{isRtl ? scenario.host_name_ar : scenario.host_name_en}</strong>
+              </span>
+            </div>
+          </div>
+
+          {/* Dialogue Workspace */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            {/* Left column: Dialogue Flow */}
+            <div className="lg:col-span-8 space-y-5">
               
-              {/* Left Column: Flow of Dialogue Cards */}
-              <div className="col-span-1 md:col-span-7 space-y-6 flex flex-col justify-center">
-                
-                {/* HOST CARD (WAITOR SPEAKS 1) */}
-                <div className={`p-4 bg-slate-50 border border-slate-100/80 rounded-2xl relative ${isRtl ? 'text-right' : 'text-left'}`}>
-                  <div className="absolute -top-3 left-4 flex gap-1 items-center bg-[#002147] text-[#C49E3A] px-2.5 py-0.5 rounded-full text-[10px] font-black">
+              {/* Host dialogue line */}
+              <div className="p-4 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-2xl relative">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#002147] text-[#E6C36A] text-[11px] font-black">
                     <span>{scenario.avatar_host}</span>
                     <span>{isRtl ? scenario.host_name_ar : scenario.host_name_en}</span>
                   </div>
 
-                  <div className="pt-2 flex items-start gap-3 justify-between">
-                    <div>
-                      <p className="font-sans font-extrabold text-slate-800 text-base md:text-lg italic leading-relaxed">
-                        &ldquo;{scenario.host_line_1}&rdquo;
-                      </p>
-                      <p className="text-xs text-slate-400 mt-1 font-semibold">
-                        {scenario.host_line_1_ar}
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => playSpeech(scenario.host_line_1, scenario.type === 'kids' ? 0.82 : 0.92)}
-                      className={`p-2.5 bg-white border rounded-xl hover:bg-slate-100 text-[#002147] transition-all cursor-pointer ${
-                        isHostAudioPlaying ? 'animate-ping' : ''
-                      }`}
-                      title="Play Pronunciation Guide"
-                    >
-                      <Volume2 size={16} />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => playSpeech(scenario.host_line_1, scenario.type === 'kids' ? 0.82 : 0.92)}
+                    className="p-1.5 bg-white border border-[#C49E3A]/40 rounded-xl hover:bg-[#fdfaf3] text-[#002147] transition-all cursor-pointer"
+                    title="Pronounce"
+                  >
+                    <Volume2 size={16} className={`text-[#C49E3A] ${isHostAudioPlaying ? 'animate-pulse' : ''}`} />
+                  </button>
                 </div>
 
-                {/* MY CARD (STUDENT RESPONSE CHALLENGE) */}
-                {(stage === 'welcome' || stage === 'speaking' || stage === 'feedback') && (
-                  <div className="p-5 bg-white border border-dashed border-[#002147]/30 rounded-2xl shadow-xs space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] bg-amber-50 px-2 py-0.5 rounded-md">
-                        {isRtl ? 'دورك بالكلام 🎤' : 'YOUR TURN TO SPEAK'}
-                      </span>
-                      <span className="text-[11px] font-bold text-slate-400">
-                        {isRtl ? 'أكمل الفراغ لتنطق' : 'Complete to unlock speech'}
-                      </span>
+                <p className="font-sans font-black text-[#002147] text-base sm:text-lg leading-relaxed">
+                  &ldquo;{scenario.host_line_1}&rdquo;
+                </p>
+                <p className="text-xs text-[#002147]/70 mt-1 font-semibold">
+                  {scenario.host_line_1_ar}
+                </p>
+              </div>
+
+              {/* Student Response Challenge */}
+              <div className="p-5 bg-white border border-[#C49E3A]/40 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <ProgressPill>
+                    {isRtl ? 'دورك بالكلام 🎤' : 'YOUR TURN TO SPEAK'}
+                  </ProgressPill>
+                  <span className="text-[11px] font-bold text-[#002147]/65">
+                    {isRtl ? 'أكمل الفراغ لتنطق' : 'Complete to unlock speech'}
+                  </span>
+                </div>
+
+                {/* Template sentence with blank */}
+                <div className="p-4 bg-[#fdfaf3] border border-[#C49E3A]/30 rounded-xl text-center">
+                  <p className="font-sans font-black text-[#002147] text-base sm:text-lg leading-relaxed">
+                    &ldquo; {scenario.student_line_template.split('____')[0]} 
+                    <span className="mx-1 px-3 py-1 bg-[#E6C36A]/30 text-[#002147] border-b-2 border-[#C49E3A] rounded-md inline-block my-1 font-black">
+                      {selectedOption || '____'}
+                    </span>
+                    {scenario.student_line_template.split('____')[1]} &rdquo;
+                  </p>
+                  <p className="text-xs text-[#002147]/70 font-bold mt-2">
+                    {scenario.student_line_template_ar}
+                  </p>
+                </div>
+
+                {/* Step 1: Select the word options */}
+                {stage === 'welcome' && (
+                  <div className="space-y-3 pt-1">
+                    <span className="text-xs font-black text-[#002147]/80 block">
+                      {isRtl ? '١. اختر التعبير الملائم لملء الفراغ:' : '1. Choose the matching blank phrase:'}
+                    </span>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {scenario.options.map((opt) => {
+                        return (
+                          <AnswerOption
+                            key={opt}
+                            label={opt}
+                            selected={selectedOption === opt}
+                            disabled={isOptionVerified}
+                            onClick={() => handleOptionSelect(opt)}
+                          />
+                        );
+                      })}
                     </div>
 
-                    {/* Template box with slot */}
-                    <div className="p-4 bg-[#f8fafc] border border-slate-100 rounded-xl text-center">
-                      <p className="font-sans font-black text-[#002147] text-lg md:text-xl leading-relaxed tracking-tight">
-                        &ldquo; {scenario.student_line_template.split('____')[0]} 
-                        <span className="mx-1 px-4 py-1.5 bg-[#C49E3A]/10 text-[#C49E3A] border-b-2 border-[#C49E3A] rounded-md inline-block my-1 font-black shadow-inner animate-pulse">
-                          {selectedOption || '____'}
-                        </span>
-                        {scenario.student_line_template.split('____')[1]} &rdquo;
-                      </p>
-                      <p className="text-xs text-slate-400 font-bold mt-2">
-                        {scenario.student_line_template_ar}
-                      </p>
-                    </div>
-
-                    {/* Step 1: Select the word options */}
-                    {stage === 'welcome' && (
-                      <div className="space-y-4 py-1">
-                        <span className={`text-xs font-black text-slate-500 block ${isRtl ? 'text-right' : 'text-left'}`}>
-                          {isRtl ? '١. اختر التعبير الملائم لملء الفراغ:' : '1. Choose the matching blank phrase:'}
-                        </span>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          {scenario.options.map((opt) => {
-                            const isChosen = selectedOption === opt;
-                            return (
-                              <button
-                                key={opt}
-                                onClick={() => handleOptionSelect(opt)}
-                                disabled={isOptionVerified}
-                                className={`p-3 rounded-xl border-2 text-center transition-all font-sans font-extrabold text-sm cursor-pointer ${
-                                  isChosen
-                                    ? 'bg-[#002147] text-[#C49E3A] border-[#002147] shadow-md scale-[1.02]'
-                                    : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                                }`}
-                              >
-                                {opt}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {selectedOption && (
-                          <div className={`flex ${isRtl ? 'justify-start' : 'justify-end'}`}>
-                            <button
-                              onClick={handleVerifyOption}
-                              className="px-6 py-2.5 bg-[#C49E3A] hover:bg-[#b08d30] text-[#002147] rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
-                            >
-                              <span>{isRtl ? 'تحقق ومتابعة للتسجيل 🎙️' : 'Verify & Continue 🎙️'}</span>
-                              <ChevronRight size={14} className={isRtl ? 'rotate-180' : ''} />
-                            </button>
-                          </div>
-                        )}
+                    {selectedOption && (
+                      <div className="flex justify-end pt-2">
+                        <PrimaryButton onClick={handleVerifyOption}>
+                          <span>{isRtl ? 'تحقق ومتابعة للتسجيل 🎙️' : 'Verify & Continue 🎙️'}</span>
+                        </PrimaryButton>
                       </div>
                     )}
-
-                    {/* Step 2: Speech microphone action */}
-                    {stage === 'speaking' && (
-                      <div className="space-y-4 py-2 flex flex-col items-center">
-                        <div className="text-center max-w-sm space-y-1">
-                          <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider">
-                            {isRtl ? '٢. سجل قراءة الجملة بصوتك' : '2. Record yourself reading the line'}
-                          </h4>
-                          <p className="text-[11px] text-slate-500 font-bold leading-normal">
-                            {isRtl 
-                              ? 'اضغط زر التسجيل واقرأ الجملة كاملة بصوت جهري واضح لتصحيح النطق بالذكاء الاصطناعي.'
-                              : 'Click record and read the full completed line clearly in your microphone.'}
-                          </p>
-                        </div>
-
-                        {/* Microphone Ring Action */}
-                        <div className="flex flex-col items-center gap-2">
-                          <button
-                            onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
-                            className={`w-20 h-20 rounded-full flex flex-col items-center justify-center transition-all cursor-pointer relative ${
-                              isRecording
-                                ? 'bg-red-500 text-white shadow-lg shadow-red-500/20 animate-pulse scale-105'
-                                : 'bg-[#002147] text-[#C49E3A] hover:bg-[#002d5e] hover:scale-102 shadow-lg shadow-[#002147]/15'
-                            }`}
-                          >
-                            <Mic size={28} strokeWidth={2.5} className={isRecording ? 'animate-bounce' : ''} />
-                          </button>
-                          <span className="text-xs font-black text-slate-600 tracking-wider uppercase">
-                            {isRecording ? (isRtl ? 'تسجيل جاري... اضغط للإيقاف' : 'Recording... Click to Stop') : (isRtl ? 'اضغط للتسجيل' : 'Click to Speak')}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Feedback report analysis */}
-                    {stage === 'feedback' && evaluationResult && (
-                      <div className="space-y-4 border-t pt-4">
-                        <div className="flex justify-between items-center gap-4 flex-wrap">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">🎉</span>
-                            <div>
-                              <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider">
-                                {isRtl ? 'تقرير نطق المحاكاة' : 'AI Speech Report'}
-                              </h4>
-                              <p className="text-[10px] font-bold text-slate-400">
-                                {isRtl ? 'طريقة صياغة صحيحة بنسبة:' : 'Fluency Accuracy Rating:'}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="px-3.5 py-1 bg-emerald-50 text-emerald-800 font-black text-sm rounded-full border border-emerald-100 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span>{evaluationResult.score}% Accuracy</span>
-                          </div>
-                        </div>
-
-                        <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-100">
-                          <p className="text-xs text-slate-600 leading-relaxed text-justify">
-                            {isRtl ? evaluationResult.feedback_ar : evaluationResult.feedback_en}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
                   </div>
                 )}
 
-                {/* HOST DYNAMIC CONTINUATION */}
-                {stage === 'feedback' && (
-                  <div className={`p-4 bg-[#C49E3A]/5 border border-[#C49E3A]/20 rounded-2xl relative ${isRtl ? 'text-right' : 'text-left'}`}>
-                    <div className="absolute -top-3 left-4 flex gap-1 items-center bg-[#C49E3A] text-[#002147] px-2.5 py-0.5 rounded-full text-[10px] font-black">
+                {/* Step 2: Speech recording */}
+                {stage === 'speaking' && (
+                  <div className="space-y-4 py-3 flex flex-col items-center text-center">
+                    <div className="max-w-sm space-y-1">
+                      <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider">
+                        {isRtl ? '٢. سجل قراءة الجملة بصوتك' : '2. Record yourself reading the line'}
+                      </h4>
+                      <p className="text-xs text-[#002147]/75 font-semibold">
+                        {isRtl 
+                          ? 'اضغط زر التسجيل واقرأ الجملة كاملة بصوت جهري واضح لتصحيح النطق بالذكاء الاصطناعي.'
+                          : 'Click record and read the full completed line clearly into your microphone.'}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+                        className={`w-16 h-16 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                          isRecording
+                            ? 'bg-red-600 text-white shadow-lg animate-pulse'
+                            : 'bg-[#002147] text-[#E6C36A] hover:bg-[#001a38] border-2 border-[#C49E3A]'
+                        }`}
+                      >
+                        <Mic size={26} />
+                      </button>
+                      <span className="text-xs font-black text-[#002147]">
+                        {isRecording 
+                          ? (isRtl ? 'تسجيل جاري... اضغط للإيقاف' : 'Recording... Click to Stop') 
+                          : (isRtl ? 'اضغط للتسجيل' : 'Click to Speak')}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Feedback Report */}
+                {stage === 'feedback' && evaluationResult && (
+                  <div className="space-y-3 pt-3 border-t border-[#C49E3A]/25">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider">
+                        {isRtl ? 'تقرير نطق المحاكاة' : 'AI Speech Report'}
+                      </h4>
+                      <ProgressPill>
+                        <span>{evaluationResult.score}% Accuracy</span>
+                      </ProgressPill>
+                    </div>
+
+                    <div className="bg-[#fdfaf3] rounded-xl p-3.5 border border-[#C49E3A]/30">
+                      <p className="text-xs text-[#002147]/85 leading-relaxed">
+                        {isRtl ? evaluationResult.feedback_ar : evaluationResult.feedback_en}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Host Response Continuation */}
+              {stage === 'feedback' && (
+                <div className="p-4 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-2xl relative">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#C49E3A] text-[#002147] text-[11px] font-black">
                       <span>{scenario.avatar_host}</span>
                       <span>{isRtl ? scenario.host_name_ar : scenario.host_name_en}</span>
                     </div>
 
-                    <div className="pt-2 flex items-start gap-3 justify-between">
-                      <div>
-                        <p className="font-sans font-extrabold text-[#002147] text-base md:text-lg italic leading-relaxed">
-                          &ldquo;{scenario.host_response}&rdquo;
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1 font-semibold">
-                          {scenario.host_response_ar}
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => playSpeech(scenario.host_response, scenario.type === 'kids' ? 0.85 : 0.95)}
-                        className="p-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-[#002147] rounded-xl transition-all cursor-pointer"
-                      >
-                        <Volume2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-
-              {/* Right Column: Restaurant Visual Backdrop & Partner Avatar */}
-              <div className="col-span-1 md:col-span-5 flex flex-col justify-between bg-slate-50/50 rounded-2xl border p-5 relative overflow-hidden">
-                <div className="absolute inset-0 bg-radial-gradient from-transparent to-slate-200/20 opacity-40" />
-
-                <div className="relative z-10 text-center space-y-4 my-auto">
-                  {/* Backdrop emoji scene */}
-                  <div className="flex justify-center items-center gap-6">
-                    <div className="relative">
-                      <div className="text-6xl filter drop-shadow-md animate-bounce">
-                        {scenario.avatar_host}
-                      </div>
-                      <span className="absolute -bottom-1 -right-1 bg-[#002147] text-[#C49E3A] text-[9px] font-black rounded-lg px-1 py-0.5 whitespace-nowrap">
-                        {isRtl ? 'المضيف' : 'Server'}
-                      </span>
-                    </div>
-
-                    <div className="text-3xl font-black text-slate-400">
-                      🥗 🥞 🍽️
-                    </div>
-
-                    <div className="relative">
-                      <div className="text-6xl filter drop-shadow-md">
-                        🎓
-                      </div>
-                      <span className="absolute -bottom-1 -right-1 bg-[#C49E3A] text-[#002147] text-[9px] font-black rounded-lg px-1 py-0.5 whitespace-nowrap">
-                        {isRtl ? 'أنت' : 'You'}
-                      </span>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => playSpeech(scenario.host_response, scenario.type === 'kids' ? 0.85 : 0.95)}
+                      className="p-1.5 bg-white border border-[#C49E3A]/40 rounded-xl hover:bg-[#fdfaf3] text-[#002147] transition-all cursor-pointer"
+                      title="Pronounce"
+                    >
+                      <Volume2 size={16} className="text-[#C49E3A]" />
+                    </button>
                   </div>
 
-                  {/* Informational guide */}
-                  <div className="space-y-1.5 pt-4">
-                    <span className="text-[10px] font-black tracking-widest text-[#002147] uppercase block">
-                      {isRtl ? 'تعليمات الموقف' : 'SIMULATION TIPS'}
-                    </span>
-                    <p className="text-[11px] text-slate-500 leading-relaxed text-justify px-2">
-                      {isRtl 
-                        ? 'تخيل أنك جالس على الطاولة في أفضل مطعم. لا تكتفِ بتسجيل الكلمة داخل الفراغ، بل تدرب على نطق العبارة كحوار واقعي متصل مع تعابير وجه واثقة.'
-                        : 'Imagine being seated. Try not to just speak the blank; focus on delivering the entire sentence with confidence and tone modulation.'}
-                    </p>
-                  </div>
+                  <p className="font-sans font-black text-[#002147] text-base sm:text-lg leading-relaxed">
+                    &ldquo;{scenario.host_response}&rdquo;
+                  </p>
+                  <p className="text-xs text-[#002147]/70 mt-1 font-semibold">
+                    {scenario.host_response_ar}
+                  </p>
                 </div>
-
-                {/* Completion CTA */}
-                {stage === 'feedback' && (
-                  <button
-                    onClick={() => setSelectedScenarioId(null)}
-                    className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs py-3.5 tracking-wider uppercase rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>{isRtl ? 'إنهاء وحفظ النتيجة الجيدة 🏆' : 'Complete & Save Score 🏆'}</span>
-                    <Check size={14} />
-                  </button>
-                )}
-              </div>
+              )}
 
             </div>
 
-          </div>
-        )}
+            {/* Right column: Scenario Avatar & Instructions */}
+            <div className="lg:col-span-4 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/35 p-5 space-y-4 text-center">
+              <div className="flex justify-center items-center gap-4 py-2">
+                <div className="flex flex-col items-center">
+                  <span className="text-4xl block mb-1">{scenario.avatar_host}</span>
+                  <span className="text-[10px] font-black text-[#002147]/70">
+                    {isRtl ? scenario.host_name_ar : scenario.host_name_en}
+                  </span>
+                </div>
 
-      </div>
-    </div>
+                <span className="text-lg font-black text-[#C49E3A]">⚡</span>
+
+                <div className="flex flex-col items-center">
+                  <TutorFace tutor={currentTutor} size="sm" />
+                  <span className="text-[10px] font-black text-[#002147]/70 mt-1">
+                    {scenario.type === 'adults' ? (isRtl ? 'محمد' : 'Mohammed') : (isRtl ? 'سارة' : 'Sara')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 text-start border-t border-[#C49E3A]/25 pt-3">
+                <span className="text-[10px] font-black tracking-widest text-[#C49E3A] uppercase block">
+                  {isRtl ? 'تعليمات الموقف' : 'SIMULATION TIPS'}
+                </span>
+                <p className="text-xs text-[#002147]/80 leading-relaxed">
+                  {isRtl 
+                    ? 'تخيل أنك في موقف واقعي. لا تكتفِ بتسجيل الكلمة داخل الفراغ، بل تدرب على نطق العبارة كحوار واقعي متصل مع نبرة واثقة.'
+                    : 'Imagine being in the actual situation. Practice delivering the entire sentence with confidence and tone modulation.'}
+                </p>
+              </div>
+
+              {stage === 'feedback' && (
+                <PrimaryButton
+                  onClick={() => setSelectedScenarioId(null)}
+                  className="w-full py-3"
+                >
+                  <Check size={14} />
+                  <span>{isRtl ? 'إنهاء وحفظ النتيجة 🏆' : 'Complete & Save Score 🏆'}</span>
+                </PrimaryButton>
+              )}
+            </div>
+
+          </div>
+
+        </GoldCard>
+      )}
+    </SectionShell>
   );
 };
