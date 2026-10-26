@@ -3,6 +3,9 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './lib/apiAuth';
+import { installChunkReload, AppErrorBoundary } from './lib/chunkReload';
+
+installChunkReload();
 
 // Monkeypatch getComputedStyle to convert OKLCH and OKLAB colors into standard HSLA/RGBA colors 
 // to prevent html2canvas / exporting utilities from crashing on modern CSS colors.
@@ -142,6 +145,8 @@ if (typeof window !== 'undefined') {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AppErrorBoundary>
+      <App />
+    </AppErrorBoundary>
   </StrictMode>,
 );
