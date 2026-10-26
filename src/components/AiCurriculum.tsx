@@ -1,5 +1,6 @@
 // batch 15: lesson view design
 // batch 16: lesson games design part 1
+// batch 16b: lesson games design part 2
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
@@ -22,7 +23,8 @@ import {
   GhostButton, 
   ProgressPill, 
   GoldCard,
-  LessonTile 
+  LessonTile,
+  AnswerOption 
 } from './ui/academy';
 import { 
   Brain, 
@@ -12122,116 +12124,126 @@ Output Summary for [${topic}]:
                   {/* LESSON 7 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 7 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
-                        <h5 className="text-lg font-black text-amber-300">{isRtl ? 'مختبر تشريح التعاويذ' : 'Prompt Anatomy Laboratory'}</h5>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] block">
+                            {isRtl ? 'مختبر تشريح التعاويذ ⚡' : 'PROMPT ANATOMY LAB ⚡'}
+                          </span>
+                          <h5 className="text-xl font-black text-[#002147]">
+                            {isRtl ? 'مختبر تشريح التعاويذ' : 'Prompt Anatomy Laboratory'}
+                          </h5>
+                        </div>
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'التعويذة ليست مجرد كلمات مبعثرة، بل لها علم! عندما تضيف الفعل، التنسيق، الدور البشري، والأسلوب الفكاهي، تتحول الإجابة من عادية إلى تحفة خارقة. ركب تعويذتك وعاين النتيجة!' 
                             : "A prime prompt isn't accidental; it has structured anatomy. Combine the target action, the role context, the result layout, and personal tone styles to witness true leadership."}
                         </p>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* Column 1: Action Selector */}
                           <div className="space-y-2">
-                            <label className="text-[10px] text-slate-400 font-bold block uppercase tracking-widest">{isRtl ? '1. الفعل أو الهدف' : '1. Target Action'}</label>
+                            <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? '1. الفعل أو الهدف' : '1. Target Action'}</label>
                             <select 
                               value={l5Action}
                               onChange={(e) => setL5Action(e.target.value)}
-                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white cursor-pointer focus:outline-none focus:border-amber-400"
+                              className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all cursor-pointer"
                             >
-                              <option value="">{isRtl ? '-- اختر الهدف --' : '-- Choose Act --'}</option>
-                              <option value="اكتب قصة قصيرة ومبسطة عن تفاح الأكاديمية">{isRtl ? 'اكتب قصة تفاح الأكاديمية' : 'Write a short story about academy apples'}</option>
-                              <option value="اشرح فوائد التفاح الطبية والعلمية">{isRtl ? 'اشرح فوائد التفاح الطبية' : 'Explain organic apples health stats'}</option>
+                              <option value="" className="bg-white text-[#002147]">{isRtl ? '-- اختر الهدف --' : '-- Choose Act --'}</option>
+                              <option value="اكتب قصة قصيرة ومبسطة عن تفاح الأكاديمية" className="bg-white text-[#002147]">{isRtl ? 'اكتب قصة تفاح الأكاديمية' : 'Write a short story about academy apples'}</option>
+                              <option value="اشرح فوائد التفاح الطبية والعلمية" className="bg-white text-[#002147]">{isRtl ? 'اشرح فوائد التفاح الطبية' : 'Explain organic apples health stats'}</option>
                             </select>
                           </div>
 
                           {/* Column 2: Role Selector */}
                           <div className="space-y-2">
-                            <label className="text-[10px] text-slate-400 font-bold block uppercase tracking-widest">{isRtl ? '2. السياق أو الدور' : '2. Persona Role'}</label>
+                            <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? '2. السياق أو الدور' : '2. Persona Role'}</label>
                             <select 
                               value={l5Role}
                               onChange={(e) => setL5Role(e.target.value)}
-                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white cursor-pointer focus:outline-none focus:border-amber-400"
+                              className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all cursor-pointer"
                             >
-                              <option value="">{isRtl ? '-- اختر الدور --' : '-- Choose Role --'}</option>
-                              <option value="شاعر جاهلي من قبيلة عبس">{isRtl ? 'شاعر جاهلي من غطفان' : 'Jahili poetic scribe'}</option>
-                              <option value="طبيب كندي يبسط الصحة للأولاد">{isRtl ? 'طبيب أطفال لطيف' : 'Soft Pediatric Doctor'}</option>
-                              <option value="رائد فضاء فكاهي ومضحك">{isRtl ? 'رائد فضاء مضحك' : 'Funny astronaut'}</option>
+                              <option value="" className="bg-white text-[#002147]">{isRtl ? '-- اختر الدور --' : '-- Choose Role --'}</option>
+                              <option value="شاعر جاهلي من قبيلة عبس" className="bg-white text-[#002147]">{isRtl ? 'شاعر جاهلي من غطفان' : 'Jahili poetic scribe'}</option>
+                              <option value="طبيب كندي يبسط الصحة للأولاد" className="bg-white text-[#002147]">{isRtl ? 'طبيب أطفال لطيف' : 'Soft Pediatric Doctor'}</option>
+                              <option value="رائد فضاء فكاهي ومضحك" className="bg-white text-[#002147]">{isRtl ? 'رائد فضاء مضحك' : 'Funny astronaut'}</option>
                             </select>
                           </div>
 
                           {/* Column 3: Format Selector */}
                           <div className="space-y-2">
-                            <label className="text-[10px] text-slate-400 font-bold block uppercase tracking-widest">{isRtl ? '3. التنسيق والمظهر' : '3. Output Format'}</label>
+                            <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? '3. التنسيق والمظهر' : '3. Output Format'}</label>
                             <select 
                               value={l5Format}
                               onChange={(e) => setL5Format(e.target.value)}
-                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white cursor-pointer focus:outline-none focus:border-amber-400"
+                              className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all cursor-pointer"
                             >
-                              <option value="">{isRtl ? '-- اختر التنسيق --' : '-- Choose Form --'}</option>
-                              <option value="قصيدة موزونة من بيتين">{isRtl ? 'أبيات قصيدة شعرية' : 'Symmetrical rhyming verses'}</option>
-                              <option value="جدول تقرير رقمي ومرقم">{isRtl ? 'قائمة نقاط مرقمة وسلسة' : 'Numbered analytics board'}</option>
-                              <option value="نص روائي سردي">{isRtl ? 'رواية ليلية كرتونية' : 'Folk-tale storytelling text'}</option>
+                              <option value="" className="bg-white text-[#002147]">{isRtl ? '-- اختر التنسيق --' : '-- Choose Form --'}</option>
+                              <option value="قصيدة موزونة من بيتين" className="bg-white text-[#002147]">{isRtl ? 'أبيات قصيدة شعرية' : 'Symmetrical rhyming verses'}</option>
+                              <option value="جدول تقرير رقمي ومرقم" className="bg-white text-[#002147]">{isRtl ? 'قائمة نقاط مرقمة وسلسة' : 'Numbered analytics board'}</option>
+                              <option value="نص روائي سردي" className="bg-white text-[#002147]">{isRtl ? 'رواية ليلية كرتونية' : 'Folk-tale storytelling text'}</option>
                             </select>
                           </div>
 
                           {/* Column 4: Tone Selector */}
                           <div className="space-y-2">
-                            <label className="text-[10px] text-slate-400 font-bold block uppercase tracking-widest">{isRtl ? '4. النبرة والأسلوب' : '4. Aesthetic Tone'}</label>
+                            <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? '4. النبرة والأسلوب' : '4. Aesthetic Tone'}</label>
                             <select 
                               value={l5Tone}
                               onChange={(e) => setL5Tone(e.target.value)}
-                              className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white cursor-pointer focus:outline-none focus:border-amber-400"
+                              className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all cursor-pointer"
                             >
-                              <option value="">{isRtl ? '-- اختر الأسلوب --' : '-- Choose Style --'}</option>
-                              <option value="فصيح للغاية وعميق">{isRtl ? 'لغة عربية فصحى معبرة' : 'Highly classical and deep Arabic'}</option>
-                              <option value="كوميدي وخفيف الدم ومرح جداً">{isRtl ? 'كوميدي هزل ومرح مضحك' : 'Extremely hilarious comedy'}</option>
+                              <option value="" className="bg-white text-[#002147]">{isRtl ? '-- اختر الأسلوب --' : '-- Choose Style --'}</option>
+                              <option value="فصيح للغاية وعميق" className="bg-white text-[#002147]">{isRtl ? 'لغة عربية فصحى معبرة' : 'Highly classical and deep Arabic'}</option>
+                              <option value="كوميدي وخفيف الدم ومرح جداً" className="bg-white text-[#002147]">{isRtl ? 'كوميدي هزل ومرح مضحك' : 'Extremely hilarious comedy'}</option>
                             </select>
                           </div>
                         </div>
 
-                        <button
+                        <PrimaryButton
                           disabled={!l5Action || !l5Role || l5Generating}
                           onClick={handleL5Submit}
-                          className={`w-full py-3.5 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 ${
-                            l5Action && l5Role 
-                              ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 active:scale-95' 
-                              : 'bg-white/5 text-slate-500 cursor-not-allowed'
-                          }`}
+                          className="w-full md:w-auto !px-8 !py-4 !rounded-2xl !text-sm shadow-md"
                         >
                           <Wand2 size={14} className={l5Generating ? 'animate-pulse' : ''} />
                           {l5Generating ? (isRtl ? 'جاري محاكاة توليد التعويذة واستدعاء الأنماط...' : 'Rendering high-impact prompt payload...') : (isRtl ? 'تفعيل مظهر التعويذة وتشريحها! ⚡' : 'Assemble and Launch Prompt Anatomy! ⚡')}
-                        </button>
+                        </PrimaryButton>
 
                         {l5SubmittedPrompt && (
-                          <div className="p-4 bg-slate-900 rounded-2xl border border-white/5 space-y-3">
+                          <div className="p-5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-4 shadow-inner">
                             <div className="space-y-1">
-                              <span className="text-[9px] text-amber-400 font-bold uppercase tracking-wider">{isRtl ? 'التعويذة التشريحية المركبة النهائية:' : 'FINAL CONSTRUCTED PROMPT:'}</span>
-                              <p className="text-xs font-mono text-slate-300 leading-normal bg-black/60 px-3 py-2 rounded-xl">
+                              <span className="text-[10px] text-[#C49E3A] font-bold uppercase tracking-wider block">{isRtl ? 'التعويذة التشريحية المركبة النهائية:' : 'FINAL CONSTRUCTED PROMPT:'}</span>
+                              <p className="text-xs font-mono text-[#002147] leading-normal bg-white p-3 rounded-xl border border-[#C49E3A]/30 shadow-sm">
                                 {l5SubmittedPrompt}
                               </p>
                             </div>
 
                             {l5GeneratedOutput && (
                               <div className="space-y-1">
-                                <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider">{isRtl ? 'استجابة محاكي الذكاء التوليدي الفريدة:' : 'GENERATED TARGET OUTPUT:'}</span>
-                                <div className="text-xs bg-slate-950/80 text-slate-100 p-4 rounded-xl border border-white/5 font-sans leading-relaxed whitespace-pre-line">
+                                <span className="text-[10px] text-[#C49E3A] font-bold uppercase tracking-wider block">{isRtl ? 'استجابة محاكي الذكاء التوليدي الفريدة:' : 'GENERATED TARGET OUTPUT:'}</span>
+                                <div className="text-xs bg-white text-[#002147] p-4 rounded-xl border border-[#C49E3A]/30 font-sans leading-relaxed whitespace-pre-line shadow-sm">
                                   {l5GeneratedOutput}
                                 </div>
                               </div>
                             )}
                           </div>
                         )}
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
                   {/* LESSON 8 HANDS-ON INTERACTIVE FINAL PROJECT */}
                   {selectedLesson.lesson_number === 8 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
-                        <h5 className="text-lg font-black text-amber-300">{isRtl ? 'بناء وتشغيل المساعد العائلي المخصص' : 'Custom Family AI Helper Workbench'}</h5>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] block">
+                            {isRtl ? 'المشروع الختامي 🌟' : 'FINAL CAPSTONE PROJECT 🌟'}
+                          </span>
+                          <h5 className="text-xl font-black text-[#002147]">
+                            {isRtl ? 'بناء وتشغيل المساعد العائلي المخصص' : 'Custom Family AI Helper Workbench'}
+                          </h5>
+                        </div>
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'مبروك! لقد وصلت للمشروع الختامي. قم بتعليم مساعدك العائلي أدواراً مخصصة (راوٍ، مستشار، مهرج)، ثم حاوره باللغة الحية مباشرة وشاهد قوة توجيه الذكاء الاصطناعي لخدمتك المباشرة!' 
                             : 'Congratulations on reaching your final capstone project! Detail the specific roles of your custom family companion, and converse with it using live server-side AI execution!'}
@@ -12239,84 +12251,92 @@ Output Summary for [${topic}]:
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-400">{isRtl ? 'اسم المساعد العائلي:' : 'Custom Bot Name:'}</label>
+                            <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'اسم المساعد العائلي:' : 'Custom Bot Name:'}</label>
                             <input 
                               type="text" 
                               value={l6BotName}
                               onChange={(e) => setL6BotName(e.target.value)}
-                              className="w-full bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-xs font-black text-white focus:outline-none focus:border-amber-400"
+                              className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all font-black"
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-400">{isRtl ? 'تعويذة النظام وتوجيهات التعليمات:' : 'System Instructions for customization:'}</label>
+                            <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'تعويذة النظام وتوجيهات التعليمات:' : 'System Instructions for customization:'}</label>
                             <textarea 
                               rows={2}
                               value={l6SystemInstructions}
                               onChange={(e) => setL6SystemInstructions(e.target.value)}
-                              className="w-full bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 resize-none leading-relaxed"
+                              className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all resize-none leading-relaxed"
                             />
                           </div>
                         </div>
 
                         {/* Custom Chat Feed */}
                         <div className="space-y-2">
-                          <span className="text-xs font-bold text-slate-400 block">{isRtl ? 'لوحة الحوار الحي مع المساعد الذكي:' : 'Live Chat Feed Companion:'}</span>
-                          <div className="h-64 bg-slate-900 rounded-3xl p-4 overflow-y-auto border border-white/5 space-y-3 flex flex-col">
+                          <span className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'لوحة الحوار الحي مع المساعد الذكي:' : 'Live Chat Feed Companion:'}</span>
+                          <div className="h-64 bg-[#fdfaf3] rounded-2xl p-4 overflow-y-auto border border-[#C49E3A]/30 shadow-inner space-y-3 flex flex-col">
                             {l6Messages.map((msg, idx) => (
                               <div 
                                 key={idx} 
                                 className={`p-3 max-w-[85%] rounded-[1.5rem] text-xs leading-relaxed ${
                                   msg.role === 'user' 
-                                    ? 'bg-amber-500 text-slate-950 font-bold self-end rounded-br-none' 
-                                    : 'bg-white/5 text-slate-100 self-start rounded-bl-none border border-white/5'
+                                    ? 'bg-[#002147] text-white font-bold self-end rounded-br-none shadow-sm' 
+                                    : 'bg-white text-[#002147] self-start rounded-bl-none border border-[#C49E3A]/40 shadow-sm'
                                 }`}
                               >
                                 {msg.text}
                               </div>
                             ))}
                             {l6Chatting && (
-                              <div className="bg-white/5 text-slate-400 px-3 py-2 rounded-xl text-xs self-start animate-pulse border border-white/5">
+                              <div className="bg-white text-[#002147]/70 px-3 py-2 rounded-xl text-xs self-start animate-pulse border border-[#C49E3A]/30 shadow-sm">
                                 {isRtl ? 'جاري توليد الاستجابة العائلية الفريدة...' : 'Generating customized AI feedback...'}
                               </div>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                             <input 
-                              type="text"
+                              type="text" 
                               value={l6InputText}
                               onChange={(e) => setL6InputText(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleL6Send()}
                               placeholder={isRtl ? `اكتب رسالة إلى ${l6BotName}...` : `Type message to ${l6BotName}...`}
-                              className="flex-1 bg-slate-900 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400"
+                              className="flex-1 bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-sm text-[#002147] focus:outline-none focus:border-[#C49E3A] transition-all placeholder:text-[#002147]/40"
                             />
-                            <button 
+                            <PrimaryButton 
                               onClick={handleL6Send}
                               disabled={l6Chatting || !l6InputText.trim()}
-                              className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 active:scale-95 transition-all text-sm font-bold"
+                              className="w-full sm:w-auto !px-8 !py-4 !rounded-2xl !text-sm shadow-md shrink-0 flex items-center justify-center gap-2"
                             >
                               <Send size={16} />
-                            </button>
+                              <span>{isRtl ? 'إرسال' : 'Send'}</span>
+                            </PrimaryButton>
                           </div>
                         </div>
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
                   {/* LESSON 12 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 12 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
-                        <h5 className="text-lg font-black text-amber-300">{isRtl ? 'تمرين: صائد الفرص الرقمية 🚀' : 'Exercise: Digital Opportunity Hunter 🚀'}</h5>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] block">
+                            {isRtl ? 'تحدي استكشاف المهن 🚀' : 'CAREER INNOVATION LAB 🚀'}
+                          </span>
+                          <h5 className="text-xl font-black text-[#002147]">
+                            {isRtl ? 'تمرين: صائد الفرص الرقمية 🚀' : 'Exercise: Digital Opportunity Hunter 🚀'}
+                          </h5>
+                        </div>
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'الذكاء الاصطناعي يغير شكل الوظائف! ادمج شغفك الشخصي (مثل الطبخ، الرسم، الفضاء، أو الألعاب) مع الذكاء الاصطناعي لتبتكر مهنة المستقبل الفريدة الخاصة بك وتكتشف أدوارها والمهام اليومية!'
                             : 'AI transforms professions! Merge your key interests (e.g., cooking, space, gaming, art) with AI capabilities to construct a brand-new futuristic career.'}
                         </p>
 
                         <div className="space-y-3 mt-4">
-                          <span className="text-xs font-bold text-slate-400 block">{isRtl ? 'أمثلة ملهمة لأدوار جديدة:' : 'Inspiring examples of new roles:'}</span>
+                          <span className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'أمثلة ملهمة لأدوار جديدة:' : 'Inspiring examples of new roles:'}</span>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             {((selectedLesson.detailed_explanation as any)?.examples_of_new_roles || [
                               {
@@ -12338,25 +12358,25 @@ Output Summary for [${topic}]:
                                   : "Fine-tunes models with tailored datasets for specific crafts, culinary arts, or sciences."
                               }
                             ]).map((it: any, idx: number) => (
-                              <div key={idx} className="p-3 bg-white/5 rounded-2xl border border-white/5 text-right">
-                                <span className="text-xs font-black text-amber-300 block">{it.role}</span>
-                                <p className="text-[10px] text-slate-300 mt-1 leading-normal">{it.description}</p>
+                              <div key={idx} className="p-4 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 text-right shadow-sm">
+                                <span className="text-xs font-black text-[#002147] block">{it.role}</span>
+                                <p className="text-[11px] text-[#002147]/70 mt-1 leading-relaxed">{it.description}</p>
                               </div>
                             ))}
                           </div>
                         </div>
 
                         <div className="space-y-3 pt-3">
-                          <label className="text-xs font-bold text-slate-400 block">{isRtl ? 'اكتب هوايتك أو شغفك الترفيهي (مثال: رعاية القطط، كتابة الروايات، الطبخ...):' : 'Input your personal hobby / passion (e.g., cooking, space, pets...):'}</label>
-                          <div className="flex gap-2">
+                          <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'اكتب هوايتك أو شغفك الترفيهي (مثال: رعاية القطط، كتابة الروايات، الطبخ...):' : 'Input your personal hobby / passion (e.g., cooking, space, pets...):'}</label>
+                          <div className="flex flex-col sm:flex-row gap-3">
                             <input 
                               type="text" 
                               value={l10Hobby}
                               onChange={(e) => setL10Hobby(e.target.value)}
                               placeholder={isRtl ? 'مثال: صناعة الحلويات، السفر، تصميم الكرتون...' : 'e.g., Pastry baking, travel, anime...'}
-                              className="flex-1 bg-slate-900 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400"
+                              className="flex-1 bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all placeholder:text-[#002147]/40"
                             />
-                            <button
+                            <PrimaryButton
                               onClick={() => {
                                 if(!l10Hobby.trim()) return;
                                 setL10Loading(true);
@@ -12374,43 +12394,50 @@ Output Summary for [${topic}]:
                                 }, 1200);
                               }}
                               disabled={l10Loading || !l10Hobby.trim()}
-                              className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-5 rounded-2xl text-xs font-black active:scale-95 transition-all flex items-center justify-center gap-2 shrink-0 font-mono"
+                              className="w-full md:w-auto !px-8 !py-4 !rounded-2xl !text-sm shadow-md shrink-0 flex items-center justify-center gap-2 font-mono"
                             >
                               <span>{l10Loading ? (isRtl ? 'جاري الابتكار...' : 'Innovating...') : (isRtl ? 'ابتدع مهنة! ✨' : 'Forge Career! ✨')}</span>
-                            </button>
+                            </PrimaryButton>
                           </div>
                         </div>
 
                         {l10GeneratedJob && (
-                          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-2xl border border-amber-500/20 space-y-3">
+                          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-6 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-4 shadow-inner text-right">
                             <div className="flex items-center gap-2">
-                              <Bot className="text-amber-400" size={18} />
-                              <span className="text-sm font-black text-white">{l10GeneratedJob.role}</span>
+                              <Bot className="text-[#C49E3A]" size={20} />
+                              <span className="text-base font-black text-[#002147]">{l10GeneratedJob.role}</span>
                             </div>
-                            <p className="text-slate-300 text-xs leading-relaxed">{l10GeneratedJob.description}</p>
+                            <p className="text-[#002147]/80 text-xs leading-relaxed">{l10GeneratedJob.description}</p>
                             <div className="space-y-1">
-                              <span className="text-[10px] text-slate-400 font-bold block">{isRtl ? 'مهامك ومسؤولياتك المهنية الرائدة اليومية:' : 'Your futuristic daily duties:'}</span>
-                              <ul className="list-disc list-inside text-xs text-slate-300 space-y-1 pl-1">
+                              <span className="text-[11px] text-[#C49E3A] font-bold block uppercase tracking-wider">{isRtl ? 'مهامك ومسؤولياتك المهنية الرائدة اليومية:' : 'Your futuristic daily duties:'}</span>
+                              <ul className="list-disc list-inside text-xs text-[#002147]/80 space-y-1.5 pl-1">
                                 {l10GeneratedJob.tasks.map((task, idx) => (
-                                  <li key={idx} className="font-medium text-slate-200">{task}</li>
+                                  <li key={idx} className="font-medium text-[#002147]">{task}</li>
                                 ))}
                               </ul>
                             </div>
-                            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl text-center text-xs font-bold border border-emerald-500/20">
+                            <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-center text-xs font-bold shadow-sm">
                               {isRtl ? '✓ تم تسجيل الوظيفة وتكريمك بـ 90 نقطة XP بنجاح!' : '✓ Unique career registered! Earned 90 XP successfully!'}
                             </div>
                           </motion.div>
                         )}
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
                   {/* LESSON 13 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 13 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
-                        <h5 className="text-lg font-black text-amber-300">{isRtl ? 'تمرين: السيمفونية بين الإنسان والآلة 🎨📖' : 'Exercise: Human-Machine Co-creation Symphony 🎨📖'}</h5>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] block">
+                            {isRtl ? 'تحدي الإبداع المشترك 🎨' : 'CO-CREATION SYMPHONY 🎨'}
+                          </span>
+                          <h5 className="text-xl font-black text-[#002147]">
+                            {isRtl ? 'تمرين: السيمفونية بين الإنسان والآلة 🎨📖' : 'Exercise: Human-Machine Co-creation Symphony 🎨📖'}
+                          </h5>
+                        </div>
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'أعلى مراتب الاستخدام للذكاء الاصطناعي هي الإبداع المشترك! تعاون مع العائلة لتوليف كتاب قصة مدهشة بالذكاء الاصطناعي بناءً على رؤيتكم الخاصة.'
                             : 'The highest stage of AI usage is collaborative co-creation! Team up with your family to co-author an astronomical digital story.'}
@@ -12419,32 +12446,32 @@ Output Summary for [${topic}]:
                         <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
-                              <label className="text-xs font-bold text-slate-400">{isRtl ? 'اختر موضوع السيمفونية المشترك:' : 'Pick cooperative theme:'}</label>
+                              <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'اختر موضوع السيمفونية المشترك:' : 'Pick cooperative theme:'}</label>
                               <select 
                                 value={l11Theme}
                                 onChange={(e) => setL11Theme(e.target.value)}
-                                className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 cursor-pointer"
+                                className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all cursor-pointer"
                               >
-                                <option value="">{isRtl ? '-- اختر موضوع القصة --' : '-- Choose Theme --'}</option>
-                                <option value="أغرب إجازة صيفية في الفطام والنجوم">{isRtl ? 'أغرب إجازة صيفية عائلية في مجرة درب التبانة 🪐' : 'An exotic summer vacation in outer space 🪐'}</option>
-                                <option value="ديناصور منزلي أليف">{isRtl ? 'ديناصوري البرتقالي الصغير في حديقة المنزل 🦖' : 'My custom tiny pet dinosaur in the garden 🦖'}</option>
-                                <option value="مملكة غواصة مكسوة بالبكسل">{isRtl ? 'قرية مائية غواصة وسلاحف بألعاب البكسل 🐢' : 'A pixel-art marine coral sanctuary 🐢'}</option>
+                                <option value="" className="bg-white text-[#002147]">{isRtl ? '-- اختر موضوع القصة --' : '-- Choose Theme --'}</option>
+                                <option value="أغرب إجازة صيفية في الفطام والنجوم" className="bg-white text-[#002147]">{isRtl ? 'أغرب إجازة صيفية عائلية في مجرة درب التبانة 🪐' : 'An exotic summer vacation in outer space 🪐'}</option>
+                                <option value="ديناصور منزلي أليف" className="bg-white text-[#002147]">{isRtl ? 'ديناصوري البرتقالي الصغير في حديقة المنزل 🦖' : 'My custom tiny pet dinosaur in the garden 🦖'}</option>
+                                <option value="مملكة غواصة مكسوة بالبكسل" className="bg-white text-[#002147]">{isRtl ? 'قرية مائية غواصة وسلاحف بألعاب البكسل 🐢' : 'A pixel-art marine coral sanctuary 🐢'}</option>
                               </select>
                             </div>
 
                             <div className="space-y-1">
-                              <label className="text-xs font-bold text-slate-400">{isRtl ? 'مدخل طفلي أو فكرة عائلية حية (البذرة البشرية):' : 'Kid-authored creative sentence (The Human Spark):'}</label>
+                              <label className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'مدخل طفلي أو فكرة عائلية حية (البذرة البشرية):' : 'Kid-authored creative sentence (The Human Spark):'}</label>
                               <input 
                                 type="text"
                                 value={l11Seed}
                                 onChange={(e) => setL11Seed(e.target.value)}
                                 placeholder={isRtl ? 'مثال: روبوت يصنع حلويات سحرية تطير بالهواء...' : 'e.g., A tiny robot making magical levitating cupcakes...'}
-                                className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400 font-medium"
+                                className="w-full bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-4 py-3 text-[#002147] text-sm focus:outline-none focus:border-[#C49E3A] transition-all placeholder:text-[#002147]/40 font-medium"
                               />
                             </div>
                           </div>
 
-                          <button
+                          <PrimaryButton
                             disabled={l11Loading || !l11Theme || !l11Seed.trim()}
                             onClick={() => {
                               if(!l11Theme || !l11Seed.trim()) return;
@@ -12461,59 +12488,60 @@ Output Summary for [${topic}]:
                                 completeCurrentLesson(100);
                               }, 1500);
                             }}
-                            className={`w-full py-3.5 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 ${
-                              l11Theme && l11Seed.trim() && !l11Loading
-                                ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 active:scale-95'
-                                : 'bg-white/5 text-slate-500 cursor-not-allowed'
-                            }`}
+                            className="w-full md:w-auto !px-8 !py-4 !rounded-2xl !text-sm shadow-md"
                           >
                             <span>{l11Loading ? (isRtl ? 'جاري تأليف السيمفونية المعنوية...' : 'Composing Cosmic Symphony...') : (isRtl ? 'أطلق وتأليف السيمفونية المشتركة! 🎼✨' : 'Launch Co-Creativity Symphony! 🎼✨')}</span>
-                          </button>
+                          </PrimaryButton>
 
                           {l11Symphony && (
-                            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-5 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 rounded-2xl border border-emerald-500/20 space-y-3">
+                            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-4 shadow-inner text-right">
                               <div className="space-y-1">
-                                <span className="text-[10px] text-amber-300 font-bold block uppercase tracking-wider">{isRtl ? 'رسمة التعويذة المصممة المشتركة:' : 'JOINT ART DESIGN PROMPT:'}</span>
-                                <p className="text-xs font-mono text-slate-300 bg-black/40 px-3 py-2 rounded-xl border border-white/5">
+                                <span className="text-[10px] text-[#C49E3A] font-bold block uppercase tracking-wider">{isRtl ? 'رسمة التعويذة المصممة المشتركة:' : 'JOINT ART DESIGN PROMPT:'}</span>
+                                <p className="text-xs font-mono text-[#002147] bg-white px-3 py-2 rounded-xl border border-[#C49E3A]/30 shadow-sm">
                                   "{l11Symphony.prompt}"
                                 </p>
                               </div>
 
                               <div className="space-y-1 pt-1">
-                                <span className="text-[10px] text-emerald-300 font-bold block uppercase tracking-wider">{isRtl ? 'سرد السيمفونية والقصة المتألقة:' : 'GENERATED JOINT FAMILY STORY:'}</span>
-                                <p className="text-xs text-white leading-relaxed bg-black/20 px-4 py-3 rounded-xl border border-white/5 italic">
+                                <span className="text-[10px] text-[#C49E3A] font-bold block uppercase tracking-wider">{isRtl ? 'سرد السيمفونية والقصة المتألقة:' : 'GENERATED JOINT FAMILY STORY:'}</span>
+                                <p className="text-xs text-[#002147] leading-relaxed bg-white px-4 py-3 rounded-xl border border-[#C49E3A]/30 italic shadow-sm">
                                   {l11Symphony.story}
                                 </p>
                               </div>
 
-                              <div className="p-3 bg-emerald-500/15 text-emerald-400 rounded-xl text-center text-xs font-bold border border-emerald-500/20 tracking-wide font-sans">
+                              <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-center text-xs font-bold tracking-wide font-sans shadow-sm">
                                 {isRtl ? '✓ تم دمج السيمفونية وإصدار كتاب العائلة بامتياز! حصلت على 100 نقطة XP!' : '✓ Symphony fully archived into customized storybook! Earned 100 XP!'}
                               </div>
                             </motion.div>
                           )}
                         </div>
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
                   {/* GENERAL INTERACTIVE LESSON CHALLENGE (FOR LESSONS 5, 6, 9, 10, 11, 14, 15, 16, 17, 18, 19, 20) */}
                   {![1, 2, 3, 4, 7, 8, 12, 13].includes(selectedLesson.lesson_number) && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
-                        <h5 className="text-lg font-black text-amber-300">
-                          {isRtl ? 'تحدي سفير الذكاء الاصطناعي 🌟' : 'AI Ambassador Challenge 🌟'}
-                        </h5>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                        <div className="space-y-1">
+                          <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] block">
+                            {isRtl ? 'تحدي سفير الذكاء الاصطناعي 🌟' : 'AI AMBASSADOR CHALLENGE 🌟'}
+                          </span>
+                          <h5 className="text-xl font-black text-[#002147]">
+                            {isRtl ? 'تحدي سفير الذكاء الاصطناعي 🌟' : 'AI Ambassador Challenge 🌟'}
+                          </h5>
+                        </div>
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'أثبت جدارتك واستيعابك للفكرة الجوهرية لهذا الدرس بحل هذا التحدي السريع لتربح 50 نقطة XP!'
                             : "Prove your grasp of this lesson's core idea to earn 50 XP in this quick challenge!"}
                         </p>
 
-                        <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-4">
-                          <span className="text-xs font-bold text-slate-400 block uppercase tracking-widest">
+                        <div className="p-5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-4 shadow-inner">
+                          <span className="text-xs font-bold text-[#002147]/70 block uppercase tracking-widest">
                             {isRtl ? 'السؤال التفاعلي:' : 'Interactive Question:'}
                           </span>
-                          <p className="text-sm font-black text-white leading-relaxed">
+                          <p className="text-lg font-black text-[#002147] leading-relaxed">
                             {selectedLesson.lesson_number === 5 && (isRtl ? 'كيف يتم تمثيل ومعالجة الصوت في الحاسوب عن طريق الذكاء الاصطناعي؟' : 'How is sound represented and processed in AI?')}
                             {selectedLesson.lesson_number === 6 && (isRtl ? 'ما هو المبدأ الأساسي الذي تقوم عليه صناعة الفيديو بالذكاء الاصطناعي؟' : 'What is the main principle behind AI video generation?')}
                             {selectedLesson.lesson_number === 9 && (isRtl ? 'ماذا يُقصد بمصطلح "الهلوسة" في النماذج اللغوية الكبيرة؟' : 'What does "Hallucination" refer to in Language Models?')}
@@ -12530,56 +12558,56 @@ Output Summary for [${topic}]:
 
                           <div className="grid grid-cols-1 gap-3 pt-2">
                             {/* Option 1 */}
-                            <button
+                            <AnswerOption
                               onClick={() => handleQuizAnswer('A')}
-                              className={`p-4 rounded-xl text-right text-xs font-bold transition-all border flex items-center justify-between ${
-                                lQuizAnswer === 'A' 
-                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500' 
-                                  : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'
-                              }`}
-                            >
-                              <span className="text-right">
-                                {selectedLesson.lesson_number === 5 && (isRtl ? 'تحويل الصوت إلى بيانات رقمية تصف شكل الموجات الصوتية الفريدة وترجمتها 🌊' : 'Converting voice to wave-descriptive digital data and compiling it 🌊')}
-                                {selectedLesson.lesson_number === 6 && (isRtl ? 'توليد سلسلة سريعة من الصور المتعاقبة (الإطارات) لخلق وهم الحركة والانسيابية 🎥' : 'Generating a consecutive sequence of images (frames) mimicking fluid kinetic motion 🎥')}
-                                {selectedLesson.lesson_number === 9 && (isRtl ? 'تخمين كلمة تبدو لغوياً ومنطقياً صحيحة بثقة تامة دون الاعتماد على حقيقة أو حقائق عينية 🧠' : 'Guessing text that seems linguistically or contextually accurate without real factual lookup 🧠')}
-                                {selectedLesson.lesson_number === 10 && (isRtl ? 'بسبب عدم توازن البيانات التاريخية والتحيزات النمطية البشرية التي غُذي بها النموذج 📊' : 'Due to unbalance or bias in historical human training sets fed to the model 📊')}
-                                {selectedLesson.lesson_number === 11 && (isRtl ? 'اتفاق العائلة على رمز أو كلمة سرية خاصة وسرية للتحقق المباشر من المكالمات المريبة 🔐' : 'Agreeing on a private family password/secret to dynamically authenticate unexpected incoming requests 🔐')}
-                                {selectedLesson.lesson_number === 14 && (isRtl ? 'بتطوير مهارة طرح الأسئلة وصياغة دور واضح وشجاع في نص الاستجابة والتعلم 🎓' : 'By mastering inquiry skills and defining clean roles inside active learning sessions 🎓')}
-                                {selectedLesson.lesson_number === 15 && (isRtl ? 'كتابة تعاويذ وهندسة فنية متناسقة ومترابطة تحكي مسار قصتنا العائلية بانسجام أسلوبي 🎨' : 'Engineering cohesive and connected prompts portraying our family history beautifully 🎨')}
-                                {selectedLesson.lesson_number === 16 && (isRtl ? 'بناء وتوجيه حلول ذكية لخدمة الإنسانية ومساعدة المحيط والمجتمع من حولنا 🤝' : 'Constructing and steering smart tools to solve real humanitarian and social dilemmas 🤝')}
-                                {selectedLesson.lesson_number === 17 && (isRtl ? 'بصياغة رحلتنا وإنجازنا كقصة ملحمية تاريخية خيالية مسجلة بقالب الذكاء التوليدي 📖' : 'Compiling our milestones as an epic storybook documented via generative AI templates 📖')}
-                                {selectedLesson.lesson_number === 18 && (isRtl ? 'تحمل ميثاق نشر الأخلاقيات، الإبداع الرقمي، الوعي والأمان والخير في المجتمع ✨' : 'Fostering best ethics, digital creativity, and helpful awareness in our community ✨')}
-                                {selectedLesson.lesson_number === 19 && (isRtl ? 'بتخصيص ساعة شهرية مستدامة لتجربة أداة ذكية جديدة ومرحة بالتناوب ومشاركة الإبداعات 🕰️' : 'Allocating a sustainable monthly hour exploring a funny smart toy and celebrating creation 🕰️')}
-                                {selectedLesson.lesson_number === 20 && (isRtl ? 'أن العلم والإبداع التقني مسؤولية نستخدمها بحكمة وحب وشغف لنبني غدًا أفضل 🌍✨' : 'That science and smart crafts are responsibilities handled with pure love to build a brighter future 🌍✨')}
-                              </span>
-                              {lQuizAnswer === 'A' && <span className="text-[10px] uppercase font-black tracking-widest text-amber-400 shrink-0">{isRtl ? 'محدد' : 'Selected'}</span>}
-                            </button>
+                              selected={lQuizAnswer === 'A'}
+                              dir={isRtl ? 'rtl' : 'ltr'}
+                              label={
+                                <>
+                                  <span className="text-right">
+                                    {selectedLesson.lesson_number === 5 && (isRtl ? 'تحويل الصوت إلى بيانات رقمية تصف شكل الموجات الصوتية الفريدة وترجمتها 🌊' : 'Converting voice to wave-descriptive digital data and compiling it 🌊')}
+                                    {selectedLesson.lesson_number === 6 && (isRtl ? 'توليد سلسلة سريعة من الصور المتعاقبة (الإطارات) لخلق وهم الحركة والانسيابية 🎥' : 'Generating a consecutive sequence of images (frames) mimicking fluid kinetic motion 🎥')}
+                                    {selectedLesson.lesson_number === 9 && (isRtl ? 'تخمين كلمة تبدو لغوياً ومنطقياً صحيحة بثقة تامة دون الاعتماد على حقيقة أو حقائق عينية 🧠' : 'Guessing text that seems linguistically or contextually accurate without real factual lookup 🧠')}
+                                    {selectedLesson.lesson_number === 10 && (isRtl ? 'بسبب عدم توازن البيانات التاريخية والتحيزات النمطية البشرية التي غُذي بها النموذج 📊' : 'Due to unbalance or bias in historical human training sets fed to the model 📊')}
+                                    {selectedLesson.lesson_number === 11 && (isRtl ? 'اتفاق العائلة على رمز أو كلمة سرية خاصة وسرية للتحقق المباشر من المكالمات المريبة 🔐' : 'Agreeing on a private family password/secret to dynamically authenticate unexpected incoming requests 🔐')}
+                                    {selectedLesson.lesson_number === 14 && (isRtl ? 'بتطوير مهارة طرح الأسئلة وصياغة دور واضح وشجاع في نص الاستجابة والتعلم 🎓' : 'By mastering inquiry skills and defining clean roles inside active learning sessions 🎓')}
+                                    {selectedLesson.lesson_number === 15 && (isRtl ? 'كتابة تعاويذ وهندسة فنية متناسقة ومترابطة تحكي مسار قصتنا العائلية بانسجام أسلوبي 🎨' : 'Engineering cohesive and connected prompts portraying our family history beautifully 🎨')}
+                                    {selectedLesson.lesson_number === 16 && (isRtl ? 'بناء وتوجيه حلول ذكية لخدمة الإنسانية ومساعدة المحيط والمجتمع من حولنا 🤝' : 'Constructing and steering smart tools to solve real humanitarian and social dilemmas 🤝')}
+                                    {selectedLesson.lesson_number === 17 && (isRtl ? 'بصياغة رحلتنا وإنجازنا كقصة ملحمية تاريخية خيالية مسجلة بقالب الذكاء التوليدي 📖' : 'Compiling our milestones as an epic storybook documented via generative AI templates 📖')}
+                                    {selectedLesson.lesson_number === 18 && (isRtl ? 'تحمل ميثاق نشر الأخلاقيات، الإبداع الرقمي، الوعي والأمان والخير في المجتمع ✨' : 'Fostering best ethics, digital creativity, and helpful awareness in our community ✨')}
+                                    {selectedLesson.lesson_number === 19 && (isRtl ? 'بتخصيص ساعة شهرية مستدامة لتجربة أداة ذكية جديدة ومرحة بالتناوب ومشاركة الإبداعات 🕰️' : 'Allocating a sustainable monthly hour exploring a funny smart toy and celebrating creation 🕰️')}
+                                    {selectedLesson.lesson_number === 20 && (isRtl ? 'أن العلم والإبداع التقني مسؤولية نستخدمها بحكمة وحب وشغف لنبني غدًا أفضل 🌍✨' : 'That science and smart crafts are responsibilities handled with pure love to build a brighter future 🌍✨')}
+                                  </span>
+                                  {lQuizAnswer === 'A' && <span className="text-[10px] font-black text-[#C49E3A] ms-2">{isRtl ? 'محدد' : 'Selected'}</span>}
+                                </>
+                              }
+                            />
 
                             {/* Option 2 */}
-                            <button
+                            <AnswerOption
                               onClick={() => handleQuizAnswer('B')}
-                              className={`p-4 rounded-xl text-right text-xs font-bold transition-all border flex items-center justify-between ${
-                                lQuizAnswer === 'B' 
-                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500' 
-                                  : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'
-                              }`}
-                            >
-                              <span className="text-right">
-                                {selectedLesson.lesson_number === 5 && (isRtl ? 'استخدام الحرارة لضغط المذياع 🌡️' : 'Using temperature to compress hardware 🌡️')}
-                                {selectedLesson.lesson_number === 6 && (isRtl ? 'تبديل كوابل الشاشات الملوّنة 💾' : 'Changing cables on old colored televisions 💾')}
-                                {selectedLesson.lesson_number === 9 && (isRtl ? 'إغلاق البرنامج وتحديثه بشكل سنوي 🔄' : 'Shutting down the software and upgrading yearly 🔄')}
-                                {selectedLesson.lesson_number === 10 && (isRtl ? 'زيادة حرارة المعالج أو استهلاك الأسلاك للطاقة المرتفعه 🔋' : 'Processor heating issues or heavy electricity consumption levels 🔋')}
-                                {selectedLesson.lesson_number === 11 && (isRtl ? 'توقيف تشغيل الهاتف الخلوي والإنترنت بالكلية 📵' : 'Turning off mobile connectivity and internet access completely 📵')}
-                                {selectedLesson.lesson_number === 14 && (isRtl ? 'تكرار نفس المدخلات مئة مرة متتالية دون تعديل 📝' : 'Repeating the exact same prompt 100 times without edits 📝')}
-                                {selectedLesson.lesson_number === 15 && (isRtl ? 'شراء أصباغ وفرشاة دهان مادية لوضعها على الأسطح 🖌️' : 'Purchasing a real paintbrush and acrylic colors 🖌️')}
-                                {selectedLesson.lesson_number === 16 && (isRtl ? 'كتابة واجبات الآخرين بشكل عشوائي دون فهم أو وعي 📝' : 'Copying homework blindly without cognitive comprehension 📝')}
-                                {selectedLesson.lesson_number === 17 && (isRtl ? 'نسيان المحطات وحذف الرسائل من الذاكرة بمرور الوقت 🧹' : 'Ignoring memories and choosing to forget everything 🧹')}
-                                {selectedLesson.lesson_number === 18 && (isRtl ? 'التنافس في معدلات الألعاب الرقمية السريعة فقط 🎮' : 'Only playing arcade or competitive shooter games 🎮')}
-                                {selectedLesson.lesson_number === 19 && (isRtl ? 'متابعة شاشات التلفاز طيلة اليوم والليل دون تفاعل لغوي 📺' : 'Watching generic televisions all days and nights without talking 📺')}
-                                {selectedLesson.lesson_number === 20 && (isRtl ? 'جمع أكبر باقة من التطبيقات والأجهزة الذكية لحفظها في الخزانة 📱' : 'Storage of as many apps and phones in the home closets 📱')}
-                              </span>
-                              {lQuizAnswer === 'B' && <span className="text-[10px] uppercase font-black tracking-widest text-amber-400 shrink-0">{isRtl ? 'محدد' : 'Selected'}</span>}
-                            </button>
+                              selected={lQuizAnswer === 'B'}
+                              dir={isRtl ? 'rtl' : 'ltr'}
+                              label={
+                                <>
+                                  <span className="text-right">
+                                    {selectedLesson.lesson_number === 5 && (isRtl ? 'استخدام الحرارة لضغط المذياع 🌡️' : 'Using temperature to compress hardware 🌡️')}
+                                    {selectedLesson.lesson_number === 6 && (isRtl ? 'تبديل كوابل الشاشات الملوّنة 💾' : 'Changing cables on old colored televisions 💾')}
+                                    {selectedLesson.lesson_number === 9 && (isRtl ? 'إغلاق البرنامج وتحديثه بشكل سنوي 🔄' : 'Shutting down the software and upgrading yearly 🔄')}
+                                    {selectedLesson.lesson_number === 10 && (isRtl ? 'زيادة حرارة المعالج أو استهلاك الأسلاك للطاقة المرتفعه 🔋' : 'Processor heating issues or heavy electricity consumption levels 🔋')}
+                                    {selectedLesson.lesson_number === 11 && (isRtl ? 'توقيف تشغيل الهاتف الخلوي والإنترنت بالكلية 📵' : 'Turning off mobile connectivity and internet access completely 📵')}
+                                    {selectedLesson.lesson_number === 14 && (isRtl ? 'تكرار نفس المدخلات مئة مرة متتالية دون تعديل 📝' : 'Repeating the exact same prompt 100 times without edits 📝')}
+                                    {selectedLesson.lesson_number === 15 && (isRtl ? 'شراء أصباغ وفرشاة دهان مادية لوضعها على الأسطح 🖌️' : 'Purchasing a real paintbrush and acrylic colors 🖌️')}
+                                    {selectedLesson.lesson_number === 16 && (isRtl ? 'كتابة واجبات الآخرين بشكل عشوائي دون فهم أو وعي 📝' : 'Copying homework blindly without cognitive comprehension 📝')}
+                                    {selectedLesson.lesson_number === 17 && (isRtl ? 'نسيان المحطات وحذف الرسائل من الذاكرة بمرور الوقت 🧹' : 'Ignoring memories and choosing to forget everything 🧹')}
+                                    {selectedLesson.lesson_number === 18 && (isRtl ? 'التنافس في معدلات الألعاب الرقمية السريعة فقط 🎮' : 'Only playing arcade or competitive shooter games 🎮')}
+                                    {selectedLesson.lesson_number === 19 && (isRtl ? 'متابعة شاشات التلفاز طيلة اليوم والليل دون تفاعل لغوي 📺' : 'Watching generic televisions all days and nights without talking 📺')}
+                                    {selectedLesson.lesson_number === 20 && (isRtl ? 'جمع أكبر باقة من التطبيقات والأجهزة الذكية لحفظها في الخزانة 📱' : 'Storage of as many apps and phones in the home closets 📱')}
+                                  </span>
+                                  {lQuizAnswer === 'B' && <span className="text-[10px] font-black text-[#C49E3A] ms-2">{isRtl ? 'محدد' : 'Selected'}</span>}
+                                </>
+                              }
+                            />
                           </div>
                         </div>
 
@@ -12587,12 +12615,12 @@ Output Summary for [${topic}]:
                           <motion.div 
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl flex items-center gap-3"
+                            className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl flex items-center gap-3 shadow-sm"
                           >
                             <span className="text-xl">🎉</span>
                             <div className="text-right">
                               <h6 className="font-black text-xs">{isRtl ? 'إجابة عبقرية وصحيحة تماماً!' : 'Brilliant! Absolutely correct!'}</h6>
-                              <p className="text-[10px] text-slate-300 mt-1">
+                              <p className="text-[10px] text-[#002147]/70 mt-1">
                                 {isRtl 
                                   ? 'أحسنت يا بطل! لقد استوعبت الدرس واستحقيت شعار ومكافأة السفير بجدية تامة. استمر في رحلتك!' 
                                   : 'Awesome work! You secured the understanding and officially earned your 50 XP award.'}
@@ -12605,12 +12633,12 @@ Output Summary for [${topic}]:
                           <motion.div 
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-2xl flex items-center gap-3"
+                            className="p-4 bg-rose-50 text-rose-800 border border-rose-200 rounded-2xl flex items-center gap-3 shadow-sm"
                           >
                             <span className="text-xl">💡</span>
                             <div className="text-right">
                               <h6 className="font-black text-xs">{isRtl ? 'اقتربت جداً! فكر في الخيار الأول مجدداً' : 'So close! Give the first option another thought'}</h6>
-                              <p className="text-[10px] text-slate-300 mt-1">
+                              <p className="text-[10px] text-[#002147]/70 mt-1">
                                 {isRtl 
                                   ? 'الذكاء الاصطناعي يزدهر بالمحاولة! جرب اختيار الإجابة الأكثر شمولاً وأخلاقية مرة أخرى.' 
                                   : 'Success rises from trying! Choose the most ethical answer.'}
@@ -12618,7 +12646,7 @@ Output Summary for [${topic}]:
                             </div>
                           </motion.div>
                         )}
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
