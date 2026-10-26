@@ -12,7 +12,11 @@ import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
 import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
 import type { SaraChoiceQuestion } from '../data/saraTracks/foundations';
+import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue } from './BoardNextTransition';
+import { extractLessonItems } from '../lib/repeatPractice';
+import type { RepeatTeacher } from './SaraRepeatPractice';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
+const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 
 const saveUnlocked = saveTutorUnlocked;
 export { readTutorUnlocked };
@@ -24,7 +28,8 @@ const useVoice = (voice: string) => {
   useEffect(() => () => saraStopNarrator(), []);
   return {
     st,
-    play: (text: string) => { saraUnlockNarrator(); setSt('loading'); void saraNarrate(text, () => setSt('blocked'), () => setSt('failed'), () => setSt('idle'), voice); },
+    /** the teacher's own cloud voice; cb.done = natural end, cb.fail = failed/blocked */
+    play: (text: string, cb?: { done?: () => void; fail?: () => void }) => { saraUnlockNarrator(); setSt('loading'); void saraNarrate(text, () => { setSt('blocked'); cb?.fail?.(); }, () => { setSt('failed'); cb?.fail?.(); }, () => { setSt('idle'); cb?.done?.(); }, voice); },
     stop: () => { saraStopNarrator(); setSt('idle'); },
   };
 };
@@ -53,6 +58,24 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const [replay, setReplay] = useState(0);
   const [talk, setTalk] = useState(false);
   const calls = useMemo(() => (lesson?.board ? toToolCalls(lesson.board) : []), [lesson]);
+  const kidsBoard = !!(persona.kids && lesson?.kids);
+  const boardNarration = lesson?.content ? (kidsBoard ? `${lesson.content.explanationAr} ${lesson.kids!.say}` : `${lesson.content.explanationAr} ${lesson.content.example.map(e => e.en).join('. ')}`) : '';
+  // Board end → check question: this teacher's own cloud voice says the cue line, gold card + 3s countdown (first run only).
+  const trans = useBoardNextTransition({
+    active: !!lesson?.content && step.k === 'board' && !talk,
+    drawMs: kidsBoard ? 1500 : boardDrawMs(calls.length),
+    say: (text, onEnd) => v.play(text, { done: onEnd, fail: onEnd }),
+    stopSay: () => v.stop(),
+    onAdvance: () => { v.stop(); setPicked(null); setCheckWrong(false); setStep({ k: 'check' }); },
+    onReplay: () => { setReplay(r => r + 1); playBoard(boardNarration, true); },
+    focusSel: '[data-testid=tutor-q]',
+  });
+  const playBoard = (text: string, replayed = false) => { trans.narrationStarted(replayed); v.play(text, { done: trans.narrationDone, fail: trans.narrationFailed }); };
+  // «ردّد مع المعلم» after the exercises: same practice screen, this teacher's face + own cloud voice.
+  const teacher: RepeatTeacher = useMemo(() => ({ id: persona.id, nameAr: persona.nameAr, face: persona.id, male: persona.gender === 'male',
+    narrate: (text, b, f, e) => { void saraNarrate(text, b, f, e, persona.voice); }, stop: saraStopNarrator, unlock: saraUnlockNarrator }), [persona]);
+  const repeatItems = useMemo(() => (lessonRaw ? extractLessonItems(lessonRaw) : []), [lessonRaw]);
+  const [repeatOpen, setRepeatOpen] = useState(false);
 
   const shell = (head: React.ReactNode, body: React.ReactNode) => (
     <div data-testid="tutor-track" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">
@@ -66,13 +89,13 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       <TtsDebugOverlay />
     </div>
   );
-  const VoiceBtn: React.FC<{ text: string }> = ({ text }) => (
+  const VoiceBtn: React.FC<{ text: string; onPlay?: () => void }> = ({ text, onPlay }) => (
     <div className="flex items-center gap-2 shrink-0">
       {v.st === 'loading'
         ? <button onClick={v.stop} className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Square size={13} className="inline" /> {t("إيقاف", "Stop")}</button>
-        : <button onClick={() => v.play(text)} data-testid="tutor-voice" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.st === 'failed' ? t('إعادة المحاولة', 'Try again') : t(`استمع لـ${persona.nameAr}`, `Listen to ${persona.nameEn}`)}</button>}
+        : <button onClick={() => (onPlay ? onPlay() : v.play(text))} data-testid="tutor-voice" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.st === 'failed' ? t('إعادة المحاولة', 'Try again') : t(`استمع لـ${persona.nameAr}`, `Listen to ${persona.nameEn}`)}</button>}
       {v.st === 'failed' && <span className="text-[10px] text-rose-300 font-bold">{t("الصوت غير متاح الآن", "Audio is not available right now")} <span data-no-i18n className="opacity-60">({saraLastReason()})</span></span>}
-      {v.st === 'blocked' && <button onClick={() => v.play(text)} className="px-3 py-1.5 rounded-xl bg-[#C49E3A] text-[#001a38] text-[12px] font-black animate-pulse">{t("اضغط للاستماع 🔊", "Tap to listen 🔊")}</button>}
+      {v.st === 'blocked' && <button onClick={() => (onPlay ? onPlay() : v.play(text))} className="px-3 py-1.5 rounded-xl bg-[#C49E3A] text-[#001a38] text-[12px] font-black animate-pulse">{t("اضغط للاستماع 🔊", "Tap to listen 🔊")}</button>}
     </div>
   );
   const nextBtn = (label: string, onClick: () => void, disabled = false) => (
@@ -91,7 +114,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
           return (
             <React.Fragment key={l.id}>
             {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-300" data-testid="tutor-level-head">{t(lvl!.titleAr, (lvl as { titleEn?: string }).titleEn || lvl!.titleAr)}</p>}
-            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); const cc = l.content!; const lk = persona.kids ? (l as TutorLesson).kids : undefined; if (lang === 'en') { v.stop(); void englishLessonAsync(l).then(x => { const e2 = x.content!; v.play(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else v.play(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
+            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); trans.reset(); const cc = l.content!; const lk = persona.kids ? (l as TutorLesson).kids : undefined; if (lang === 'en') { v.stop(); trans.narrationStarted(); void englishLessonAsync(l).then(x => { const e2 = x.content!; playBoard(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else playBoard(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-start border ${open ? 'bg-[#0a2d5c] border-amber-400/40' : 'bg-white/5 border-white/10 opacity-60'}`}>
               <span className="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-[#001a38] text-[12px] font-black flex items-center justify-center">{l.order}</span>
               <span className="flex-1 min-w-0">{lang === 'en' ? <span dir="ltr" className="block text-[13px] font-black truncate text-start">{l.titleEn}</span> : <><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></>}</span>
@@ -113,14 +136,15 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const narration = kids ? `${c.explanationAr} ${kids.say}` : `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
 
   if (step.k === 'board') return shell(head, <>
-    <div onClickCapture={e => { if ((e.target as HTMLElement).closest('[data-testid=tutor-voice]')) setReplay(r => r + 1); }}><VoiceBtn text={narration} /></div>
+    <div onClickCapture={e => { if ((e.target as HTMLElement).closest('[data-testid=tutor-voice]')) setReplay(r => r + 1); }}><VoiceBtn text={narration} onPlay={() => playBoard(narration)} /></div>
     <div className="flex-1 min-h-0">
-      {kids ? <KidsCardBoard persona={persona} listTitle={kids.listTitle} cards={kids.cards} speaking={v.st === 'loading'} onSpeak={() => v.play(narration)} /> :
+      {kids ? <KidsCardBoard persona={persona} listTitle={kids.listTitle} cards={kids.cards} speaking={v.st === 'loading'} onSpeak={() => playBoard(narration)} /> :
       <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">{t("جاري فتح السبورة…", "Opening the board…")}</div>}>
-        <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={v.st === 'loading'} replayKey={replay} onSpeak={() => { setReplay(r => r + 1); v.play(narration); }} />
+        <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={v.st === 'loading'} replayKey={replay} onSpeak={() => { setReplay(r => r + 1); playBoard(narration, true); }} />
       </Suspense>}
     </div>
-    {nextBtn(t('الشرح', 'Explanation'), () => setStep({ k: 'explain' }))}
+    {trans.banner}
+    {!trans.banner && nextBtn(t('الشرح', 'Explanation'), () => setStep({ k: 'explain' }))}
   </>);
 
   if (step.k === 'explain') return shell(head, <>
@@ -146,7 +170,10 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     const n = step.k === 'check' ? 1 : step.i + 2;
     const isLast = step.k === 'ex' && step.i === c.exercises.length - 1;
     return shell(head, <>
-      <p className="text-[11px] font-black text-amber-300 shrink-0">{t('سؤال', 'Question')} {n} {t('من', 'of')} {total}</p>
+      <div className="flex items-center gap-2 shrink-0">
+        <p data-testid="tutor-q" tabIndex={-1} className="flex-1 text-[11px] font-black text-amber-300 outline-none">{t('سؤال', 'Question')} {n} {t('من', 'of')} {total}</p>
+        {step.k === 'check' && picked === null && <button onClick={() => { v.stop(); setStep({ k: 'explain' }); }} data-testid="tutor-read-explain" className="px-2 py-0.5 rounded-lg bg-white/10 text-[11px] font-black text-amber-200">{t('📖 اقرأ الشرح', '📖 Read the explanation')}</button>}
+      </div>
       {persona.kids ? (
         <div className="rounded-2xl bg-white p-3 shrink-0" style={{ border: `4px solid ${persona.kids.accent}`, background: persona.kids.soft }} data-testid="kids-question">
           <p className="text-[14px] font-black" style={{ color: persona.kids.ink }}>{q.promptAr}</p>
@@ -180,12 +207,20 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       <p className="text-[18px] font-black text-amber-300" data-testid="tutor-result">{t(`جاوبت ${correct} من ${total} صح`, `You got ${correct} of ${total} right`)}</p>
       <p className="text-[12px] font-bold text-white/80">{correct === total ? t('ممتاز!', 'Excellent!') : t('تقدر تعيد الدرس متى ما بغيت.', 'You can redo the lesson any time.')}</p>
     </div>
-    <div className="flex gap-2 shrink-0">
-      <button onClick={() => { setStep({ k: 'board' }); setCorrect(0); }} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">{t("أعد الدرس", "Redo lesson")}</button>
-      {nextLesson
-        ? <button onClick={() => { setLesson(nextLesson); setStep({ k: 'board' }); setCorrect(0); }} data-testid="tutor-next-lesson" className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{t("الدرس التالي", "Next lesson")}</button>
-        : <button onClick={() => setLesson(null)} className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{t("قائمة الدروس", "Lesson list")}</button>}
+    <div className="shrink-0">
+      <ExercisesDoneCue say={text => v.play(text)} onRepeat={repeatItems.length > 0 ? () => { v.stop(); setRepeatOpen(true); } : undefined}
+        onNext={nextLesson ? () => { v.stop(); setLesson(nextLesson); setStep({ k: 'board' }); setCorrect(0); } : () => { v.stop(); setLesson(null); }}
+        nextLabel={nextLesson ? t("الدرس التالي", "Next lesson") : t("قائمة الدروس", "Lesson list")} nextTestId={nextLesson ? 'tutor-next-lesson' : 'tutor-lesson-list'} />
     </div>
+    <div className="flex gap-2 shrink-0">
+      <button onClick={() => { v.stop(); setStep({ k: 'board' }); setCorrect(0); }} className="flex-1 px-3 py-2.5 rounded-xl bg-white/10 text-[13px] font-black">{t("أعد الدرس", "Redo lesson")}</button>
+    </div>
+    {repeatOpen && lessonRaw && repeatItems.length > 0 && (
+      <Suspense fallback={null}>
+        <SaraRepeatPractice uid={uid} teacher={teacher} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}
+          lesson={{ trackId: track.id, lessonId: lessonRaw.id, titleAr: lessonRaw.titleAr, titleEn: lessonRaw.titleEn, items: repeatItems }} />
+      </Suspense>
+    )}
   </>);
 };
 export default TutorTrackPlayer;

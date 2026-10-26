@@ -9,6 +9,7 @@ import { playCloudAudioAs, cancelAllSpeech, fetchCloudVoice } from '../lib/audio
 import { BOARD_PERSONAS, personaById, type BoardPersona } from '../data/saraBoardPersonas';
 import { toToolCalls, type BoardResult } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
+import { useBoardNextTransition, boardDrawMs } from './BoardNextTransition';
 import TutorTrackPlayer from './TutorTrackPlayer';
 import { TUTOR_TRACKS, type TutorTrack } from '../data/tutorTracks';
 import { SaraTracksHub } from './SaraTracksHub';
@@ -23,18 +24,23 @@ type Step = 'pick' | 'board' | 'check' | 'done';
 const usePersonaVoice = () => {
   const [state, setState] = useState<'idle' | 'loading' | 'playing' | 'failed'>('idle');
   const stopRef = useRef<{ stop: () => void } | null>(null);
-  const stop = () => { try { stopRef.current?.stop(); } catch { /* ignore */ } cancelAllSpeech(OWNER); setState('idle'); };
+  const tok = useRef(0);
+  const stop = () => { tok.current++; try { stopRef.current?.stop(); } catch { /* ignore */ } cancelAllSpeech(OWNER); setState('idle'); };
   useEffect(() => () => stop(), []); // eslint-disable-line react-hooks/exhaustive-deps
-  const play = async (text: string, voice: string) => {
+  /** cb.done = natural end, cb.fail = no audio / playback failed (ignored once stopped or superseded) */
+  const play = async (text: string, voice: string, cb?: { done?: () => void; fail?: () => void }) => {
     stop(); setState('loading');
+    const my = ++tok.current;
+    const fail = () => { setState('failed'); if (my === tok.current) cb?.fail?.(); };
     try {
       const j = await fetchCloudVoice(text, voice);
-      if (!j?.audio) { setState('failed'); return; }
+      if (my !== tok.current) return;
+      if (!j?.audio) { fail(); return; }
       setState('playing');
-      const p = await playCloudAudioAs(OWNER, j.audio, () => setState('idle'));
+      const p = await playCloudAudioAs(OWNER, j.audio, () => { setState('idle'); if (my === tok.current) cb?.done?.(); });
       stopRef.current = p || null;
-      if (!p) setState('failed');
-    } catch { setState('failed'); }
+      if (!p) fail();
+    } catch { fail(); }
   };
   return { state, play, stop };
 };
@@ -42,11 +48,11 @@ const usePersonaVoice = () => {
 const boardSpeech = (b: BoardResult) => b.boardActions.map(a =>
   a.kind === 'example' ? a.en : a.kind === 'fix' ? `Not "${a.wrong}". Say "${a.right}".` : a.kind === 'arrow' ? `${a.from}, becomes ${a.to}.` : a.text).join('. ');
 
-const VoiceBtn: React.FC<{ v: ReturnType<typeof usePersonaVoice>; text: string; p: BoardPersona }> = ({ v, text, p }) => (
+const VoiceBtn: React.FC<{ v: ReturnType<typeof usePersonaVoice>; text: string; p: BoardPersona; onPlay?: () => void }> = ({ v, text, p, onPlay }) => (
   <div className="flex items-center gap-2 shrink-0">
     {v.state === 'loading' || v.state === 'playing'
       ? <button onClick={v.stop} data-testid="board-voice-stop" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Square size={13} className="inline" /> {L("إيقاف", "Stop")}</button>
-      : <button onClick={() => void v.play(text, p.voice)} data-testid="board-voice-play" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.state === 'failed' ? L('إعادة المحاولة', 'Try again') : L(`استمع لـ${p.nameAr}`, `Listen to ${p.nameEn}`)}</button>}
+      : <button onClick={() => (onPlay ? onPlay() : void v.play(text, p.voice))} data-testid="board-voice-play" className="px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={13} className="inline" /> {v.state === 'failed' ? L('إعادة المحاولة', 'Try again') : L(`استمع لـ${p.nameAr}`, `Listen to ${p.nameEn}`)}</button>}
     {v.state === 'failed' && <span className="text-[10px] text-rose-300 font-bold">{L("الصوت غير متاح الآن", "Audio is not available right now")}</span>}
   </div>
 );
@@ -84,6 +90,19 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
       .finally(() => setRepeatOpen(true));
   };
   const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
+  const [boardReplay, setBoardReplay] = useState(0);
+  const startCheck = () => { voice.stop(); setQi(0); setPicked(null); setCorrect(0); setStep('check'); };
+  // Board end → check questions, in this teacher's own cloud voice (only when the board has checks).
+  const trans = useBoardNextTransition({
+    active: step === 'board' && !!board && board.checks.length > 0 && !track,
+    drawMs: boardDrawMs(calls.length),
+    say: (text, onEnd) => void voice.play(text, persona.voice, { done: onEnd, fail: onEnd }),
+    stopSay: () => voice.stop(),
+    onAdvance: startCheck,
+    onReplay: () => { if (board) { setBoardReplay(r => r + 1); playBoard(true); } },
+    focusSel: '[data-testid=board-q]',
+  });
+  const playBoard = (replayed = false) => { if (!board) return; trans.narrationStarted(replayed); void voice.play(boardSpeech(board), persona.voice, { done: trans.narrationDone, fail: trans.narrationFailed }); };
 
   const ask = async () => {
     const t = topic.trim(); if (!t || busy) return;
@@ -194,26 +213,27 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   if (step === 'board') return shell(<>
     <div className="flex items-center justify-between gap-2 shrink-0">
       <p className="text-[12px] font-black text-amber-300 flex items-center gap-2"><TeacherPhoto p={persona} size={28} /> {L(persona.nameAr, persona.nameEn)} — {L(persona.roleAr, persona.roleEn || persona.roleAr)}</p>
-      <VoiceBtn v={voice} text={boardSpeech(board)} p={persona} />
+      <VoiceBtn v={voice} text={boardSpeech(board)} p={persona} onPlay={() => playBoard()} />
     </div>
     <div data-testid="board-surface" className="flex-1 min-h-0">
       <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">{L("جاري فتح السبورة…", "Opening the board…")}</div>}>
-        <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={topic} speaking={voice.state === 'loading' || voice.state === 'playing'} onSpeak={() => void voice.play(boardSpeech(board), persona.voice)} />
+        <TutorTldrawBoard calls={calls} personaId={persona.id} lessonTitle={topic} speaking={voice.state === 'loading' || voice.state === 'playing'} replayKey={boardReplay} onSpeak={() => { setBoardReplay(r => r + 1); playBoard(true); }} />
       </Suspense>
     </div>
     {board.explanationAr && <p className="text-[12px] font-bold text-white/85 shrink-0 line-clamp-3">{board.explanationAr}</p>}
-    <div className="flex gap-2 shrink-0">
+    {trans.banner}
+    {!trans.banner && <div className="flex gap-2 shrink-0">
       <button onClick={() => { voice.stop(); setStep('pick'); }} className="px-3 py-3 rounded-xl bg-white/10 text-[13px] font-black">{L("موضوع ثاني", "Another topic")}</button>
-      <button onClick={() => { voice.stop(); if (board.checks.length) { setQi(0); setPicked(null); setCorrect(0); setStep('check'); } else void finish(0); }} data-testid="board-next"
+      <button onClick={() => { voice.stop(); if (board.checks.length) startCheck(); else void finish(0); }} data-testid="board-next"
         className="flex-1 py-3 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{board.checks.length ? L('تأكد إنك فهمت', 'Check you understood') : L('تم', 'Done')} <ArrowLeft size={14} className="inline" /></button>
-    </div>
+    </div>}
   </>);
 
   if (step === 'check') {
     const c = board.checks[qi];
     const last = qi === board.checks.length - 1;
     return shell(<>
-      <p className="text-[11px] font-black text-amber-300 shrink-0">{L('سؤال', 'Question')} {qi + 1} {L('من', 'of')} {board.checks.length}</p>
+      <p data-testid="board-q" tabIndex={-1} className="text-[11px] font-black text-amber-300 shrink-0 outline-none">{L('سؤال', 'Question')} {qi + 1} {L('من', 'of')} {board.checks.length}</p>
       <div className="rounded-xl bg-[#0a2d5c] border border-amber-400/40 p-3 shrink-0"><p dir="ltr" className="text-[15px] font-black text-start">{c.q}</p></div>
       <div className="grid gap-1.5 shrink-0">
         {c.options.map((o, i) => {

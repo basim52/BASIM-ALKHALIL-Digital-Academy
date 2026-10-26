@@ -38,6 +38,8 @@ export interface RepeatTeacher extends RepeatTeacherInfo {
   narrate: (text: string, onBlocked: () => void, onFailed: () => void, onEnd: () => void) => void;
   stop: () => void;
   unlock: () => void;
+  /** male teacher (Mohammed, Ali): masculine Arabic wording on screen */
+  male?: boolean;
 }
 export const SARA_TEACHER: RepeatTeacher = { id: 'sara', nameAr: 'سارة', face: 'sara', narrate: saraNarrate, stop: saraStopNarrator, unlock: saraUnlockNarrator };
 type Voice = 'idle' | 'loading' | 'blocked' | 'failed' | 'done';
@@ -303,7 +305,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
   if (!level && lessonItems) {
     body = (
       <GoldCard className="space-y-3 text-center">
-        <p className="text-[15px] sm:text-[17px] font-black">{teacher.nameAr} تقول كلمات وجمل الدرس، وأنت تردّدها وراها 🎧</p>
+        <p className="text-[15px] sm:text-[17px] font-black">{teacher.nameAr} {teacher.male ? 'يقول' : 'تقول'} كلمات وجمل الدرس، وأنت تردّدها {teacher.male ? 'وراه' : 'وراها'} 🎧</p>
         <p className="text-[12.5px] font-bold text-slate-600">{lessonItems.length} {lessonItems.length > 10 ? 'كلمة وجملة' : 'كلمات وجمل'} من الدرس{lessonItems.length > ROUND ? '، وبعد كل ٥ تراجع معك النتيجة' : ''}. نحتاج المايك للتقييم، والكاميرا اختيارية.</p>
         <PrimaryButton onClick={() => begin('lesson')} data-testid="repeat-start-lesson" className="w-full py-3 text-sm">▶️ ابدأ التدريب</PrimaryButton>
         {!rec.supported && <p className="text-[12px] font-bold text-rose-700">متصفحك ما يدعم التعرّف على الصوت، فما راح يطلع لك تقييم. جرّب Chrome أو Safari.</p>}
@@ -312,7 +314,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
   } else if (!level) {
     body = (
       <GoldCard className="space-y-3 text-center">
-        <p className="text-[15px] sm:text-[17px] font-black">{teacher.nameAr} تقول الكلمة أو الجملة، وأنت تردّدها وراها 🎧</p>
+        <p className="text-[15px] sm:text-[17px] font-black">{teacher.nameAr} {teacher.male ? 'يقول' : 'تقول'} الكلمة أو الجملة، وأنت تردّدها {teacher.male ? 'وراه' : 'وراها'} 🎧</p>
         <p className="text-[12.5px] font-bold text-slate-600">بعد كل ٥ جمل تراجع معك النتيجة وتعطيك نصيحة. نحتاج المايك للتقييم، والكاميرا اختيارية.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <PrimaryButton onClick={() => begin('beginner')} data-testid="repeat-level-beginner" className="py-3 text-sm">🌱 مبتدئ — كلمات وجمل قصيرة</PrimaryButton>
@@ -326,7 +328,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
       <GoldCard className="space-y-3" data-testid="repeat-card">
         <div className="flex items-center gap-2">
           {idx < reviewCount && <span className="shrink-0 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-[11px] font-black" data-testid="repeat-review-tag">مراجعة</span>}
-          <span className="flex-1 text-[12px] font-black text-[#C49E3A]">{voice === 'loading' ? `${teacher.nameAr} تتكلم…` : rec.listening ? 'دورك! ردّد الحين 🎙️' : res ? 'تقدر تعيد أو تكمل' : 'ردّد وراها'}</span>
+          <span className="flex-1 text-[12px] font-black text-[#C49E3A]">{voice === 'loading' ? `${teacher.nameAr} ${teacher.male ? 'يتكلم' : 'تتكلم'}…` : rec.listening ? 'دورك! ردّد الحين 🎙️' : res ? 'تقدر تعيد أو تكمل' : (teacher.male ? 'ردّد وراه' : 'ردّد وراها')}</span>
           <GhostButton onClick={() => { rec.abort(); say(text); }} data-testid="repeat-listen"><Volume2 size={14} />{voice === 'failed' || voice === 'blocked' ? `اضغط لتسمع ${teacher.nameAr}` : `اسمع ${teacher.nameAr} مرة ثانية`}</GhostButton>
         </div>
         <p dir="ltr" className="text-center text-[24px] sm:text-[32px] font-black text-[#002147] leading-snug py-2" data-testid="repeat-text">{text}</p>

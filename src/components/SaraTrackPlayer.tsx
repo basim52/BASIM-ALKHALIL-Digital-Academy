@@ -1,7 +1,7 @@
 import { trackSpeech, watchSpeechElement } from '../lib/speechLevel';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync, L } from '../lib/explainLang';
-import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { X, ArrowRight, Lock, Volume2, Square, CheckCircle2, Mic, Send } from 'lucide-react';
 import { auth } from '../lib/firebase';
 import { CompletionCertificateModal, type CertificateData } from './CompletionCertificateModal';
@@ -17,6 +17,7 @@ import { toToolCalls, type BoardAction } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 import { extractLessonItems, recordLastLesson } from '../lib/repeatPractice';
+import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue } from './BoardNextTransition';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -206,6 +207,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const [checkPick, setCheckPick] = useState<number | null>(null);
   const [mode, setMode] = useState<'learn' | 'exercises' | 'board' | 'sentences'>('board');
   const [boardReplay, setBoardReplay] = useState(0);
+  const modeRef = useRef(mode); modeRef.current = mode;
   const [exIdx, setExIdx] = useState(0);
   const [exPick, setExPick] = useState<number | null>(null);
   const [exScore, setExScore] = useState(0);
@@ -235,21 +237,36 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const [repeatOpen, setRepeatOpen] = useState(false);
   const boardCalls = useMemo(() => (lesson?.content ? toToolCalls(lessonBoardActions(lesson, useAlt)) : []), [lesson, useAlt]);
 
-  /** Narrate the page lines: segments = the exact on-screen lines (title, explanation, each example line). */
-  const startNarration = (l: SaraTrackLesson, alt: boolean) => {
+  /** Board end → check question: Sara's own cloud voice says the cue line, gold card + 3s countdown (first run only). */
+  const sayLine = (text: string, onEnd: () => void = () => {}) => { setSpeaking(true); const e = () => { setSpeaking(false); onEnd(); }; narrate(text, e, e, e); };
+  const trans = useBoardNextTransition({
+    active: !!lesson?.content && mode === 'board' && !test,
+    drawMs: boardDrawMs(boardCalls.length),
+    say: sayLine,
+    stopSay: () => stop(),
+    onAdvance: () => { stop(); setMode('learn'); },
+    onReplay: () => { if (!lesson) return; unlockNarrator(); setBoardReplay(r => r + 1); startNarration(lesson, useAlt, { replay: true }); },
+    focusSel: '[data-testid=lesson-check]',
+  });
+  /** Narrate the page lines: segments = the exact on-screen lines (title, explanation, each example line).
+   *  `board` = this is the board explanation (its natural end opens the board → check transition). */
+  const startNarration = (l: SaraTrackLesson, alt: boolean, board?: { replay?: boolean }) => {
     if (!l.content) return;
     stop();
     const text = lessonPageLines(l, alt).map(line => boardLinesToSpeech([line])).join('\n');
     setBlocked(false); setFailed(false); setPaused(false);
     setSpeaking(true); setActiveSeg(1);
+    if (board) trans.narrationStarted(!!board.replay);
     const end = () => { setSpeaking(false); setActiveSeg(-1); };
-    narrate(text, () => { end(); setBlocked(true); }, () => { end(); setFailed(true); }, end);
+    const fail = () => { if (board) trans.narrationFailed(); };
+    narrate(text, () => { end(); setBlocked(true); fail(); }, () => { end(); setFailed(true); fail(); }, () => { end(); if (board && modeRef.current === 'board') trans.narrationDone(); });
   };
   const openLesson = (l: SaraTrackLesson) => {
     unlockNarrator(); // inside the tap
     markLastTrack(uid, track.id);
     stop(); setLessonId(l.id); setUseAlt(false); setCheckPick(null); setMode('board'); setBoardReplay(r => r + 1); setExIdx(0); setExPick(null); setExScore(0);
-    if (lang === 'en') void englishLessonAsync(l).then(x => startNarration(x, false)); else startNarration(l, false);
+    trans.reset();
+    if (lang === 'en') void englishLessonAsync(l).then(x => startNarration(x, false, {})); else startNarration(l, false, {});
   };
   const nextLesson = lesson ? track.lessons.find(x => x.order === lesson.order + 1) : undefined;
   const goNext = () => { if (nextLesson) openLesson(nextLesson); else { stop(); setLessonId(null); } };
@@ -297,6 +314,11 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
     unlockNarrator();
     startNarration(lesson, useAlt);
   };
+  const speakBoard = (replay = false) => {
+    if (!lesson?.content) return;
+    unlockNarrator();
+    startNarration(lesson, useAlt, { replay });
+  };
   /** Lesson passed (page check OR whiteboard exercises): unlock the next lesson, same rule everywhere. */
   const markPassed = () => {
     if (!lesson) return;
@@ -341,7 +363,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           {enLoading && <span className="text-[10px] font-black text-amber-300">EN…</span>}
           <ExplainLangToggle />
           {lesson?.content && (mode === 'learn' || mode === 'board') && (
-            <button onClick={speaking ? stop : () => { if (mode === 'board') setBoardReplay(r => r + 1); speak(); }} className="p-1.5 rounded-lg bg-amber-400 text-slate-950" aria-label="read">
+            <button onClick={speaking ? stop : () => { if (mode === 'board') { setBoardReplay(r => r + 1); speakBoard(); } else speak(); }} className="p-1.5 rounded-lg bg-amber-400 text-slate-950" aria-label="read">
               {speaking ? <Square size={16} /> : <Volume2 size={16} />}
             </button>
           )}
@@ -426,11 +448,11 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 <p key={i} className={`text-[13px] leading-snug rounded-lg px-1 ${activeSeg === i + 2 ? 'bg-amber-400/30' : ''}`}><span dir="ltr" className="block font-bold text-start" style={{ direction: 'ltr' }}>{e.en}</span><span className="block text-[11px] text-amber-100/80">{e.ar}</span></p>
               ))}
             </div>
-            <div className="rounded-2xl p-2.5 bg-amber-50 border-2 border-amber-300">
+            <div data-testid="lesson-check" tabIndex={-1} className="rounded-2xl p-2.5 bg-amber-50 border-2 border-amber-300 outline-none focus:ring-4 focus:ring-[#C49E3A]/60">
               <div className="flex items-center gap-2 mb-1">
                 <p className="text-[10px] font-black text-amber-700">{L("سؤال فهم", "Check question")}</p>
                 <span className="flex-1" />
-                <button onClick={() => { unlockNarrator(); setMode('board'); setBoardReplay(r => r + 1); startNarration(lesson, useAlt); }} data-testid="open-board"
+                <button onClick={() => { unlockNarrator(); setMode('board'); setBoardReplay(r => r + 1); startNarration(lesson, useAlt, { replay: true }); }} data-testid="open-board"
                   className="px-2 py-0.5 -my-1 rounded-lg bg-[#002147] text-amber-300 border border-[#C49E3A] text-[11px] font-black leading-tight">{L("🧑‍🏫 ارجع للسبورة", "🧑‍🏫 Back to the board")}</button>
               </div>
               {passed
@@ -519,16 +541,17 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             <div className="shrink-0 flex items-center gap-2">
               <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-amber-400 text-[#001a38]">{L("👩‍💼 سارة على السبورة", "👩‍💼 Sara on the board")}</span>
               {speaking && <button onClick={togglePause} data-testid="sara-board-pause" className="px-2 py-0.5 rounded-lg bg-white/10 text-white text-[11px] font-black">{paused ? L('▶️ كملي', '▶️ Continue') : L('⏸️ إيقاف مؤقت', '⏸️ Pause')}</button>}
-              {failed && !speaking && <button onClick={() => { setBoardReplay(r => r + 1); speak(); }} className="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[11px] font-black">{L("🔄 إعادة المحاولة", "🔄 Try again")}</button>}
+              {failed && !speaking && <button onClick={() => { setBoardReplay(r => r + 1); speakBoard(); }} className="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-[11px] font-black">{L("🔄 إعادة المحاولة", "🔄 Try again")}</button>}
               {blocked && !speaking && <span className="text-[10px] font-bold text-white/70">{L("اضغط 🔊 فوق", "Tap 🔊 above")}</span>}
             </div>
             <div className="flex-1 min-h-0">
               <Suspense fallback={<div className="w-full h-full rounded-2xl border-2 border-amber-400/60 bg-[#0a2d5c] flex items-center justify-center text-[12px] font-bold text-amber-200">{L("جاري فتح السبورة…", "Opening the board…")}</div>}>
                 <TutorTldrawBoard key={lesson.id + (useAlt ? '-alt' : '')} calls={boardCalls} personaId="sara" lessonTitle={`${lesson.titleEn} (${lesson.titleAr})`} speaking={speaking}
-                  replayKey={boardReplay} onSpeak={() => { unlockNarrator(); setBoardReplay(r => r + 1); startNarration(lesson, useAlt); }} />
+                  replayKey={boardReplay} onSpeak={() => { unlockNarrator(); setBoardReplay(r => r + 1); startNarration(lesson, useAlt, { replay: true }); }} />
               </Suspense>
             </div>
-            <button data-testid="board-to-check" onClick={() => { stop(); setMode('learn'); }} className="shrink-0 w-full py-2.5 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{passed ? L('رجوع للدرس ←', 'Back to the lesson →') : L('سؤال الفهم ←', 'Check question →')}</button>
+            {trans.banner}
+            {!trans.banner && <button data-testid="board-to-check" onClick={() => { stop(); setMode('learn'); }} className="shrink-0 w-full py-2.5 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{passed ? L('رجوع للدرس ←', 'Back to the lesson →') : L('سؤال الفهم ←', 'Check question →')}</button>}
           </div>
         )}
 
@@ -562,8 +585,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   preset={lessonCallPreset({ id: lesson.id, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: CALL_TRACKS[track.id], tag: CALL_TRACKS[track.id],
                     phrases: [...new Set(lesson.content.example.flatMap(e => e.en.replace(/\b[AB]:\s*/g, '\n').split(/\n|(?<=[.!?])\s+/)).map(x => x.trim()).filter(x => x.length > 3 && x.split(/\s+/).length <= 9))].slice(0, 4),
                     starter: `Let's practise "${lesson.titleEn}" in a real conversation. ${lesson.content.example[0]?.en || ''} Now you try — what would you say?` })} />}
-                {repeatItems.length > 0 && <button onClick={() => { stop(); setRepeatOpen(true); }} data-testid="lesson-repeat-open" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">🎙️ تدرّب على نطق كلمات الدرس</button>}
-                <button onClick={goNext} className="w-full py-2 rounded-xl bg-[#58cc02] text-white text-[14px] font-black">{L("الدرس التالي ←", "Next lesson →")}</button>
+                <ExercisesDoneCue say={t => sayLine(t)} onRepeat={repeatItems.length > 0 ? () => { stop(); setRepeatOpen(true); } : undefined}
+                  onNext={goNext} nextLabel={nextLesson ? L("الدرس التالي ←", "Next lesson →") : L("رجوع للدروس", "Back to lessons")} />
                 <button onClick={() => { stop(); setLessonId(null); }} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("رجوع للدروس", "Back to lessons")}</button>
               </div>
             )}
