@@ -3,6 +3,7 @@ import { ArrowRight, Mic, MicOff, Volume2, Camera, CameraOff, RotateCcw, SkipFor
 import { SectionShell, GoldCard, PrimaryButton, GhostButton, ProgressPill, TutorFace } from './ui/academy';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 import { checkSpokenAnswer } from '../utils/speechAnswerCheck';
+import { FilteredSelfieCanvas, SelfieFilterPicker, SparkleOverlay, filterInfo, useSelfieFilter } from './selfieFilters';
 
 /**
  * «ردّد مع سارة» — split-screen repeat-after-me practice (pilot with Sara).
@@ -128,6 +129,9 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
   const cam = useSelfieCamera();
   const rec = useRepeatRecognition();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
+  const bindVideo = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; setVideoEl(el); }, []);
+  const [selfieFilter, setSelfieFilter] = useSelfieFilter();
   const items = level ? ITEMS[level] : [];
   const text = items[idx] || '';
   const round = Math.floor(idx / ROUND);
@@ -209,10 +213,17 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
   );
 
   const camOn = cam.state === 'on';
+  const fInfo = filterInfo(selfieFilter);
+  const canvasFilter = camOn && fInfo.mode === 'canvas';
   const studentPanel = (
     <div className={`relative ${sceneH} rounded-3xl border-2 border-[#C49E3A] bg-gradient-to-b from-[#0a2d5c] to-[#001a38] overflow-hidden shadow-lg flex flex-col items-center justify-center gap-2`} data-testid="repeat-student-panel">
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] z-10 bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
-      <video ref={videoRef} muted playsInline autoPlay aria-label="كاميرا الطالب" className={`absolute inset-0 w-full h-full object-cover ${camOn ? '' : 'hidden'}`} style={{ transform: 'scaleX(-1)' }} />
+      {/* The video keeps playing (needed as the filter source); with a canvas filter it sits invisible under the canvas. */}
+      <video ref={bindVideo} muted playsInline autoPlay aria-label="كاميرا الطالب" className={`absolute inset-0 w-full h-full object-cover ${camOn ? '' : 'hidden'} ${canvasFilter ? 'opacity-0' : ''}`} style={{ transform: 'scaleX(-1)', filter: !canvasFilter && fInfo.css ? fInfo.css : undefined }} />
+      {canvasFilter && <FilteredSelfieCanvas video={videoEl} filter={selfieFilter} active={camOn} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />}
+      {camOn && selfieFilter === 'gold' && <span aria-hidden className="pointer-events-none absolute inset-0 z-[5] rounded-3xl" style={{ boxShadow: 'inset 0 0 28px 6px rgba(196,158,58,0.55)' }} />}
+      {camOn && selfieFilter === 'stars' && <SparkleOverlay />}
+      {camOn && <div className="absolute top-1.5 inset-x-0 z-10"><SelfieFilterPicker value={selfieFilter} onChange={setSelfieFilter} /></div>}
       {!camOn && (
         <>
           <span className="rounded-full border-2 border-[#C49E3A] bg-[#002147] flex items-center justify-center shadow-inner" style={{ width: faceSize, height: faceSize, fontSize: Math.round(faceSize * 0.5) }}>🧑‍🎓</span>
