@@ -4,6 +4,7 @@ import { SectionShell, GoldCard, PrimaryButton, GhostButton, ProgressPill, Tutor
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 import { checkSpokenAnswer } from '../utils/speechAnswerCheck';
 import { FilteredSelfieCanvas, SelfieFilterPicker, SparkleOverlay, filterInfo, useSelfieFilter } from './selfieFilters';
+import { RepeatLessonSource, RepeatTeacherInfo, loadWeakWords, pickReviewWords, updateWeakWords } from '../lib/repeatPractice';
 
 /**
  * «ردّد مع سارة» — split-screen repeat-after-me practice (pilot with Sara).
@@ -30,7 +31,15 @@ const ITEMS: Record<Level, string[]> = {
   ],
 };
 
-type ItemResult = { score: number | null; transcript: string; missing: string[] };
+type ItemResult = { score: number | null; transcript: string; missing: string[]; passed?: boolean };
+
+/** A teacher for the practice screen: identity + her own narrator. Pilot: Sara (cloud voice via saraNarrate only). */
+export interface RepeatTeacher extends RepeatTeacherInfo {
+  narrate: (text: string, onBlocked: () => void, onFailed: () => void, onEnd: () => void) => void;
+  stop: () => void;
+  unlock: () => void;
+}
+export const SARA_TEACHER: RepeatTeacher = { id: 'sara', nameAr: 'سارة', face: 'sara', narrate: saraNarrate, stop: saraStopNarrator, unlock: saraUnlockNarrator };
 type Voice = 'idle' | 'loading' | 'blocked' | 'failed' | 'done';
 type CamState = 'off' | 'loading' | 'on' | 'denied' | 'unavailable';
 
@@ -87,7 +96,7 @@ function useRepeatRecognition() {
       const alts: string[] = Array.from(e.results?.[0] || []).map((a: any) => a.transcript || '');
       const best = alts.map(t => ({ t, r: checkSpokenAnswer(t, expected) })).sort((a, b) => b.r.score - a.r.score)[0];
       if (!best || !best.r.heard.length) return;
-      onScored({ score: best.r.score, transcript: best.t, missing: best.r.missing });
+      onScored({ score: best.r.score, transcript: best.t, missing: best.r.missing, passed: best.r.passed });
     };
     rec.onerror = (e: any) => {
       const code = e?.error;
@@ -117,10 +126,26 @@ function adviceFor(avg: number | null, weak: string[]): string {
   return `ولا يهمك، البداية دايم كذا. اسمع الجملة مرة ثانية قبل ما تعيدها، وقلها كلمة كلمة.${w ? ` وركّز على: ${w}.` : ''}`;
 }
 
-interface Props { onClose: () => void }
+interface Props {
+  onClose: () => void;
+  /** Defaults to Sara. */
+  teacher?: RepeatTeacher;
+  /** Lesson-based practice (title + the lesson's own English items). Without it: built-in sentences with a level pick. */
+  lesson?: RepeatLessonSource | null;
+  /** Student id, for the weak-words memory (guest when missing). */
+  uid?: string;
+  /** Label of the final «back» button. */
+  backLabel?: string;
+}
 
-export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
-  const [level, setLevel] = useState<Level | null>(null);
+export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TEACHER, lesson, uid, backLabel }) => {
+  const saraNarrate = teacher.narrate, saraStopNarrator = teacher.stop, saraUnlockNarrator = teacher.unlock;
+  const lessonItems = lesson?.items?.length ? lesson.items : null;
+  const [level, setLevel] = useState<Level | 'lesson' | null>(null);
+  const [sessionItems, setSessionItems] = useState<string[]>([]);
+  const [reviewCount, setReviewCount] = useState(0);
+  const weakRef = useRef<string[]>([]);
+  useEffect(() => { let on = true; loadWeakWords(teacher.id, uid).then(w => { if (on) weakRef.current = w; }); return () => { on = false; }; }, [teacher.id, uid]);
   const [idx, setIdx] = useState(0);
   const [results, setResults] = useState<Record<number, ItemResult>>({});
   const [phase, setPhase] = useState<'practice' | 'review' | 'finished'>('practice');
@@ -132,7 +157,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
   const bindVideo = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; setVideoEl(el); }, []);
   const [selfieFilter, setSelfieFilter] = useSelfieFilter();
-  const items = level ? ITEMS[level] : [];
+  const items = level ? sessionItems : [];
   const text = items[idx] || '';
   const round = Math.floor(idx / ROUND);
   const rounds = Math.ceil(items.length / ROUND);
@@ -144,12 +169,12 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
   const aliveRef = useRef(true);
   useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false; saraStopNarrator(); }; }, []);
 
-  const exit = () => { saraStopNarrator(); rec.abort(); cam.stop(); onClose(); };
+  const exit = () => { saraStopNarrator(); rec.abort(); cam.stop(); if (level && phase === 'practice') remember(idx); onClose(); };
 
   const say = useCallback((t: string, then?: () => void) => {
     saraUnlockNarrator(); setVoice('loading');
     saraNarrate(t, () => setVoice('blocked'), () => setVoice('failed'), () => { if (!aliveRef.current) return; setVoice('done'); then?.(); });
-  }, []);
+  }, [saraNarrate, saraUnlockNarrator]);
 
   const keep = useCallback((i: number) => (r: ItemResult) => {
     setResults(prev => { const old = prev[i]; return old && old.score !== null && r.score !== null && old.score > r.score ? prev : { ...prev, [i]: r }; });
@@ -161,11 +186,26 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
     say(t, () => rec.start(t, keep(i), true));
   }, [rec, say, keep]);
 
-  const begin = (lv: Level) => {
+  const begin = (lv: Level | 'lesson') => {
     saraUnlockNarrator();
+    const base = lv === 'lesson' ? (lessonItems || []) : ITEMS[lv];
+    // Previous weak words (up to 3) open round 1, labelled «مراجعة».
+    const review = pickReviewWords(weakRef.current, base);
+    const list = [...review, ...base];
+    if (!list.length) return;
+    setSessionItems(list); setReviewCount(review.length);
     setLevel(lv); setIdx(0); setResults({}); setPhase('practice');
     void cam.start();
-    present(0, ITEMS[lv][0]);
+    present(0, list[0]);
+  };
+
+  // Weak-words memory: an item scored under the pass threshold adds its unclear words; a review word said well is dropped.
+  const remember = (i: number) => {
+    const r = results[i];
+    if (!r || r.score === null) return;
+    const said = items[i];
+    if (r.passed) { if (i < reviewCount) void updateWeakWords(teacher.id, uid, [], [said.toLowerCase()]); return; }
+    void updateWeakWords(teacher.id, uid, r.missing, []);
   };
 
   const roundStats = (r: number) => {
@@ -178,6 +218,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
 
   const next = () => {
     rec.abort(); saraStopNarrator();
+    remember(idx);
     const n = idx + 1;
     if (n % ROUND === 0 || n >= items.length) {
       setPhase('review');
@@ -207,8 +248,8 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
   const saraPanel = (
     <div className={`relative ${sceneH} rounded-3xl border-2 border-[#C49E3A] bg-gradient-to-b from-[#0a2d5c] to-[#001a38] flex flex-col items-center justify-center gap-2 overflow-hidden shadow-lg`} data-testid="repeat-sara-panel">
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
-      <TutorFace tutor="sara" size={faceSize} isSpeaking={speaking} />
-      <span className="text-[13px] sm:text-[15px] font-black text-[#E8C766]">سارة</span>
+      <TutorFace tutor={teacher.face as any} size={faceSize} isSpeaking={speaking} />
+      <span className="text-[13px] sm:text-[15px] font-black text-[#E8C766]">{teacher.nameAr}</span>
     </div>
   );
 
@@ -250,16 +291,28 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
   const header = (
     <div className="flex items-center gap-2">
       <GhostButton onClick={exit} data-testid="repeat-back"><ArrowRight size={15} />العودة</GhostButton>
-      <h1 className="flex-1 min-w-0 truncate text-[18px] sm:text-[22px] font-black text-[#002147]">🎙️ ردّد مع سارة</h1>
-      {level && phase !== 'finished' && <ProgressPill data-testid="repeat-progress">الجولة {round + 1} من {rounds} · {Math.min(idx % ROUND + 1, ROUND)}/{ROUND}</ProgressPill>}
+      <div className="flex-1 min-w-0">
+        <h1 className="truncate text-[18px] sm:text-[22px] font-black text-[#002147]">🎙️ ردّد مع {teacher.nameAr}</h1>
+        {lessonItems && lesson && <p className="truncate text-[12px] sm:text-[13px] font-bold text-[#C49E3A]" data-testid="repeat-lesson-title">📘 {lesson.titleAr}{lesson.titleEn ? <span dir="ltr" className="text-slate-500"> · {lesson.titleEn}</span> : null}</p>}
+      </div>
+      {level && phase !== 'finished' && <ProgressPill data-testid="repeat-progress">الجولة {round + 1} من {rounds} · {Math.min(idx % ROUND + 1, ROUND)}/{Math.min(ROUND, items.length - round * ROUND)}</ProgressPill>}
     </div>
   );
 
   let body: React.ReactNode;
-  if (!level) {
+  if (!level && lessonItems) {
     body = (
       <GoldCard className="space-y-3 text-center">
-        <p className="text-[15px] sm:text-[17px] font-black">سارة تقول الكلمة أو الجملة، وأنت تردّدها وراها 🎧</p>
+        <p className="text-[15px] sm:text-[17px] font-black">{teacher.nameAr} تقول كلمات وجمل الدرس، وأنت تردّدها وراها 🎧</p>
+        <p className="text-[12.5px] font-bold text-slate-600">{lessonItems.length} {lessonItems.length > 10 ? 'كلمة وجملة' : 'كلمات وجمل'} من الدرس{lessonItems.length > ROUND ? '، وبعد كل ٥ تراجع معك النتيجة' : ''}. نحتاج المايك للتقييم، والكاميرا اختيارية.</p>
+        <PrimaryButton onClick={() => begin('lesson')} data-testid="repeat-start-lesson" className="w-full py-3 text-sm">▶️ ابدأ التدريب</PrimaryButton>
+        {!rec.supported && <p className="text-[12px] font-bold text-rose-700">متصفحك ما يدعم التعرّف على الصوت، فما راح يطلع لك تقييم. جرّب Chrome أو Safari.</p>}
+      </GoldCard>
+    );
+  } else if (!level) {
+    body = (
+      <GoldCard className="space-y-3 text-center">
+        <p className="text-[15px] sm:text-[17px] font-black">{teacher.nameAr} تقول الكلمة أو الجملة، وأنت تردّدها وراها 🎧</p>
         <p className="text-[12.5px] font-bold text-slate-600">بعد كل ٥ جمل تراجع معك النتيجة وتعطيك نصيحة. نحتاج المايك للتقييم، والكاميرا اختيارية.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <PrimaryButton onClick={() => begin('beginner')} data-testid="repeat-level-beginner" className="py-3 text-sm">🌱 مبتدئ — كلمات وجمل قصيرة</PrimaryButton>
@@ -272,11 +325,12 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
     body = (
       <GoldCard className="space-y-3" data-testid="repeat-card">
         <div className="flex items-center gap-2">
-          <span className="flex-1 text-[12px] font-black text-[#C49E3A]">{voice === 'loading' ? 'سارة تتكلم…' : rec.listening ? 'دورك! ردّد الحين 🎙️' : res ? 'تقدر تعيد أو تكمل' : 'ردّد وراها'}</span>
-          <GhostButton onClick={() => { rec.abort(); say(text); }} data-testid="repeat-listen"><Volume2 size={14} />{voice === 'failed' || voice === 'blocked' ? 'اضغط لتسمع سارة' : 'اسمع سارة مرة ثانية'}</GhostButton>
+          {idx < reviewCount && <span className="shrink-0 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-amber-800 text-[11px] font-black" data-testid="repeat-review-tag">مراجعة</span>}
+          <span className="flex-1 text-[12px] font-black text-[#C49E3A]">{voice === 'loading' ? `${teacher.nameAr} تتكلم…` : rec.listening ? 'دورك! ردّد الحين 🎙️' : res ? 'تقدر تعيد أو تكمل' : 'ردّد وراها'}</span>
+          <GhostButton onClick={() => { rec.abort(); say(text); }} data-testid="repeat-listen"><Volume2 size={14} />{voice === 'failed' || voice === 'blocked' ? `اضغط لتسمع ${teacher.nameAr}` : `اسمع ${teacher.nameAr} مرة ثانية`}</GhostButton>
         </div>
         <p dir="ltr" className="text-center text-[24px] sm:text-[32px] font-black text-[#002147] leading-snug py-2" data-testid="repeat-text">{text}</p>
-        {voice === 'failed' && <p className="text-[12px] font-bold text-rose-700 text-center">تعذّر صوت سارة الحين. اضغط «اضغط لتسمع سارة» لإعادة المحاولة، أو اقرأ الجملة وردّدها.</p>}
+        {voice === 'failed' && <p className="text-[12px] font-bold text-rose-700 text-center">تعذّر صوت {teacher.nameAr} الحين. اضغط «اضغط لتسمع {teacher.nameAr}» لإعادة المحاولة، أو اقرأ الجملة وردّدها.</p>}
         <div className="flex flex-wrap items-center justify-center gap-2">
           <button type="button" onClick={rec.listening ? rec.stop : () => { saraStopNarrator(); rec.start(text, keep(idx)); }} disabled={!rec.supported} data-testid="repeat-mic"
             className={`inline-flex items-center gap-2 rounded-2xl px-6 py-3 font-black text-[15px] shadow-md active:scale-95 transition-transform disabled:opacity-40 ${rec.listening ? 'bg-rose-600 text-white animate-pulse' : 'bg-[#C49E3A] text-[#002147] hover:bg-[#d4ae4a]'}`}>
@@ -302,7 +356,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
     const { avg, weak, scoredCount } = roundStats(round);
     body = (
       <GoldCard className="space-y-3 text-center" data-testid="repeat-review">
-        <p className="text-[13px] font-black text-[#C49E3A]">مراجعة سارة — الجولة {round + 1}</p>
+        <p className="text-[13px] font-black text-[#C49E3A]">مراجعة {teacher.nameAr} — الجولة {round + 1}</p>
         <p className="text-[34px] sm:text-[40px] font-black text-[#002147]">{avg === null ? '—' : `${pct(avg)}٪`}</p>
         <p className="text-[12px] font-bold text-slate-500">{avg === null ? 'ما فيه تقييم في هالجولة' : `متوسط ${scoredCount} من ${Math.min(ROUND, items.length - round * ROUND)} جمل تم تقييمها بالمايك`}</p>
         {weak.length > 0 && (
@@ -312,7 +366,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
         )}
         <p className="text-[14px] sm:text-[15px] font-bold text-[#002147] leading-relaxed bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-xl p-3">💬 {adviceFor(avg, weak)}</p>
         <div className="flex flex-col sm:flex-row gap-2">
-          <GhostButton onClick={() => say(`${avg === null ? '' : `نتيجتك في هالجولة ${pct(avg)} بالمية. `}${adviceFor(avg, weak)}`)} className="py-3"><Volume2 size={14} />اسمع نصيحة سارة</GhostButton>
+          <GhostButton onClick={() => say(`${avg === null ? '' : `نتيجتك في هالجولة ${pct(avg)} بالمية. `}${adviceFor(avg, weak)}`)} className="py-3"><Volume2 size={14} />اسمع نصيحة {teacher.nameAr}</GhostButton>
           <PrimaryButton onClick={continueRound} className="flex-1 py-3" data-testid="repeat-continue">{idx + 1 >= items.length ? 'النتيجة النهائية' : 'كمّل الخمس الجاية'}</PrimaryButton>
         </div>
       </GoldCard>
@@ -324,8 +378,8 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose }) => {
         <p className="text-[34px] font-black text-[#002147]">{overall === null ? '—' : `${pct(overall)}٪`}</p>
         <p className="text-[12px] font-bold text-slate-500">{overall === null ? 'ما فيه تقييم لأن المايك ما سمع شي' : 'متوسط كل الجمل اللي تقيّمت بالمايك'}</p>
         <div className="flex flex-col sm:flex-row gap-2">
-          <GhostButton onClick={() => { saraStopNarrator(); rec.abort(); setLevel(null); setIdx(0); setResults({}); setPhase('practice'); setVoice('idle'); }} className="py-3"><RotateCcw size={14} />من جديد</GhostButton>
-          <PrimaryButton onClick={exit} className="flex-1 py-3">رجوع لفصل المعلمين</PrimaryButton>
+          <GhostButton onClick={() => { saraStopNarrator(); rec.abort(); setLevel(null); setIdx(0); setResults({}); setPhase('practice'); setVoice('idle'); setReviewCount(0); loadWeakWords(teacher.id, uid).then(w => { weakRef.current = w; }); }} className="py-3"><RotateCcw size={14} />من جديد</GhostButton>
+          <PrimaryButton onClick={exit} className="flex-1 py-3">{backLabel || 'رجوع لفصل المعلمين'}</PrimaryButton>
         </div>
       </GoldCard>
     );

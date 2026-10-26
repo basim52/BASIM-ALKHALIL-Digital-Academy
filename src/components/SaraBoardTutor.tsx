@@ -76,6 +76,13 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const [saraHub, setSaraHub] = useState(false);
   const [fbOpen, setFbOpen] = useState(false);
   const [repeatOpen, setRepeatOpen] = useState(false); // «ردّد مع سارة» (pilot: Sara only)
+  // Practise the student's last passed Sara lesson; null → the built-in sentences (level pick).
+  const [repeatLesson, setRepeatLesson] = useState<import('../lib/repeatPractice').RepeatLessonSource | null>(null);
+  const openRepeat = () => {
+    import('../lib/saraRepeatLesson')
+      .then(m => setRepeatLesson(m.resolveSaraRepeatLesson(uid)), () => setRepeatLesson(null))
+      .finally(() => setRepeatOpen(true));
+  };
   const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
 
   const ask = async () => {
@@ -124,13 +131,13 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
         return (
           <div key={p.id} className="flex flex-col gap-1 min-w-0">
             {card}
-            <button type="button" onClick={() => { voice.stop(); setRepeatOpen(true); }} data-testid="sara-repeat-open"
+            <button type="button" onClick={() => { voice.stop(); openRepeat(); }} data-testid="sara-repeat-open"
               className="w-full rounded-xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] border border-[#E8C766] px-1 py-1 text-[10px] sm:text-[11px] font-black leading-tight shadow-md active:scale-95 transition-transform">🎙️ ردّد مع سارة</button>
           </div>
         );
       })}
     </div>
-    {repeatOpen && <Suspense fallback={null}><SaraRepeatPractice onClose={() => setRepeatOpen(false)} /></Suspense>}
+    {repeatOpen && <Suspense fallback={null}><SaraRepeatPractice uid={uid} lesson={repeatLesson} onClose={() => setRepeatOpen(false)} /></Suspense>}
     <div data-testid="kids-teachers" className="shrink-0 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] p-2">
       <p className="text-[12px] font-black text-[#002147] mb-1.5">{L("🌱 من الصفر — للصغار والكبار", "🌱 From zero, for kids and adults")}</p>
       <div className="grid grid-cols-4 gap-1.5">

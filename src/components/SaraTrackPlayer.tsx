@@ -15,6 +15,8 @@ import SaraSentenceBuilder from './SaraSentenceBuilder';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { toToolCalls, type BoardAction } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
+const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
+import { extractLessonItems, recordLastLesson } from '../lib/repeatPractice';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -228,6 +230,9 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const lessonRaw = useMemo(() => track.lessons.find(l => l.id === lessonId) || null, [lessonId, track]);
   const [lang] = useExplainLang();
   const { view: lesson, loading: enLoading } = useLessonView(lessonRaw, lang);
+  // «تدرّب على نطق كلمات الدرس»: the lesson's own English items (button hidden when there are none).
+  const repeatItems = useMemo(() => (lessonRaw ? extractLessonItems(lessonRaw) : []), [lessonRaw]);
+  const [repeatOpen, setRepeatOpen] = useState(false);
   const boardCalls = useMemo(() => (lesson?.content ? toToolCalls(lessonBoardActions(lesson, useAlt)) : []), [lesson, useAlt]);
 
   /** Narrate the page lines: segments = the exact on-screen lines (title, explanation, each example line). */
@@ -295,6 +300,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   /** Lesson passed (page check OR whiteboard exercises): unlock the next lesson, same rule everywhere. */
   const markPassed = () => {
     if (!lesson) return;
+    // «ردّد مع سارة» in فصل المعلمين practises the last passed lesson.
+    if (lessonRaw && repeatItems.length) recordLastLesson('sara', uid, { trackId: track.id, lessonId: lessonRaw.id, titleAr: lessonRaw.titleAr, titleEn: lessonRaw.titleEn, items: repeatItems });
     const next = lesson.order + 1; // may be length+1 → the track's last level test opens
     if (next > unlockedRaw) {
       setUnlocked(next);
@@ -436,6 +443,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("✅ الدرس التالي ←", "✅ Next lesson →")}</button>
               </div>
             )}
+            {passed && repeatItems.length > 0 && <button onClick={() => { stop(); setRepeatOpen(true); }} data-testid="lesson-repeat-open" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">🎙️ تدرّب على نطق كلمات الدرس</button>}
             {passed && track.id === 'conversation_v2' && (
               <button onClick={() => { stop(); setMode('sentences'); }} data-testid="open-sentence-builder" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">{L("🧩 ابنِ جملك — 5 بطاقات", "🧩 Build your sentences, 5 cards")}</button>
             )}
@@ -554,11 +562,18 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   preset={lessonCallPreset({ id: lesson.id, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: CALL_TRACKS[track.id], tag: CALL_TRACKS[track.id],
                     phrases: [...new Set(lesson.content.example.flatMap(e => e.en.replace(/\b[AB]:\s*/g, '\n').split(/\n|(?<=[.!?])\s+/)).map(x => x.trim()).filter(x => x.length > 3 && x.split(/\s+/).length <= 9))].slice(0, 4),
                     starter: `Let's practise "${lesson.titleEn}" in a real conversation. ${lesson.content.example[0]?.en || ''} Now you try — what would you say?` })} />}
+                {repeatItems.length > 0 && <button onClick={() => { stop(); setRepeatOpen(true); }} data-testid="lesson-repeat-open" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">🎙️ تدرّب على نطق كلمات الدرس</button>}
                 <button onClick={goNext} className="w-full py-2 rounded-xl bg-[#58cc02] text-white text-[14px] font-black">{L("الدرس التالي ←", "Next lesson →")}</button>
                 <button onClick={() => { stop(); setLessonId(null); }} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("رجوع للدروس", "Back to lessons")}</button>
               </div>
             )}
           </div>
+        )}
+        {repeatOpen && lessonRaw && repeatItems.length > 0 && (
+          <Suspense fallback={null}>
+            <SaraRepeatPractice uid={uid} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}
+              lesson={{ trackId: track.id, lessonId: lessonRaw.id, titleAr: lessonRaw.titleAr, titleEn: lessonRaw.titleEn, items: repeatItems }} />
+          </Suspense>
         )}
         {chatOpen && lesson && <SaraLivePhoneCallModal isOpen onClose={() => setChatOpen(false)} studentName="" studentLevel="A2" isRtl studentId={uid} preset={freeCallPresetFor(lesson.titleEn, lesson.titleAr)} />}
         {/* ❓ Ask Sara sheet (overlay, does not affect the page layout) */}
