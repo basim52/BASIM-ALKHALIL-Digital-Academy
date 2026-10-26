@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, Mic, MicOff, Volume2, Camera, CameraOff, RotateCcw, SkipForward, CheckCircle2 } from 'lucide-react';
 import { SectionShell, GoldCard, PrimaryButton, GhostButton, ProgressPill, TutorFace } from './ui/academy';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
-import { checkSpokenAnswer } from '../utils/speechAnswerCheck';
+import { scoreRepeat } from '../utils/repeatMatch';
 import { FilteredSelfieCanvas, SelfieFilterPicker, SparkleOverlay, filterInfo, useSelfieFilter } from './selfieFilters';
 import { RepeatLessonSource, RepeatTeacherInfo, loadWeakWords, pickReviewWords, updateWeakWords } from '../lib/repeatPractice';
 
@@ -78,21 +78,47 @@ function useSelfieCamera() {
 
 /**
  * Mic recognition (en-US), same approach as SpeakingDrillCheck: best of 3 alternatives scored by checkSpokenAnswer.
- * Lifecycle (per item): every attempt is a FRESH SpeechRecognition with its own session id; handlers of an older
- * session are ignored, so a late onend/onerror from the previous item can never flip the new one off. The auto
- * start after the teacher's voice waits ~350ms (mobile Chrome needs the audio output released first), and a
- * watchdog recreates the session once if it never reports onstart within 1.5s. Any failure leaves the mic button
- * in its clear «اضغط وردّد» state with a message, so a tap always works as the manual fallback.
+ * Android Chrome: the FIRST item used to fail (later ones worked) because the first recognizer was the one that had to
+ * obtain the mic while the camera was opening. Now the «ابدأ» tap warms the mic first (getUserMedia audio, tracks
+ * stopped right away), then the camera opens, then the teacher speaks. A mic tap with the permission still not
+ * granted asks for it explicitly the same way. Interim results are kept as a fallback: if the engine ends
+ * without a final result, the last interim transcript is scored. The raw error code is shown (small) for diagnosis.
+ * Every attempt is a fresh SpeechRecognition with its own session id, so a late event of an older one is ignored.
  */
 const AUTO_START_DELAY_MS = 350;
-const ONSTART_WATCHDOG_MS = 1500;
+export const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+type MicPerm = 'granted' | 'denied' | 'prompt' | 'unknown';
+const MIC_DENIED_MSG = 'المايك مقفول لهالموقع. افتح قفل 🔒 جنب رابط الموقع في Chrome ← أذونات (الإعدادات) ← الميكروفون ← سماح، وبعدها حدّث الصفحة واضغط «اضغط وردّد».';
+const errMsg = (code: string): string => {
+  switch (code) {
+    case 'not-allowed': case 'service-not-allowed': return MIC_DENIED_MSG;
+    case 'no-speech': return 'ما وصلني صوتك. اضغط «اضغط وردّد» وقل الكلمة على طول بصوت واضح وقرّب الجوال من فمك.';
+    case 'audio-capture': return 'المايك مشغول أو ما اشتغل. سكّر أي تطبيق ثاني يستخدم المايك (مكالمة، تسجيل، سماعة بلوتوث) واضغط «اضغط وردّد».';
+    case 'network': return 'التعرّف على الصوت يحتاج إنترنت. تأكد من الاتصال واضغط «اضغط وردّد».';
+    case 'language-not-supported': return 'التعرّف على الإنجليزي مو متاح في جوالك. حدّث تطبيق Google من المتجر وجرّب مرة ثانية.';
+    case 'aborted': return 'انقطع المايك. اضغط «اضغط وردّد» مرة ثانية.';
+    case 'no-result': return 'ما وصلني صوتك. اضغط «اضغط وردّد» وقل الكلمة على طول بصوت واضح.';
+    default: return 'صار خطأ في المايك. اضغط «اضغط وردّد» وحاول مرة ثانية.';
+  }
+};
 function useRepeatRecognition() {
   const recRef = useRef<any>(null);
   const sessionRef = useRef(0);
   const timersRef = useRef<number[]>([]);
+  const permRef = useRef<MicPerm>('unknown');
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debug, setDebug] = useState<string>('');
   const supported = typeof window !== 'undefined' && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
+  useEffect(() => {
+    let on = true;
+    try {
+      (navigator as any).permissions?.query({ name: 'microphone' }).then((st: any) => {
+        if (!on) return; permRef.current = st.state; st.onchange = () => { permRef.current = st.state; };
+      }).catch(() => {});
+    } catch { /* ignore */ }
+    return () => { on = false; };
+  }, []);
   const clearTimers = () => { timersRef.current.forEach(t => window.clearTimeout(t)); timersRef.current = []; };
   const later = (fn: () => void, ms: number) => { timersRef.current.push(window.setTimeout(fn, ms)); };
   const kill = () => {
@@ -103,66 +129,109 @@ function useRepeatRecognition() {
   const abort = useCallback(() => { kill(); setListening(false); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => kill(), []); // eslint-disable-line react-hooks/exhaustive-deps
   const start = useCallback((expected: string, onScored: (r: ItemResult) => void, auto = false) => {
-    setError(null);
+    setError(null); setDebug('');
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { setError('متصفحك ما يدعم التعرّف على الصوت. جرّب Chrome أو Safari.'); return; }
     kill();
     const session = sessionRef.current;
     const live = () => session === sessionRef.current;
-    const tapMsg = 'ما سمعتك. اضغط زر المايك «اضغط وردّد» وردّد بصوت واضح.';
-    setListening(true); // UI shows «دورك» right away; the watchdog/handlers turn it off if the mic can't open
+    const t0 = Date.now();
+    const secs = () => `${((Date.now() - t0) / 1000).toFixed(1)}s`;
+    setListening(true);
     const launch = (attempt: number) => {
       if (!live()) return;
       let rec: any;
-      try { rec = new SR(); } catch { setListening(false); setError('تعذّر تشغيل المايك. اضغط زر المايك وحاول مرة ثانية.'); return; }
-      rec.lang = 'en-US'; rec.interimResults = false; rec.continuous = false; rec.maxAlternatives = 3;
-      let started = false, got = false, ended = false;
+      try { rec = new SR(); } catch (e: any) { setListening(false); setDebug(`ctor:${e?.name || 'err'}`); setError(errMsg('ctor')); return; }
+      rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 5;
+      let started = false, scored = false, ended = false, lastCode = '', rawHeard = '';
+      let interim: string[] = [];
       const mine = () => live() && recRef.current === rec;
+      const score = (alts: string[]) => {
+        if (alts.some(a => a.trim())) rawHeard = alts.find(a => a.trim()) || rawHeard;
+        const best = scoreRepeat(alts, expected);
+        if (!best) return false;
+        scored = true;
+        onScored({ score: best.score, transcript: best.transcript, missing: best.missing, passed: best.passed });
+        return true;
+      };
       rec.onstart = () => { if (!mine()) return; started = true; setListening(true); };
       rec.onresult = (e: any) => {
         if (!mine()) return;
-        got = true;
-        const alts: string[] = Array.from(e.results?.[0] || []).map((a: any) => a.transcript || '');
-        const best = alts.map(t => ({ t, r: checkSpokenAnswer(t, expected) })).sort((a, b) => b.r.score - a.r.score)[0];
-        if (!best || !best.r.heard.length) return;
-        onScored({ score: best.r.score, transcript: best.t, missing: best.r.missing, passed: best.r.passed });
+        for (let i = e.resultIndex ?? 0; i < (e.results?.length || 0); i++) {
+          const r = e.results[i];
+          const alts: string[] = Array.from(r || []).map((a: any) => a.transcript || '');
+          if (r.isFinal) { if (score(alts)) setDebug(`ok · ${secs()}`); }
+          else if (alts.some(Boolean)) { interim = alts; rawHeard = alts.find(Boolean) || rawHeard; }
+        }
       };
       rec.onerror = (e: any) => {
         if (!mine()) return;
-        const code = e?.error;
-        // A session that died before it ever opened (busy audio device right after playback): recreate it once.
-        if (!started && attempt === 0 && (code === 'aborted' || code === 'audio-capture' || code === 'network')) { ended = true; recRef.current = null; later(() => launch(1), 300); return; }
-        setError(code === 'not-allowed' || code === 'service-not-allowed'
-          ? 'ما قدرنا نستخدم المايك. اسمح للموقع بالمايكروفون واضغط زر المايك.'
-          : code === 'no-speech' ? tapMsg : 'صار خطأ في المايك. اضغط زر المايك «اضغط وردّد» وحاول مرة ثانية.');
-        setListening(false);
+        lastCode = e?.error || 'unknown';
+        // Died before it ever opened (busy audio right after playback): recreate it once, quietly.
+        if (!started && attempt === 0 && (lastCode === 'aborted' || lastCode === 'audio-capture')) {
+          ended = true; recRef.current = null; later(() => launch(1), 400); return;
+        }
+        if (lastCode === 'not-allowed' || lastCode === 'service-not-allowed') permRef.current = 'denied';
       };
       rec.onend = () => {
         if (!mine() || ended) return;
         ended = true; recRef.current = null; clearTimers();
         setListening(false);
-        if (!got) setError(prev => prev || tapMsg);
+        if (!scored && interim.length && score(interim)) { setDebug(`interim · ${secs()}`); return; }
+        if (scored) return;
+        const code = lastCode || 'no-result';
+        setDebug(`${code}${started ? '' : ' · no-start'} · ${secs()}`);
+        // Something was heard but not in English letters (e.g. Arabic): say what was heard instead of «ما سمعتك».
+        setError(rawHeard.trim() ? `سمعتك تقول: «${rawHeard.trim()}». قلها بالإنجليزي مثل ما قالتها المعلمة واضغط «اضغط وردّد».` : errMsg(code));
       };
       recRef.current = rec;
       try { rec.start(); }
-      catch {
+      catch (e: any) {
         recRef.current = null;
         if (attempt === 0) { later(() => launch(1), 300); return; }
-        setListening(false); setError('تعذّر تشغيل المايك. اضغط زر المايك وحاول مرة ثانية.'); return;
+        setListening(false); setDebug(`start:${e?.name || 'err'}`); setError(errMsg('start'));
       }
-      // Watchdog: listening but the engine never said onstart → recreate and restart once.
-      later(() => {
-        if (!mine() || started || ended) return;
-        rec.onresult = rec.onerror = rec.onend = rec.onstart = null; try { rec.abort(); } catch { /* ignore */ }
-        recRef.current = null;
-        if (attempt === 0) { launch(1); return; }
-        setListening(false); setError('المايك ما اشتغل. اضغط زر المايك «اضغط وردّد» وحاول مرة ثانية.');
-      }, ONSTART_WATCHDOG_MS);
     };
-    if (auto) later(() => launch(0), AUTO_START_DELAY_MS); else launch(0);
+    const go = () => { if (auto) later(() => launch(0), AUTO_START_DELAY_MS); else launch(0); };
+    // First tap with the mic permission not granted yet: ask for it explicitly, release the stream, then listen.
+    if (!auto && IS_ANDROID && permRef.current !== 'granted' && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(s => {
+        s.getTracks().forEach(t => { try { t.stop(); } catch { /* ignore */ } });
+        permRef.current = 'granted';
+        if (!live()) return;
+        later(() => launch(0), 300); // let the device release the mic before recognition takes it
+      }).catch((e: any) => {
+        if (!live()) return;
+        setListening(false);
+        const name = e?.name || 'err';
+        setDebug(`mic:${name}`);
+        if (name === 'NotAllowedError' || name === 'SecurityError') { permRef.current = 'denied'; setError(MIC_DENIED_MSG); }
+        else if (name === 'NotFoundError') setError('ما لقينا مايك في الجهاز.');
+        else if (name === 'NotReadableError') setError(errMsg('audio-capture'));
+        else go(); // unknown failure of the permission probe: still try recognition directly
+      });
+      return;
+    }
+    go();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  /** Android: ask for / warm the mic once, inside the start tap, and release it before recognition needs it. */
+  const warm = useCallback(async (): Promise<boolean> => {
+    if (!IS_ANDROID || !navigator.mediaDevices?.getUserMedia) return true;
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+      s.getTracks().forEach(t => { try { t.stop(); } catch { /* ignore */ } });
+      permRef.current = 'granted';
+      await new Promise(r => setTimeout(r, 300));
+      return true;
+    } catch (e: any) {
+      const name = e?.name || 'err';
+      setDebug(`mic:${name}`);
+      if (name === 'NotAllowedError' || name === 'SecurityError') { permRef.current = 'denied'; setError(MIC_DENIED_MSG); return false; }
+      return true;
+    }
+  }, []);
   const stop = useCallback(() => { const r = recRef.current; if (!r) { abort(); return; } try { r.stop(); } catch { abort(); } }, [abort]);
-  return { listening, error, supported, start, stop, abort };
+  return { listening, error, debug, supported, start, stop, abort, warm };
 }
 
 function adviceFor(avg: number | null, weak: string[]): string {
@@ -242,8 +311,14 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
     if (!list.length) return;
     setSessionItems(list); setReviewCount(review.length);
     setLevel(lv); setIdx(0); setResults({}); setPhase('practice');
-    void cam.start();
-    present(0, list[0]);
+    // Mic first (Android warm-up), then the camera, then the first item — so the first recognizer never races them.
+    void (async () => {
+      const micOk = await rec.warm();
+      if (!aliveRef.current) return;
+      await cam.start();
+      if (!aliveRef.current) return;
+      if (micOk) present(0, list[0]); else say(list[0]); // mic blocked: keep the how-to-allow message on screen
+    })();
   };
 
   // Weak-words memory: an item scored under the pass threshold adds its unclear words; a review word said well is dropped.
@@ -385,10 +460,11 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
           </button>
         </div>
         {rec.error && <p className="text-[12px] font-bold text-amber-700 text-center">{rec.error}</p>}
+        {rec.debug && <p dir="ltr" className="text-[10px] font-mono text-slate-400 text-center" data-testid="repeat-mic-debug">mic: {rec.debug}</p>}
         {res && res.score !== null && (
           <div className={`rounded-xl border p-3 text-center space-y-1 ${res.score >= 0.85 ? 'bg-emerald-50 border-emerald-300' : res.score >= 0.65 ? 'bg-amber-50 border-amber-300' : 'bg-rose-50 border-rose-300'}`} data-testid="repeat-score">
             <p className="text-[18px] font-black">{pct(res.score)}٪ {res.score >= 0.85 ? '🌟' : res.score >= 0.65 ? '👍' : '💪'}</p>
-            <p dir="ltr" className="text-[13px] font-bold text-slate-700">🗣️ “{res.transcript}”</p>
+            <p className="text-[13px] font-bold text-slate-700">🗣️ سمعتك تقول: <span dir="ltr">“{res.transcript}”</span></p>
             {res.missing.length > 0 && <p className="text-[12px] font-bold text-rose-700">كلمات ما وضحت: <span dir="ltr">{res.missing.join(', ')}</span></p>}
           </div>
         )}
