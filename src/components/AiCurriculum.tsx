@@ -1,3 +1,4 @@
+// design-harmony batch 13
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
@@ -14,6 +15,13 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'fire
 import { saveEarnedCertificate } from '../services/certificateService';
 import { recordStreakActivity } from '../services/streakService';
 import { UserProfile } from '../types';
+import { 
+  SectionShell, 
+  PrimaryButton, 
+  GhostButton, 
+  ProgressPill, 
+  GoldCard 
+} from './ui/academy';
 import { 
   Brain, 
   BrainCircuit,
@@ -5775,13 +5783,11 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
 
   return (
-    <div className="flex-1 bg-[#001a38] text-slate-100 min-h-screen font-sans overflow-y-auto" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Astronaut Particle Accents */}
-      <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-b from-[#09162e] to-transparent pointer-events-none opacity-40 z-0" />
-      
-      <header className="relative z-10 px-6 py-5 border-b border-white/5 flex items-center justify-between backdrop-blur-md bg-[#001a38]/80 sticky top-0">
-        <div className="flex items-center gap-4">
-          <button 
+    <SectionShell dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Academy Unified Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#C49E3A]/20 pb-4">
+        <div className="flex items-center gap-3">
+          <GhostButton 
             onClick={() => {
               if (selectedProLesson) {
                 setSelectedProLesson(null);
@@ -5794,14 +5800,25 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 onBack();
               }
             }}
-            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-amber-400 transition-all active:scale-95 border border-white/10"
           >
-            <ArrowLeft className={isRtl ? 'rotate-180' : ''} />
-          </button>
+            <ArrowLeft className={`w-4 h-4 ${isRtl ? 'rotate-180' : ''}`} />
+            <span>{isRtl ? 'العودة' : 'Back'}</span>
+          </GhostButton>
           <div className="flex items-center gap-3">
             <FamilyAILightbulbIcon size={36} />
             <div>
-              <h1 className="text-xl font-black text-white leading-none uppercase tracking-tight">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase bg-[#002147] text-[#E6C36A] py-0.5 px-2.5 rounded tracking-wider">
+                  {selectedProLesson 
+                    ? (isRtl ? 'دراسة متعمقة للمحترفين' : 'In-depth Professional Level Study')
+                    : curriculumType === 'foundational' 
+                      ? AI_CURRICULUM_DATA.program_subtitle 
+                      : curriculumType === 'advanced' 
+                        ? ADVANCED_CURRICULUM_DATA.program_subtitle 
+                        : PROMPT_PROFESSIONAL_DATA.description}
+                </span>
+              </div>
+              <h1 className="text-xl md:text-2xl font-black text-[#002147] mt-1">
                 {selectedProLesson 
                   ? (isRtl ? `الدرس ${selectedProLesson.lesson_number}: ${selectedProLesson.lesson_title}` : `Lesson ${selectedProLesson.lesson_number}: ${selectedProLesson.lesson_title}`)
                   : curriculumType === 'foundational' 
@@ -5810,31 +5827,20 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       ? ADVANCED_CURRICULUM_DATA.program_name 
                       : PROMPT_PROFESSIONAL_DATA.title}
               </h1>
-              <p className="text-[10px] text-amber-400/80 font-bold uppercase tracking-widest mt-1">
-                {selectedProLesson 
-                  ? (isRtl ? 'دراسة متعمقة للمحترفين' : 'In-depth Professional Level Study')
-                  : curriculumType === 'foundational' 
-                    ? AI_CURRICULUM_DATA.program_subtitle 
-                    : curriculumType === 'advanced' 
-                      ? ADVANCED_CURRICULUM_DATA.program_subtitle 
-                      : PROMPT_PROFESSIONAL_DATA.description}
-              </p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 px-4 py-2 rounded-2xl flex items-center gap-2">
-            <Trophy className="text-amber-400 shrink-0" size={16} />
-            <div className="text-right">
-              <div className="text-[9px] font-black text-amber-300 uppercase leading-none">{isRtl ? 'نقاط الحكمة' : 'WISDOM POINTS'}</div>
-              <div className="text-sm font-black text-white leading-none mt-1">{xp} <span className="text-[10px] text-amber-400/70">XP</span></div>
-            </div>
-          </div>
+          <ProgressPill>
+            <Trophy className="text-[#C49E3A] shrink-0 w-4 h-4" />
+            <span className="text-[10px] font-black uppercase text-[#002147]">{isRtl ? 'نقاط الحكمة' : 'WISDOM POINTS'}:</span>
+            <span className="font-mono font-black text-[#002147]">{xp} XP</span>
+          </ProgressPill>
         </div>
-      </header>
+      </div>
 
-      <main className="relative z-10 p-6 md:p-12 max-w-7xl mx-auto space-y-12">
+      <main className="space-y-6">
         <AnimatePresence mode="wait">
           {!selectedLesson ? (
             <motion.div 
@@ -5842,24 +5848,24 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              className="space-y-10 font-sans"
+              className="space-y-6 font-sans"
             >
               {/* Mission Card */}
-              <div className="relative overflow-hidden bg-gradient-to-r from-[#0d1e3d] to-[#071329] border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#C49E3A]/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
-                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
-                  <div className="space-y-6 max-w-4xl text-right md:text-right">
-                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 px-4 py-1.5 rounded-full border border-amber-500/25">
-                      <Sparkles size={14} className="animate-spin duration-3000" />
-                      <span className="text-[10px] font-black uppercase tracking-widest leading-none">
-                        {isRtl ? 'بوابة تعلم الذكاء الاصطناعي الأسرية' : 'Family AI Exploration Portal'}
-                      </span>
+              <GoldCard className="relative overflow-hidden p-6 sm:p-8">
+                <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+                  <div className="space-y-4 max-w-4xl text-right md:text-right">
+                    <div className="inline-flex items-center gap-2">
+                      <ProgressPill>
+                        <Sparkles size={14} className="text-[#C49E3A]" />
+                        <span className="text-[10px] font-black uppercase tracking-wider">
+                          {isRtl ? 'بوابة تعلم الذكاء الاصطناعي الأسرية' : 'Family AI Exploration Portal'}
+                        </span>
+                      </ProgressPill>
                     </div>
-                    <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight">
+                    <h2 className="text-2xl md:text-3xl font-black text-[#002147] leading-tight">
                       {isRtl ? "أهلًا بكم في 'تعلم الذكاء الاصطناعي'!" : 'Welcome to "Learn AI for Families"!'}
                     </h2>
-                    <p className="text-slate-300 text-sm md:text-md font-medium leading-relaxed whitespace-pre-line max-w-3xl">
+                    <p className="text-[#002147]/80 text-sm md:text-base font-medium leading-relaxed whitespace-pre-line max-w-3xl">
                       {isRtl ? (
                         `هذا ليس قسمًا تقنيًا معقدًا، بل هو ملعب عائلي للعقول الفضولية. هنا، أنتم لستم مجرد طلاب، بل مستكشفون، مبدعون، وسفراء للمستقبل.
 
@@ -5886,277 +5892,210 @@ The adventure is waiting!`
                     </p>
                   </div>
                   <div className="relative shrink-0 flex flex-col items-center gap-3">
-                    <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-amber-500/20 to-orange-500/20 border-2 border-amber-500/30 flex items-center justify-center text-amber-400 shadow-xl shadow-amber-500/5 animate-pulse">
-                      <FamilyAILightbulbIcon size={80} />
+                    <div className="w-24 h-24 rounded-full bg-[#E6C36A]/20 border-2 border-[#C49E3A] flex items-center justify-center text-[#002147] shadow-md">
+                      <FamilyAILightbulbIcon size={64} />
                     </div>
-                    <span className="text-amber-400 text-xs font-black font-mono bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">{isRtl ? 'الأكاديمية الأسرية' : 'Family Academy'}</span>
+                    <ProgressPill className="text-xs">
+                      {isRtl ? 'الأكاديمية الأسرية' : 'Family Academy'}
+                    </ProgressPill>
                   </div>
                 </div>
-              </div>
+              </GoldCard>
 
               {/* Lobby Tabs Selector */}
-              <div className="flex flex-wrap border-b border-white/5 pb-px gap-2">
-                <button
+              <div className="flex flex-wrap items-center gap-2 border-b border-[#C49E3A]/20 pb-3">
+                <GhostButton
+                  active={lobbyTab === 'lessons'}
                   onClick={() => setLobbyTab('lessons')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'lessons'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Layers size={16} />
-                  {isRtl ? 'المستويات والتطبيقات 🚀' : 'Learning Levels & Sandbox 🚀'}
-                </button>
-                <button
+                  <span>{isRtl ? 'المستويات والتطبيقات 🚀' : 'Learning Levels & Sandbox 🚀'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'tools'}
                   onClick={() => setLobbyTab('tools')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'tools'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <BookOpen size={16} />
-                  {isRtl ? 'مكتبة الأدوات الذكية 🛠️' : 'AI Tools Library 🛠️'}
-                </button>
-                <button
+                  <span>{isRtl ? 'مكتبة الأدوات الذكية 🛠️' : 'AI Tools Library 🛠️'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'challenges'}
                   onClick={() => setLobbyTab('challenges')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'challenges'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Sparkle size={16} />
-                  {isRtl ? 'التحديات والمسارات 📅' : 'Challenges & Roadmaps 📅'}
-                </button>
-                <button
+                  <span>{isRtl ? 'التحديات والمسارات 📅' : 'Challenges & Roadmaps 📅'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'experiments'}
                   onClick={() => setLobbyTab('experiments')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'experiments'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Sliders size={16} />
-                  {isRtl ? 'في المختبر (تجارب ومقارنات) 🧪' : 'Interactive Lab 🧪'}
-                </button>
-                <button
+                  <span>{isRtl ? 'في المختبر (تجارب ومقارنات) 🧪' : 'Interactive Lab 🧪'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'family'}
                   onClick={() => setLobbyTab('family')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'family'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Users size={16} />
-                  {isRtl ? 'ركن العائلة والقصص 👨‍👩‍👧‍👦' : 'Family Corner & Stories 👨‍👩‍👧‍👦'}
-                </button>
-                <button
+                  <span>{isRtl ? 'ركن العائلة والقصص 👨‍👩‍👧‍👦' : 'Family Corner & Stories 👨‍👩‍👧‍👦'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'english'}
                   onClick={() => setLobbyTab('english')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'english'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Compass size={16} />
-                  {isRtl ? 'الإنجليزية بالذكاء الاصطناعي 🇬🇧' : 'AI English Bridge 🇬🇧'}
-                </button>
-                <button
+                  <span>{isRtl ? 'الإنجليزية بالذكاء الاصطناعي 🇬🇧' : 'AI English Bridge 🇬🇧'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'certificate'}
                   onClick={() => setLobbyTab('certificate')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'certificate'
-                      ? 'bg-gradient-to-t from-amber-500/10 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Award size={16} />
-                  {isRtl ? 'الشهادة الاحترافية المتقدمة 🏆' : 'Professional Certificate 🏆'}
-                </button>
-                <button
+                  <span>{isRtl ? 'الشهادة الاحترافية المتقدمة 🏆' : 'Professional Certificate 🏆'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'printables'}
                   onClick={() => setLobbyTab('printables')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'printables'
-                      ? 'bg-amber-500/10 text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Printer size={16} />
-                  {isRtl ? 'مطبوعات العائلة 🖨️' : 'Printables 🖨️'}
-                </button>
+                  <span>{isRtl ? 'مطبوعات العائلة 🖨️' : 'Printables 🖨️'}</span>
+                </GhostButton>
 
-                <button
+                <GhostButton
+                  active={lobbyTab === 'perfection'}
                   onClick={() => setLobbyTab('perfection')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'perfection'
-                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <Sparkles size={16} />
-                  {isRtl ? 'الوضع المتطور ✨' : 'Advanced Mode ✨'}
-                </button>
-                <button
+                  <span>{isRtl ? 'الوضع المتطور ✨' : 'Advanced Mode ✨'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'study_plan'}
                   onClick={() => setLobbyTab('study_plan')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'study_plan'
-                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-white/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
                   <BrainCircuit size={16} />
-                  {isRtl ? 'مخطط الدراسة الذكي (AI Planner) 🧠' : 'Smart AI Study Planner 🧠'}
-                </button>
-                <button
+                  <span>{isRtl ? 'مخطط الدراسة الذكي (AI Planner) 🧠' : 'Smart AI Study Planner 🧠'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'balance_oasis'}
                   onClick={() => setLobbyTab('balance_oasis')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'balance_oasis'
-                      ? 'bg-gradient-to-t from-[#C49E3A]/15 to-transparent text-[#E4C77A] border-t border-x border-[#C49E3A]/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
-                  <Smile size={16} className="text-[#E4C77A]" />
-                  {isRtl ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊'}
-                </button>
-                <button
+                  <Smile size={16} className={lobbyTab === 'balance_oasis' ? 'text-[#E6C36A]' : 'text-[#C49E3A]'} />
+                  <span>{isRtl ? 'واحة التوازن 🌊' : 'Balance Oasis 🌊'}</span>
+                </GhostButton>
+                <GhostButton
+                  active={lobbyTab === 'updates'}
                   onClick={() => setLobbyTab('updates')}
-                  className={`px-5 py-3 rounded-t-2xl font-black text-sm transition-all flex items-center gap-2 ${
-                    lobbyTab === 'updates'
-                      ? 'bg-gradient-to-t from-amber-500/15 to-transparent text-amber-300 border-t border-x border-amber-500/10 border-b-2 border-b-[#001a38]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
                 >
-                  <RefreshCw size={16} className="text-amber-400" />
-                  {isRtl ? 'الجديد والتحديثات (الجدية) 🔄' : 'New & Updates 🔄'}
-                </button>
+                  <RefreshCw size={16} className={lobbyTab === 'updates' ? 'text-[#E6C36A]' : 'text-[#C49E3A]'} />
+                  <span>{isRtl ? 'الجديد والتحديثات (الجدية) 🔄' : 'New & Updates 🔄'}</span>
+                </GhostButton>
               </div>
 
               {/* Tab 1: Standard Levels Grid */}
               {lobbyTab === 'lessons' && (
                 !(hasCompletedTest || bypassTest) ? (
-                  <div className="bg-[#00274f] border border-amber-500/20 rounded-3xl p-10 relative overflow-hidden text-right shadow-2xl animate-fade-in w-full" dir="rtl">
-                    <div className="absolute top-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl opacity-30" />
-                    <div className="relative z-10 flex flex-col items-center text-center space-y-6 py-6 font-sans">
-                      <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                        <Lock size={36} />
+                  <GoldCard className="p-8 sm:p-10 relative overflow-hidden text-center shadow-md animate-fade-in w-full">
+                    <div className="relative z-10 flex flex-col items-center text-center space-y-5 max-w-2xl mx-auto font-sans">
+                      <div className="w-16 h-16 rounded-full bg-[#E6C36A]/20 border border-[#C49E3A] flex items-center justify-center text-[#002147]">
+                        <Lock size={32} />
                       </div>
                       
-                      <div className="space-y-3 max-w-2xl">
-                        <h3 className="text-3xl font-black text-white">
+                      <div className="space-y-2">
+                        <h3 className="text-2xl font-black text-[#002147]">
                           {isRtl ? '⚠️ اختبار تحديد المستوى مطلوب أولاً' : '⚠️ Placement Test Required First'}
                         </h3>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                        <p className="text-[#002147]/80 text-sm leading-relaxed">
                           {isRtl 
                             ? 'لا يمكنك تصفح مستويات البرنامج التأسيسي أو التخصصي، ولا حصد نقاط الحكمة دون القيام باختبار تحديد المستوى التفاعلي أولاً للتأكد من ملائمة المنهج لمستواك الأكاديمي واللغوي الصحيح.'
                             : 'You cannot browse the foundational or advanced course levels, nor earn Wisdom Points without first completing the placement test to determine your correct academic level.'}
                         </p>
                       </div>
 
-                      <div className="pt-4 flex flex-col sm:flex-row gap-4 items-center justify-center">
-                        <button
+                      <div className="pt-2 flex flex-col sm:flex-row gap-3 items-center justify-center">
+                        <PrimaryButton
                           onClick={() => onNavigate && onNavigate('placement-test')}
-                          className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-8 py-4 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all active:scale-95 shrink-0 hover:-translate-y-0.5 font-sans cursor-pointer"
                         >
                           <Sparkles size={16} />
-                          {isRtl ? 'ابدأ اختبار تحديد المستوى الآن 🎯' : 'Start Placement Test Now 🎯'}
-                        </button>
+                          <span>{isRtl ? 'ابدأ اختبار تحديد المستوى الآن 🎯' : 'Start Placement Test Now 🎯'}</span>
+                        </PrimaryButton>
                         
-                        <button
+                        <GhostButton
                           onClick={() => onBack()}
-                          className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold px-6 py-4 rounded-2xl text-xs transition-all active:scale-95 font-sans cursor-pointer"
                         >
-                          {isRtl ? 'العودة للرئيسية' : 'Back to Home'}
-                        </button>
+                          <span>{isRtl ? 'العودة للرئيسية' : 'Back to Home'}</span>
+                        </GhostButton>
                       </div>
                     </div>
-                  </div>
+                  </GoldCard>
                 ) : (
                   <div className="space-y-8">
                   {/* Curriculum Toggle Picker */}
-                  <div className="flex justify-start pb-4">
-                    <div className="p-1 bg-slate-950/80 border border-white/10 rounded-2xl flex flex-wrap gap-1">
-                      <button
-                        onClick={() => setCurriculumType('foundational')}
-                        className={`px-5 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
-                          curriculumType === 'foundational'
-                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        <Brain size={14} />
-                        {isRtl ? 'البرنامج التأسيسي العائلي (20 درسًا)' : 'Foundational Program (20 Lessons)'}
-                      </button>
-                      <button
-                        onClick={() => setCurriculumType('advanced')}
-                        className={`px-5 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
-                          curriculumType === 'advanced'
-                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        <Sparkles size={14} />
-                        {isRtl ? 'المسارات التخصصية المتقدمة (9 دروس)' : 'Advanced Professional Tracks (9 Lessons)'}
-                      </button>
-                      <button
-                        onClick={() => setCurriculumType('professional')}
-                        className={`px-5 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
-                          curriculumType === 'professional'
-                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        <Award size={14} />
-                        {isRtl ? 'احترافية المطالبات (24 درساً) 🏆' : 'Prompt Pro Program (24 Lessons) 🏆'}
-                      </button>
-                      <button
-                        onClick={() => setCurriculumType('capstone')}
-                        className={`px-5 py-2.5 rounded-xl font-black text-xs transition-all flex items-center gap-2 ${
-                          curriculumType === 'capstone'
-                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/10'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        <GraduationCap size={14} />
-                        {isRtl ? 'مشروع التخرج: بناء موقع ذكي 🎓' : 'AI Graduation Capstone 🎓'}
-                      </button>
-                    </div>
+                  <div className="flex flex-wrap gap-2 pb-2">
+                    <GhostButton
+                      active={curriculumType === 'foundational'}
+                      onClick={() => setCurriculumType('foundational')}
+                    >
+                      <Brain size={14} />
+                      <span>{isRtl ? 'البرنامج التأسيسي العائلي (20 درسًا)' : 'Foundational Program (20 Lessons)'}</span>
+                    </GhostButton>
+                    <GhostButton
+                      active={curriculumType === 'advanced'}
+                      onClick={() => setCurriculumType('advanced')}
+                    >
+                      <Sparkles size={14} />
+                      <span>{isRtl ? 'المسارات التخصصية المتقدمة (9 دروس)' : 'Advanced Professional Tracks (9 Lessons)'}</span>
+                    </GhostButton>
+                    <GhostButton
+                      active={curriculumType === 'professional'}
+                      onClick={() => setCurriculumType('professional')}
+                    >
+                      <Award size={14} />
+                      <span>{isRtl ? 'احترافية المطالبات (24 درساً) 🏆' : 'Prompt Pro Program (24 Lessons) 🏆'}</span>
+                    </GhostButton>
+                    <GhostButton
+                      active={curriculumType === 'capstone'}
+                      onClick={() => setCurriculumType('capstone')}
+                    >
+                      <GraduationCap size={14} />
+                      <span>{isRtl ? 'مشروع التخرج: بناء موقع ذكي 🎓' : 'AI Graduation Capstone 🎓'}</span>
+                    </GhostButton>
                   </div>
 
                   {curriculumType === 'capstone' ? (
                     <CapstoneProjectHub isRtl={isRtl} onBackToMain={() => setCurriculumType('foundational')} />
                   ) : curriculumType === 'professional' ? (
-                    <div id="pro_main_dashboard" className="space-y-12 text-right animate-fade-in animate-duration-300" dir="rtl">
+                    <div id="pro_main_dashboard" className="space-y-8 text-right animate-fade-in animate-duration-300" dir="rtl">
                       
                       {/* Secondary Pro Sub-Tabs */}
-                      <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-950/60 p-2.5 rounded-3xl border border-white/5 max-w-5xl mx-auto shadow-2xl">
-                        <button
+                      <div className="flex flex-wrap items-center justify-center gap-2 p-2 rounded-2xl bg-white border border-[#C49E3A]/30 max-w-5xl mx-auto shadow-sm">
+                        <GhostButton
+                          active={proSubTab === 'dashboard'}
                           onClick={() => setProSubTab('dashboard')}
-                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                         >
                           <Award size={14} />
-                          {isRtl ? 'بوابة المحاضرات والاعتماد 🏆' : 'Lectures & Accreditation 🏆'}
-                        </button>
-                        <button
+                          <span>{isRtl ? 'بوابة المحاضرات والاعتماد 🏆' : 'Lectures & Accreditation 🏆'}</span>
+                        </GhostButton>
+                        <GhostButton
+                          active={proSubTab === 'templates'}
                           onClick={() => setProSubTab('templates')}
-                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'templates' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                         >
                           <PenTool size={14} />
-                          {isRtl ? 'مكتبة الـ 50 قالباً الاحترافية 📝' : '50 Free Pro Templates 📝'}
-                        </button>
-                        <button
+                          <span>{isRtl ? 'مكتبة الـ 50 قالباً الاحترافية 📝' : '50 Free Pro Templates 📝'}</span>
+                        </GhostButton>
+                        <GhostButton
+                          active={proSubTab === 'megaprompts'}
                           onClick={() => setProSubTab('megaprompts')}
-                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'megaprompts' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                         >
                           <Brain size={14} />
-                          {isRtl ? 'معمل الأوامر الضخمة (12) 🧪' : '12 Mega-Prompts Lab 🧪'}
-                        </button>
-                        <button
+                          <span>{isRtl ? 'معمل الأوامر الضخمة (12) 🧪' : '12 Mega-Prompts Lab 🧪'}</span>
+                        </GhostButton>
+                        <GhostButton
+                          active={proSubTab === 'capstone'}
                           onClick={() => setProSubTab('capstone')}
-                          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-black transition-all ${proSubTab === 'capstone' ? 'bg-amber-500 text-slate-950 font-sans shadow-lg shadow-amber-500/10' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                         >
                           <GraduationCap size={14} />
-                          {isRtl ? 'مشروع التخرج: بناء موقع ذكي 🎓' : 'AI Graduation Capstone 🎓'}
-                        </button>
+                          <span>{isRtl ? 'مشروع التخرج: بناء موقع ذكي 🎓' : 'AI Graduation Capstone 🎓'}</span>
+                        </GhostButton>
                       </div>
 
                       {/* SUBTAB 1: Lectures & Certification Dashboard */}
@@ -7268,37 +7207,36 @@ Output Summary for [${topic}]:
                   {/* Search and Category Filter Layout */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {/* Sidebar Categories */}
-                    <div className="lg:col-span-3 bg-slate-900/40 border border-white/5 rounded-3xl p-5 space-y-2">
-                      <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-4 pb-2 border-b border-white/5">
+                    <GoldCard className="lg:col-span-3 p-4 space-y-2">
+                      <h4 className="text-xs font-black text-[#002147] uppercase tracking-wider mb-3 pb-2 border-b border-[#C49E3A]/20">
                         {isRtl ? '📁 أقسام الأدوات العمليّة' : '📁 Category Filter'}
                       </h4>
-                      {[
-                        { id: 'all', label: isRtl ? 'الكل (عرض الجميع) ✨' : 'All Categories' },
-                        { id: 'writer', label: isRtl ? 'النصوص والكتابة ✍️' : 'Text & Writing' },
-                        { id: 'image', label: isRtl ? 'الصور والفنون واللوحات 🎨' : 'Images & Art' },
-                        { id: 'video', label: isRtl ? 'الفيديو والأنيميشن 🎬' : 'Video & Motion' },
-                        { id: 'audio', label: isRtl ? 'الملحنات والمقاطع الصوتية 🎵' : 'Audio & Voice' },
-                        { id: 'office', label: isRtl ? 'المكتب وتسهيل التخطيط 📊' : 'Productivity' },
-                        { id: 'code', label: isRtl ? 'البرمجة والتطوير المبتكر 💻' : 'Coding & Tech' },
-                        { id: 'edu', label: isRtl ? 'التعليم وصناعة المناهج 📚' : 'Education' },
-                        { id: 'business', label: isRtl ? 'التسويق وأعمال المنتجات 📈' : 'Business' },
-                        { id: 'safety', label: isRtl ? 'التزييف وفحص الأمان والتحقق 🛡️' : 'Safety & Deepfakes' },
-                        { id: 'favs', label: isRtl ? 'نجماتي المفضلة ⭐' : 'Favorites ⭐' }
-                      ].map(cat => (
-                        <button
-                          key={cat.id}
-                          onClick={() => setSelectedToolCategory(cat.id)}
-                          className={`w-full text-right p-3 rounded-xl font-bold transition-all text-xs flex items-center justify-between ${
-                            selectedToolCategory === cat.id
-                              ? 'bg-amber-500/25 text-amber-300 border border-amber-500/30'
-                              : 'bg-white/5 hover:bg-white/10 text-slate-300'
-                          }`}
-                        >
-                          <span>{cat.label}</span>
-                          {selectedToolCategory === cat.id && <div className="w-2 h-2 rounded-full bg-amber-400" />}
-                        </button>
-                      ))}
-                    </div>
+                      <div className="flex flex-col gap-1.5">
+                        {[
+                          { id: 'all', label: isRtl ? 'الكل (عرض الجميع) ✨' : 'All Categories' },
+                          { id: 'writer', label: isRtl ? 'النصوص والكتابة ✍️' : 'Text & Writing' },
+                          { id: 'image', label: isRtl ? 'الصور والفنون واللوحات 🎨' : 'Images & Art' },
+                          { id: 'video', label: isRtl ? 'الفيديو والأنيميشن 🎬' : 'Video & Motion' },
+                          { id: 'audio', label: isRtl ? 'الملحنات والمقاطع الصوتية 🎵' : 'Audio & Voice' },
+                          { id: 'office', label: isRtl ? 'المكتب وتسهيل التخطيط 📊' : 'Productivity' },
+                          { id: 'code', label: isRtl ? 'البرمجة والتطوير المبتكر 💻' : 'Coding & Tech' },
+                          { id: 'edu', label: isRtl ? 'التعليم وصناعة المناهج 📚' : 'Education' },
+                          { id: 'business', label: isRtl ? 'التسويق وأعمال المنتجات 📈' : 'Business' },
+                          { id: 'safety', label: isRtl ? 'التزييف وفحص الأمان والتحقق 🛡️' : 'Safety & Deepfakes' },
+                          { id: 'favs', label: isRtl ? 'نجماتي المفضلة ⭐' : 'Favorites ⭐' }
+                        ].map(cat => (
+                          <GhostButton
+                            key={cat.id}
+                            active={selectedToolCategory === cat.id}
+                            onClick={() => setSelectedToolCategory(cat.id)}
+                            className="w-full justify-between"
+                          >
+                            <span>{cat.label}</span>
+                            {selectedToolCategory === cat.id && <span className="w-2 h-2 rounded-full bg-[#C49E3A]" />}
+                          </GhostButton>
+                        ))}
+                      </div>
+                    </GoldCard>
 
                     {/* Tools Grid Area */}
                     <div className="lg:col-span-9 space-y-6">
@@ -8715,24 +8653,21 @@ Output Summary for [${topic}]:
                       </div>
 
                       {/* Sub-tabs pills */}
-                      <div className="p-1 bg-slate-950/85 border border-white/10 rounded-2xl flex flex-wrap gap-1 w-full md:w-auto">
+                      <div className="flex flex-wrap gap-2 w-full md:w-auto">
                         {[
                           { id: 'guide', label: isRtl ? '📖 دليل الوالدين' : 'Parent Guide' },
                           { id: 'discussions', label: isRtl ? '💬 الجلسات الـ 12' : '12 Dialogues' },
                           { id: 'stories', label: isRtl ? '📚 قصص النجاح' : 'Success Stories' },
                           { id: 'whatif', label: isRtl ? '💡 ماذا لو؟' : 'What If?' }
                         ].map(st => (
-                          <button
+                          <GhostButton
                             key={st.id}
+                            active={familySubTab === st.id}
                             onClick={() => setFamilySubTab(st.id as any)}
-                            className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex-1 md:flex-none whitespace-nowrap ${
-                              familySubTab === st.id 
-                                ? 'bg-amber-500 text-slate-950 shadow-md font-black' 
-                                : 'text-slate-400 hover:text-white'
-                            }`}
+                            className="whitespace-nowrap"
                           >
-                            {st.label}
-                          </button>
+                            <span>{st.label}</span>
+                          </GhostButton>
                         ))}
                       </div>
                     </div>
@@ -13661,6 +13596,6 @@ Output Summary for [${topic}]:
         </div>
       )}
 
-    </div>
+    </SectionShell>
   );
 };
