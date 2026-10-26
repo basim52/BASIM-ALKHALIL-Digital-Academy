@@ -1,4 +1,4 @@
-// design-harmony batch 14
+// batch 15: lesson view design
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
@@ -4653,16 +4653,16 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full text-right" dir={isRtl ? 'rtl' : 'ltr'}>
         {/* Left Column: Lesson card details */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
+          <GoldCard className="space-y-6 !p-6">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 text-right">
-                <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-300 border border-amber-500/15 rounded-full text-[10px] font-black uppercase tracking-widest">{trackName}</span>
-                <h3 className="text-2xl font-black text-white mt-2 leading-tight">{lesson.lesson_title}</h3>
+                <ProgressPill className="text-[10px] uppercase tracking-widest">{trackName}</ProgressPill>
+                <h3 className="text-2xl font-black text-[#002147] mt-2 leading-tight">{lesson.lesson_title}</h3>
               </div>
               <button
                 disabled={exportingLesson}
                 onClick={() => handleExportLessonAsImage(lesson, 'advanced')}
-                className="bg-[#001a38] border border-amber-500/35 hover:bg-[#b08c2f] hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                className="bg-[#002147] hover:bg-[#001a38] border-2 border-[#C49E3A] text-[#E6C36A] p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
               >
                 {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
                   <>
@@ -4679,42 +4679,42 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             </div>
 
             <div className="space-y-4">
-              <div className="p-5 bg-white/5 rounded-2xl border border-white/5 relative">
-                <h4 className="text-xs font-black text-amber-300 uppercase tracking-widest mb-3 leading-none flex items-center gap-2">
-                  <Smile size={14} />
+              <GoldCard className="!p-5 bg-[#fdfaf3] border border-[#C49E3A]/40 relative">
+                <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-3 leading-none flex items-center gap-2">
+                  <Smile size={14} className="text-[#C49E3A]" />
                   {lesson.lesson_card.section_title}
                 </h4>
-                <p className="text-slate-200 text-xs leading-relaxed font-semibold whitespace-pre-line">
+                <p className="text-[#002147]/85 text-xs leading-relaxed font-semibold whitespace-pre-line">
                   {lesson.lesson_card.content}
                 </p>
                 {lesson.lesson_card.image_description && (
-                  <div className="mt-4 p-3 bg-slate-950/60 rounded-xl border border-white/5 text-[10px] text-slate-400 italic flex gap-2">
-                    <span className="text-amber-400 font-bold">🎨 {isRtl ? 'مشهد الدرس الفني:' : 'Scene Art Idea:'}</span> {lesson.lesson_card.image_description}
+                  <div className="mt-4 p-3 bg-white rounded-xl border border-[#C49E3A]/30 text-[10px] text-[#002147]/70 italic flex gap-2">
+                    <span className="text-[#C49E3A] font-bold">🎨 {isRtl ? 'مشهد الدرس الفني:' : 'Scene Art Idea:'}</span> {lesson.lesson_card.image_description}
                   </div>
                 )}
-              </div>
+              </GoldCard>
 
               {lesson.notes && (
-                <div className="p-5 bg-amber-500/5 rounded-2xl border border-amber-500/15">
-                  <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
-                    <Bot size={14} />
+                <GoldCard className="!p-5 bg-[#fdfaf3] border border-[#C49E3A]/40">
+                  <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                    <Bot size={14} className="text-[#C49E3A]" />
                     {lesson.notes.section_title || (isRtl ? 'نصيحة وخبرة مبرورة' : 'Expert Advice')}
                   </h4>
-                  <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-line font-medium">
+                  <p className="text-[#002147]/85 text-xs leading-relaxed whitespace-pre-line font-medium">
                     {lesson.notes.content}
                   </p>
-                </div>
+                </GoldCard>
               )}
             </div>
-          </div>
+          </GoldCard>
 
-          <button
+          <GhostButton
             onClick={() => setSelectedLesson(null)}
-            className="w-full bg-[#00274f] hover:bg-slate-900 border border-white/10 text-slate-300 font-black p-4 rounded-xl text-xs flex justify-center items-center gap-2 transition-all"
+            className="w-full !p-3.5 flex justify-center items-center gap-2"
           >
             <ArrowLeft className={isRtl ? 'rotate-180' : ''} size={14} />
             {isRtl ? 'العودة لقائمة المسارات المتقدمة' : 'Back to Advanced Tracks'}
-          </button>
+          </GhostButton>
         </div>
 
         {/* Right Column: Interactive SandBox Workspace and Simulator */}
@@ -4886,49 +4886,49 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
                       {/* Chapter footer actions (Next / Prev) */}
                       <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                        <button
+                        <GhostButton
                           onClick={() => {
                             if (activeChapterIdx > 0) {
                               setActiveChapterIdx(activeChapterIdx - 1);
                             }
                           }}
                           disabled={activeChapterIdx === 0}
-                          className="bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-slate-300 hover:text-white text-xs font-black px-4 py-2.5 rounded-xl transition-all border border-white/5 flex items-center gap-1 cursor-pointer"
+                          className="px-4 py-2 text-xs"
                         >
                           <ChevronRight size={14} className={isRtl ? '' : 'rotate-180'} />
                           {isRtl ? 'الفصل السابق' : 'Prev Chapter'}
-                        </button>
+                        </GhostButton>
 
                         {activeChapterIdx < 4 ? (
-                          <button
+                          <PrimaryButton
                             onClick={() => {
                               setActiveChapterIdx(activeChapterIdx + 1);
                             }}
-                            className="bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-amber-500/10 flex items-center gap-1 cursor-pointer"
+                            className="px-5 py-2 text-xs"
                           >
                             {isRtl ? 'الفصل التالي' : 'Next Chapter'}
                             <ChevronRight size={14} className={isRtl ? 'rotate-180' : ''} />
-                          </button>
+                          </PrimaryButton>
                         ) : (
                           <div className="flex gap-2">
-                            <button
+                            <PrimaryButton
                               onClick={() => {
                                 setActiveWorkspaceTab('sandbox');
                               }}
-                              className="bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-amber-500/10 flex items-center gap-1 cursor-pointer"
+                              className="px-4 py-2 text-xs"
                             >
                               <Terminal size={14} />
                               {isRtl ? 'انتقل للمعمل 🛠' : 'Go to Sandbox 🛠'}
-                            </button>
-                            <button
+                            </PrimaryButton>
+                            <PrimaryButton
                               onClick={() => {
                                 setActiveWorkspaceTab('quiz');
                               }}
-                              className="bg-gradient-to-r from-[#002147] to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 text-xs font-black px-4 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-1 cursor-pointer"
+                              className="px-4 py-2 text-xs !bg-[#C49E3A] !text-[#002147] hover:!bg-[#b08c2f]"
                             >
                               <Award size={14} />
                               {isRtl ? 'ابدأ الاختبار 📝' : 'Take Quiz 📝'}
-                            </button>
+                            </PrimaryButton>
                           </div>
                         )}
                       </div>
@@ -5100,13 +5100,13 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
               {/* Action layout */}
               <div className="flex justify-end pt-4">
-                <button
+                <PrimaryButton
                   onClick={handleCompleteLessonAndAwardXp}
-                  className="bg-gradient-to-r from-[#002147] to-[#002147] hover:from-emerald-400 hover:to-[#C49E3A] text-slate-950 font-black px-8 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 text-sm"
+                  className="!px-8 !py-3.5 !text-sm flex items-center gap-3"
                 >
                   <CheckCircle size={18} />
                   {isCompleted ? (isRtl ? 'تجاوز التحدي مجدداً' : 'Replay challenge completed') : (isRtl ? 'أكملت المغامرة بنجاح وحصدت +50 XP 🏆' : 'Adventure completed successfully (+50 XP) 🏆')}
-                </button>
+                </PrimaryButton>
               </div>
             </>
           ) : (
@@ -5466,26 +5466,25 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
     return (
       <div id="pro_workspace_container" className="space-y-8 text-right" dir="rtl">
         {/* Course Interactive Header */}
-        <div className="bg-[#00274f] border border-amber-500/20 rounded-3xl p-6 md:p-8 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl" />
+        <GoldCard className="!p-6 md:!p-8 relative overflow-hidden bg-white border border-[#C49E3A]/40">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
             <div className="space-y-3 text-right">
-              <div className="flex items-center gap-2 justify-start">
-                <span className="px-3 py-1 bg-amber-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest animate-pulse">
+              <div className="flex items-center gap-2 justify-start flex-wrap">
+                <ProgressPill className="text-[10px] uppercase tracking-widest">
                   {isRtl ? 'منهج المحترفين المعتمد 🏆' : 'Certified Pro Track 🏆'}
-                </span>
-                <span className="px-3 py-1 bg-white/5 text-slate-300 rounded-full text-[10px] font-bold">
+                </ProgressPill>
+                <ProgressPill className="text-[10px] font-bold">
                   {isRtl ? `المستوى ${Math.ceil(lesson.lesson_number / 6)} - الدرس ${lesson.lesson_number}` : `Level ${Math.ceil(lesson.lesson_number / 6)} - Lesson ${lesson.lesson_number}`}
-                </span>
+                </ProgressPill>
               </div>
               <div className="flex justify-between items-center gap-4 flex-wrap">
-                <h2 className="text-3xl font-black text-white leading-tight font-sans">
+                <h2 className="text-2xl md:text-3xl font-black text-[#002147] leading-tight font-sans">
                   {lesson.lesson_title}
                 </h2>
                 <button
                   disabled={exportingLesson}
                   onClick={() => handleExportLessonAsImage(lesson, 'pro')}
-                  className="bg-[#001a38] border border-amber-500/35 hover:bg-[#b08c2f] hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                  className="bg-[#002147] hover:bg-[#001a38] border-2 border-[#C49E3A] text-[#E6C36A] p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
                 >
                   {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
                     <>
@@ -5500,23 +5499,23 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                   )}
                 </button>
               </div>
-              <p className="text-slate-400 text-xs max-w-3xl leading-relaxed">
+              <p className="text-[#002147]/80 text-xs max-w-3xl leading-relaxed">
                 {isRtl ? 'مستواك الحالي في ريادة الأوامر يتطلب مواءمة المتغيرات المتقدمة وصقل هيكل المطالبة لتفادي هلوسة المخرجات اللغوية.' : 'Your professional current position demands deep alignment of variables and robust formatting schemas to fully safeguard outputs.'}
               </p>
             </div>
-            <button
+            <GhostButton
               onClick={() => {
                 setSelectedProLesson(null);
                 setProPlaygroundOutput('');
                 setProCompiledPrompt('');
               }}
-              className="bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 px-6 py-3 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shrink-0 self-start md:self-auto"
+              className="!px-6 !py-3 !text-xs shrink-0 self-start md:self-auto"
             >
               <ArrowLeft size={14} className="rotate-180" />
               {isRtl ? 'العودة لجدول المنهج المتقدم' : 'Back to Advanced Curriculum'}
-            </button>
+            </GhostButton>
           </div>
-        </div>
+        </GoldCard>
 
         {/* Bento Grid layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -5525,51 +5524,51 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           <div className="lg:col-span-5 space-y-6">
             
             {/* The Core Content Document */}
-            <div className="bg-[#00274f] border border-white/5 rounded-3xl p-8 space-y-6 relative">
-              <div className="flex items-center gap-3 border-b border-white/10 pb-4 justify-start">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+            <GoldCard className="!p-6 md:!p-8 space-y-6 relative bg-white border border-[#C49E3A]/40">
+              <div className="flex items-center gap-3 border-b border-[#002147]/10 pb-4 justify-start">
+                <div className="w-8 h-8 rounded-xl bg-[#E6C36A]/25 border border-[#C49E3A] flex items-center justify-center text-[#002147]">
                   <BookOpen size={16} />
                 </div>
                 <div>
-                  <h4 className="text-lg font-black text-white">{isRtl ? '📖 الدليل العلمي والدراسة النظرية' : '📖 Academic Guidelines'}</h4>
-                  <p className="text-[10px] text-slate-500">{isRtl ? 'الأصول التأسيسية للمحاضرة' : 'Lecture notes and conceptual paradigms'}</p>
+                  <h4 className="text-lg font-black text-[#002147]">{isRtl ? '📖 الدليل العلمي والدراسة النظرية' : '📖 Academic Guidelines'}</h4>
+                  <p className="text-[10px] text-[#002147]/60">{isRtl ? 'الأصول التأسيسية للمحاضرة' : 'Lecture notes and conceptual paradigms'}</p>
                 </div>
               </div>
 
-              <div className="space-y-4 text-slate-300 text-xs leading-relaxed font-semibold">
-                <p className="whitespace-pre-line text-slate-200">
+              <div className="space-y-4 text-[#002147]/85 text-xs leading-relaxed font-semibold">
+                <p className="whitespace-pre-line text-[#002147]">
                   {lesson.content}
                 </p>
 
-                <div className="bg-amber-500/5 border border-amber-500/10 p-5 rounded-2xl mt-4 space-y-2">
-                  <span className="text-[10px] font-black text-amber-400 block tracking-wider uppercase">✨ {isRtl ? 'ملاحظة الخبير وسلوك النماذج' : 'ENGINEER PERSPECTIVE'}</span>
-                  <p className="text-slate-300 text-xs leading-relaxed">
+                <GoldCard className="!p-5 bg-[#fdfaf3] border border-[#C49E3A]/40 mt-4 space-y-2">
+                  <span className="text-[10px] font-black text-[#002147] block tracking-wider uppercase">✨ {isRtl ? 'ملاحظة الخبير وسلوك النماذج' : 'ENGINEER PERSPECTIVE'}</span>
+                  <p className="text-[#002147]/85 text-xs leading-relaxed">
                     {isRtl 
                       ? 'إن مفتاح الصياغة الاحترافية يكمن بالتجريد التام ومنح النموذج دوراً واضحاً وصارماً تلو الآخر. الأوامر العشوائية تبرز الهلوسة في درجات الحرارة المرتفعة، بينما الهيكلة المحددة بمستندات JSON أو جداول Markdown تحكم السلوك بالكامل.' 
                       : 'The pinnacle of prompting lies in complete abstraction and absolute isolation of tasks. Loose queries leak parameters easily.'}
                   </p>
-                </div>
+                </GoldCard>
               </div>
-            </div>
+            </GoldCard>
 
             {/* Quick Practice Tip */}
-            <div className="bg-gradient-to-br from-[#0c1328] to-[#040813] border border-white/5 rounded-3xl p-8 space-y-4">
-              <h4 className="text-sm font-black text-white flex items-center gap-2 justify-start">
-                <Info size={16} className="text-amber-400 animate-bounce" />
+            <GoldCard className="!p-6 md:!p-8 space-y-4 bg-[#fdfaf3] border border-[#C49E3A]/40">
+              <h4 className="text-sm font-black text-[#002147] flex items-center gap-2 justify-start">
+                <Info size={16} className="text-[#C49E3A]" />
                 {isRtl ? '💡 نصيحة التطبيق العملي للدرس' : '💡 Context Optimization advice'}
               </h4>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-[#002147]/80 leading-relaxed">
                 {isRtl 
                   ? 'انقر على "تطبيق نموذج مسبق تلقائي" لتعبئة منصة الفحص الفوري للتحدي ببيانات حقيقية نموذجية صممت خصيصاً لهذا المبحث، ثم قم بتشييد ومحاكاة الاستجابة لترى الفرق بين المطالبات البسيطة والتكاملية!' 
                   : 'Click on apply prebuilt template button below to dynamically fetch mock professional parameters and test structural behaviors instantly.'}
               </p>
-              <button
+              <PrimaryButton
                 onClick={handleApplyPrebuilt}
-                className="w-full bg-amber-500/15 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 px-5 py-3 rounded-2xl text-xs font-black transition-all active:scale-95 text-center"
+                className="w-full !py-3 !text-xs text-center"
               >
                 ⚡ {isRtl ? 'تطبيق نموذج مسبق تلقائي للمبحث' : 'Apply Automated Lesson Template'}
-              </button>
-            </div>
+              </PrimaryButton>
+            </GoldCard>
           </div>
 
           {/* Prompt Constructor & Simulation Platform (Left Side) - 7 Cols */}
@@ -5761,20 +5760,20 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             )}
 
             {/* Bottom Actions of Lesson */}
-            <div className="bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/30 p-6 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <GoldCard className="!p-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border border-[#C49E3A]/40">
               <div className="text-right">
-                <h5 className="text-sm font-black text-white">{isRtl ? 'هل قمت ببناء وفحص تعاويذ هذا المبحث بنجاح؟' : 'Have you completed prompt compilation requirements?'}</h5>
-                <p className="text-xs text-slate-400 mt-1">{isRtl ? 'احرص على مطابقة محاور الدرس السلوكي واستنباط الفوارق العمليّة.' : 'Mark the lesson complete to progress your Certified Prompt Engineer journey.'}</p>
+                <h5 className="text-sm font-black text-[#002147]">{isRtl ? 'هل قمت ببناء وفحص تعاويذ هذا المبحث بنجاح؟' : 'Have you completed prompt compilation requirements?'}</h5>
+                <p className="text-xs text-[#002147]/70 mt-1">{isRtl ? 'احرص على مطابقة محاور الدرس السلوكي واستنباط الفوارق العمليّة.' : 'Mark the lesson complete to progress your Certified Prompt Engineer journey.'}</p>
               </div>
 
-              <button
+              <PrimaryButton
                 onClick={handleCompleteProLesson}
-                className="bg-[#002147] hover:bg-[#00306b] text-white font-black px-6 py-3.5 rounded-2xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/10 transition-all active:scale-95 shrink-0"
+                className="!px-6 !py-3.5 !text-xs shrink-0 flex items-center gap-2"
               >
                 <CheckCircle size={14} />
                 {isCompleted ? (isRtl ? 'مكتمل بنجاح (اعتماد تكراري)' : 'Completed') : (isRtl ? 'تسجيل إكمال الدرس وحصد +100 XP 🏆' : 'Mark Lesson Complete +100 XP 🏆')}
-              </button>
-            </div>
+              </PrimaryButton>
+            </GoldCard>
           </div>
         </div>
       </div>
@@ -11317,16 +11316,16 @@ Output Summary for [${topic}]:
               {/* Sidebar Left: Concepts & Activities instructions */}
               <div className="lg:col-span-4 space-y-6">
                 {/* Information Node */}
-                <div className="bg-[#00274f] border border-white/5 rounded-3xl p-6 space-y-6">
+                <GoldCard className="space-y-6 !p-6 bg-white border border-[#C49E3A]/40">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 text-right">
-                      <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{isRtl ? 'الدرس النشط' : 'ACTIVE EXERCISE'}</span>
-                      <h3 className="text-2xl font-black text-white mt-1 leading-tight">{selectedLesson.lesson_title}</h3>
+                      <ProgressPill className="text-[10px] uppercase tracking-widest">{isRtl ? 'الدرس النشط' : 'ACTIVE EXERCISE'}</ProgressPill>
+                      <h3 className="text-2xl font-black text-[#002147] mt-1 leading-tight">{selectedLesson.lesson_title}</h3>
                     </div>
                     <button
                       disabled={exportingLesson}
                       onClick={() => handleExportLessonAsImage(selectedLesson, 'foundational')}
-                      className="bg-[#001a38] border border-amber-500/35 hover:bg-[#b08c2f] hover:text-slate-950 text-amber-400 p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                      className="bg-[#002147] hover:bg-[#001a38] border-2 border-[#C49E3A] text-[#E6C36A] p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
                     >
                       {exportingLesson && lessonToExport?.lesson_number === selectedLesson.lesson_number ? (
                         <>
@@ -11343,85 +11342,85 @@ Output Summary for [${topic}]:
                   </div>
 
                   <div className="space-y-4">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                      <h4 className="text-xs font-black text-amber-300 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
-                        <Smile size={14} />
+                    <GoldCard className="!p-4 bg-[#fdfaf3] border border-[#C49E3A]/40">
+                      <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                        <Smile size={14} className="text-[#C49E3A]" />
                         {isRtl ? 'الفكرة الجوهرية' : 'CORE IDEA'}
                       </h4>
-                      <p className="text-slate-300 text-xs leading-relaxed font-semibold whitespace-pre-line">
+                      <p className="text-[#002147]/85 text-xs leading-relaxed font-semibold whitespace-pre-line">
                         {selectedLesson.core_concept}
                       </p>
-                    </div>
+                    </GoldCard>
 
-                    <div className="p-4 bg-amber-500/5 rounded-2xl border border-amber-500/10">
-                      <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
-                        <Award size={14} />
+                    <GoldCard className="!p-4 bg-[#fdfaf3] border border-[#C49E3A]/40">
+                      <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                        <Award size={14} className="text-[#C49E3A]" />
                         {isRtl ? 'النشاط العائلي المقترح شفهياً' : 'SUGGESTED FAMILY PLAY'}
                       </h4>
-                      <h5 className="text-sm font-black text-white mb-1">{selectedLesson.family_activity.activity_name}</h5>
-                      <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-line">
+                      <h5 className="text-sm font-black text-[#002147] mb-1">{selectedLesson.family_activity.activity_name}</h5>
+                      <p className="text-[#002147]/85 text-xs leading-relaxed whitespace-pre-line">
                         {selectedLesson.family_activity.activity_description}
                       </p>
-                    </div>
+                    </GoldCard>
 
-                    <div className="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
-                      <h4 className="text-xs font-black text-emerald-400 uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
-                        <CheckCircle size={14} />
+                    <GoldCard className="!p-4 bg-[#fdfaf3] border border-[#C49E3A]/40">
+                      <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                        <CheckCircle size={14} className="text-emerald-600" />
                         {isRtl ? 'الحكمة المكتسبة' : 'LESSON LEARNED'}
                       </h4>
-                      <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-line">
+                      <p className="text-[#002147]/85 text-xs leading-relaxed whitespace-pre-line">
                         {selectedLesson.family_activity.lesson_learned}
                       </p>
-                    </div>
+                    </GoldCard>
 
                     {selectedLesson.parent_summary && (
-                      <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
-                        <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
-                          <Bot size={14} />
+                      <GoldCard className="!p-4 bg-[#fdfaf3] border border-[#C49E3A]/40">
+                        <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                          <Bot size={14} className="text-[#C49E3A]" />
                           {isRtl ? 'خلاصة للآباء' : 'PARENT SUMMARY'}
                         </h4>
-                        <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-line font-medium">
+                        <p className="text-[#002147]/85 text-xs leading-relaxed whitespace-pre-line font-medium">
                           {selectedLesson.parent_summary}
                         </p>
-                      </div>
+                      </GoldCard>
                     )}
 
                     {selectedLesson.discussion_question && (
-                      <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
-                        <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
-                          <HelpCircle size={14} />
+                      <GoldCard className="!p-4 bg-[#fdfaf3] border border-[#C49E3A]/40">
+                        <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                          <HelpCircle size={14} className="text-[#C49E3A]" />
                           {isRtl ? 'سؤال للنقاش العائلي' : 'DISCUSSION QUESTION'}
                         </h4>
-                        <p className="text-slate-100 text-xs font-black leading-relaxed whitespace-pre-line">
+                        <p className="text-[#002147] text-xs font-black leading-relaxed whitespace-pre-line">
                           {selectedLesson.discussion_question}
                         </p>
-                      </div>
+                      </GoldCard>
                     )}
 
                     {selectedLesson.image_description && (
-                      <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
-                        <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
-                          <PenTool size={14} />
+                      <GoldCard className="!p-4 bg-[#fdfaf3] border border-[#C49E3A]/40">
+                        <h4 className="text-xs font-black text-[#002147] uppercase tracking-widest mb-2 leading-none flex items-center gap-2">
+                          <PenTool size={14} className="text-[#C49E3A]" />
                           {isRtl ? 'وصف الصورة الفنية المقترحة' : 'SUGGESTED LESSON SCENE'}
                         </h4>
-                        <p className="text-slate-400 text-[11px] leading-relaxed italic whitespace-pre-line">
+                        <p className="text-[#002147]/70 text-[11px] leading-relaxed italic whitespace-pre-line">
                           "{selectedLesson.image_description}"
                         </p>
-                      </div>
+                      </GoldCard>
                     )}
                   </div>
 
-                  <button 
+                  <GhostButton 
                     onClick={() => {
                       setSelectedLesson(null);
                       resetGames();
                     }}
-                    className="w-full py-3 rounded-2xl border border-white/10 text-slate-400 text-xs font-black hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+                    className="w-full !py-3 !text-xs flex items-center justify-center gap-2"
                   >
-                    <ArrowLeft size={14} />
+                    <ArrowLeft size={14} className={isRtl ? 'rotate-180' : ''} />
                     {isRtl ? 'العودة لغرفة المناهج' : 'Back to Curriculums'}
-                  </button>
-                </div>
+                  </GhostButton>
+                </GoldCard>
               </div>
 
               {/* Main Center interactive activity wrapper */}
@@ -11436,9 +11435,9 @@ Output Summary for [${topic}]:
                         {isRtl ? 'المعامل التفاعلي الرقمي' : 'INTERACTIVE LAB SIMULATOR'}
                       </h4>
                     </div>
-                    <span className="text-[10px] bg-amber-500/15 text-amber-300 px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+                    <ProgressPill className="text-[10px] font-bold uppercase tracking-widest">
                        {isRtl ? `تمرين الدرس ${selectedLesson.lesson_number}` : `Interactive Ex ${selectedLesson.lesson_number}`}
-                    </span>
+                    </ProgressPill>
                   </div>
 
                   {/* LESSON 1 HANDS-ON INTERACTIVE GAME */}
@@ -12643,15 +12642,15 @@ Output Summary for [${topic}]:
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <button
+                    <GhostButton
                       onClick={() => {
                         setSelectedLesson(null);
                         resetGames();
                       }}
-                      className="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95"
+                      className="!px-5 !py-2.5 !text-xs"
                     >
                       {isRtl ? 'إغلاق المعمل ✖' : 'Close Sandbox'}
-                    </button>
+                    </GhostButton>
                   </div>
                 </div>
               </div>
