@@ -263,7 +263,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] z-10 bg-gradient-to-l from-transparent via-[#C49E3A] to-transparent" />
       {/* The video keeps playing (needed as the filter source); with a canvas filter it sits invisible under the canvas. */}
       <video ref={bindVideo} muted playsInline autoPlay aria-label="كاميرا الطالب" className={`absolute inset-0 w-full h-full object-cover ${camOn ? '' : 'hidden'} ${canvasFilter ? 'opacity-0' : ''}`} style={{ transform: 'scaleX(-1)', filter: !canvasFilter && fInfo.css ? fInfo.css : undefined }} />
-      {canvasFilter && <FilteredSelfieCanvas video={videoEl} filter={selfieFilter} active={camOn} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />}
+      {canvasFilter && <FilteredSelfieCanvas video={videoEl} filter={selfieFilter} active={camOn} lowPower={rec.listening} className="absolute inset-0 w-full h-full object-cover" style={{ transform: 'scaleX(-1)' }} />}
       {camOn && selfieFilter === 'gold' && <span aria-hidden className="pointer-events-none absolute inset-0 z-[5] rounded-3xl" style={{ boxShadow: 'inset 0 0 28px 6px rgba(196,158,58,0.55)' }} />}
       {camOn && selfieFilter === 'stars' && <SparkleOverlay />}
       {camOn && <div className="absolute top-1.5 inset-x-0 z-10"><SelfieFilterPicker value={selfieFilter} onChange={setSelfieFilter} /></div>}

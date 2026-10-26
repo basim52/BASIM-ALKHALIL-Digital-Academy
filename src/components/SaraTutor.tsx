@@ -676,6 +676,10 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [curriculumInitialPillar, setCurriculumInitialPillar] = useState<string>('all');
 
   const [isTrackOpen, setIsTrackOpen] = useState<boolean>(false);
+  // Sara's spoken welcome arrives seconds after the page opens (AI reply). If the student already went into another
+  // screen (فصل المعلمين / a tool / a track), keep the greeting as text only, so Sara's voice never talks over another teacher.
+  const welcomeVoiceBlockedRef = useRef(false);
+  welcomeVoiceBlockedRef.current = saraTool !== null || isTrackOpen;
   const [isListeningOpen, setIsListeningOpen] = useState(false);
   const [isPronOpen, setIsPronOpen] = useState(false);
   const [isVocabOpen, setIsVocabOpen] = useState(false);
@@ -1400,7 +1404,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
     };
     setMessages(prev => sortByTime([welcomeMsg, ...prev.filter(m => !isWelcomeMsgId(m.id) && m.notice !== 'auth')]));
     setActiveBoard(welcomeMsg.board || null);
-    if (voiceEnabled && isMountedRef.current) {
+    if (voiceEnabled && isMountedRef.current && !welcomeVoiceBlockedRef.current) {
       playSaraVoice(text);
     }
   };
@@ -1472,7 +1476,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             setIsWhiteboardOpen(true);
           }
         }
-        if (voiceEnabled && isMountedRef.current) {
+        if (voiceEnabled && isMountedRef.current && !welcomeVoiceBlockedRef.current) {
           playSaraVoice(conciseGreeting);
         }
         if (data.memory) {

@@ -39,6 +39,7 @@ export const filterInfo = (id: SelfieFilterId) => SELFIE_FILTERS.find(x => x.id 
 
 const WORK_W = 320;
 const FRAME_MS = 1000 / 30;
+const LOW_POWER_FRAME_MS = 250; // while listening
 
 /** Recolours one frame in place. `lum` is a scratch buffer of w*h. */
 function processFrame(id: SelfieFilterId, d: Uint8ClampedArray, lum: Uint8Array, w: number, h: number) {
@@ -90,11 +91,15 @@ function processFrame(id: SelfieFilterId, d: Uint8ClampedArray, lum: Uint8Array,
   }
 }
 
-type CanvasProps = { video: HTMLVideoElement | null; filter: SelfieFilterId; active: boolean; className?: string; style?: React.CSSProperties };
+type CanvasProps = { video: HTMLVideoElement | null; filter: SelfieFilterId; active: boolean; className?: string; style?: React.CSSProperties;
+  /** true while the mic listens: drop to ~4 fps so the per-pixel filter does not compete with speech recognition. */
+  lowPower?: boolean };
 
 /** On-screen canvas that renders the filtered (mirrored by CSS) selfie. Only mounted for canvas filters. */
-export const FilteredSelfieCanvas: React.FC<CanvasProps> = ({ video, filter, active, className, style }) => {
+export const FilteredSelfieCanvas: React.FC<CanvasProps> = ({ video, filter, active, className, style, lowPower = false }) => {
   const ref = useRef<HTMLCanvasElement | null>(null);
+  const lowRef = useRef(lowPower);
+  lowRef.current = lowPower;
   useEffect(() => {
     const cv = ref.current;
     if (!cv || !video || !active) return;
@@ -107,7 +112,7 @@ export const FilteredSelfieCanvas: React.FC<CanvasProps> = ({ video, filter, act
     let lum = new Uint8Array(0);
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
-      if (now - last < FRAME_MS - 2) return;
+      if (now - last < (lowRef.current ? LOW_POWER_FRAME_MS : FRAME_MS) - 2) return;
       if (video.readyState < 2 || !video.videoWidth) return;
       last = now;
       const t0 = performance.now();
@@ -136,7 +141,7 @@ export const FilteredSelfieCanvas: React.FC<CanvasProps> = ({ video, filter, act
     raf = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(raf); soft.width = soft.height = 0; };
   }, [video, filter, active]);
-  return <canvas ref={ref} className={className} style={style} data-testid="repeat-filter-canvas" data-filter={filter} aria-label="كاميرا الطالب مع فلتر" />;
+  return <canvas ref={ref} className={className} style={style} data-testid="repeat-filter-canvas" data-filter={filter} data-low-power={lowPower ? "1" : "0"} aria-label="كاميرا الطالب مع فلتر" />;
 };
 
 /** Sparkle overlay for the «نجوم» filter: pure CSS, no processing. */
