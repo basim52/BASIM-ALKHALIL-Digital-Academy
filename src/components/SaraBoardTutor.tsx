@@ -14,6 +14,7 @@ import { TUTOR_TRACKS, type TutorTrack } from '../data/tutorTracks';
 import { SaraTracksHub } from './SaraTracksHub';
 import { TUTOR_FILL_BLANK_TRACKS } from '../data/fillBlankTracks';
 const FillBlankPlayer = lazy(() => import('./SaraFillBlankPlayer').then(m => ({ default: m.FillBlankPlayer })));
+const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -74,6 +75,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const [track, setTrack] = useState<TutorTrack | null>(null);
   const [saraHub, setSaraHub] = useState(false);
   const [fbOpen, setFbOpen] = useState(false);
+  const [repeatOpen, setRepeatOpen] = useState(false); // «ردّد مع سارة» (pilot: Sara only)
   const calls = useMemo(() => (board ? ((board as any).toolCalls || toToolCalls(board.boardActions)) : []), [board]);
 
   const ask = async () => {
@@ -108,15 +110,27 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   if (step === 'pick') return shell(<>
     <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[11px] text-amber-200/90 font-bold">{L("اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.", "Pick a teacher and type what you want to learn; they explain it on the board.")}</p><ExplainLangToggle /></div>
     <div className="grid grid-cols-4 gap-1.5 shrink-0">
-      {BOARD_PERSONAS.filter(p => !p.kids).map(p => (
+      {BOARD_PERSONAS.filter(p => !p.kids).map(p => {
+        const card = (
         <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => { setPersona(p); if (p.id === 'sara' && !mock) { voice.stop(); setSaraHub(true); } }}
           className={`rounded-2xl border p-1.5 pt-2 flex flex-col items-center gap-0.5 transition-transform active:scale-95 ${persona.id === p.id ? 'bg-amber-400 text-[#001a38] border-amber-300' : 'bg-[#0a2d5c] border-white/10'}`}>
           <TeacherPhoto p={p} size={48} ring={persona.id === p.id ? '#001a38' : '#C49E3A'} className="mb-0.5" />
           <span className="text-[13px] font-black">{L(p.nameAr, p.nameEn)}</span>
           <span className={`text-[9px] font-bold text-center leading-tight ${persona.id === p.id ? 'text-[#001a38]/80' : 'text-white/70'}`}>{L(p.roleAr, p.roleEn || p.roleAr)}</span>
         </button>
-      ))}
+        );
+        if (p.id !== 'sara') return card;
+        // Sara's card carries the «ردّد مع سارة» pilot button (other teachers later).
+        return (
+          <div key={p.id} className="flex flex-col gap-1 min-w-0">
+            {card}
+            <button type="button" onClick={() => { voice.stop(); setRepeatOpen(true); }} data-testid="sara-repeat-open"
+              className="w-full rounded-xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] border border-[#E8C766] px-1 py-1 text-[10px] sm:text-[11px] font-black leading-tight shadow-md active:scale-95 transition-transform">🎙️ ردّد مع سارة</button>
+          </div>
+        );
+      })}
     </div>
+    {repeatOpen && <Suspense fallback={null}><SaraRepeatPractice onClose={() => setRepeatOpen(false)} /></Suspense>}
     <div data-testid="kids-teachers" className="shrink-0 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] p-2">
       <p className="text-[12px] font-black text-[#002147] mb-1.5">{L("🌱 من الصفر — للصغار والكبار", "🌱 From zero, for kids and adults")}</p>
       <div className="grid grid-cols-4 gap-1.5">
