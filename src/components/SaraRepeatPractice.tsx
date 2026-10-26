@@ -76,47 +76,92 @@ function useSelfieCamera() {
   return { state, stream, start, stop };
 }
 
-/** Mic recognition (en-US), same approach as SpeakingDrillCheck: best of 3 alternatives scored by checkSpokenAnswer. */
+/**
+ * Mic recognition (en-US), same approach as SpeakingDrillCheck: best of 3 alternatives scored by checkSpokenAnswer.
+ * Lifecycle (per item): every attempt is a FRESH SpeechRecognition with its own session id; handlers of an older
+ * session are ignored, so a late onend/onerror from the previous item can never flip the new one off. The auto
+ * start after the teacher's voice waits ~350ms (mobile Chrome needs the audio output released first), and a
+ * watchdog recreates the session once if it never reports onstart within 1.5s. Any failure leaves the mic button
+ * in its clear «اضغط وردّد» state with a message, so a tap always works as the manual fallback.
+ */
+const AUTO_START_DELAY_MS = 350;
+const ONSTART_WATCHDOG_MS = 1500;
 function useRepeatRecognition() {
   const recRef = useRef<any>(null);
-  const gotRef = useRef(false);
+  const sessionRef = useRef(0);
+  const timersRef = useRef<number[]>([]);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const supported = typeof window !== 'undefined' && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
-  const abort = useCallback(() => { try { recRef.current?.abort(); } catch { /* ignore */ } recRef.current = null; setListening(false); }, []);
-  useEffect(() => () => { try { recRef.current?.abort(); } catch { /* ignore */ } recRef.current = null; }, []);
-  const start = useCallback((expected: string, onScored: (r: ItemResult) => void, quietErrors = false) => {
+  const clearTimers = () => { timersRef.current.forEach(t => window.clearTimeout(t)); timersRef.current = []; };
+  const later = (fn: () => void, ms: number) => { timersRef.current.push(window.setTimeout(fn, ms)); };
+  const kill = () => {
+    sessionRef.current++; clearTimers();
+    const old = recRef.current; recRef.current = null;
+    if (old) { old.onresult = old.onerror = old.onend = old.onstart = null; try { old.abort(); } catch { /* ignore */ } }
+  };
+  const abort = useCallback(() => { kill(); setListening(false); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => kill(), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const start = useCallback((expected: string, onScored: (r: ItemResult) => void, auto = false) => {
     setError(null);
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { setError('متصفحك ما يدعم التعرّف على الصوت. جرّب Chrome أو Safari.'); return; }
-    try { recRef.current?.abort(); } catch { /* ignore */ }
-    const rec = new SR();
-    rec.lang = 'en-US'; rec.interimResults = false; rec.continuous = false; rec.maxAlternatives = 3;
-    gotRef.current = false;
-    rec.onresult = (e: any) => {
-      gotRef.current = true;
-      const alts: string[] = Array.from(e.results?.[0] || []).map((a: any) => a.transcript || '');
-      const best = alts.map(t => ({ t, r: checkSpokenAnswer(t, expected) })).sort((a, b) => b.r.score - a.r.score)[0];
-      if (!best || !best.r.heard.length) return;
-      onScored({ score: best.r.score, transcript: best.t, missing: best.r.missing, passed: best.r.passed });
+    kill();
+    const session = sessionRef.current;
+    const live = () => session === sessionRef.current;
+    const tapMsg = 'ما سمعتك. اضغط زر المايك «اضغط وردّد» وردّد بصوت واضح.';
+    setListening(true); // UI shows «دورك» right away; the watchdog/handlers turn it off if the mic can't open
+    const launch = (attempt: number) => {
+      if (!live()) return;
+      let rec: any;
+      try { rec = new SR(); } catch { setListening(false); setError('تعذّر تشغيل المايك. اضغط زر المايك وحاول مرة ثانية.'); return; }
+      rec.lang = 'en-US'; rec.interimResults = false; rec.continuous = false; rec.maxAlternatives = 3;
+      let started = false, got = false, ended = false;
+      const mine = () => live() && recRef.current === rec;
+      rec.onstart = () => { if (!mine()) return; started = true; setListening(true); };
+      rec.onresult = (e: any) => {
+        if (!mine()) return;
+        got = true;
+        const alts: string[] = Array.from(e.results?.[0] || []).map((a: any) => a.transcript || '');
+        const best = alts.map(t => ({ t, r: checkSpokenAnswer(t, expected) })).sort((a, b) => b.r.score - a.r.score)[0];
+        if (!best || !best.r.heard.length) return;
+        onScored({ score: best.r.score, transcript: best.t, missing: best.r.missing, passed: best.r.passed });
+      };
+      rec.onerror = (e: any) => {
+        if (!mine()) return;
+        const code = e?.error;
+        // A session that died before it ever opened (busy audio device right after playback): recreate it once.
+        if (!started && attempt === 0 && (code === 'aborted' || code === 'audio-capture' || code === 'network')) { ended = true; recRef.current = null; later(() => launch(1), 300); return; }
+        setError(code === 'not-allowed' || code === 'service-not-allowed'
+          ? 'ما قدرنا نستخدم المايك. اسمح للموقع بالمايكروفون واضغط زر المايك.'
+          : code === 'no-speech' ? tapMsg : 'صار خطأ في المايك. اضغط زر المايك «اضغط وردّد» وحاول مرة ثانية.');
+        setListening(false);
+      };
+      rec.onend = () => {
+        if (!mine() || ended) return;
+        ended = true; recRef.current = null; clearTimers();
+        setListening(false);
+        if (!got) setError(prev => prev || tapMsg);
+      };
+      recRef.current = rec;
+      try { rec.start(); }
+      catch {
+        recRef.current = null;
+        if (attempt === 0) { later(() => launch(1), 300); return; }
+        setListening(false); setError('تعذّر تشغيل المايك. اضغط زر المايك وحاول مرة ثانية.'); return;
+      }
+      // Watchdog: listening but the engine never said onstart → recreate and restart once.
+      later(() => {
+        if (!mine() || started || ended) return;
+        rec.onresult = rec.onerror = rec.onend = rec.onstart = null; try { rec.abort(); } catch { /* ignore */ }
+        recRef.current = null;
+        if (attempt === 0) { launch(1); return; }
+        setListening(false); setError('المايك ما اشتغل. اضغط زر المايك «اضغط وردّد» وحاول مرة ثانية.');
+      }, ONSTART_WATCHDOG_MS);
     };
-    rec.onerror = (e: any) => {
-      const code = e?.error;
-      if (quietErrors && code !== 'no-speech') { setListening(false); return; }
-      setError(code === 'not-allowed' || code === 'service-not-allowed'
-        ? 'ما قدرنا نستخدم المايك. اسمح للموقع بالمايكروفون واضغط زر المايك.'
-        : code === 'no-speech' ? 'ما سمعتك. اضغط المايك وردّد بصوت واضح.' : 'صار خطأ في التعرّف على الصوت. حاول مرة ثانية.');
-      setListening(false);
-    };
-    rec.onend = () => {
-      setListening(false);
-      if (!gotRef.current && !quietErrors) setError(prev => prev || 'ما سمعتك. اضغط المايك وردّد بصوت واضح.');
-      recRef.current = null;
-    };
-    recRef.current = rec;
-    try { rec.start(); setListening(true); } catch { setListening(false); if (!quietErrors) setError('تعذّر تشغيل المايك. حاول مرة ثانية.'); }
-  }, []);
-  const stop = useCallback(() => { try { recRef.current?.stop(); } catch { /* ignore */ } }, []);
+    if (auto) later(() => launch(0), AUTO_START_DELAY_MS); else launch(0);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const stop = useCallback(() => { const r = recRef.current; if (!r) { abort(); return; } try { r.stop(); } catch { abort(); } }, [abort]);
   return { listening, error, supported, start, stop, abort };
 }
 
