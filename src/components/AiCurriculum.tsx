@@ -1,4 +1,5 @@
 // batch 15: lesson view design
+// batch 16: lesson games design part 1
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
@@ -11424,14 +11425,14 @@ Output Summary for [${topic}]:
               </div>
 
               {/* Main Center interactive activity wrapper */}
-              <div className="lg:col-span-8 bg-[#091120] border border-white/5 rounded-3xl p-6 md:p-10 min-h-[500px] flex flex-col justify-between shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full pointer-events-none blur-3xl" />
+              <div className="lg:col-span-8 bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-3xl p-6 md:p-10 min-h-[500px] flex flex-col justify-between shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-[#C49E3A]/10 rounded-full pointer-events-none blur-3xl" />
                 
                 <div className="space-y-6 relative z-10 w-full">
-                  <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                  <div className="flex items-center justify-between border-b border-[#C49E3A]/20 pb-4">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="text-amber-400 scale-110" />
-                      <h4 className="text-sm font-black text-white">
+                      <Sparkles className="text-[#C49E3A] scale-110" />
+                      <h4 className="text-sm font-black text-[#002147]">
                         {isRtl ? 'المعامل التفاعلي الرقمي' : 'INTERACTIVE LAB SIMULATOR'}
                       </h4>
                     </div>
@@ -11443,36 +11444,36 @@ Output Summary for [${topic}]:
                   {/* LESSON 1 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 1 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-3xl border border-white/5 space-y-6 relative overflow-hidden">
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-black tracking-widest text-amber-400">
+                            <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A]">
                               {isRtl ? 'تحدي المهمة العائلية 🌟' : 'FAMILY QUEST CHALLENGE 🌟'}
                             </span>
-                            <h5 className="text-xl font-black text-white">
+                            <h5 className="text-xl font-black text-[#002147]">
                               {isRtl ? 'تحدي النمط المخفي' : 'Hidden Pattern Challenge'}
                             </h5>
                           </div>
-                          <span className="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300 font-bold font-mono">
+                          <ProgressPill className="text-[11px] font-mono">
                             {isRtl ? `التحدي ${l1Step + 1} من 4` : `Challenge ${l1Step + 1} of 4`}
-                          </span>
+                          </ProgressPill>
                         </div>
 
-                        <p className="text-slate-300 text-sm leading-relaxed text-right">
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'اجتمعوا معًا وأحضروا ورقة وقلمًا. مهمتكم هي إكمال الأنماط التالية. من يكتشف النمط أولاً يربح نقطة! شاركوا الإجابات معًا كعائلة لتكتشفوا كيف تتنبأ الآلة.' 
                             : 'Gather together with paper and pen. Your mission is to complete the following sequences. First to decode wins a point! Share with your family.'}
                         </p>
 
-                        <div className="py-8 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center justify-center space-y-3 relative">
-                          <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-full text-[10px] font-bold uppercase tracking-widest absolute top-3 right-3">
+                        <div className="py-8 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 flex flex-col items-center justify-center space-y-3 relative shadow-inner">
+                          <ProgressPill className="!px-3 !py-1 text-[10px] font-bold uppercase tracking-widest absolute top-3 right-3">
                             {isRtl ? `الصعوبة: ${l1Patterns[l1Step].difficulty}` : `Difficulty: ${l1Patterns[l1Step].difficulty}`}
-                          </span>
+                          </ProgressPill>
                           
-                          <span className="text-slate-400 text-xs uppercase tracking-widest pt-2">
+                          <span className="text-[#002147]/60 text-xs uppercase tracking-widest pt-2 font-bold">
                             {isRtl ? 'النمط الحالي لتخمينه' : 'Pattern to Solve'}
                           </span>
-                          <span className="text-3xl md:text-4xl font-black text-center text-white font-sans tracking-wide px-4">
+                          <span className="text-3xl md:text-4xl font-black text-center text-[#002147] font-sans tracking-wide px-4">
                             {l1Patterns[l1Step].sequence}
                           </span>
                         </div>
@@ -11488,51 +11489,51 @@ Output Summary for [${topic}]:
                             value={l1UserAnswer}
                             onChange={(e) => setL1UserAnswer(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleL1Submit()}
-                            className="flex-1 bg-slate-900 border border-white/10 rounded-2xl px-5 py-4 text-white text-center font-black focus:outline-none focus:border-amber-400 text-sm transition-all shadow-inner"
+                            className="flex-1 bg-white border-2 border-[#C49E3A]/40 rounded-2xl px-5 py-4 text-[#002147] text-center font-black focus:outline-none focus:border-[#C49E3A] text-sm transition-all shadow-sm placeholder:text-[#002147]/40"
                           />
-                          <button 
+                          <PrimaryButton 
                             onClick={handleL1Submit}
-                            className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-8 py-4 rounded-2xl font-black transition-all text-sm shrink-0 shadow-lg hover:shadow-amber-500/10 active:scale-95"
+                            className="!px-8 !py-4 !rounded-2xl !text-sm shrink-0 shadow-md"
                           >
                             {l1Patterns[l1Step].isCreative 
                               ? (isRtl ? 'إنهاء التحدي بنجاح 🎉' : 'Publish Sequence 🎉')
                               : (isRtl ? 'تنبؤ رقمي 🚀' : 'AI Predict 🚀')
                             }
-                          </button>
+                          </PrimaryButton>
                         </div>
 
                         {l1Feedback === 'correct' && (
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-4 bg-emerald-500/10 text-emerald-400 rounded-2xl text-center text-xs font-bold border border-emerald-500/20">
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-4 bg-emerald-50 text-emerald-800 rounded-2xl text-center text-xs font-bold border border-emerald-300 shadow-sm">
                             {isRtl ? `✓ إجابة عبقرية ومطابقة تماماً! تفسير النمط: ${l1Patterns[l1Step].explanation}` : `✓ Correct! ${l1Patterns[l1Step].explanation}`}
                           </motion.div>
                         )}
                         {l1Feedback === 'wrong' && (
-                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-4 bg-red-500/10 text-red-400 rounded-xl text-center text-xs font-bold border border-red-500/20">
+                          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="p-4 bg-rose-50 text-rose-800 rounded-2xl text-center text-xs font-bold border border-rose-300 shadow-sm">
                             {isRtl ? '✗ النمط غير مطابق بعد، تأمل المتتالية جيداً وحاول مجدداً!' : '✗ Mismatch. Try checking the pattern steps again!'}
                           </motion.div>
                         )}
-                      </div>
+                      </GoldCard>
 
                       {l1Complete && (
-                        <div className="p-8 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-3xl text-center space-y-4">
-                          <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
-                          <h6 className="text-white text-lg font-black">{isRtl ? 'تم الانتهاء بنجاح! حصلت على 50 نقطة XP!' : 'Successfully completed! Earned 50 XP!'}</h6>
+                        <GoldCard className="p-8 bg-gradient-to-r from-emerald-50 via-[#fdfaf3] to-amber-50 border-2 border-[#C49E3A]/40 text-center space-y-4">
+                          <Smile size={44} className="text-emerald-600 mx-auto animate-bounce" />
+                          <h6 className="text-[#002147] text-lg font-black">{isRtl ? 'تم الانتهاء بنجاح! حصلت على 50 نقطة XP!' : 'Successfully completed! Earned 50 XP!'}</h6>
                           
-                          <div className="p-5 bg-black/30 rounded-2xl border border-white/5 space-y-2 text-right">
-                            <span className="text-[10px] text-amber-300 font-bold tracking-wider uppercase block">{isRtl ? 'سؤال للنقاش العائلي 💬' : 'FAMILY DEBATE 💬'}</span>
-                            <p className="text-sm text-slate-100 font-black leading-relaxed">
+                          <div className="p-5 bg-white rounded-2xl border border-[#C49E3A]/30 space-y-2 text-right shadow-sm">
+                            <span className="text-[10px] text-[#C49E3A] font-bold tracking-wider uppercase block">{isRtl ? 'سؤال للنقاش العائلي 💬' : 'FAMILY DEBATE 💬'}</span>
+                            <p className="text-sm text-[#002147] font-black leading-relaxed">
                               {isRtl 
                                 ? 'هل تعتقدون أن الذكاء الاصطناعي "يفهم" معنى الأرقام والكلمات التي يتنبأ بها، أم أنه فقط يجيد لعبة النمط الشاملة؟'
                                 : 'Do you think that AI really "understands" the meanings behind numbers or words, or is it just extremely skilled at decoding and predicting patterns?'}
                             </p>
                           </div>
 
-                          <p className="text-slate-300 text-xs leading-relaxed max-w-lg mx-auto">
+                          <p className="text-[#002147]/80 text-xs leading-relaxed max-w-lg mx-auto">
                             {isRtl 
                               ? 'لقد اختبرتم كيف يبني الذكاء الاصطناعي توقعاته. هو لا يفكر بالمفهوم البشري، بل يبحث عن التتابع الاحتمالي الأكثر ملاءمة في خزائنه الضخمة!'
                               : 'You have seen first-hand how pattern detection works. AI does not think as you or I do; it statistically guesses the next most probable sequence node!'}
                           </p>
-                        </div>
+                        </GoldCard>
                       )}
                     </div>
                   )}
@@ -11540,24 +11541,24 @@ Output Summary for [${topic}]:
                   {/* LESSON 2 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 2 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-3xl border border-white/5 space-y-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C49E3A]/5 rounded-full blur-3xl pointer-events-none" />
                         
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-black tracking-widest text-amber-400">
+                            <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A]">
                               {isRtl ? 'محاكاة العباقرة الرقمية 🧪' : 'DIGITAL SANDBOX SIMULATION 🧪'}
                             </span>
-                            <h5 className="text-xl font-black text-white">
+                            <h5 className="text-xl font-black text-[#002147]">
                               {isRtl ? 'مختبر تدريب تعابير الوجه (Teachable Machine)' : 'Facial Expression Teachable Machine'}
                             </h5>
                           </div>
-                          <span className="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-slate-300 font-bold font-mono">
+                          <ProgressPill className="text-[11px]">
                             {isRtl ? 'أداة تفاعلية' : 'Interactive Lab'}
-                          </span>
+                          </ProgressPill>
                         </div>
 
-                        <p className="text-slate-300 text-sm leading-relaxed text-right">
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'مهمتكم كعائلة هي تدريب "موديل" صغير يفرق بين الابتسامة والعبوس. سنقوم بجمع عينات تدريبية لملء دماغ الآلة بنسبة 100%!' 
                             : 'Your family mission is to train a custom model to identify smile versus frown. Let\'s gather simulated training samples to teach the neural net!'}
@@ -11567,18 +11568,18 @@ Output Summary for [${topic}]:
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           
                           {/* Class 1: Smile Card */}
-                          <div className={`bg-slate-900/60 border rounded-2xl p-5 space-y-4 transition-all duration-300 ${l2FlashActive === 'smile' ? 'border-emerald-500 bg-emerald-500/10 scale-95' : 'border-white/5'}`}>
+                          <div className={`bg-[#fdfaf3] border-2 rounded-2xl p-5 space-y-4 transition-all duration-300 ${l2FlashActive === 'smile' ? 'border-emerald-500 bg-emerald-50 scale-95 shadow-md' : 'border-[#C49E3A]/30'}`}>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-black text-white flex items-center gap-2">
+                              <span className="text-sm font-black text-[#002147] flex items-center gap-2">
                                 <span className="text-2xl">😊</span>
                                 {isRtl ? 'الفئة الأولى: الابتسامة' : 'Class 1: Smile'}
                               </span>
-                              <span className="text-xs bg-emerald-500/20 text-emerald-300 font-black px-2 py-0.5 rounded-full font-mono">
+                              <span className="text-xs bg-emerald-100 text-emerald-800 border border-emerald-300 font-black px-2 py-0.5 rounded-full font-mono">
                                 {l2SmileCount} / 50 {isRtl ? 'صورة' : 'img'}
                               </span>
                             </div>
 
-                            <div className="h-2 bg-slate-950 rounded-full overflow-hidden">
+                            <div className="h-2 bg-[#002147]/10 rounded-full overflow-hidden">
                               <div 
                                 className="bg-emerald-500 h-full transition-all duration-500" 
                                 style={{ width: `${(l2SmileCount / 50) * 100}%` }} 
@@ -11586,9 +11587,9 @@ Output Summary for [${topic}]:
                             </div>
 
                             {/* Captured samples view */}
-                            <div className="h-10 bg-black/40 rounded-xl flex items-center justify-start px-3 gap-1.5 overflow-x-auto border border-white/5">
+                            <div className="h-10 bg-white rounded-xl flex items-center justify-start px-3 gap-1.5 overflow-x-auto border border-[#C49E3A]/30 shadow-inner">
                               {l2SmileCount === 0 ? (
-                                <span className="text-[10px] text-slate-500">{isRtl ? 'لم تسجل صور بعد...' : 'Empty sample dataset'}</span>
+                                <span className="text-[10px] text-[#002147]/50">{isRtl ? 'لم تسجل صور بعد...' : 'Empty sample dataset'}</span>
                               ) : (
                                 Array.from({ length: l2SmileCount / 10 }).map((_, i) => (
                                   <span key={i} className="text-base animate-pulse">😊</span>
@@ -11596,43 +11597,41 @@ Output Summary for [${topic}]:
                               )}
                             </div>
 
-                            <button
+                            <PrimaryButton
                               onClick={handleAddSmileSample}
                               disabled={lSmileCountExceeded()}
-                              className={`w-full py-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 ${
-                                lSmileCountExceeded()
-                                  ? 'bg-[#002147]/10 text-[#C49E3A] border border-[#C49E3A]/20 cursor-not-allowed'
-                                  : 'bg-[#002147] hover:bg-[#002147] text-slate-950 active:scale-95'
+                              className={`w-full !py-3 !rounded-xl !text-xs flex items-center justify-center gap-2 ${
+                                lSmileCountExceeded() ? '!opacity-60 cursor-not-allowed' : ''
                               }`}
                             >
                               <span>📸</span>
                               <span>{lSmileCountExceeded() ? (isRtl ? 'اكتمال عينات الابتسامة ✓' : 'Smile Dataset Ready ✓') : (isRtl ? 'التقط 10 صور للابتسامة 😊' : 'Capture 50 Smile Samples (+10)')}</span>
-                            </button>
+                            </PrimaryButton>
                           </div>
 
                           {/* Class 2: Frown Card */}
-                          <div className={`bg-slate-900/60 border rounded-2xl p-5 space-y-4 transition-all duration-300 ${l2FlashActive === 'frown' ? 'border-red-500 bg-red-400/10 scale-95' : 'border-white/5'}`}>
+                          <div className={`bg-[#fdfaf3] border-2 rounded-2xl p-5 space-y-4 transition-all duration-300 ${l2FlashActive === 'frown' ? 'border-rose-500 bg-rose-50 scale-95 shadow-md' : 'border-[#C49E3A]/30'}`}>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-black text-white flex items-center gap-2">
+                              <span className="text-sm font-black text-[#002147] flex items-center gap-2">
                                 <span className="text-2xl">😡</span>
                                 {isRtl ? 'الفئة الثانية: العبوس' : 'Class 2: Frown'}
                               </span>
-                              <span className="text-xs bg-red-500/20 text-red-300 font-black px-2 py-0.5 rounded-full font-mono">
+                              <span className="text-xs bg-rose-100 text-rose-800 border border-rose-300 font-black px-2 py-0.5 rounded-full font-mono">
                                 {l2FrownCount} / 50 {isRtl ? 'صورة' : 'img'}
                               </span>
                             </div>
 
-                            <div className="h-2 bg-slate-950 rounded-full overflow-hidden">
+                            <div className="h-2 bg-[#002147]/10 rounded-full overflow-hidden">
                               <div 
-                                className="bg-red-500 h-full transition-all duration-500" 
+                                className="bg-rose-500 h-full transition-all duration-500" 
                                 style={{ width: `${(l2FrownCount / 50) * 100}%` }} 
                               />
                             </div>
 
                             {/* Captured samples view */}
-                            <div className="h-10 bg-black/40 rounded-xl flex items-center justify-start px-3 gap-1.5 overflow-x-auto border border-white/5">
+                            <div className="h-10 bg-white rounded-xl flex items-center justify-start px-3 gap-1.5 overflow-x-auto border border-[#C49E3A]/30 shadow-inner">
                               {l2FrownCount === 0 ? (
-                                <span className="text-[10px] text-slate-500">{isRtl ? 'لم تسجل صور بعد...' : 'Empty sample dataset'}</span>
+                                <span className="text-[10px] text-[#002147]/50">{isRtl ? 'لم تسجل صور بعد...' : 'Empty sample dataset'}</span>
                               ) : (
                                 Array.from({ length: l2FrownCount / 10 }).map((_, i) => (
                                   <span key={i} className="text-base animate-pulse">😡</span>
@@ -11640,68 +11639,62 @@ Output Summary for [${topic}]:
                               )}
                             </div>
 
-                            <button
+                            <PrimaryButton
                               onClick={handleAddFrownSample}
                               disabled={lFrownCountExceeded()}
-                              className={`w-full py-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 ${
-                                lFrownCountExceeded()
-                                  ? 'bg-red-500/10 text-red-400 border border-red-500/20 cursor-not-allowed'
-                                  : 'bg-red-500 hover:bg-red-600 text-slate-950 active:scale-95'
+                              className={`w-full !py-3 !rounded-xl !text-xs flex items-center justify-center gap-2 ${
+                                lFrownCountExceeded() ? '!opacity-60 cursor-not-allowed' : ''
                               }`}
                             >
                               <span>📸</span>
                               <span>{lFrownCountExceeded() ? (isRtl ? 'اكتمال عينات العبوس ✓' : 'Frown Dataset Ready ✓') : (isRtl ? 'التقط 10 صور للعبوس 😡' : 'Capture 50 Frown Samples (+10)')}</span>
-                            </button>
+                            </PrimaryButton>
 
                           </div>
                         </div>
 
                         {!l2ModelReady && !l2Training && (
-                          <div className="p-6 bg-slate-900/40 rounded-2xl border border-white/5 text-center space-y-4">
-                            <h6 className="text-white text-sm font-black">
+                          <div className="p-6 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 text-center space-y-4 shadow-sm">
+                            <h6 className="text-[#002147] text-sm font-black">
                               {isRtl ? 'صندوق التحكم بالتدريب 🎛️' : 'Training Control Console 🎛️'}
                             </h6>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs text-[#002147]/70">
                               {isRtl 
                                 ? 'عندما تجمع 50 عينة لكل تعبير، تفضل بالضغط أدناه للبدء بتغذية الشبكة العصبية!' 
                                 : 'Once you accumulate 50 snapshots per class, trigger neural model construction below!'}
                             </p>
-                            <button
+                            <PrimaryButton
                               onClick={handleTrainL2Model}
                               disabled={l2SmileCount < 50 || l2FrownCount < 50}
-                              className={`px-6 py-3 rounded-xl font-black text-xs transition-all ${
-                                l2SmileCount >= 50 && l2FrownCount >= 50
-                                  ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 active:scale-95 shadow-lg shadow-amber-500/20'
-                                  : 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/5'
-                              }`}
+                              className="!px-6 !py-3 !rounded-xl !text-xs shadow-md"
                             >
                               {isRtl ? 'تدريب نموذج الذكاء الاصطناعي 🧠' : 'Train the AI Neural Net 🧠'}
-                            </button>
+                            </PrimaryButton>
                           </div>
                         )}
 
                         {l2Training && (
-                          <div className="p-8 bg-slate-900/40 rounded-2xl border border-white/5 text-center space-y-4 flex flex-col items-center justify-center">
-                            <RefreshCw className="text-amber-400 animate-spin" size={36} />
-                            <h6 className="text-white text-sm font-black">
+                          <div className="p-8 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/40 text-center space-y-4 flex flex-col items-center justify-center shadow-md">
+                            <RefreshCw className="text-[#C49E3A] animate-spin" size={36} />
+                            <h6 className="text-[#002147] text-sm font-black">
                               {isRtl ? 'جاري تدريب النموذج العصبي حالياً...' : 'Constructing & Standardizing Neural Synapses...'}
                             </h6>
-                            <div className="w-48 h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                              <div className="bg-amber-500 h-full animate-pulse" style={{ width: '70%' }} />
+                            <div className="w-48 h-2 bg-[#002147]/10 rounded-full overflow-hidden">
+                              <div className="bg-[#C49E3A] h-full animate-pulse" style={{ width: '70%' }} />
                             </div>
-                            <p className="text-[10px] text-slate-500 font-mono">
+                            <p className="text-[10px] text-[#002147]/60 font-mono font-bold">
                               OPTIMIZING WEIGHTS & GRADIENTS (SIMULATED COG ENGINE)
                             </p>
                           </div>
                         )}
 
                         {l2ModelReady && (
-                          <div className="space-y-6 pt-4 border-t border-white/5">
+                          <div className="space-y-6 pt-4 border-t border-[#C49E3A]/20">
                             <div className="text-center space-y-1">
-                              <span className="text-[10px] text-emerald-400 uppercase font-black tracking-widest block">
+                              <span className="text-[10px] text-[#C49E3A] uppercase font-black tracking-widest block">
                                 {isRtl ? 'المرحلة الثانية: اختبار استنتاج النموذج 🎯' : 'STAGE 2: CHIP INFERENCE TESTING 🎯'}
                               </span>
-                              <h5 className="text-md font-black text-white">
+                              <h5 className="text-base font-black text-[#002147]">
                                 {isRtl ? 'اعرض تعبيراً لمشاهدة التوقع المباشر للذكاء الاصطناعي!' : 'Show an expression to witness real-time prediction output!'}
                               </h5>
                             </div>
@@ -11709,10 +11702,10 @@ Output Summary for [${topic}]:
                             <div className="grid grid-cols-3 gap-3">
                               <button
                                 onClick={() => handlePredictL2('smile')}
-                                className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 ${
+                                className={`p-4 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 cursor-pointer ${
                                   l2TestInput === 'smile'
-                                    ? 'bg-[#002147]/10 border-[#C49E3A]/40 text-[#E4C77A]'
-                                    : 'bg-white/5 border-white/5 text-slate-200 hover:border-white/15'
+                                    ? 'bg-[#002147] border-[#C49E3A] text-[#E6C36A] shadow-md'
+                                    : 'bg-white border-[#C49E3A]/30 text-[#002147] hover:border-[#C49E3A]'
                                 }`}
                               >
                                 <span className="text-3xl">😊</span>
@@ -11721,10 +11714,10 @@ Output Summary for [${topic}]:
 
                               <button
                                 onClick={() => handlePredictL2('frown')}
-                                className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 ${
+                                className={`p-4 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 cursor-pointer ${
                                   l2TestInput === 'frown'
-                                    ? 'bg-red-500/10 border-red-500/40 text-red-300'
-                                    : 'bg-white/5 border-white/5 text-slate-200 hover:border-white/15'
+                                    ? 'bg-[#002147] border-[#C49E3A] text-[#E6C36A] shadow-md'
+                                    : 'bg-white border-[#C49E3A]/30 text-[#002147] hover:border-[#C49E3A]'
                                 }`}
                               >
                                 <span className="text-3xl">😡</span>
@@ -11733,10 +11726,10 @@ Output Summary for [${topic}]:
 
                               <button
                                 onClick={() => handlePredictL2('neutral')}
-                                className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 ${
+                                className={`p-4 rounded-2xl border-2 text-center transition-all flex flex-col items-center justify-center gap-1.5 active:scale-95 cursor-pointer ${
                                   l2TestInput === 'neutral'
-                                    ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
-                                    : 'bg-white/5 border-white/5 text-slate-200 hover:border-white/15'
+                                    ? 'bg-[#002147] border-[#C49E3A] text-[#E6C36A] shadow-md'
+                                    : 'bg-white border-[#C49E3A]/30 text-[#002147] hover:border-[#C49E3A]'
                                 }`}
                               >
                                 <span className="text-3xl">😐</span>
@@ -11748,25 +11741,25 @@ Output Summary for [${topic}]:
                               <motion.div 
                                 initial={{ scale: 0.95, opacity: 0 }} 
                                 animate={{ scale: 1, opacity: 1 }} 
-                                className="p-5 bg-[#0a1424] border border-[#1e2f4a] rounded-2xl space-y-3"
+                                className="p-5 bg-white border border-[#C49E3A]/40 rounded-2xl space-y-3 shadow-md"
                               >
                                 <div className="flex justify-between items-center text-xs">
-                                  <span className="text-slate-400 font-bold">{isRtl ? 'المُعالج العصبي:' : 'Inference Outcome:'}</span>
-                                  <span className="text-emerald-400 font-black">{isRtl ? 'تنبؤ ناجح ✓' : 'Match Confirmed ✓'}</span>
+                                  <span className="text-[#002147]/70 font-bold">{isRtl ? 'المُعالج العصبي:' : 'Inference Outcome:'}</span>
+                                  <span className="text-emerald-700 font-black">{isRtl ? 'تنبؤ ناجح ✓' : 'Match Confirmed ✓'}</span>
                                 </div>
-                                <div className="text-lg font-black text-white flex items-center gap-2">
+                                <div className="text-lg font-black text-[#002147] flex items-center gap-2">
                                   <span>🤖</span>
                                   <span>{isRtl ? `يتوقع النموذج أن هذا: ${l2Prediction}` : `Computed Predicted Express: ${l2Prediction}`}</span>
                                 </div>
                                 
                                 {/* confidence meters */}
-                                <div className="space-y-2 pt-2 border-t border-white/5 text-xs">
+                                <div className="space-y-2 pt-2 border-t border-[#C49E3A]/20 text-xs">
                                   <div className="space-y-1">
-                                    <div className="flex justify-between text-[11px] text-slate-400">
+                                    <div className="flex justify-between text-[11px] text-[#002147]/70">
                                       <span>😊 {isRtl ? 'الابتسامة' : 'Smile'}</span>
                                       <span className="font-bold">{l2TestInput === 'smile' ? '98%' : l2TestInput === 'neutral' ? '50%' : '2%'}</span>
                                     </div>
-                                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-[#002147]/10 rounded-full overflow-hidden">
                                       <div 
                                         className="bg-emerald-500 h-full transition-all duration-300" 
                                         style={{ width: l2TestInput === 'smile' ? '98%' : l2TestInput === 'neutral' ? '50%' : '2%' }} 
@@ -11775,13 +11768,13 @@ Output Summary for [${topic}]:
                                   </div>
 
                                   <div className="space-y-1">
-                                    <div className="flex justify-between text-[11px] text-slate-400">
+                                    <div className="flex justify-between text-[11px] text-[#002147]/70">
                                       <span>😡 {isRtl ? 'العبوس' : 'Frown'}</span>
                                       <span className="font-bold">{l2TestInput === 'frown' ? '96%' : l2TestInput === 'neutral' ? '50%' : '4%'}</span>
                                     </div>
-                                    <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-[#002147]/10 rounded-full overflow-hidden">
                                       <div 
-                                        className="bg-red-500 h-full transition-all duration-300" 
+                                        className="bg-rose-500 h-full transition-all duration-300" 
                                         style={{ width: l2TestInput === 'frown' ? '96%' : l2TestInput === 'neutral' ? '50%' : '4%' }} 
                                       />
                                     </div>
@@ -11795,21 +11788,21 @@ Output Summary for [${topic}]:
                               <motion.div 
                                 initial={{ scale: 0.9, opacity: 0 }} 
                                 animate={{ scale: 1, opacity: 1 }} 
-                                className="p-6 bg-gradient-to-r from-emerald-500/10 to-[#C49E3A]/10 border border-emerald-500/20 rounded-3xl text-center space-y-4"
+                                className="p-6 bg-gradient-to-r from-emerald-50 via-[#fdfaf3] to-amber-50 border-2 border-[#C49E3A]/40 rounded-3xl text-center space-y-4 shadow-sm"
                               >
-                                <Smile size={44} className="text-emerald-400 mx-auto animate-bounce" />
-                                <h6 className="text-white text-lg font-black">{isRtl ? 'تم إنهاء تحدي تدريب النموذج بنجاح! 🎉 حصلت على 60 نقطة XP!' : 'Successfully completed training! Earned 60 XP!'}</h6>
+                                <Smile size={44} className="text-emerald-600 mx-auto animate-bounce" />
+                                <h6 className="text-[#002147] text-lg font-black">{isRtl ? 'تم إنهاء تحدي تدريب النموذج بنجاح! 🎉 حصلت على 60 نقطة XP!' : 'Successfully completed training! Earned 60 XP!'}</h6>
 
-                                <div className="p-5 bg-black/30 rounded-xl border border-white/5 space-y-2 text-right">
-                                  <span className="text-[10px] text-amber-300 font-bold tracking-wider uppercase block">{isRtl ? 'سؤال للنقاش العائلي 💬' : 'FAMILY DEBATE 💬'}</span>
-                                  <p className="text-sm text-slate-100 font-black leading-relaxed">
+                                <div className="p-5 bg-white rounded-xl border border-[#C49E3A]/30 space-y-2 text-right shadow-sm">
+                                  <span className="text-[10px] text-[#C49E3A] font-bold tracking-wider uppercase block">{isRtl ? 'سؤال للنقاش العائلي 💬' : 'FAMILY DEBATE 💬'}</span>
+                                  <p className="text-sm text-[#002147] font-black leading-relaxed">
                                     {isRtl 
                                       ? 'في دقائق قليلة صنعنا "نموذجًا" لتعابير الوجه. تخيلوا لو تدرب النموذج على مليارات الصور بدل 50 صورة. كيف سيصبح أداؤه ودقته؟'
                                       : 'In minutes we created a small model. Imagine if we trained it with billions of facial snapshots instead of just 50. How sharp would its accuracy become?'}
                                   </p>
                                 </div>
 
-                                <p className="text-slate-300 text-xs leading-relaxed max-w-lg mx-auto">
+                                <p className="text-[#002147]/80 text-xs leading-relaxed max-w-lg mx-auto">
                                   {isRtl 
                                     ? 'بهذا التمرين البسيط لمستم بأنفسكم معنى "التدريب" وصنع "النماذج". النموذج هو قالب وليس محرك تخزين مباشر، إنه يستخلص الأنماط من البيانات الضخمة التي استقبلها!'
                                     : 'With this simple lab, you touched firsthand what "Training" is. A model is a math shape/template layer, not storage!'}
@@ -11822,7 +11815,7 @@ Output Summary for [${topic}]:
                         {/* Reset button to clear simulation anytime */}
                         {(l2SmileCount > 0 || l2FrownCount > 0 || l2ModelReady) && (
                           <div className="flex justify-end pt-2">
-                            <button
+                            <GhostButton
                               onClick={() => {
                                 setL2SmileCount(0);
                                 setL2FrownCount(0);
@@ -11832,48 +11825,48 @@ Output Summary for [${topic}]:
                                 setL2TestInput(null);
                                 setL2Prediction(null);
                               }}
-                              className="px-4 py-2 bg-red-500/5 hover:bg-red-500/10 text-red-400 border border-red-500/10 hover:border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                              className="!px-4 !py-2 !text-[10px] !uppercase !tracking-wider"
                             >
                               {isRtl ? 'إعادة ضبط المختبر والتكبيس 🔄' : 'Reset Simulator Dataset 🔄'}
-                            </button>
+                            </GhostButton>
                           </div>
                         )}
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
                   {/* LESSON 3 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 3 && (
                     <div className="space-y-8 font-sans">
-                      <div className="bg-slate-950/60 p-6 md:p-8 rounded-3xl border border-white/5 space-y-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C49E3A]/5 rounded-full blur-3xl pointer-events-none" />
                         
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
-                            <span className="text-[10px] uppercase font-black tracking-widest text-amber-400">
+                            <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A]">
                               {isRtl ? 'تحدي المهمة العائلية 🌟' : 'FAMILY QUEST CHALLENGE 🌟'}
                             </span>
-                            <h5 className="text-xl font-black text-white">
+                            <h5 className="text-xl font-black text-[#002147]">
                               {isRtl ? 'لعبة التوقع والهلوسة العائلية' : 'Predictive Word Completion & Hallucinations'}
                             </h5>
                           </div>
-                          <span className="text-[11px] bg-[#1e2f4a] border border-white/10 px-3 py-1 rounded-full text-slate-300 font-bold font-mono">
+                          <ProgressPill className="text-[11px] font-mono">
                             {isRtl ? `الجولة ${l3Step + 1} من 3` : `Round ${l3Step + 1} of 3`}
-                          </span>
+                          </ProgressPill>
                         </div>
 
-                        <p className="text-slate-300 text-sm leading-relaxed text-right">
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'أنظمة النصوص لا تفهم المعاني الحقيقية كالبشر، بل تحسب الكلمة الأكثر احتمالاً إحصائياً بناءً على ما تدربت عليه. اختاروا لبنة لتكملة الجملة وانتبهوا لسبب الهلوسة!' 
                             : 'An LLM doesn\'t possess human semantic comprehension; rather, it makes probabilistic assumptions.'}
                         </p>
 
                         {/* Prompt Display */}
-                        <div className="p-6 bg-slate-900/80 rounded-2xl border border-white/5 space-y-3 relative">
-                          <span className="text-[9px] text-[#cca55e] font-bold block uppercase tracking-wider">
+                        <div className="p-6 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-3 relative shadow-inner">
+                          <span className="text-[9px] text-[#C49E3A] font-bold block uppercase tracking-wider">
                             {isRtl ? 'الجملة حتى الآن بناءً على احتمالات الآلة:' : 'PROMPT STREAM SO FAR:'}
                           </span>
-                          <span className="text-lg font-black text-white block leading-relaxed">
+                          <span className="text-lg font-black text-[#002147] block leading-relaxed">
                             {l3InteractiveOptions[l3Step].prompt}
                             {l3SelectedWord && (
                               <motion.span 
@@ -11881,8 +11874,8 @@ Output Summary for [${topic}]:
                                 animate={{ opacity: 1, scale: 1 }} 
                                 className={`inline-block px-3 py-1 mx-2 rounded-xl text-sm font-black ${
                                   l3IsHallucinating 
-                                    ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
-                                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    ? 'bg-rose-100 text-rose-800 border border-rose-300' 
+                                    : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 }`}
                               >
                                 {l3SelectedWord}
@@ -11893,7 +11886,7 @@ Output Summary for [${topic}]:
 
                         {/* Candidates Grid */}
                         <div className="space-y-4">
-                          <span className="text-xs font-bold text-slate-400 block">
+                          <span className="text-xs font-bold text-[#002147]/70 block">
                             {isRtl ? 'اختر الكلمة التالية التي سيولدها النموذج (خمّن ثم انقر):' : 'Choose candidate token:'}
                           </span>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -11903,21 +11896,21 @@ Output Summary for [${topic}]:
                                 <button
                                   key={option.word}
                                   onClick={() => handleL3WordPick(option)}
-                                  className={`p-5 rounded-2xl border text-right transition-all flex flex-col items-start justify-between min-h-[100px] active:scale-95 group relative overflow-hidden ${
+                                  className={`p-5 rounded-2xl border-2 text-right transition-all flex flex-col items-start justify-between min-h-[100px] active:scale-95 group relative overflow-hidden cursor-pointer ${
                                     isSelected
                                       ? option.isHallucination
-                                        ? 'bg-red-500/15 border-red-500/40 text-red-300 shadow-lg shadow-red-500/5'
-                                        : 'bg-[#002147]/15 border-[#C49E3A]/40 text-emerald-300 shadow-lg shadow-emerald-500/5'
-                                      : 'bg-white/5 border-white/5 hover:border-amber-400/20 text-slate-200'
+                                        ? 'bg-rose-50 border-rose-400 text-rose-900 shadow-md'
+                                        : 'bg-emerald-50 border-emerald-500 text-emerald-900 shadow-md'
+                                      : 'bg-white border-[#C49E3A]/30 hover:border-[#C49E3A] text-[#002147] shadow-sm'
                                   }`}
                                 >
-                                  <span className="text-base font-black tracking-wide block text-white">{option.word}</span>
+                                  <span className="text-base font-black tracking-wide block text-[#002147]">{option.word}</span>
                                   
-                                  <div className="w-full flex items-center justify-between mt-3 pt-2 border-t border-white/5 text-[10px] font-bold">
-                                    <span className="text-slate-400 font-mono">
+                                  <div className="w-full flex items-center justify-between mt-3 pt-2 border-t border-[#002147]/10 text-[10px] font-bold">
+                                    <span className="text-[#002147]/60 font-mono">
                                       {option.isHallucination ? (isRtl ? 'احتمال منخفض ⚠️' : 'Low Prob ⚠️') : (isRtl ? 'احتمال مرتفع ✓' : 'High Prob ✓')}
                                     </span>
-                                    <span className={option.isHallucination ? 'text-red-400' : 'text-emerald-400'}>
+                                    <span className={option.isHallucination ? 'text-rose-600' : 'text-emerald-700'}>
                                       {option.isHallucination ? (isRtl ? 'هلوسة' : 'Hallucination') : (isRtl ? 'طبيعي' : 'Logical')}
                                     </span>
                                   </div>
@@ -11932,10 +11925,10 @@ Output Summary for [${topic}]:
                           <motion.div 
                             initial={{ scale: 0.98, opacity: 0 }} 
                             animate={{ scale: 1, opacity: 1 }} 
-                            className={`p-5 rounded-2xl border text-xs leading-relaxed space-y-2 ${
+                            className={`p-5 rounded-2xl border text-xs leading-relaxed space-y-2 shadow-sm ${
                               l3IsHallucinating 
-                                ? 'bg-red-500/10 border-red-500/20 text-red-300' 
-                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                                ? 'bg-rose-50 border-rose-300 text-rose-900' 
+                                : 'bg-emerald-50 border-emerald-300 text-emerald-900'
                             }`}
                           >
                             <div className="flex items-center gap-2 font-black text-sm uppercase tracking-wider">
@@ -11944,43 +11937,43 @@ Output Summary for [${topic}]:
                             <p>{l3Explanation}</p>
 
                             <div className="pt-3 flex justify-end">
-                              <button
+                              <PrimaryButton
                                 onClick={handleL3NextStep}
-                                className="px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded-xl font-black text-xs transition-all flex items-center gap-1.5 active:scale-95"
+                                className="!px-5 !py-2.5 !rounded-xl !text-xs shadow-md"
                               >
                                 <span>{l3Step < l3InteractiveOptions.length - 1 ? (isRtl ? 'الجولة التالية ➡️' : 'Next Round ➡️') : (isRtl ? 'إكمال الدرس وبدء النقاش 🎉' : 'Complete Lesson 🎉')}</span>
-                              </button>
+                              </PrimaryButton>
                             </div>
                           </motion.div>
                         )}
                         
                         {/* History story feed */}
                         {l3Sentences.length > 0 && (
-                          <div className="pt-4 border-t border-white/5 text-xs text-slate-500 space-y-1">
-                            <span className="font-bold block text-slate-400 mb-1">{isRtl ? 'تاريخ التوقعات المستكشفة:' : 'Sequence exploration history:'}</span>
+                          <div className="pt-4 border-t border-[#C49E3A]/20 text-xs text-[#002147]/70 space-y-1">
+                            <span className="font-bold block text-[#002147] mb-1">{isRtl ? 'تاريخ التوقعات المستكشفة:' : 'Sequence exploration history:'}</span>
                             {l3Sentences.map((sent, idx) => (
-                              <p key={idx} className="font-mono bg-black/20 px-3 py-1.5 rounded-lg border border-white/5 inline-block mr-2 text-slate-300">
+                              <p key={idx} className="font-mono bg-[#fdfaf3] px-3 py-1.5 rounded-lg border border-[#C49E3A]/30 inline-block mr-2 text-[#002147]">
                                 {sent}
                               </p>
                             ))}
                           </div>
                         )}
-                      </div>
+                      </GoldCard>
 
                       {/* FAMILY DEBATE: THE GIRAFFE SANDBOX */}
-                      <div className="bg-gradient-to-br from-[#0e1629] to-[#040a17] p-6 md:p-8 rounded-3xl border border-white/10 space-y-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-2 border-[#C49E3A]/40 shadow-sm">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C49E3A]/5 rounded-full blur-3xl pointer-events-none" />
                         
                         <div className="space-y-2">
-                          <div className="inline-flex items-center gap-1.5 bg-amber-500/15 text-amber-300 px-3 py-1 rounded-full border border-amber-500/20 text-[10px] font-black uppercase tracking-widest">
+                          <ProgressPill className="text-[10px] font-black uppercase tracking-widest">
                             <span>💬</span>
                             <span>{isRtl ? 'سؤال للنقاش العائلي والمحاكاة' : 'FAMILY BRAINSTORM LAB'}</span>
-                          </div>
+                          </ProgressPill>
                           
-                          <h6 className="text-lg font-black text-white">
+                          <h6 className="text-lg font-black text-[#002147]">
                             {isRtl ? 'تحدي جملة الزرافة المجنونة! 🦒✏️' : 'The Mad Giraffe Sentence Challenge'}
                           </h6>
-                          <p className="text-slate-400 text-sm leading-relaxed text-right">
+                          <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                             {isRtl 
                               ? "هل يفهم الذكاء الاصطناعي حقًا ما يكتبه؟ جربوا تشغيل محاكاة كتابة الجملة المجنونة: 'أكلت الزرافة قلمي لأن...' وراقبوا كيف سيقوم 'نموذج اللغة' بتركيب المعاني بالتوقع التلقائي كلمة بكلمة!"
                               : "Does AI actually understand what it generates? Run this simulated prediction sequence to see it build sentences token by token!"}
@@ -11988,35 +11981,35 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* Giraffe Terminal simulation display */}
-                        <div className="p-6 bg-slate-950 rounded-2xl border border-white/5 space-y-4">
-                          <div className="flex justify-between items-center pb-2 border-b border-white/5">
-                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold font-mono">
-                              <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                              <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-                              <span className="ml-1">GPT-LLM-Simulator</span>
+                        <div className="p-6 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-4 shadow-inner">
+                          <div className="flex justify-between items-center pb-2 border-b border-[#C49E3A]/20">
+                            <div className="flex items-center gap-1.5 text-[10px] text-[#002147]/60 font-bold font-mono">
+                              <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                              <span className="ml-1 text-[#002147]/70">GPT-LLM-Simulator</span>
                             </div>
-                            <span className="text-[9px] bg-white/5 px-2 py-0.5 rounded text-amber-400 font-bold font-mono uppercase">
+                            <ProgressPill className="text-[9px] !py-0.5 uppercase">
                               {isRtl ? 'تنبؤ اللبنات' : 'Token Inference'}
-                            </span>
+                            </ProgressPill>
                           </div>
 
                           <div className="space-y-4 min-h-[100px] flex flex-col justify-between">
                             <div className="text-base leading-relaxed text-right">
-                              <span className="text-slate-500 font-bold">"{isRtl ? 'أكلت الزرافة قلمي لأن...' : 'The giraffe ate my pen because...'}"</span>
+                              <span className="text-[#002147]/70 font-bold">"{isRtl ? 'أكلت الزرافة قلمي لأن...' : 'The giraffe ate my pen because...'}"</span>
                               {l3GiraffeResponse && (
-                                <span className="text-amber-300 font-black relative bg-[#1e2f4a]/40 px-2 py-1 rounded border border-white/5 select-none inline-block ml-1 animate-pulse">
+                                <span className="text-[#002147] font-black relative bg-[#E6C36A]/30 px-2 py-1 rounded border border-[#C49E3A] select-none inline-block ml-1 animate-pulse">
                                   {l3GiraffeResponse}
                                 </span>
                               )}
                               {!l3GiraffeResponse && !l3GiraffeGenerating && (
-                                <span className="text-slate-600 block text-xs font-bold pt-2">{isRtl ? '...بانتظار تشغيل الموديل...' : '...waiting for generation spark...'}</span>
+                                <span className="text-[#002147]/40 block text-xs font-bold pt-2">{isRtl ? '...بانتظار تشغيل الموديل...' : '...waiting for generation spark...'}</span>
                               )}
                             </div>
 
                             {l3GiraffeGenerating && (
-                              <div className="flex items-center gap-2 text-xs text-amber-400 font-mono animate-pulse bg-white/5 p-2 rounded">
-                                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                              <div className="flex items-center gap-2 text-xs text-[#002147] font-mono animate-pulse bg-white p-2 rounded border border-[#C49E3A]/20 shadow-sm">
+                                <span className="w-2 h-2 rounded-full bg-[#C49E3A] animate-ping" />
                                 <span>Generating: Temperature=0.7, Max_Tokens=32</span>
                               </div>
                             )}
@@ -12025,21 +12018,17 @@ Output Summary for [${topic}]:
 
                         {/* Button spark prompt */}
                         <div className="flex flex-col md:flex-row items-center gap-4">
-                          <button
+                          <PrimaryButton
                             onClick={handleL3GiraffeGenerate}
                             disabled={l3GiraffeGenerating}
-                            className={`w-full md:w-auto px-8 py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2.5 transition-all ${
-                              l3GiraffeGenerating
-                                ? 'bg-amber-500/10 text-amber-300 border border-amber-500/25 cursor-wait'
-                                : 'bg-gradient-to-tr from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 active:scale-95 shadow-lg shadow-amber-500/10'
-                            }`}
+                            className="w-full md:w-auto !px-8 !py-4 !rounded-2xl !text-sm shadow-md"
                           >
                             <span>🦒</span>
                             <span>{l3GiraffeGenerating ? (isRtl ? 'جاري بناء الكلمات عصبيّاً...' : 'Streaming response...') : (isRtl ? 'ابدأ توليد التوقع اللغوي التلقائي ✨' : 'Run AI Prediction Spark ✨')}</span>
-                          </button>
+                          </PrimaryButton>
 
                           {l3GiraffeResponse && !l3GiraffeGenerating && (
-                            <div className="p-4 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-2xl text-xs font-bold w-full text-right">
+                            <div className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-2xl text-xs font-bold w-full text-right shadow-sm">
                               {isRtl 
                                 ? '✓ لاحظ كيف ركّب النموذج الكلمات بطرق تبدو ذكية ومقنعة (أصفر، وموز، وحلوى مقرمشة) فقط لأنها إحصائيّاً تأتي سوية في الكتب!' 
                                 : '✓ Check how stats combined keywords elegantly (yellow, banana, sweet)!'}
@@ -12048,24 +12037,24 @@ Output Summary for [${topic}]:
                         </div>
 
                         {/* Summary panel for parents */}
-                        <div className="p-5 bg-black/40 border border-white/5 rounded-2xl text-right space-y-2">
-                          <span className="text-[10px] text-amber-300 font-bold block uppercase tracking-widest">{isRtl ? 'خلاصة للآباء 💡' : 'PARENT CAPSULE SUMMARY 💡'}</span>
-                          <p className="text-xs text-slate-300 leading-relaxed">
+                        <div className="p-5 bg-[#fdfaf3] border border-[#C49E3A]/30 rounded-2xl text-right space-y-2 shadow-sm">
+                          <span className="text-[10px] text-[#C49E3A] font-bold block uppercase tracking-widest">{isRtl ? 'خلاصة للآباء 💡' : 'PARENT CAPSULE SUMMARY 💡'}</span>
+                          <p className="text-xs text-[#002147]/80 leading-relaxed">
                             {isRtl 
                               ? 'النموذج اللغوي لا يملك وعياً حقيقياً، بل هو يحسب الكلمة الأكثر احتمالاً إحصائياً. هذا يفسر لماذا يبدو مقنعاً جداً مثل كاتب خبير... ولماذا يخطئ أحياناً ويهلوس باختلاق أكاذيب غريبة (الهلوسة اللفظية). عقول أطفالكم البشرية هي الوحيدة التي تملك الإدراك الحقيقي للمعنى!'
                               : 'LLMs calculate probabilities of strings they cannot structurally grasp. This illustrates how coherent AI seems, but also explains its occasional hallucinations.'}
                           </p>
                         </div>
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
                   {/* LESSON 4 HANDS-ON INTERACTIVE GAME */}
                   {selectedLesson.lesson_number === 4 && (
                     <div className="space-y-6">
-                      <div className="bg-slate-950/60 p-6 rounded-3xl border border-white/5 space-y-4">
-                        <h5 className="text-lg font-black text-amber-300">{isRtl ? 'لعبة إزالة التشويش (Diffusion Simulation)' : 'De-noising Diffusion Engine Sandbox'}</h5>
-                        <p className="text-slate-300 text-sm leading-relaxed">
+                      <GoldCard className="p-6 md:p-8 space-y-4 bg-white border-[#C49E3A]/40 shadow-sm">
+                        <h5 className="text-lg font-black text-[#002147]">{isRtl ? 'لعبة إزالة التشويش (Diffusion Simulation)' : 'De-noising Diffusion Engine Sandbox'}</h5>
+                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
                           {isRtl 
                             ? 'مولدات الصور مثل Midjourney لا ترسم بفرشاة! بل تبدأ بجدول من الضباب والتشويش الرمادي المطلق، ثم تقوم بإزالة الغبار بذكاء خطوة بخطوة لرسم طلبك: "قطة ترتدي قبعة". جربها بنفسك!' 
                             : 'AI image generators do not paint with brush strokes! They start from static gray noise and iteratively guide pixels toward your description.'}
@@ -12073,7 +12062,7 @@ Output Summary for [${topic}]:
 
                         <div className="flex flex-col md:flex-row gap-6 items-center">
                           {/* Image box with noise simulation class */}
-                          <div className="relative w-64 h-64 bg-slate-900 border border-white/10 rounded-3xl overflow-hidden flex items-center justify-center shrink-0">
+                          <div className="relative w-64 h-64 bg-[#fdfaf3] border-2 border-[#C49E3A]/40 rounded-3xl overflow-hidden flex items-center justify-center shrink-0 shadow-md">
                             <img 
                               src={denoisingImages[l4ImgIndex]} 
                               alt="Diffusion display"
@@ -12081,52 +12070,52 @@ Output Summary for [${topic}]:
                               className={`w-full h-full object-cover transition-all duration-700 ${getNoiseBlur()}`}
                             />
                             {l4DenoisingStep < 5 && (
-                              <div className="absolute inset-0 bg-[#334155]/10 pointer-events-none mix-blend-color-burn" />
+                              <div className="absolute inset-0 bg-[#002147]/10 pointer-events-none mix-blend-color-burn" />
                             )}
                           </div>
 
                           <div className="flex-1 space-y-4 w-full">
                             <div>
-                              <span className="text-xs font-bold text-slate-400 block">{isRtl ? 'التعويذة المدخلة في الآلة:' : 'The Target Image Prompt:'}</span>
-                              <div className="mt-1 px-4 py-3 bg-slate-900 rounded-2xl border border-white/5 text-sm font-black text-amber-300 font-mono">
+                              <span className="text-xs font-bold text-[#002147]/70 block">{isRtl ? 'التعويذة المدخلة في الآلة:' : 'The Target Image Prompt:'}</span>
+                              <div className="mt-1 px-4 py-3 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 text-sm font-black text-[#002147] font-mono shadow-inner">
                                 "{isRtl ? 'صديقي القط الشجاع يرتدي قبعة حمراء زاهية 🐱🎩' : 'A brave brave cat with a bright red hat 🐱🎩'}"
                               </div>
                             </div>
 
                             <div className="space-y-1">
-                              <div className="flex justify-between text-xs font-bold text-slate-400">
+                              <div className="flex justify-between text-xs font-bold text-[#002147]/70">
                                 <span>{isRtl ? `خطوة إزالة التشويش:` : `De-noise Step:`}</span>
                                 <span>{l4DenoisingStep} / 5</span>
                               </div>
-                              <div className="w-full bg-slate-900 h-3 rounded-full overflow-hidden">
-                                <div className="bg-amber-500 h-full transition-all duration-300" style={{ width: `${(l4DenoisingStep / 5) * 100}%` }} />
+                              <div className="w-full bg-[#002147]/10 h-3 rounded-full overflow-hidden">
+                                <div className="bg-[#C49E3A] h-full transition-all duration-300" style={{ width: `${(l4DenoisingStep / 5) * 100}%` }} />
                               </div>
                             </div>
 
-                            <button
+                            <PrimaryButton
                               disabled={l4DenoisingStep >= 5}
                               onClick={handleDenoise}
-                              className={`w-full py-3 rounded-2xl font-black text-xs transition-all ${
-                                l4DenoisingStep < 5 
-                                  ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 active:scale-95' 
-                                  : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default'
+                              className={`w-full !py-3.5 !rounded-2xl !text-xs transition-all shadow-md ${
+                                l4DenoisingStep >= 5 
+                                  ? '!bg-emerald-50 !text-emerald-800 !border-emerald-300 cursor-default' 
+                                  : ''
                               }`}
                             >
                               {l4DenoisingStep < 5 ? (isRtl ? 'إزالة جزء من التشويش (خطوة عكسية) ⚡' : 'De-noise iteration ⚡') : (isRtl ? '✓ اكتملت الصورة بوضوح مذهل!' : '✓ Image Fully Restored!')}
-                            </button>
+                            </PrimaryButton>
                             
-                            <button
+                            <GhostButton
                               onClick={() => {
                                 setL4DenoisingStep(0);
                                 setL4ImgIndex((l4ImgIndex + 1) % denoisingImages.length);
                               }}
-                              className="w-full py-3 bg-white/5 hover:bg-white/10 text-xs font-bold rounded-2xl tracking-wider active:scale-95 transition-all text-slate-300 border border-white/5"
+                              className="w-full !py-3 !rounded-2xl !text-xs tracking-wider"
                             >
                               {isRtl ? 'إعادة ضبط أو تغيير الصورة 🔄' : 'Reset or Change Prompt 🔄'}
-                            </button>
+                            </GhostButton>
                           </div>
                         </div>
-                      </div>
+                      </GoldCard>
                     </div>
                   )}
 
@@ -12635,10 +12624,10 @@ Output Summary for [${topic}]:
 
                 </div>
 
-                <div className="border-t border-white/5 pt-6 mt-8 flex flex-col md:flex-row gap-4 justify-between items-center relative z-10">
+                <div className="border-t border-[#C49E3A]/20 pt-6 mt-8 flex flex-col md:flex-row gap-4 justify-between items-center relative z-10">
                   <div className="flex items-center gap-2">
-                    <Info size={14} className="text-slate-500" />
-                    <span className="text-[10px] text-[#C49E3A] font-black uppercase tracking-widest">{isRtl ? 'تذكر: الذكاء الاصطناعي مدعوم بنماذج الأكاديمية وGemini' : 'Powered securely by Basim Al Khalil Academy AI Platform'}</span>
+                    <Info size={14} className="text-[#C49E3A]" />
+                    <span className="text-[10px] text-[#002147] font-black uppercase tracking-widest">{isRtl ? 'تذكر: الذكاء الاصطناعي مدعوم بنماذج الأكاديمية وGemini' : 'Powered securely by Basim Al Khalil Academy AI Platform'}</span>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -12647,7 +12636,7 @@ Output Summary for [${topic}]:
                         setSelectedLesson(null);
                         resetGames();
                       }}
-                      className="!px-5 !py-2.5 !text-xs"
+                      className="!px-5 !py-2.5 !text-xs shadow-sm hover:border-[#C49E3A]"
                     >
                       {isRtl ? 'إغلاق المعمل ✖' : 'Close Sandbox'}
                     </GhostButton>
