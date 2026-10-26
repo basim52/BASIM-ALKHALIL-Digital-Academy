@@ -12685,7 +12685,7 @@ Output Summary for [${topic}]:
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-[#001a38]/95 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+                className="fixed inset-0 bg-[#002147]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
                 onClick={() => {
                   setSelectedCustomUnit(null);
                   setCustomUnitQuizSelected(null);
@@ -12703,20 +12703,20 @@ Output Summary for [${topic}]:
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.95, y: 20 }}
                   onClick={(e) => e.stopPropagation()}
-                  className="bg-[#00274f] border border-white/10 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative text-right"
+                  className="bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl relative text-right"
                   dir={isRtl ? 'rtl' : 'ltr'}
                 >
                   {/* Top Bar Banner Accent */}
-                  <div className="bg-gradient-to-r from-amber-500/20 to-[#C49E3A]/20 p-6 border-b border-white/5 flex justify-between items-center">
+                  <div className="bg-white border-b border-[#C49E3A]/30 p-6 flex justify-between items-center">
                     <div className="text-right w-full">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md inline-block">
+                      <ProgressPill>
                         {isRtl ? `مستوى ${selectedCustomUnit.level} • خطتك الذكية` : `CEFR Level ${selectedCustomUnit.level} • Smart Path`}
-                      </span>
-                      <h4 className="text-lg font-black text-white mt-2 leading-tight">
+                      </ProgressPill>
+                      <h4 className="text-lg font-black text-[#002147] mt-2 leading-tight">
                         {isRtl ? (selectedCustomUnit.titleAr || selectedCustomUnit.title) : (selectedCustomUnit.title || selectedCustomUnit.titleAr)}
                       </h4>
                     </div>
-                    <button 
+                    <GhostButton 
                       onClick={() => {
                         setSelectedCustomUnit(null);
                         setCustomUnitQuizSelected(null);
@@ -12728,10 +12728,10 @@ Output Summary for [${topic}]:
                         setLessonQuizResultScore(null);
                         setShowQuizReview(false);
                       }}
-                      className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center font-bold text-lg cursor-pointer transition-all shrink-0 ml-4"
+                      className="w-10 h-10 !rounded-full text-lg font-bold !p-0 flex items-center justify-center shrink-0 ml-4 cursor-pointer"
                     >
                       ✖
-                    </button>
+                    </GhostButton>
                   </div>
 
                   {/* Body Content */}
@@ -12739,16 +12739,16 @@ Output Summary for [${topic}]:
                     {loadingActivity ? (
                       <div className="flex flex-col items-center justify-center py-16 space-y-4">
                         <div className="relative">
-                          <div className="w-16 h-16 rounded-full border-4 border-amber-500/10 border-t-amber-500 animate-spin" />
+                          <div className="w-16 h-16 rounded-full border-4 border-[#C49E3A]/20 border-t-[#C49E3A] animate-spin" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <BrainCircuit className="text-amber-400 animate-pulse" size={24} />
+                            <BrainCircuit className="text-[#C49E3A] animate-pulse" size={24} />
                           </div>
                         </div>
                         <div className="text-center space-y-2">
-                          <p className="text-xs font-black text-amber-400 tracking-wider">
+                          <p className="text-xs font-black text-[#002147] tracking-wider">
                             {isRtl ? 'جاري الاستعانة بالذكاء الاصطناعي لتوليد محتوى الدرس والتقييم تفاعلياً...' : 'SYNTHESIZING TAILORED LESSON & QUIZ VIA AI...'}
                           </p>
-                          <p className="text-[10px] text-slate-400 leading-relaxed max-w-md mx-auto">
+                          <p className="text-[10px] text-[#002147]/60 leading-relaxed max-w-md mx-auto">
                             {isRtl ? 'الذكاء المستنير يصيغ لك مقدمة أكاديمية وتحديات عملية تناسب تخصصك بدقة' : 'Generating high density academic context and creative tasks tailored for your profile'}
                           </p>
                         </div>
@@ -12757,55 +12757,63 @@ Output Summary for [${topic}]:
                       <>
                         {/* Lecture Section */}
                         <div className="space-y-2">
-                          <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
-                            <BookOpen size={14} className="text-amber-400" />
-                            {isRtl ? '💡 המفهوم والدرس اليومي' : '💡 CORE LESSON CONCEPT'}
+                          <h5 className="text-xs font-black uppercase tracking-wider text-[#C49E3A] flex items-center gap-1.5 justify-start">
+                            <BookOpen size={14} className="text-[#C49E3A]" />
+                            {isRtl ? '💡 المفهوم والدرس اليومي' : '💡 CORE LESSON CONCEPT'}
                           </h5>
-                          <p className="text-xs text-slate-200 leading-relaxed font-semibold bg-white/[0.02] p-4 rounded-2xl border border-white/5">
-                            {act.concept}
-                          </p>
+                          <GoldCard className="p-5 space-y-3 bg-white border-[#C49E3A]/40 shadow-sm">
+                            <p className="text-xs text-[#002147]/80 leading-relaxed font-semibold">
+                              {act.concept}
+                            </p>
+                          </GoldCard>
                         </div>
 
                         {/* Laboratory Practice */}
                         <div className="space-y-2">
-                          <h5 className="text-xs font-black uppercase tracking-wider text-[#E4C77A] flex items-center gap-1.5 justify-start">
-                            <Bot size={14} className="text-[#E4C77A]" />
+                          <h5 className="text-xs font-black uppercase tracking-wider text-[#C49E3A] flex items-center gap-1.5 justify-start">
+                            <Bot size={14} className="text-[#C49E3A]" />
                             {isRtl ? '🔬 النشاط التجريبي العالي (Sandbox Mission)' : '🔬 PRACTICAL SANDBOX MISSION'}
                           </h5>
-                          <div className="bg-[#C49E3A]/5 p-4 rounded-2xl border border-[#C49E3A]/10 space-y-3">
-                            <p className="text-[11px] text-slate-300 font-bold leading-relaxed">
+                          <GoldCard className="p-5 space-y-3 bg-white border-[#C49E3A]/40 shadow-sm">
+                            <p className="text-[11px] text-[#002147]/80 font-bold leading-relaxed">
                               {act.mission}
                             </p>
-                            <button
+                            <PrimaryButton
                               onClick={() => {
                                 setSelectedCustomUnit(null);
                                 setCustomUnitQuizSelected(null);
                                 setCustomUnitQuizCorrect(null);
                                 setLobbyTab('experiments'); // Go to play workspace
                               }}
-                              className="bg-[#002147] hover:bg-[#C49E3A] text-white px-4 py-2 rounded-xl text-[10px] font-black tracking-wider uppercase transition-all flex items-center gap-1.5 cursor-pointer"
+                              className="!py-2 !px-4 !text-[10px] tracking-wider uppercase flex items-center gap-1.5 cursor-pointer"
                             >
                               <Play size={10} />
                               {isRtl ? 'افتح المعمل التفاعلي الفوري 🚀' : 'Open AI Learning Lab Now 🚀'}
-                            </button>
-                          </div>
+                            </PrimaryButton>
+                          </GoldCard>
                         </div>
 
                         {/* Interactive Quiz Mini-Quest */}
                         <div className="space-y-3 pt-2">
-                          <h5 className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5 justify-start">
-                            <Trophy size={14} className="text-amber-400" />
+                          <h5 className="text-xs font-black uppercase tracking-wider text-[#C49E3A] flex items-center gap-1.5 justify-start">
+                            <Trophy size={14} className="text-[#C49E3A]" />
                             {isRtl ? '🏁 التحدي السريع والتقييم' : '🏁 INTERACTIVE MINI-QUEST'}
                           </h5>
                           
-                          <div className="bg-[#001a38] p-5 rounded-2xl border border-white/5 space-y-4">
-                            <p className="text-xs font-bold text-white text-right">
+                          <GoldCard className="p-5 space-y-3 bg-white border-[#C49E3A]/40 shadow-sm">
+                            <p className="text-sm font-black text-[#002147] leading-relaxed text-right">
                               {act.question}
                             </p>
 
                             <div className="grid grid-cols-1 gap-2">
                               {act.options.map((option, idx) => {
                                 const isSelected = customUnitQuizSelected === idx;
+                                let optColor = 'border-[#C49E3A]/40 bg-white text-[#002147] hover:border-[#C49E3A] hover:bg-[#fdfaf3]';
+                                if (isSelected) {
+                                  optColor = idx === act.correctIndex
+                                    ? 'border-green-600 bg-green-50 text-[#002147]'
+                                    : 'border-red-600 bg-red-50 text-red-900';
+                                }
                                 return (
                                   <button
                                     key={idx}
@@ -12813,13 +12821,7 @@ Output Summary for [${topic}]:
                                       setCustomUnitQuizSelected(idx);
                                       setCustomUnitQuizCorrect(idx === act.correctIndex);
                                     }}
-                                    className={`w-full text-right p-3.5 rounded-xl text-xs font-bold border-2 transition-all flex items-center justify-between cursor-pointer ${
-                                      isSelected
-                                        ? idx === act.correctIndex
-                                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-                                          : 'border-rose-500 bg-rose-500/10 text-rose-400'
-                                        : 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-slate-300'
-                                    }`}
+                                    className={`w-full min-h-[44px] p-3.5 rounded-2xl border-2 text-xs sm:text-sm font-bold text-right flex items-center justify-between gap-2 transition-all cursor-pointer ${optColor}`}
                                   >
                                     <span>{option}</span>
                                     {isSelected && (
@@ -12836,10 +12838,10 @@ Output Summary for [${topic}]:
                               <motion.div 
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className={`p-3 rounded-xl text-[11px] font-black ${
+                                className={`p-3.5 text-xs font-black ${
                                   customUnitQuizCorrect 
-                                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' 
-                                    : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
+                                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl' 
+                                    : 'bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl'
                                 }`}
                               >
                                 {customUnitQuizCorrect 
@@ -12848,65 +12850,65 @@ Output Summary for [${topic}]:
                                 }
                               </motion.div>
                             )}
-                          </div>
+                          </GoldCard>
                         </div>
 
                         {/* Custom Lesson Quiz Section */}
                         {isCompleted && (
-                          <div className="border-t border-dashed border-white/10 pt-6 mt-6 space-y-4">
-                            <h5 className="text-xs font-black uppercase tracking-wider text-amber-405 text-amber-400 flex items-center gap-1.5 justify-start">
-                              <BrainCircuit size={14} className="text-amber-400" />
+                          <div className="border-t border-dashed border-[#C49E3A]/30 pt-6 mt-6 space-y-4">
+                            <h5 className="text-xs font-black uppercase tracking-wider text-[#C49E3A] flex items-center gap-1.5 justify-start">
+                              <BrainCircuit size={14} className="text-[#C49E3A]" />
                               {isRtl ? '📝 اختبار الدرس المنجز (٣ أسئلة)' : '📝 COMPLETED LESSON ASSESSMENT (3 QUESTIONS)'}
                             </h5>
 
                             {completedCustomUnitIds.has(selectedCustomUnit.id + '-quiz') ? (
-                              <div className="bg-emerald-500/10 p-5 rounded-2xl border border-emerald-500/20 space-y-3 text-right">
+                              <GoldCard className="p-5 space-y-3 bg-emerald-50 border border-emerald-200 text-right shadow-sm">
                                 <div className="flex items-center gap-2 justify-start">
                                   <span className="text-lg">🏆</span>
-                                  <h6 className="text-xs font-black text-emerald-400">
+                                  <h6 className="text-xs font-black text-emerald-800">
                                     {isRtl ? 'تم تقديم هذا الاختبار بنجاح!' : 'Quiz Submitted Successfully!'}
                                   </h6>
                                 </div>
-                                <p className="text-[11px] text-slate-300 font-bold leading-relaxed">
+                                <p className="text-[11px] text-[#002147]/80 font-bold leading-relaxed">
                                   {isRtl 
                                     ? `لقد خضت اختبار هذا الدرس وحصلت على درجة: ${aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.score ?? 3} من 3.` 
                                     : `You have completed this lesson's quiz and scored: ${aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.score ?? 3} out of 3.`
                                   }
                                 </p>
-                                <div className="text-[9px] bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full inline-block font-black uppercase tracking-wider">
+                                <div className="text-[9px] bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full inline-block font-black uppercase tracking-wider">
                                   {isRtl ? '🔒 لا يمكن إعادة تقديم الاختبار' : '🔒 Retakes are disabled for this quiz'}
                                 </div>
 
                                 {aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.questions && (
-                                  <div className="pt-2 border-t border-emerald-500/10 mt-2 flex justify-start">
-                                    <button
+                                  <div className="pt-2 border-t border-emerald-200 mt-2 flex justify-start">
+                                    <GhostButton
                                       onClick={() => setShowQuizReview(!showQuizReview)}
-                                      className="bg-white/5 hover:bg-white/10 text-white border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black tracking-wider transition-all flex items-center gap-1.5 cursor-pointer"
+                                      className="!py-2 !px-4 !text-[10px] font-black tracking-wider flex items-center gap-1.5 cursor-pointer"
                                     >
-                                      <Sparkles size={12} className="text-amber-400" />
+                                      <Sparkles size={12} className="text-[#C49E3A]" />
                                       {showQuizReview 
                                         ? (isRtl ? 'إخفاء تفاصيل الإجابات 🔼' : 'Hide Quiz Review 🔼')
                                         : (isRtl ? 'عرض ومراجعة الإجابات 🔎' : 'Review My Answers 🔎')
                                       }
-                                    </button>
+                                    </GhostButton>
                                   </div>
                                 )}
 
                                 {showQuizReview && aiLessonResultsMap[selectedCustomUnit.id + '-quiz']?.questions && (
-                                  <div className="mt-4 pt-4 border-t border-emerald-500/10 space-y-4 text-right">
+                                  <div className="mt-4 pt-4 border-t border-emerald-200 space-y-4 text-right">
                                     {aiLessonResultsMap[selectedCustomUnit.id + '-quiz'].questions.map((q: any, qIdx: number) => {
                                       const chosenIdx = aiLessonResultsMap[selectedCustomUnit.id + '-quiz'].answers?.[qIdx];
                                       const isCorrect = chosenIdx === q.correctIndex;
 
                                       return (
-                                        <div key={qIdx} className="space-y-2 border-b border-white/5 pb-3 last:border-0 last:pb-0 text-right">
+                                        <div key={qIdx} className="space-y-2 border-b border-[#C49E3A]/20 pb-3 last:border-0 last:pb-0 text-right">
                                           <div className="flex items-start gap-2 justify-start text-right">
                                             <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
-                                              isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                                              isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                                             }`}>
                                               {isRtl ? `سؤال ${qIdx + 1}` : `Q${qIdx + 1}`} ({isCorrect ? '✅' : '❌'})
                                             </span>
-                                            <p className="text-[11px] font-bold text-white leading-relaxed text-right">
+                                            <p className="text-[11px] font-bold text-[#002147] leading-relaxed text-right">
                                               {q.question}
                                             </p>
                                           </div>
@@ -12916,13 +12918,13 @@ Output Summary for [${topic}]:
                                               const wasChosen = chosenIdx === oIdx;
                                               const isCorrectOption = oIdx === q.correctIndex;
 
-                                              let optStyle = 'border-white/5 bg-white/[0.01] text-slate-400';
+                                              let optStyle = 'border-[#C49E3A]/40 bg-white text-[#002147]';
                                               if (wasChosen) {
                                                 optStyle = isCorrectOption 
-                                                  ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold' 
-                                                  : 'border-rose-500 bg-rose-500/10 text-rose-400 font-bold';
+                                                  ? 'border-green-600 bg-green-50 text-[#002147] font-bold' 
+                                                  : 'border-red-600 bg-red-50 text-red-900 font-bold';
                                               } else if (isCorrectOption) {
-                                                optStyle = 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400/80 font-bold';
+                                                optStyle = 'border-green-600/50 bg-green-50/60 text-[#002147]/80 font-bold';
                                               }
 
                                               return (
@@ -12940,8 +12942,8 @@ Output Summary for [${topic}]:
                                           </div>
 
                                           {q.explanation && (
-                                            <div className="p-2.5 rounded-lg text-[9px] font-medium bg-white/[0.01] border border-white/5 text-slate-400 leading-relaxed text-right">
-                                              <span className="font-bold text-amber-400 block mb-0.5">{isRtl ? '💡 شرح الإجابة:' : '💡 Explanation:'}</span>
+                                            <div className="p-2.5 rounded-lg text-[9px] font-medium bg-white border border-[#C49E3A]/20 text-[#002147]/80 leading-relaxed text-right">
+                                              <span className="font-bold text-[#C49E3A] block mb-0.5">{isRtl ? '💡 شرح الإجابة:' : '💡 Explanation:'}</span>
                                               {q.explanation}
                                             </div>
                                           )}
@@ -12950,11 +12952,11 @@ Output Summary for [${topic}]:
                                     })}
                                   </div>
                                 )}
-                              </div>
+                              </GoldCard>
                             ) : !activeLessonQuiz ? (
-                              <div className="bg-[#001a38] p-5 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center space-y-4 py-8">
-                                <Sparkles size={24} className="text-amber-400 animate-pulse" />
-                                <p className="text-xs font-bold text-slate-300">
+                              <GoldCard className="p-5 space-y-3 bg-white border-[#C49E3A]/40 shadow-sm flex flex-col items-center justify-center text-center py-8">
+                                <Sparkles size={24} className="text-[#C49E3A] animate-pulse" />
+                                <p className="text-xs font-bold text-[#002147]/80">
                                   {isRtl 
                                     ? 'يمكنك الآن توليد اختبار تقييمي مخصص من ٣ أسئلة بناءً على محتوى هذا الدرس لتعزيز فهمك وحفظ النتيجة في سجلك.' 
                                     : 'You can now generate a personalized 3-question assessment based on this lesson to test your skills and save your grade.'
@@ -12962,11 +12964,11 @@ Output Summary for [${topic}]:
                                 </p>
 
                                 {/* Difficulty Level Selector */}
-                                <div className="flex flex-col items-center gap-2 w-full max-w-xs bg-white/[0.02] p-3 rounded-2xl border border-white/5">
-                                  <label className="text-[10px] font-black text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                                <div className="flex flex-col items-center gap-2 w-full max-w-xs bg-[#fdfaf3] p-3 rounded-2xl border border-[#C49E3A]/30">
+                                  <label className="text-[10px] font-black text-[#C49E3A] uppercase tracking-wider flex items-center gap-1">
                                     🎯 {isRtl ? 'اختر مستوى صعوبة الاختبار:' : 'Choose quiz difficulty:'}
                                   </label>
-                                  <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-xl w-full border border-white/5">
+                                  <div className="grid grid-cols-3 gap-1 bg-[#fdfaf3] p-1 rounded-xl w-full border border-[#C49E3A]/30">
                                     {[
                                       { value: 'Beginner', labelAr: 'مبتدئ', labelEn: 'Beginner' },
                                       { value: 'Intermediate', labelAr: 'متوسط', labelEn: 'Intermediate' },
@@ -12974,31 +12976,28 @@ Output Summary for [${topic}]:
                                     ].map((opt) => {
                                       const isSel = selectedQuizDifficulty === opt.value;
                                       return (
-                                        <button
+                                        <GhostButton
                                           key={opt.value}
                                           type="button"
+                                          active={isSel}
                                           onClick={() => setSelectedQuizDifficulty(opt.value)}
-                                          className={`py-1.5 px-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
-                                            isSel 
-                                              ? 'bg-amber-500 text-slate-950 shadow-md' 
-                                              : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
-                                          }`}
+                                          className="!py-2 !text-[11px] w-full"
                                         >
                                           {isRtl ? opt.labelAr : opt.labelEn}
-                                        </button>
+                                        </GhostButton>
                                       );
                                     })}
                                   </div>
                                 </div>
 
-                                <button
+                                <PrimaryButton
                                   onClick={() => handleGenerateLessonQuiz(selectedCustomUnit)}
                                   disabled={loadingQuiz}
-                                  className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-5 py-2.5 rounded-xl text-xs font-black tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-amber-500/10"
+                                  className="px-5 py-2.5 !text-xs font-black tracking-wider flex items-center gap-2 cursor-pointer shadow-lg"
                                 >
                                   {loadingQuiz ? (
                                     <>
-                                      <div className="w-3 h-3 rounded-full border-2 border-slate-950/20 border-t-slate-950 animate-spin" />
+                                      <div className="w-3 h-3 rounded-full border-2 border-current/20 border-t-current animate-spin" />
                                       {isRtl ? 'جاري التوليد عبر الذكاء الاصطناعي...' : 'Generating via AI...'}
                                     </>
                                   ) : (
@@ -13007,20 +13006,20 @@ Output Summary for [${topic}]:
                                       {isRtl ? 'توليد اختبار الدرس المخصص 🧠' : 'Generate Custom Lesson Quiz 🧠'}
                                     </>
                                   )}
-                                </button>
-                              </div>
+                                </PrimaryButton>
+                              </GoldCard>
                             ) : (
-                              <div className="bg-[#001a38] p-5 rounded-2xl border border-white/5 space-y-6 text-right">
+                              <GoldCard className="p-5 space-y-6 bg-white border-[#C49E3A]/40 shadow-sm text-right">
                                 {activeLessonQuiz.map((q, qIdx) => {
                                   const selectedOptionIdx = lessonQuizAnswers[qIdx];
                                   
                                   return (
-                                    <div key={qIdx} className="space-y-3 border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                                    <div key={qIdx} className="space-y-3 border-b border-[#C49E3A]/20 pb-4 last:border-0 last:pb-0">
                                       <div className="flex items-start gap-2 justify-start">
-                                        <span className="bg-amber-500/15 text-amber-400 text-[10px] font-black px-2 py-0.5 rounded-md">
+                                        <ProgressPill>
                                           {isRtl ? `سؤال ${qIdx + 1}` : `Q${qIdx + 1}`}
-                                        </span>
-                                        <p className="text-xs font-bold text-white text-right leading-relaxed">
+                                        </ProgressPill>
+                                        <p className="text-sm font-black text-[#002147] leading-relaxed text-right">
                                           {q.question}
                                         </p>
                                       </div>
@@ -13030,17 +13029,17 @@ Output Summary for [${topic}]:
                                           const isOptionSelected = selectedOptionIdx === oIdx;
                                           const isCorrectOption = oIdx === q.correctIndex;
                                           
-                                          let btnStyle = 'border-white/5 bg-white/[0.02] hover:bg-white/5 text-slate-300';
+                                          let btnStyle = 'border-[#C49E3A]/40 bg-white text-[#002147] hover:border-[#C49E3A] hover:bg-[#fdfaf3]';
                                           if (lessonQuizSubmitted) {
                                             if (isOptionSelected) {
                                               btnStyle = isCorrectOption 
-                                                ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' 
-                                                : 'border-rose-500 bg-rose-500/10 text-rose-400';
+                                                ? 'border-green-600 bg-green-50 text-[#002147]' 
+                                                : 'border-red-600 bg-red-50 text-red-900';
                                             } else if (isCorrectOption) {
-                                              btnStyle = 'border-emerald-500/50 bg-emerald-500/5 text-emerald-400/80';
+                                              btnStyle = 'border-green-600/50 bg-green-50/60 text-[#002147]/80';
                                             }
                                           } else if (isOptionSelected) {
-                                            btnStyle = 'border-amber-500 bg-amber-500/10 text-amber-400';
+                                            btnStyle = 'border-[#C49E3A] bg-[#fdfaf3] text-[#002147] ring-2 ring-[#C49E3A]/40';
                                           }
 
                                           return (
@@ -13053,7 +13052,7 @@ Output Summary for [${topic}]:
                                                   [qIdx]: oIdx
                                                 }));
                                               }}
-                                              className={`text-right w-full p-3 rounded-xl text-[11px] font-semibold border transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
+                                              className={`w-full min-h-[44px] p-3.5 rounded-2xl border-2 text-xs sm:text-sm font-bold text-right flex items-center justify-between gap-2 transition-all cursor-pointer ${btnStyle}`}
                                             >
                                               <span>{option}</span>
                                               {isOptionSelected && (
@@ -13067,8 +13066,8 @@ Output Summary for [${topic}]:
                                       </div>
 
                                       {lessonQuizSubmitted && q.explanation && (
-                                        <div className="p-3 rounded-xl text-[10px] font-medium bg-white/[0.02] border border-white/5 text-slate-400 leading-relaxed">
-                                          <span className="font-bold text-amber-400 block mb-1">{isRtl ? '💡 شرح الإجابة:' : '💡 Explanation:'}</span>
+                                        <div className="p-3 rounded-xl text-[10px] font-medium bg-white border border-[#C49E3A]/20 text-[#002147]/80 leading-relaxed">
+                                          <span className="font-bold text-[#C49E3A] block mb-1">{isRtl ? '💡 شرح الإجابة:' : '💡 Explanation:'}</span>
                                           {q.explanation}
                                         </div>
                                       )}
@@ -13077,27 +13076,23 @@ Output Summary for [${topic}]:
                                 })}
 
                                 {!lessonQuizSubmitted ? (
-                                  <div className="pt-4 border-t border-white/5 flex justify-end">
-                                    <button
+                                  <div className="pt-4 border-t border-[#C49E3A]/20 flex justify-end">
+                                    <PrimaryButton
                                       onClick={() => handleSubmitLessonQuiz(selectedCustomUnit)}
                                       disabled={Object.keys(lessonQuizAnswers).length < 3}
-                                      className={`px-6 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
-                                        Object.keys(lessonQuizAnswers).length < 3
-                                          ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/10'
-                                      }`}
+                                      className="px-6 py-2.5 text-xs font-black flex items-center gap-2"
                                     >
                                       <CheckCircle size={13} />
                                       {isRtl ? 'تسليم الإجابات ورصد الدرجة 🎓' : 'Submit Answers & Save Grade 🎓'}
-                                    </button>
+                                    </PrimaryButton>
                                   </div>
                                 ) : (
-                                  <div className="pt-4 border-t border-white/5 bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 flex flex-col sm:flex-row justify-between items-center gap-3">
+                                  <div className="pt-4 border-t border-emerald-200 bg-emerald-50 p-4 rounded-xl border flex flex-col sm:flex-row justify-between items-center gap-3">
                                     <div className="text-right">
-                                      <h6 className="text-xs font-black text-emerald-400">
+                                      <h6 className="text-sm font-black text-[#002147]">
                                         {isRtl ? `درجتك الإجمالية: ${lessonQuizResultScore} من 3` : `Your Total Score: ${lessonQuizResultScore} / 3`}
                                       </h6>
-                                      <p className="text-[10px] text-slate-400 leading-relaxed mt-1">
+                                      <p className="text-[10px] text-[#002147]/70 leading-relaxed mt-1">
                                         {isRtl 
                                           ? 'تم حفظ النتيجة بنجاح في سجل الدارس ولا يمكن إعادة الاختبار.' 
                                           : 'Grade recorded successfully in student record. Retakes are disabled.'}
@@ -13108,7 +13103,7 @@ Output Summary for [${topic}]:
                                     </div>
                                   </div>
                                 )}
-                              </div>
+                              </GoldCard>
                             )}
                           </div>
                         )}
@@ -13117,8 +13112,8 @@ Output Summary for [${topic}]:
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="p-6 bg-[#001a38]/50 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <button
+                  <div className="p-6 bg-white border-t border-[#C49E3A]/30 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <GhostButton
                       onClick={() => {
                         setSelectedCustomUnit(null);
                         setCustomUnitQuizSelected(null);
@@ -13130,25 +13125,25 @@ Output Summary for [${topic}]:
                         setLessonQuizResultScore(null);
                         setShowQuizReview(false);
                       }}
-                      className="text-slate-400 hover:text-white text-xs font-black cursor-pointer transition-all self-stretch sm:self-auto text-center"
+                      className="w-full sm:w-auto min-h-[44px] text-xs font-black self-stretch sm:self-auto text-center"
                     >
                       {isRtl ? 'إغلاق ❌' : 'Close'}
-                    </button>
+                    </GhostButton>
 
-                    <button
+                    <PrimaryButton
                       onClick={() => handleMarkCustomUnitCompleted(selectedCustomUnit)}
                       disabled={isCompleted}
-                      className={`px-6 py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer whitespace-nowrap self-stretch sm:self-auto ${
+                      className={`w-full sm:w-auto min-h-[44px] px-6 py-3 text-xs font-black flex items-center justify-center gap-2 whitespace-nowrap self-stretch sm:self-auto ${
                         isCompleted 
-                          ? 'bg-emerald-500/25 text-emerald-400 border border-emerald-500/20 cursor-not-allowed' 
-                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/10'
+                          ? '!bg-emerald-50 !text-emerald-800 !border-emerald-300 cursor-not-allowed' 
+                          : ''
                       }`}
                     >
                       <CheckCircle size={14} />
                       {isCompleted 
                         ? (isRtl ? 'الدرس مكتمل بنجاح ✅' : 'Lesson Successfully Completed ✅')
                         : (isRtl ? 'تأكيد إكمال ودراسة الدرس 🎓' : 'Mark Lesson as Completed 🎓')}
-                    </button>
+                    </PrimaryButton>
                   </div>
                 </motion.div>
               </motion.div>

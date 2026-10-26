@@ -23,7 +23,10 @@ async function startServer() {
   app.use(express.urlencoded({ extended: true, limit: "15mb" }));
   const server = createServer(app);
   const wss = new WebSocketServer({ noServer: true });
-  const PORT = Number(process.env.PORT) || 3000;
+  const portArgIndex = process.argv.indexOf("--port");
+  const cliPort = portArgIndex !== -1 && process.argv[portArgIndex + 1] ? Number(process.argv[portArgIndex + 1]) : null;
+  // In dev, dev server must run on 3000 (port 8080 is used by Nginx). In production, use process.env.PORT or 8080.
+  const PORT = cliPort || (process.env.NODE_ENV === "production" ? Number(process.env.PORT) || 8080 : 3000);
 
   server.on('error', (err: any) => {
     console.error('[Server HTTP Error]', err);
@@ -74,7 +77,7 @@ async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: false },
       appType: "spa",
     });
     app.use(vite.middlewares);
