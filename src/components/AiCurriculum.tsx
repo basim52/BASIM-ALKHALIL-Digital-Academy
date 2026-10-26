@@ -1,4 +1,4 @@
-// design-harmony batch 13
+// design-harmony batch 14
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import html2canvas from 'html2canvas';
@@ -20,7 +20,8 @@ import {
   PrimaryButton, 
   GhostButton, 
   ProgressPill, 
-  GoldCard 
+  GoldCard,
+  LessonTile 
 } from './ui/academy';
 import { 
   Brain, 
@@ -6102,34 +6103,33 @@ The adventure is waiting!`
                       {proSubTab === 'dashboard' && (
                         <div className="space-y-12 text-right">
                           {/* Certified Pro Dashboard Banner */}
-                          <div className="bg-[#00274f] border border-amber-500/20 rounded-3xl p-8 md:p-10 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl" />
-                            <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 text-right">
-                              <div className="space-y-4">
-                                <span className="px-3 py-1 bg-amber-500/10 text-amber-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
+                          <GoldCard className="p-6 sm:p-8 relative overflow-hidden">
+                            <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 text-right">
+                              <div className="space-y-3">
+                                <ProgressPill className="text-[10px]">
                                   {isRtl ? 'الأكاديمية المهنية المعتمدة 🏆' : 'Professional Accredited Track 🏆'}
-                                </span>
-                                <h3 className="text-3xl font-black text-white leading-none">
+                                </ProgressPill>
+                                <h3 className="text-2xl sm:text-3xl font-black text-[#002147] leading-tight">
                                   {PROMPT_PROFESSIONAL_DATA.title}
                                 </h3>
-                                <p className="text-slate-400 text-xs max-w-4xl leading-relaxed">
+                                <p className="text-[#002147]/80 text-xs sm:text-sm max-w-4xl leading-relaxed">
                                   {PROMPT_PROFESSIONAL_DATA.description}
                                 </p>
                               </div>
 
                               {/* Level Pro Stats */}
-                              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-4 w-full lg:w-auto shrink-0">
-                                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right">
-                                  <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'الدروس المنجزة' : 'LESSONS DONE'}</span>
-                                  <span className="text-xl font-mono text-amber-400 font-extrabold mt-1 block">{completedProLessons.length} / 24</span>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 w-full lg:w-auto shrink-0">
+                                <div className="bg-[#fdfaf3] p-3.5 rounded-xl border border-[#C49E3A]/30 text-right">
+                                  <span className="text-[10px] text-[#002147]/70 font-bold block leading-none">{isRtl ? 'الدروس المنجزة' : 'LESSONS DONE'}</span>
+                                  <span className="text-lg font-mono text-[#002147] font-extrabold mt-1 block">{completedProLessons.length} / 24</span>
                                 </div>
-                                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right">
-                                  <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'المشاريع العملية' : 'PROJECTS'}</span>
-                                  <span className="text-xl font-mono text-amber-400 font-extrabold mt-1 block">{Object.keys(proProjectSubmissions).length} / 4</span>
+                                <div className="bg-[#fdfaf3] p-3.5 rounded-xl border border-[#C49E3A]/30 text-right">
+                                  <span className="text-[10px] text-[#002147]/70 font-bold block leading-none">{isRtl ? 'المشاريع العملية' : 'PROJECTS'}</span>
+                                  <span className="text-lg font-mono text-[#002147] font-extrabold mt-1 block">{Object.keys(proProjectSubmissions).length} / 4</span>
                                 </div>
-                                <div className="bg-slate-950/60 p-4 rounded-2xl border border-white/5 text-right col-span-2">
-                                  <span className="text-[10px] text-slate-500 font-bold block leading-none">{isRtl ? 'حالة الاعتماد' : 'ACCREDITATION'}</span>
-                                  <span className="text-xs text-emerald-400 font-black mt-1.5 block">
+                                <div className="bg-[#fdfaf3] p-3.5 rounded-xl border border-[#C49E3A]/30 text-right col-span-2">
+                                  <span className="text-[10px] text-[#002147]/70 font-bold block leading-none">{isRtl ? 'حالة الاعتماد' : 'ACCREDITATION'}</span>
+                                  <span className="text-xs text-[#C49E3A] font-black mt-1.5 block">
                                     {(completedProLessons.length >= 24 && Object.keys(proProjectSubmissions).length >= 4 && proQuizPassed && proPledgeSigned) 
                                       ? (isRtl ? 'مؤهل - مستحق للدرع 🎓' : 'Qualified for Certificate 🎓')
                                       : (isRtl ? 'قيد الدراسة والتحصيل' : 'In Study Phase')}
@@ -6137,86 +6137,75 @@ The adventure is waiting!`
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </GoldCard>
 
                           {/* Prerequisites Notice */}
-                          <div className="bg-[#10100d] border border-amber-500/10 p-5 rounded-2xl flex items-center justify-start gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
+                          <div className="bg-[#fdfaf3] border border-[#C49E3A]/40 p-4 rounded-xl flex items-center justify-start gap-4">
+                            <div className="w-9 h-9 rounded-xl bg-[#E6C36A]/20 flex items-center justify-center text-[#002147] shrink-0 border border-[#C49E3A]/30">
                               <Info size={18} />
                             </div>
                             <div className="text-right">
-                              <span className="text-[10px] text-amber-400 font-black block leading-none">{isRtl ? 'المتطلبات الأساسية للالتحاق' : 'PREREQUISITES'}</span>
-                              <span className="text-xs font-semibold text-slate-300 mt-1 block">{PROMPT_PROFESSIONAL_DATA.prerequisites}</span>
+                              <span className="text-[10px] text-[#C49E3A] font-black block leading-none">{isRtl ? 'المتطلبات الأساسية للالتحاق' : 'PREREQUISITES'}</span>
+                              <span className="text-xs font-semibold text-[#002147]/85 mt-1 block">{PROMPT_PROFESSIONAL_DATA.prerequisites}</span>
                             </div>
                           </div>
 
                           {/* Levels Blocks */}
-                          <div className="space-y-12 border-b border-white/5 pb-10">
+                          <div className="space-y-8 border-b border-[#C49E3A]/20 pb-10">
                             {PROMPT_PROFESSIONAL_DATA.levels.map((level, levelIdx) => {
                               const levelDoneLessons = level.lessons.filter(l => completedProLessons.includes(l.lesson_number)).length;
                               const projectDraft = proProjectSubmissions[level.level_number] || '';
                               const projectSaved = proProjectSaved[level.level_number];
 
                               return (
-                                <div 
+                                <GoldCard 
                                   key={level.level_number}
-                                  className="bg-gradient-to-br from-[#0c1830]/80 to-slate-950/40 border border-white/5 rounded-3xl p-8 space-y-8 relative hover:border-amber-500/10 transition-all"
+                                  className="p-6 space-y-6 relative hover:border-[#C49E3A] transition-all"
                                 >
-                                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-6 text-right">
+                                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#C49E3A]/20 pb-4 text-right">
                                     <div className="space-y-2">
                                       <div className="flex items-center gap-2 justify-start">
-                                        <span className="px-3 py-0.5 bg-amber-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                        <ProgressPill className="text-[10px]">
                                           {isRtl ? `المستوى ${level.level_number}` : `Level ${level.level_number}`}
-                                        </span>
-                                        <span className="text-xs font-mono text-slate-500">({levelDoneLessons}/6 {isRtl ? 'محاضرات منجزة' : 'completed'})</span>
+                                        </ProgressPill>
+                                        <span className="text-xs font-mono text-[#002147]/65">({levelDoneLessons}/6 {isRtl ? 'محاضرات منجزة' : 'completed'})</span>
                                       </div>
-                                      <h4 className="text-2xl font-black text-white leading-tight">
+                                      <h4 className="text-xl sm:text-2xl font-black text-[#002147] leading-tight">
                                         {level.level_title}
                                       </h4>
-                                      <p className="text-slate-400 text-xs">
-                                        <strong className="text-amber-400 font-bold">{isRtl ? 'الهدف المنهجي للمستوى' : 'Level Objective'}: </strong> 
+                                      <p className="text-[#002147]/80 text-xs sm:text-sm">
+                                        <strong className="text-[#002147] font-bold">{isRtl ? 'الهدف المنهجي للمستوى' : 'Level Objective'}: </strong> 
                                         {level.level_goal}
                                       </p>
                                     </div>
                                   </div>
 
                                   {/* Lesson Grid */}
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-right">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-right">
                                     {level.lessons.map((lesson) => {
                                       const isComp = completedProLessons.includes(lesson.lesson_number);
                                       return (
-                                        <button
+                                        <LessonTile
                                           key={lesson.lesson_number}
+                                          order={lesson.lesson_number}
+                                          title={lesson.lesson_title}
+                                          done={isComp}
                                           onClick={() => setSelectedProLesson(lesson)}
-                                          className="w-full bg-[#001a38]/60 hover:bg-[#001a38]/90 hover:border-amber-500/20 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right text-xs font-semibold"
-                                        >
-                                          <div className="flex items-center gap-3 justify-start">
-                                            {isComp ? (
-                                              <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-                                            ) : (
-                                              <div className="w-4 h-4 rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
-                                            )}
-                                            <div className="text-right">
-                                              <span className="text-[10px] text-slate-500 block leading-none mb-1 font-mono">الدرس {lesson.lesson_number}</span>
-                                              <span className="text-xs font-bold font-sans text-slate-200 group-hover:text-amber-300 transition-colors">{lesson.lesson_title}</span>
-                                            </div>
-                                          </div>
-                                          <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors rotate-180" />
-                                        </button>
+                                        />
                                       );
                                     })}
                                   </div>
 
                                   {/* Level Project Submission Console */}
-                                  <div className="bg-[#001a38]/80 p-6 rounded-3xl border border-white/5 space-y-4">
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+                                  <div className="bg-[#fdfaf3] p-5 sm:p-6 rounded-2xl border border-[#C49E3A]/30 space-y-4">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#C49E3A]/20 pb-4">
                                       <div className="text-right">
-                                        <span className="text-[10px] text-amber-400 font-black tracking-wider uppercase block">💾 {isRtl ? 'مشروع جرد المستوى العملي المعزّز' : 'PRACTICAL LEVEL PROJECT'}</span>
-                                        <h5 className="text-sm font-black text-slate-200 mt-1">{level.project}</h5>
+                                        <span className="text-[10px] text-[#C49E3A] font-black tracking-wider uppercase block">💾 {isRtl ? 'مشروع جرد المستوى العملي المعزّز' : 'PRACTICAL LEVEL PROJECT'}</span>
+                                        <h5 className="text-sm font-black text-[#002147] mt-1">{level.project}</h5>
                                       </div>
-                                      <span className={`px-2.5 py-1 text-[10px] font-black rounded-full shrink-0 ${projectSaved ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}`}>
+                                      <ProgressPill className="text-[10px]">
                                         {projectSaved ? (isRtl ? 'تم تسليم المشروع ✓ وحصد +200 XP' : 'Project Submitted ✓ +200 XP') : (isRtl ? 'بانتظار الصياغة والتسليم' : 'Draft Pending Submission')}
-                                      </span>
+                                      </ProgressPill>
                                     </div>
 
                                     <textarea
@@ -6227,24 +6216,23 @@ The adventure is waiting!`
                                         setProProjectSaved(prev => ({ ...prev, [level.level_number]: false }));
                                       }}
                                       placeholder={isRtl ? "اكتب أو الصق كود الأمر والمطابقة البرمجية لمشروع هذا المستوى طبقاً للخبرات العلمية..." : "Detail your level prompt project or programming solutions here..."}
-                                      className="w-full bg-slate-950/70 border border-white/10 rounded-xl p-4 text-xs font-semibold text-white focus:outline-none focus:border-amber-400 transition-colors text-right resize-none placeholder-slate-500"
+                                      className="w-full bg-white border border-[#C49E3A]/40 rounded-xl p-4 text-xs font-semibold text-[#002147] focus:outline-none focus:border-[#C49E3A] transition-colors text-right resize-none placeholder-[#002147]/40"
                                     />
 
                                     <div className="flex justify-end">
-                                      <button
+                                      <PrimaryButton
                                         onClick={() => {
                                           if (!projectDraft.trim()) return;
                                           setProProjectSaved(prev => ({ ...prev, [level.level_number]: true }));
                                           setXp(prev => prev + 200);
                                         }}
                                         disabled={!projectDraft.trim() || projectSaved}
-                                        className="bg-[#C49E3A] hover:bg-[#b08c2f] disabled:opacity-50 text-[#002147] font-black px-6 py-3 rounded-xl text-xs transition-all active:scale-95 shadow-md shadow-amber-500/10"
                                       >
-                                        {projectSaved ? (isRtl ? '✓ تم حفظ واعتماد المشروع' : '✓ Saved and Certified') : (isRtl ? '💾 حفظ وإرسال مسودة المشروع (+200 XP)' : '💾 Save & Submit Level Project (+200 XP)')}
-                                      </button>
+                                        <span>{projectSaved ? (isRtl ? '✓ تم حفظ واعتماد المشروع' : '✓ Saved and Certified') : (isRtl ? '💾 حفظ وإرسال مسودة المشروع (+200 XP)' : '💾 Save & Submit Level Project (+200 XP)')}</span>
+                                      </PrimaryButton>
                                     </div>
                                   </div>
-                                </div>
+                                </GoldCard>
                               );
                             })}
                           </div>
@@ -7006,14 +6994,14 @@ Output Summary for [${topic}]:
                       )}
 
                       {/* Resources Directory */}
-                      <div id="pro_sandbox_playground" className="bg-[#00274f] border border-white/5 rounded-3xl p-8 space-y-6 text-right">
+                      <GoldCard className="p-6 sm:p-8 space-y-6 text-right">
                         <div className="flex items-center gap-3 justify-start">
-                          <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                          <div className="w-8 h-8 rounded-xl bg-[#E6C36A]/20 border border-[#C49E3A]/40 flex items-center justify-center text-[#002147]">
                             <BookOpen size={16} />
                           </div>
                           <div className="text-right">
-                            <h5 className="text-md font-black text-white">{isRtl ? '🛠️ أدوات وموارد مهندسي الأوامر المحترفين' : '🛠️ Pro Toolkit Resources'}</h5>
-                            <p className="text-xs text-slate-500">{isRtl ? 'أدوات معتمدة عالمياً ننصح بالعمل والإنتاج من خلالها في عالم الأعمال:' : 'Recommended corporate consoles for prompt hosting:'}</p>
+                            <h5 className="text-md font-black text-[#002147]">{isRtl ? '🛠️ أدوات وموارد مهندسي الأوامر المحترفين' : '🛠️ Pro Toolkit Resources'}</h5>
+                            <p className="text-xs text-[#002147]/70">{isRtl ? 'أدوات معتمدة عالمياً ننصح بالعمل والإنتاج من خلالها في عالم الأعمال:' : 'Recommended corporate consoles for prompt hosting:'}</p>
                           </div>
                         </div>
 
@@ -7030,49 +7018,54 @@ Output Summary for [${topic}]:
                               href={tool.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="bg-[#001a38] border border-white/10 hover:border-amber-400/30 text-white font-black p-4 rounded-xl text-[10px] text-center transition-all hover:-translate-y-1 block cursor-pointer"
+                              className="bg-white border border-[#C49E3A]/40 hover:border-[#C49E3A] text-[#002147] font-black p-3.5 rounded-xl text-[10px] text-center transition-all hover:-translate-y-1 block cursor-pointer shadow-sm"
                             >
                               🚀 {tool.name}
                             </a>
                           ))}
                         </div>
-                      </div>
+                      </GoldCard>
 
                     </div>
                   ) : curriculumType === 'advanced' ? (
-                    <div className="space-y-8">
-                      <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
-                        <Sparkles className="text-amber-400" />
-                        {isRtl ? 'المسارات التخصصية المتقدمة ✨' : 'Our Professional Advanced Tracks ✨'}
-                      </h3>
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <Sparkles className="text-[#C49E3A] w-6 h-6" />
+                        <h3 className="text-xl sm:text-2xl font-black text-[#002147] tracking-tight">
+                          {isRtl ? 'المسارات التخصصية المتقدمة ✨' : 'Our Professional Advanced Tracks ✨'}
+                        </h3>
+                      </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {ADVANCED_CURRICULUM_DATA.tracks.map((track, trackIdx) => (
-                          <div 
+                          <GoldCard 
                             key={track.track_name}
-                            className="bg-gradient-to-br from-[#0c1830] to-slate-950/45 border border-white/5 rounded-3xl p-8 space-y-6 flex flex-col justify-between hover:border-amber-400/20 transition-all hover:-translate-y-1 relative"
+                            className="p-5 sm:p-6 space-y-5 flex flex-col justify-between hover:border-[#C49E3A] transition-all hover:-translate-y-1 relative"
                           >
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                               <div className="flex items-center justify-between">
-                                <span className="px-3 py-1 bg-amber-500/10 text-amber-300 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/10">
+                                <ProgressPill className="text-[10px]">
                                   {isRtl ? `المسار ${trackIdx + 1}` : `Track ${trackIdx + 1}`}
-                                </span>
-                                <span className="text-xs font-bold text-slate-500 font-mono">0{trackIdx + 1}</span>
+                                </ProgressPill>
+                                <span className="text-xs font-bold text-[#002147]/60 font-mono">0{trackIdx + 1}</span>
                               </div>
-                              <h4 className="text-2xl font-black text-white leading-tight font-sans">
+                              <h4 className="text-lg sm:text-xl font-black text-[#002147] leading-tight font-sans">
                                 {track.track_name}
                               </h4>
-                              <p className="text-slate-400 text-xs leading-relaxed">
+                              <p className="text-[#002147]/75 text-xs leading-relaxed">
                                 {track.track_description}
                               </p>
                             </div>
 
-                            <div className="pt-6 border-t border-white/5 space-y-3">
+                            <div className="pt-4 border-t border-[#C49E3A]/20 space-y-2">
                               {track.lessons.map((lesson) => {
                                  const isCompleted = completedAdvancedLessons.includes(lesson.lesson_number);
                                  return (
-                                   <button
+                                   <LessonTile
                                      key={lesson.lesson_number}
+                                     order={lesson.lesson_number}
+                                     title={lesson.lesson_title}
+                                     done={isCompleted}
                                      onClick={() => {
                                        setSelectedLesson(lesson);
                                        setSandboxInputs({});
@@ -7082,91 +7075,74 @@ Output Summary for [${topic}]:
                                        setActiveWorkspaceTab('chapters');
                                        setActiveChapterIdx(0);
                                      }}
-                                     className="w-full bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-slate-200 p-4 rounded-xl flex items-center justify-between border border-white/5 group text-right hover:border-amber-400/30"
-                                   >
-                                     <div className="flex items-center gap-3">
-                                       {isCompleted ? (
-                                         <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-                                       ) : (
-                                         <div className="w-[16px] h-[16px] rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
-                                       )}
-                                       <span className="text-xs font-bold text-right">{lesson.lesson_title}</span>
-                                     </div>
-                                     <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors" />
-                                   </button>
+                                   />
                                  );
                               })}
                             </div>
-                          </div>
+                          </GoldCard>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-8">
-                      <h3 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
-                        <Layers className="text-amber-400" />
-                        {isRtl ? 'مستويات الرحلة العائلية 🚀' : 'Our Digital Exploration Levels 🚀'}
-                      </h3>
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <Layers className="text-[#C49E3A] w-6 h-6" />
+                        <h3 className="text-xl sm:text-2xl font-black text-[#002147] tracking-tight">
+                          {isRtl ? 'مستويات الرحلة العائلية 🚀' : 'Our Digital Exploration Levels 🚀'}
+                        </h3>
+                      </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {AI_CURRICULUM_DATA.program_levels.map((level, levelIdx) => (
-                          <div 
+                          <GoldCard 
                             key={level.level_number}
-                            className="bg-slate-900/45 border border-white/5 rounded-3xl p-8 space-y-6 flex flex-col justify-between hover:border-amber-500/20 transition-all hover:-translate-y-1 relative"
+                            className="p-5 sm:p-6 space-y-5 flex flex-col justify-between hover:border-[#C49E3A] transition-all hover:-translate-y-1 relative"
                           >
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                               <div className="flex items-center justify-between">
-                                <span className="px-3 py-1 bg-[#1a2e5c] text-amber-300 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                <ProgressPill className="text-[10px]">
                                   {isRtl ? `المستوى ${level.level_number}` : `Level ${level.level_number}`}
-                                </span>
-                                <span className="text-xs font-bold text-slate-500 font-mono">0{level.level_number}</span>
+                                </ProgressPill>
+                                <span className="text-xs font-bold text-[#002147]/60 font-mono">0{level.level_number}</span>
                               </div>
-                              <h4 className="text-2xl font-black text-white leading-tight font-sans">
+                              <h4 className="text-lg sm:text-xl font-black text-[#002147] leading-tight font-sans">
                                 {level.level_title}
                               </h4>
-                              <p className="text-slate-400 text-sm leading-relaxed">
+                              <p className="text-[#002147]/75 text-xs sm:text-sm leading-relaxed">
                                 {level.level_description}
                               </p>
                             </div>
 
-                            <div className="pt-6 border-t border-white/5 space-y-3">
+                            <div className="pt-4 border-t border-[#C49E3A]/20 space-y-2">
                               {level.lessons.map((lesson) => {
                                  const isCompleted = completedLessons.includes(lesson.lesson_number);
                                  return (
-                                   <button
+                                   <LessonTile
                                      key={lesson.lesson_number}
+                                     order={lesson.lesson_number}
+                                     title={lesson.lesson_title}
+                                     done={isCompleted}
                                      onClick={() => {
                                        setSelectedLesson(lesson);
                                        resetGames();
                                      }}
-                                     className="w-full bg-white/5 hover:bg-white/10 active:scale-95 transition-all text-slate-200 p-4 rounded-2xl flex items-center justify-between border border-white/5 group text-right hover:border-amber-400/30"
-                                   >
-                                     <div className="flex items-center gap-3">
-                                       {isCompleted ? (
-                                         <CheckCircle size={18} className="text-emerald-400 shrink-0" />
-                                       ) : (
-                                         <div className="w-[18px] h-[18px] rounded-full border border-slate-600 group-hover:border-amber-400 shrink-0" />
-                                       )}
-                                       <span className="text-xs font-bold">{lesson.lesson_title}</span>
-                                     </div>
-                                     <ChevronRight size={14} className="text-slate-500 group-hover:text-amber-400 transition-colors" />
-                                   </button>
+                                   />
                                  );
                               })}
 
                               {level.lessons.every(lesson => completedLessons.includes(lesson.lesson_number)) && (
-                                <button
+                                <PrimaryButton
                                   onClick={() => {
                                     setQuizLevel(level.level_number);
                                     setLobbyTab('perfection');
                                   }}
-                                  className="w-full bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all text-slate-950 font-black p-4 rounded-2xl flex items-center justify-center gap-2 border border-amber-400/20 text-xs mt-4 animate-pulse shadow-lg shadow-amber-500/10 cursor-pointer text-center"
+                                  className="w-full text-xs mt-3 cursor-pointer"
                                 >
-                                  📝 {isRtl ? `خوض اختبار المستوى ${level.level_number} المعتمد! 🏆` : `Take Certified Level ${level.level_number} Quiz! 🏆`}
-                                </button>
+                                  📝 <span>{isRtl ? `خوض اختبار المستوى ${level.level_number} المعتمد! 🏆` : `Take Certified Level ${level.level_number} Quiz! 🏆`}</span>
+                                </PrimaryButton>
                               )}
                             </div>
-                          </div>
+                          </GoldCard>
                         ))}
                       </div>
                     </div>
