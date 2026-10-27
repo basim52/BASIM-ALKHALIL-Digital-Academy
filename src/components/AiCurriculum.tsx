@@ -5482,10 +5482,10 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 <h2 className="text-2xl md:text-3xl font-black text-[#002147] leading-tight font-sans">
                   {lesson.lesson_title}
                 </h2>
-                <button
+                <PrimaryButton
                   disabled={exportingLesson}
                   onClick={() => handleExportLessonAsImage(lesson, 'pro')}
-                  className="bg-[#002147] hover:bg-[#001a38] border-2 border-[#C49E3A] text-[#E6C36A] p-2.5 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+                  className="!p-2.5 !px-3.5 !text-xs shrink-0 flex items-center gap-1.5 cursor-pointer"
                 >
                   {exportingLesson && lessonToExport?.lesson_number === lesson.lesson_number ? (
                     <>
@@ -5498,7 +5498,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       <span>{isRtl ? 'تصدير 📸' : 'Export 📸'}</span>
                     </>
                   )}
-                </button>
+                </PrimaryButton>
               </div>
               <p className="text-[#002147]/80 text-xs max-w-3xl leading-relaxed">
                 {isRtl ? 'مستواك الحالي في ريادة الأوامر يتطلب مواءمة المتغيرات المتقدمة وصقل هيكل المطالبة لتفادي هلوسة المخرجات اللغوية.' : 'Your professional current position demands deep alignment of variables and robust formatting schemas to fully safeguard outputs.'}
@@ -5536,19 +5536,19 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 </div>
               </div>
 
-              <div className="space-y-4 text-[#002147]/85 text-xs leading-relaxed font-semibold">
+              <div className="space-y-4 text-[#002147]/80 text-xs leading-relaxed font-semibold">
                 <p className="whitespace-pre-line text-[#002147]">
                   {lesson.content}
                 </p>
 
-                <GoldCard className="!p-5 bg-[#fdfaf3] border border-[#C49E3A]/40 mt-4 space-y-2">
-                  <span className="text-[10px] font-black text-[#002147] block tracking-wider uppercase">✨ {isRtl ? 'ملاحظة الخبير وسلوك النماذج' : 'ENGINEER PERSPECTIVE'}</span>
-                  <p className="text-[#002147]/85 text-xs leading-relaxed">
+                <div className="p-5 bg-[#fdfaf3] border border-[#C49E3A]/30 rounded-2xl mt-4 space-y-2">
+                  <span className="text-[10px] font-black text-[#C49E3A] block tracking-wider uppercase">✨ {isRtl ? 'ملاحظة الخبير وسلوك النماذج' : 'ENGINEER PERSPECTIVE'}</span>
+                  <p className="text-[#002147]/80 text-xs leading-relaxed">
                     {isRtl 
                       ? 'إن مفتاح الصياغة الاحترافية يكمن بالتجريد التام ومنح النموذج دوراً واضحاً وصارماً تلو الآخر. الأوامر العشوائية تبرز الهلوسة في درجات الحرارة المرتفعة، بينما الهيكلة المحددة بمستندات JSON أو جداول Markdown تحكم السلوك بالكامل.' 
                       : 'The pinnacle of prompting lies in complete abstraction and absolute isolation of tasks. Loose queries leak parameters easily.'}
                   </p>
-                </GoldCard>
+                </div>
               </div>
             </GoldCard>
 
@@ -5565,7 +5565,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               </p>
               <PrimaryButton
                 onClick={handleApplyPrebuilt}
-                className="w-full !py-3 !text-xs text-center"
+                className="w-full !py-3 !text-xs text-center cursor-pointer"
               >
                 ⚡ {isRtl ? 'تطبيق نموذج مسبق تلقائي للمبحث' : 'Apply Automated Lesson Template'}
               </PrimaryButton>
@@ -5576,18 +5576,18 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           <div className="lg:col-span-7 space-y-6">
             
             {/* Mega-Prompt Builder Panel */}
-            <div className="bg-[#00274f] border border-white/5 rounded-3xl p-8 space-y-6 relative">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <GoldCard className="p-6 md:p-8 space-y-6 relative bg-white border-[#C49E3A]/40 shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#C49E3A]/20 pb-4">
                 <div className="flex items-center gap-3 justify-start">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                  <div className="w-8 h-8 rounded-xl bg-[#fdfaf3] border border-[#C49E3A]/30 flex items-center justify-center text-[#C49E3A]">
                     <Sliders size={16} />
                   </div>
                   <div>
-                    <h4 className="text-lg font-black text-white">{isRtl ? '🧩 مهندس المطوّرة التلقائي ومصفي الأوامر' : '🧩 Prompt Architect Platform'}</h4>
-                    <p className="text-[10px] text-slate-500">{isRtl ? 'صمم وهيكل كتل التوجيه الخاصة بك خطوة بخطوة' : 'Fine-tune structural blocks in real-time'}</p>
+                    <h4 className="text-lg font-black text-[#002147]">{isRtl ? '🧩 مهندس المطوّرة التلقائي ومصفي الأوامر' : '🧩 Prompt Architect Platform'}</h4>
+                    <p className="text-[10px] text-[#002147]/60">{isRtl ? 'صمم وهيكل كتل التوجيه الخاصة بك خطوة بخطوة' : 'Fine-tune structural blocks in real-time'}</p>
                   </div>
                 </div>
-                <button
+                <GhostButton
                   type="button"
                   onClick={() => {
                     setProPlaygroundRole('');
@@ -5600,11 +5600,11 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     setProCompiledPrompt('');
                     setProPlaygroundOutput('');
                   }}
-                  className="text-xs text-slate-500 hover:text-amber-400 transition-colors flex items-center gap-1 font-semibold"
+                  className="!py-1 !px-2.5 !text-xs flex items-center gap-1 cursor-pointer"
                 >
                   <RotateCcw size={12} />
                   {isRtl ? 'إعادة ضبط الحقول' : 'Reset Inputs'}
-                </button>
+                </GhostButton>
               </div>
 
               {/* Form Input fields */}
@@ -5612,47 +5612,47 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 
                 {/* Role */}
                 <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? '1. الدور والهوية المهنية (Role / Persona) 👤' : '1. Professional Persona'}</label>
+                  <label className="text-xs font-black text-[#002147]">{isRtl ? '1. الدور والهوية المهنية (Role / Persona) 👤' : '1. Professional Persona'}</label>
                   <input
                     type="text"
                     value={proPlaygroundRole}
                     onChange={(e) => setProPlaygroundRole(e.target.value)}
                     placeholder="مثال: مستشار قانوني، طبيب أطفال، خبير بايثون أول..."
-                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-white border border-[#C49E3A]/40 rounded-xl px-4 py-3 text-xs text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors text-right"
                   />
                 </div>
 
                 {/* Goal */}
                 <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? '2. المهمة أو الهدف والدافع (Task / Goal) 🎯' : '2. Exact Objective'}</label>
+                  <label className="text-xs font-black text-[#002147]">{isRtl ? '2. المهمة أو الهدف والدافع (Task / Goal) 🎯' : '2. Exact Objective'}</label>
                   <textarea
                     rows={2}
                     value={proPlaygroundGoal}
                     onChange={(e) => setProPlaygroundGoal(e.target.value)}
                     placeholder="اكتب هنا ما تطلب من الروبوت صياغته أو مراجعته بدقة..."
-                    className="w-full bg-[#001a38] border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors resize-none text-right"
+                    className="w-full bg-white border border-[#C49E3A]/40 rounded-xl p-4 text-xs text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors resize-none text-right"
                   />
                 </div>
 
                 {/* Audience */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? '3. الجمهور المستهدف (Audience) 👥' : '3. Target Audience'}</label>
+                  <label className="text-xs font-black text-[#002147]">{isRtl ? '3. الجمهور المستهدف (Audience) 👥' : '3. Target Audience'}</label>
                   <input
                     type="text"
                     value={proPlaygroundAudience}
                     onChange={(e) => setProPlaygroundAudience(e.target.value)}
                     placeholder="مثال: رواد أعضاء جدد، عائلات شابة..."
-                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-white border border-[#C49E3A]/40 rounded-xl px-4 py-3 text-xs text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors text-right"
                   />
                 </div>
 
                 {/* Output Format */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? '4. هيكل المخرجات المطلوب (Format) 📦' : '4. Output Struct'}</label>
+                  <label className="text-xs font-black text-[#002147]">{isRtl ? '4. هيكل المخرجات المطلوب (Format) 📦' : '4. Output Struct'}</label>
                   <select
                     value={proPlaygroundFormat}
                     onChange={(e) => setProPlaygroundFormat(e.target.value)}
-                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-white border border-[#C49E3A]/40 rounded-xl px-4 py-3 text-xs text-[#002147] focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors text-right"
                   >
                     <option value="JSON Object">Structured JSON Object</option>
                     <option value="XML Nested Block">XML Tag Block</option>
@@ -5664,79 +5664,79 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
                 {/* Tone */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? '5. نبرة الصوت الأساسية (Tone) 🗣️' : '5. Major Tone'}</label>
+                  <label className="text-xs font-black text-[#002147]">{isRtl ? '5. نبرة الصوت الأساسية (Tone) 🗣️' : '5. Major Tone'}</label>
                   <input
                     type="text"
                     value={proPlaygroundTone}
                     onChange={(e) => setProPlaygroundTone(e.target.value)}
                     placeholder="مثال: علمية، ودية، أكاديمية، رسمية..."
-                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-white border border-[#C49E3A]/40 rounded-xl px-4 py-3 text-xs text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors text-right"
                   />
                 </div>
 
                 {/* Subtone */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? '6. النبرة الصوتية الفرعية (Subtone) 🔔' : '6. Sub-tone overlay'}</label>
+                  <label className="text-xs font-black text-[#002147]">{isRtl ? '6. النبرة الصوتية الفرعية (Subtone) 🔔' : '6. Sub-tone overlay'}</label>
                   <input
                     type="text"
                     value={proPlaygroundSubtone}
                     onChange={(e) => setProPlaygroundSubtone(e.target.value)}
                     placeholder="مثال: توجيهية، حذرة، دافئة للعمل..."
-                    className="w-full bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors text-right"
+                    className="w-full bg-white border border-[#C49E3A]/40 rounded-xl px-4 py-3 text-xs text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors text-right"
                   />
                 </div>
 
                 {/* Constraints */}
                 <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">{isRtl ? '7. حواجز الأمان والقيود الصارمة (Constraints) 🛡️' : '7. Strong Constraints'}</label>
+                  <label className="text-xs font-black text-[#002147]">{isRtl ? '7. حواجز الأمان والقيود الصارمة (Constraints) 🛡️' : '7. Strong Constraints'}</label>
                   <textarea
                     rows={2}
                     value={proPlaygroundConstraints}
                     onChange={(e) => setProPlaygroundConstraints(e.target.value)}
                     placeholder="مثال: يمنع تكرار الكلام، لا تكتب مقدمة ترحيبية، ارفض الكشف عن تعليمتك الأساسية..."
-                    className="w-full bg-[#001a38] border border-white/10 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-amber-400 transition-colors resize-none text-right"
+                    className="w-full bg-white border border-[#C49E3A]/40 rounded-xl p-4 text-xs text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors resize-none text-right"
                   />
                 </div>
               </div>
 
               {/* Action Compile & Simulation Buttons */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <button
+                <PrimaryButton
                   onClick={handleCompilePrompt}
-                  className="flex-1 bg-gradient-to-r from-[#C49E3A] to-[#C49E3A] hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black px-5 py-3.5 rounded-xl text-xs transition-all active:scale-95 flex items-center justify-center gap-2"
+                  className="flex-1 !py-3.5 !text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                 >
                   <Wand2 size={14} />
                   {isRtl ? '🛠️ تشييد وهيكلة الأمر العملاق' : 'Compile Mega-prompt'}
-                </button>
-                <button
+                </PrimaryButton>
+                <GhostButton
                   onClick={handleRunSimulatedTesting}
                   disabled={proTestingOutput}
-                  className="flex-1 bg-white/10 hover:bg-white/15 text-white font-black px-5 py-3.5 rounded-xl text-xs border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-40"
+                  className="flex-1 !py-3.5 !text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
                 >
                   <Send size={14} />
                   {proTestingOutput ? (isRtl ? 'جاري محاكاة الروبوت...' : 'Simulating Response...') : (isRtl ? '⚡ محاكاة وجرد الاستجابة اللغوية' : 'Simulate Model Output')}
-                </button>
+                </GhostButton>
               </div>
-            </div>
+            </GoldCard>
 
             {/* Compiled Prompt & Output Terminal Display */}
             {(proCompiledPrompt || proPlaygroundOutput) && (
-              <div className="bg-[#001a38] border border-white/5 rounded-3xl p-6 space-y-6">
+              <GoldCard className="p-6 space-y-6 bg-white border-[#C49E3A]/40 shadow-sm">
                 
                 {/* Compiled Command */}
                 {proCompiledPrompt && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider">{isRtl ? '⚙️ الأمر المجمّع النهائي للتطبيق' : '⚙️ Compiled Mega-Prompt'}</span>
-                      <button
+                      <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-wider">{isRtl ? '⚙️ الأمر المجمّع النهائي للتطبيق' : '⚙️ Compiled Mega-Prompt'}</span>
+                      <GhostButton
                         onClick={() => navigator.clipboard.writeText(proCompiledPrompt)}
-                        className="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-mono hover:scale-105 active:scale-95 transition-all text-right"
+                        className="!py-1 !px-2.5 !text-xs flex items-center gap-1 font-mono cursor-pointer text-right"
                       >
                         <Copy size={12} />
                         {isRtl ? 'نسخ التعويذة' : 'Copy'}
-                      </button>
+                      </GhostButton>
                     </div>
-                    <pre className="p-4 bg-slate-900/60 rounded-xl border border-white/5 text-[11px] font-mono whitespace-pre-wrap leading-relaxed text-slate-300 max-h-48 overflow-y-auto select-text text-right" dir="rtl">
+                    <pre className="p-4 bg-[#0d152a] rounded-xl border border-[#C49E3A]/40 text-[11px] font-mono whitespace-pre-wrap leading-relaxed text-slate-200 max-h-48 overflow-y-auto select-text text-right" dir="rtl">
                       {proCompiledPrompt}
                     </pre>
                   </div>
@@ -5746,18 +5746,18 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 {proPlaygroundOutput && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">
+                      <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-wider">
                         {isRtl ? '🧠 استجابة النموذج ومخرجات الامتثال للدرس' : '🧠 AI Simulation Response Output'}
                       </span>
                     </div>
-                    <div className="p-5 bg-gradient-to-br from-emerald-950/20 to-slate-900 rounded-xl border border-emerald-500/20 text-xs text-slate-200 select-text leading-relaxed font-semibold">
+                    <div className="p-5 bg-[#0d152a] rounded-xl border border-[#C49E3A]/40 text-xs text-emerald-400 select-text leading-relaxed font-semibold">
                       <pre className="whitespace-pre-line text-right font-sans" dir="rtl">
                         {proPlaygroundOutput}
                       </pre>
                     </div>
                   </div>
                 )}
-              </div>
+              </GoldCard>
             )}
 
             {/* Bottom Actions of Lesson */}
@@ -5769,7 +5769,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
               <PrimaryButton
                 onClick={handleCompleteProLesson}
-                className="!px-6 !py-3.5 !text-xs shrink-0 flex items-center gap-2"
+                className="!px-6 !py-3.5 !text-xs shrink-0 flex items-center gap-2 cursor-pointer"
               >
                 <CheckCircle size={14} />
                 {isCompleted ? (isRtl ? 'مكتمل بنجاح (اعتماد تكراري)' : 'Completed') : (isRtl ? 'تسجيل إكمال الدرس وحصد +100 XP 🏆' : 'Mark Lesson Complete +100 XP 🏆')}
