@@ -89,6 +89,7 @@ const AUTO_START_DELAY_MS = 350;
 export const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
 type MicPerm = 'granted' | 'denied' | 'prompt' | 'unknown';
 const MIC_DENIED_MSG = 'المايك مقفول لهالموقع. افتح قفل 🔒 جنب رابط الموقع في Chrome ← أذونات (الإعدادات) ← الميكروفون ← سماح، وبعدها حدّث الصفحة واضغط «اضغط وردّد».';
+const WRONG_MSG = '❌ في الجملة خطأ في النطق. اضغط المايك وعيدها، أو اضغط «تخطَّ».';
 const errMsg = (code: string): string => {
   switch (code) {
     case 'not-allowed': case 'service-not-allowed': return MIC_DENIED_MSG;
@@ -181,8 +182,10 @@ function useRepeatRecognition() {
         if (scored) return;
         const code = lastCode || 'no-result';
         setDebug(`${code}${started ? '' : ' · no-start'} · ${secs()}`);
-        // Something was heard but not in English letters (e.g. Arabic): say what was heard instead of «ما سمعتك».
-        setError(rawHeard.trim() ? `سمعتك تقول: «${rawHeard.trim()}». قلها بالإنجليزي مثل ما قالتها المعلمة واضغط «اضغط وردّد».` : errMsg(code));
+        // Speech that didn't match (or couldn't be made out) is a pronunciation miss, not «ما سمعتك».
+        const unclear = code === 'no-speech' || code === 'no-result';
+        if (rawHeard.trim()) setError(`${WRONG_MSG} سمعتك تقول: «${rawHeard.trim()}».`);
+        else setError(unclear && started ? WRONG_MSG : errMsg(code));
       };
       recRef.current = rec;
       try { rec.start(); }
@@ -466,9 +469,11 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
             <p className="text-[18px] font-black">{pct(res.score)}٪ {res.score >= 0.85 ? '🌟' : res.score >= 0.65 ? '👍' : '💪'}</p>
             <p className="text-[13px] font-bold text-slate-700">🗣️ سمعتك تقول: <span dir="ltr">“{res.transcript}”</span></p>
             {res.missing.length > 0 && <p className="text-[12px] font-bold text-rose-700">كلمات ما وضحت: <span dir="ltr">{res.missing.join(', ')}</span></p>}
+            {res.score < 0.65 && <p className="text-[12px] font-black text-rose-700" data-testid="repeat-wrong">❌ في الجملة خطأ. عيدها أو اضغط «تخطَّ».</p>}
           </div>
         )}
         <div className="flex gap-2">
+          {res && res.score !== null && res.score < 0.65 && <GhostButton onClick={next} className="py-3" data-testid="repeat-skip-wrong"><SkipForward size={14} />تخطَّ</GhostButton>}
           {res
             ? <PrimaryButton onClick={next} className="flex-1 py-3" data-testid="repeat-next"><CheckCircle2 size={16} />{(idx + 1) % ROUND === 0 || idx + 1 >= items.length ? 'شوف نتيجة الجولة' : 'التالي'}</PrimaryButton>
             : <GhostButton onClick={next} className="flex-1 py-3" data-testid="repeat-skip"><SkipForward size={14} />تخطَّ (بدون تقييم)</GhostButton>}
