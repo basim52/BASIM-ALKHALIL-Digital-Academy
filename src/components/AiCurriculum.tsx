@@ -7741,7 +7741,7 @@ Output Summary for [${topic}]:
                         <span className="font-extrabold text-amber-400 block">{isRtl ? '💬 نصيحة الأسبوع للمكثف:' : '💬 Quickstart Advice:'}</span>
                         <p>
                           {isRtl 
-                            ? 'أفضل نتائج التعلم تظهر حينما تناقش الآباء في "ركن العائلة" بعد تحدياتك! جربوا حوارات "ركن العائلة" لتكامل أفضل.' 
+                            ? 'أفضل نتائج التعلم تظهر حينما تناقش أهلك بعد تحدياتك! شاركهم اللي تعلمته اليوم.' 
                             : 'Learning AI is much more powerful when shared. Always run family chats with parents after completing your daily task!'}
                         </p>
                       </div>
