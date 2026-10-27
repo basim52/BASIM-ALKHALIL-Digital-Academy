@@ -4723,13 +4723,13 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
         {/* Right Column: Interactive SandBox Workspace and Simulator */}
         <div className="lg:col-span-7 space-y-6">
           {/* Workspace Tab Switcher */}
-          <div className="flex bg-[#00274f] border border-white/10 p-1.5 rounded-2xl gap-2">
+          <div className="flex bg-white border border-[#C49E3A]/40 p-1.5 rounded-2xl gap-2">
             <button
               onClick={() => setActiveWorkspaceTab('chapters')}
-              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeWorkspaceTab === 'chapters'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/10'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#002147] text-white shadow'
+                  : 'text-[#002147]/70 hover:bg-[#fdfaf3]'
               }`}
             >
               <BookOpen size={14} />
@@ -4737,10 +4737,10 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             </button>
             <button
               onClick={() => setActiveWorkspaceTab('sandbox')}
-              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeWorkspaceTab === 'sandbox'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/10'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#002147] text-white shadow'
+                  : 'text-[#002147]/70 hover:bg-[#fdfaf3]'
               }`}
             >
               <Terminal size={14} />
@@ -4748,16 +4748,16 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             </button>
             <button
               onClick={() => setActiveWorkspaceTab('quiz')}
-              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 relative ${
+              className={`flex-1 py-3.5 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-2 relative cursor-pointer ${
                 activeWorkspaceTab === 'quiz'
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-lg shadow-amber-500/10'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-[#002147] text-white shadow'
+                  : 'text-[#002147]/70 hover:bg-[#fdfaf3]'
               }`}
             >
               <Award size={14} />
               {isRtl ? 'اختبار الوحدة المعرفي 📝' : 'Unit Knowledge Quiz 📝'}
               {advancedQuizCompletedLessons.includes(lesson.lesson_number) && (
-                <span className="absolute top-2.5 right-2 w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="absolute top-2.5 right-2 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               )}
             </button>
           </div>
@@ -4765,23 +4765,23 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
           {activeWorkspaceTab === 'chapters' ? (
             <>
               {/* Chapters Panel */}
-              <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
+              <GoldCard className="p-6 space-y-6 bg-white border-[#C49E3A]/40 shadow-sm">
                 {/* Chapter Navigator Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#C49E3A]/20 pb-4">
                   <div className="text-right flex-1">
-                    <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                    <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-widest">
                       {isRtl ? `المنهج المتقدم • الدرس ${lesson.lesson_number}` : `Advanced Curriculum • Lesson ${lesson.lesson_number}`}
                     </span>
-                    <h3 className="text-xl font-black text-white mt-1 leading-tight">
+                    <h3 className="text-xl font-black text-[#002147] mt-1 leading-tight">
                       {isRtl ? 'الفصول التعليمية الخمسة 📚' : 'Five Educational Chapters 📚'}
                     </h3>
                   </div>
                   {/* Progress Indicator */}
-                  <div className="bg-slate-950/40 border border-white/5 px-4 py-2 rounded-xl flex items-center gap-2">
-                    <span className="text-xs text-slate-400 font-bold">
+                  <div className="bg-[#fdfaf3] border border-[#C49E3A]/30 px-4 py-2 rounded-xl flex items-center gap-2">
+                    <span className="text-xs text-[#002147]/70 font-bold">
                       {isRtl ? 'التقدم بالدرس:' : 'Progress:'}
                     </span>
-                    <span className="text-xs font-black text-amber-400 font-mono">
+                    <span className="text-xs font-black text-[#C49E3A] font-mono">
                       {Math.round(((activeChapterIdx + 1) / 5) * 100)}%
                     </span>
                   </div>
@@ -4797,10 +4797,10 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       <button
                         key={idx}
                         onClick={() => setActiveChapterIdx(idx)}
-                        className={`py-2.5 rounded-xl text-xs font-black border transition-all text-center ${
+                        className={`py-2.5 rounded-xl text-xs font-black border transition-all text-center cursor-pointer ${
                           isSelected
-                            ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 shadow-md'
-                            : 'bg-[#001a38]/50 border-white/5 text-slate-400 hover:text-white hover:bg-white/5'
+                            ? 'bg-[#C49E3A] border-[#C49E3A] text-[#002147] shadow-sm font-black'
+                            : 'bg-white border border-[#C49E3A]/40 text-[#002147] hover:bg-[#fdfaf3]'
                         }`}
                         title={chData.title}
                       >
@@ -4815,7 +4815,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                   const currentChapter = ADVANCED_LESSON_CHAPTERS[lesson.lesson_number]?.[activeChapterIdx];
                   if (!currentChapter) {
                     return (
-                      <div className="p-4 text-center text-slate-400 text-xs">
+                      <div className="p-4 text-center text-[#002147]/70 text-xs">
                         {isRtl ? 'جاري تحميل محتوى الفصل...' : 'Loading chapter content...'}
                       </div>
                     );
@@ -4827,11 +4827,11 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     <div className="space-y-6">
                       {/* Chapter Title & Prose */}
                       <div className="space-y-3">
-                        <h4 className="text-lg font-black text-amber-400 flex items-center justify-start gap-2 text-right">
-                          <span className="w-1.5 h-6 bg-amber-500 rounded-full shrink-0" />
+                        <h4 className="text-lg font-black text-[#002147] flex items-center justify-start gap-2 text-right">
+                          <span className="w-1.5 h-6 bg-[#C49E3A] rounded-full shrink-0" />
                           <span>{currentChapter.title}</span>
                         </h4>
-                        <p className="text-slate-300 text-xs leading-relaxed text-right select-text">
+                        <p className="text-[#002147]/80 text-xs leading-relaxed text-right select-text">
                           {currentChapter.content}
                         </p>
                       </div>
@@ -4839,7 +4839,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       {/* Code block if any */}
                       {currentChapter.code && (
                         <div className="space-y-2">
-                          <div className="flex justify-between items-center bg-slate-950 px-4 py-2 rounded-t-xl border-t border-x border-white/5">
+                          <div className="flex justify-between items-center bg-[#0d152a] px-4 py-2 rounded-t-xl border-t border-x border-[#C49E3A]/40">
                             <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
                               Python Playground
                             </span>
@@ -4857,13 +4857,13 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                                   }));
                                 }, 2000);
                               }}
-                              className="text-[10px] font-black text-amber-400 hover:text-amber-300 transition-all flex items-center gap-1 cursor-pointer"
+                              className="text-[10px] font-black text-[#C49E3A] hover:text-[#fdfaf3] transition-all flex items-center gap-1 cursor-pointer"
                             >
                               <Copy size={10} />
                               {isCopied ? (isRtl ? 'تم النسخ!' : 'Copied!') : (isRtl ? 'نسخ الكود' : 'Copy Code')}
                             </button>
                           </div>
-                          <pre className="bg-[#001a38] border-b border-x border-white/5 p-4 rounded-b-xl overflow-x-auto text-left select-all">
+                          <pre className="bg-[#0d152a] border-b border-x border-[#C49E3A]/40 p-4 rounded-b-xl overflow-x-auto text-left select-all">
                             <code className="text-xs font-mono text-emerald-400 leading-relaxed block">
                               {currentChapter.code}
                             </code>
@@ -4872,15 +4872,15 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       )}
 
                       {/* Takeaways and key facts */}
-                      <div className="bg-slate-950/40 border border-white/5 p-4 rounded-2xl space-y-3">
-                        <h5 className="text-xs font-black text-white flex items-center justify-start gap-1.5 text-right">
+                      <div className="bg-[#fdfaf3] border border-[#C49E3A]/30 p-4 rounded-2xl space-y-3">
+                        <h5 className="text-xs font-black text-[#002147] flex items-center justify-start gap-1.5 text-right">
                           <span>💡</span>
                           <span>{isRtl ? 'الفوائد والركائز الأساسية للامتحان:' : 'Key Academic Takeaways for the quiz:'}</span>
                         </h5>
                         <ul className="space-y-2 text-right">
                           {currentChapter.takeaways.map((takeaway, tIdx) => (
-                            <li key={tIdx} className="text-xs text-slate-300 flex items-start justify-start gap-2 select-text">
-                              <span className="text-emerald-400 mt-1 shrink-0">✔</span>
+                            <li key={tIdx} className="text-xs text-[#002147]/80 flex items-start justify-start gap-2 select-text font-medium">
+                              <span className="text-emerald-600 mt-1 shrink-0">✔</span>
                               <span>{takeaway}</span>
                             </li>
                           ))}
@@ -4888,7 +4888,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                       </div>
 
                       {/* Chapter footer actions (Next / Prev) */}
-                      <div className="flex justify-between items-center pt-4 border-t border-white/5">
+                      <div className="flex justify-between items-center pt-4 border-t border-[#C49E3A]/20">
                         <GhostButton
                           onClick={() => {
                             if (activeChapterIdx > 0) {
@@ -4938,35 +4938,35 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     </div>
                   );
                 })()}
-              </div>
+              </GoldCard>
             </>
           ) : activeWorkspaceTab === 'sandbox' ? (
             <>
               {/* Challenge list */}
-              <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
+              <GoldCard className="p-6 space-y-6 bg-white border-[#C49E3A]/40 shadow-sm">
                 <div>
-                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">{lesson.quest_card.section_title}</span>
-                  <h3 className="text-xl font-black text-white mt-1 leading-tight">{lesson.quest_card.activity_name}</h3>
-                  <p className="text-slate-400 text-xs mt-1">{lesson.quest_card.instructions}</p>
+                  <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-widest">{lesson.quest_card.section_title}</span>
+                  <h3 className="text-xl font-black text-[#002147] mt-1 leading-tight">{lesson.quest_card.activity_name}</h3>
+                  <p className="text-[#002147]/80 text-xs mt-1">{lesson.quest_card.instructions}</p>
                 </div>
 
                 <div className="space-y-4">
                   {lesson.quest_card.challenges.map((chal: any, idxx: number) => {
                     const isCopiedState = sandboxInputs[`copied_${chal.id}`] === 'true';
                     return (
-                      <div key={chal.id} className="p-4 bg-slate-950/40 rounded-2xl border border-white/5 space-y-3">
+                      <div key={chal.id} className="p-4 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-slate-400 text-xs font-bold font-mono">#{idxx + 1}</span>
-                          <span className="text-[10px] text-amber-400 font-black bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">{chal.difficulty}</span>
+                          <span className="text-[#002147]/60 text-xs font-bold font-mono">#{idxx + 1}</span>
+                          <span className="text-[10px] text-[#002147] font-black bg-[#C49E3A]/20 px-2.5 py-0.5 rounded border border-[#C49E3A]/40">{chal.difficulty}</span>
                         </div>
 
-                        <div className="bg-[#0d152a] p-4 rounded-xl border border-white/5 font-mono text-xs leading-relaxed text-slate-300 relative select-text whitespace-pre-wrap">
+                        <div className="bg-[#0d152a] p-4 rounded-xl border border-[#C49E3A]/40 font-mono text-xs leading-relaxed text-slate-200 relative select-text whitespace-pre-wrap">
                           {chal.pattern}
                           
                           {/* Copy template button */}
                           <button
                             onClick={() => handleCopyText(chal.pattern, chal.id)}
-                            className="absolute bottom-2 left-2 bg-slate-800 hover:bg-slate-700 text-amber-400 p-1.5 rounded-lg text-[9px] font-black flex items-center gap-1 transition-all"
+                            className="absolute bottom-2 left-2 bg-[#002147] hover:bg-[#001a38] text-[#C49E3A] hover:text-[#fdfaf3] border border-[#C49E3A]/40 p-1.5 rounded-lg text-[9px] font-black flex items-center gap-1 transition-all cursor-pointer"
                           >
                             {isCopiedState ? <Check size={10} className="text-emerald-400" /> : <Copy size={10} />}
                             {isCopiedState ? (isRtl ? 'تم نسخ القالب!' : 'Copied!') : (isRtl ? 'نسخ القالب' : 'Copy Template')}
@@ -4978,25 +4978,25 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                           value={sandboxInputs[`ans_${chal.id}`] || ''}
                           onChange={(e) => setSandboxInputs(prev => ({ ...prev, [`ans_${chal.id}`]: e.target.value }))}
                           rows={2}
-                          className="w-full text-xs font-semibold bg-[#001a38]/90 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors"
+                          className="w-full text-xs font-semibold bg-white border border-[#C49E3A]/40 rounded-xl px-4 py-3 text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] focus:ring-1 focus:ring-[#C49E3A] transition-colors"
                         />
                       </div>
                     );
                   })}
 
                   {lesson.quest_card.discussion_question && (
-                    <div className="p-4 bg-[#C49E3A]/5 rounded-2xl border border-[#C49E3A]/15">
-                      <h4 className="text-xs font-black text-[#E4C77A] uppercase tracking-widest mb-1 flex items-center gap-2">
-                        <HelpCircle size={14} />
+                    <div className="p-4 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30">
+                      <h4 className="text-xs font-black text-[#C49E3A] uppercase tracking-widest mb-1 flex items-center gap-2">
+                        <HelpCircle size={14} className="text-[#C49E3A]" />
                         {isRtl ? 'سؤال للنقاش والمطالعة' : 'DISCUSSION QUESTION'}
                       </h4>
-                      <p className="text-slate-300 text-xs leading-relaxed">
+                      <p className="text-[#002147]/80 text-xs leading-relaxed">
                         {lesson.quest_card.discussion_question}
                       </p>
                     </div>
                   )}
                 </div>
-              </div>
+              </GoldCard>
 
               {/* Dynamic Interactive AI Simulator Console */}
               <div className="bg-slate-950 border border-white/10 rounded-3xl p-6 space-y-4 font-mono relative overflow-hidden">
