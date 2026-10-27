@@ -4999,22 +4999,20 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
               </GoldCard>
 
               {/* Dynamic Interactive AI Simulator Console */}
-              <div className="bg-slate-950 border border-white/10 rounded-3xl p-6 space-y-4 font-mono relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
-                
-                <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                  <span className="text-slate-400 text-xs font-black font-mono tracking-widest flex items-center gap-2 text-right">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <GoldCard className="p-6 space-y-4 font-mono relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
+                <div className="flex justify-between items-center border-b border-[#C49E3A]/20 pb-3">
+                  <span className="text-[#002147] text-xs font-black font-mono tracking-widest flex items-center gap-2 text-right">
+                    <span className="w-2 h-2 rounded-full bg-[#C49E3A] animate-pulse" />
                     {isRtl ? 'معمل محاكاة الذكاء الاصطناعي وبايثون' : 'INTELLIGENT INTEGRATION LAB SANDBOX'}
                   </span>
-                  <span className="text-[9px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">{lesson.lesson_number >= 7 ? 'PYTHON CONSOLE' : 'NEURAL INTERACTIVE CHAT'}</span>
+                  <span className="text-[10px] text-[#002147] font-black bg-[#C49E3A]/20 px-2 py-0.5 rounded border border-[#C49E3A]/40">{lesson.lesson_number >= 7 ? 'PYTHON CONSOLE' : 'NEURAL INTERACTIVE CHAT'}</span>
                 </div>
 
                 {/* Python track simulator (Lessons 7-9) */}
                 {lesson.lesson_number >= 7 ? (
                   <div className="space-y-4">
-                    <div className="p-4 bg-[#0d162e] rounded-xl border border-white/5 space-y-3">
-                      <label className="block text-xs font-bold text-amber-300 text-right">
+                    <div className="p-4 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-3">
+                      <label className="block text-xs font-bold text-[#002147] text-right">
                         {isRtl ? 'اسم المبرمج (مرر متغير الاسم البرمجي):' : 'Programmer Name (Pass to your input command):'}
                       </label>
                       <input
@@ -5022,24 +5020,24 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         placeholder={isRtl ? 'مبرمج التقدم الحكيم' : 'Basim the Coder'}
                         value={sandboxInputs['python_name'] || ''}
                         onChange={(e) => setSandboxInputs(prev => ({ ...prev, python_name: e.target.value }))}
-                        className="w-full text-xs bg-[#001a38]/80 border border-white/10 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-amber-500 text-right"
+                        className="w-full text-xs bg-white border border-[#C49E3A]/40 rounded-xl px-3 py-2 text-[#002147] placeholder:text-[#002147]/40 font-mono focus:outline-none focus:border-[#C49E3A] text-right"
                       />
 
-                      <button
+                      <PrimaryButton
                         disabled={simulating}
                         onClick={handleRunPython}
-                        className="w-full bg-[#fb923c] text-slate-950 font-black text-xs py-2.5 rounded-xl hover:bg-[#b08c2f] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                        className="w-full !py-2.5 text-xs flex items-center justify-center gap-2"
                       >
-                        <Play size={12} fill="#020617" />
+                        <Play size={12} fill="currentColor" />
                         {simulating ? (isRtl ? 'جاري محاكاة الخادم ولغة بايثون...' : 'Simulating Local Interpreter...') : (isRtl ? 'شغل كود بايثون وعالج الأوامر ⚡' : 'Run Python Simulation script ⚡')}
-                      </button>
+                      </PrimaryButton>
                     </div>
 
                     {/* Simulated result terminal terminal-logs */}
                     {(simulating || simResponse) && (
-                      <div className="bg-[#001a38] p-4 rounded-xl border border-white/5 text-xs text-[#E4C77A] space-y-2 select-text font-mono whitespace-pre-wrap leading-relaxed">
+                      <div className="bg-[#0d152a] p-4 rounded-xl border border-[#C49E3A]/40 text-xs text-[#E6C36A] space-y-2 select-text font-mono whitespace-pre-wrap leading-relaxed">
                         {simulating && simulatingStep === 1 && (
-                          <div className="text-amber-400 animate-pulse">🛠️ {isRtl ? 'مرحبًا بك في معمل Google Colab المحاكي. جاري تحميل المفسر الأساسي ونواة بايثون...' : 'Initializing cloud VM. Spawning Python kernel container...'}</div>
+                          <div className="text-[#C49E3A] animate-pulse">🛠️ {isRtl ? 'مرحبًا بك في معمل Google Colab المحاكي. جاري تحميل المفسر الأساسي ونواة بايثون...' : 'Initializing cloud VM. Spawning Python kernel container...'}</div>
                         )}
                         {simulating && simulatingStep === 2 && (
                           <div className="text-slate-400">⚙️ {isRtl ? 'جاري الاتصال بالـ API ومزامنة رموز مفاتيح OpenAI / Gemini ...' : 'Connecting to OpenAI API host... Securing network links...'}</div>
@@ -5051,9 +5049,9 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                 ) : (
                   /* Conversational interface (Lessons 1-6) */
                   <div className="space-y-4">
-                    <div className="bg-[#001a38] p-4 rounded-xl border border-white/5 max-h-56 overflow-y-auto text-xs space-y-3 font-semibold">
+                    <div className="bg-[#fdfaf3] p-4 rounded-2xl border border-[#C49E3A]/30 max-h-56 overflow-y-auto text-xs space-y-3 font-semibold">
                       {/* Default greetings */}
-                      <div className="text-slate-400 leading-relaxed italic text-center pb-2 border-b border-white/5">
+                      <div className="text-[#002147]/70 leading-relaxed italic text-center pb-2 border-b border-[#C49E3A]/20">
                         💡 {isRtl ? 'قم بنسخ أي من التحديات بالأعلى وصياغة مفرداتها وتفعيل البوت لمشاهدة التحليل ذكيًا ومطابقًا لتعاويذك السحرية!' : 'Paste any challenge template above, modify components, and write into simulation chat to experience real-time AI reply.'}
                       </div>
 
@@ -5061,10 +5059,10 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         <div key={mIdx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           <div className={`p-3 rounded-2xl max-w-sm border leading-relaxed ${
                             msg.role === 'user' 
-                              ? 'bg-amber-500/10 border-amber-500/20 text-slate-100 rounded-tr-none text-right' 
-                              : 'bg-slate-900 border-white/5 text-slate-200 rounded-tl-none text-right'
+                              ? 'bg-[#002147] border-[#002147] text-white rounded-tr-none text-right shadow-sm' 
+                              : 'bg-[#fdfaf3] border-[#C49E3A]/30 text-[#002147] rounded-tl-none text-right shadow-sm'
                           }`}>
-                            <div className="text-[8px] font-black text-amber-400 uppercase tracking-widest mb-1">{msg.role === 'user' ? (isRtl ? 'أنت (صاحب التعويذة)' : 'YOU (PROMPT OWNER)') : (isRtl ? 'البوت المحاكي الذكي 🧠' : 'AI BOT ASSISTANT 🧠')}</div>
+                            <div className={`text-[8px] font-black uppercase tracking-widest mb-1 ${msg.role === 'user' ? 'text-[#E6C36A]' : 'text-[#C49E3A]'}`}>{msg.role === 'user' ? (isRtl ? 'أنت (صاحب التعويذة)' : 'YOU (PROMPT OWNER)') : (isRtl ? 'البوت المحاكي الذكي 🧠' : 'AI BOT ASSISTANT 🧠')}</div>
                             <div className="whitespace-pre-wrap select-text text-xs leading-relaxed">{msg.content}</div>
                           </div>
                         </div>
@@ -5072,7 +5070,7 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
 
                       {simulating && (
                         <div className="flex justify-start">
-                          <div className="bg-slate-900/60 p-3 rounded-2xl rounded-tl-none text-slate-400 border border-white/5 flex items-center gap-2 animate-pulse text-right">
+                          <div className="bg-[#fdfaf3] p-3 rounded-2xl rounded-tl-none text-[#002147]/80 border border-[#C49E3A]/30 flex items-center gap-2 animate-pulse text-right">
                             <span>🧠</span>
                             <span>{isRtl ? 'الذكاء الاصطناعي يحلل تعاويذك ويولّد المخرجات...' : 'Smart model is processing your context and generating text...'}</span>
                           </div>
@@ -5087,25 +5085,25 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         value={sandboxInputs['sim_chat_input'] || ''}
                         onChange={(e) => setSandboxInputs(prev => ({ ...prev, sim_chat_input: e.target.value }))}
                         onKeyDown={(e) => e.key === 'Enter' && handleSimSubmit()}
-                        className="flex-1 bg-[#001a38] border border-white/10 rounded-xl px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 text-right"
+                        className="flex-1 bg-white border border-[#C49E3A]/40 rounded-xl px-4 py-3 text-xs font-semibold text-[#002147] placeholder:text-[#002147]/40 focus:outline-none focus:border-[#C49E3A] text-right"
                       />
-                      <button
+                      <PrimaryButton
                         onClick={handleSimSubmit}
                         disabled={simulating}
-                        className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] px-4 rounded-xl flex items-center justify-center font-black text-xs shrink-0"
+                        className="!px-4 shrink-0 flex items-center justify-center cursor-pointer"
                       >
                         <Send size={14} />
-                      </button>
+                      </PrimaryButton>
                     </div>
                   </div>
                 )}
-              </div>
+              </GoldCard>
 
               {/* Action layout */}
               <div className="flex justify-end pt-4">
                 <PrimaryButton
                   onClick={handleCompleteLessonAndAwardXp}
-                  className="!px-8 !py-3.5 !text-sm flex items-center gap-3"
+                  className="!px-8 !py-3.5 !text-sm flex items-center gap-3 cursor-pointer"
                 >
                   <CheckCircle size={18} />
                   {isCompleted ? (isRtl ? 'تجاوز التحدي مجدداً' : 'Replay challenge completed') : (isRtl ? 'أكملت المغامرة بنجاح وحصدت +50 XP 🏆' : 'Adventure completed successfully (+50 XP) 🏆')}
@@ -5114,23 +5112,23 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
             </>
           ) : (
             /* Interactive Advanced Level Unit Quiz View */
-            <div className="bg-[#00274f] border border-white/10 rounded-3xl p-6 space-y-6">
-              <div className="flex justify-between items-center border-b border-white/5 pb-4">
+            <GoldCard className="p-6 space-y-6 bg-white border-[#C49E3A]/40 shadow-sm">
+              <div className="flex justify-between items-center border-b border-[#C49E3A]/20 pb-4">
                 <div>
-                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
+                  <span className="text-[10px] font-black text-[#C49E3A] uppercase tracking-widest">
                     {isRtl ? `قياس الفهم المعرفي للوحدة ${lesson.lesson_number}` : `COMPREHENSION CHECK UNIT ${lesson.lesson_number}`}
                   </span>
-                  <h3 className="text-xl font-black text-white mt-1 leading-tight">
+                  <h3 className="text-xl font-black text-[#002147] mt-1 leading-tight">
                     {isRtl ? 'اختبار الجودة والخبرة الأكاديمية 📝' : 'Unit Academic Assessment 📝'}
                   </h3>
-                  <p className="text-slate-400 text-xs mt-1">
+                  <p className="text-[#002147]/80 text-xs mt-1">
                     {isRtl 
                       ? 'أجب عن الأسئلة الثلاثة التالية لتقييم مستواك وحصد وسام التخرج والـ XP الأكاديمي!'
                       : 'Answer the following 3 questions to assess your mastery and earn graduation points!'}
                   </p>
                 </div>
-                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-                  <Award className="text-amber-400" size={24} />
+                <div className="p-3 bg-[#fdfaf3] border border-[#C49E3A]/30 rounded-2xl">
+                  <Award className="text-[#C49E3A]" size={24} />
                 </div>
               </div>
 
@@ -5141,17 +5139,17 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                     const hasSelected = selectedOptIdx !== undefined;
 
                     return (
-                      <div key={qIdx} className="p-5 bg-slate-950/40 rounded-2xl border border-white/5 space-y-4">
+                      <div key={qIdx} className="p-5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-4">
                         <div className="flex items-start gap-2">
-                          <span className="text-xs font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20 shrink-0">
+                          <span className="text-xs font-black text-[#002147] bg-[#C49E3A]/20 px-2.5 py-1 rounded border border-[#C49E3A]/40 shrink-0">
                             {isRtl ? `سؤال ${qIdx + 1}` : `Q${qIdx + 1}`}
                           </span>
                           <div className="space-y-1">
-                            <h4 className="text-sm font-black text-slate-100 leading-relaxed text-right">
+                            <h4 className="text-sm font-black text-[#002147] leading-relaxed text-right">
                               {isRtl ? q.question : (q.questionEn || q.question)}
                             </h4>
                             {isRtl && q.questionEn && (
-                              <p className="text-[10px] font-mono text-slate-400 italic text-right">
+                              <p className="text-[10px] font-mono text-[#002147]/60 italic text-right">
                                 {q.questionEn}
                               </p>
                             )}
@@ -5165,17 +5163,17 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                             const optEn = q.optionsEn ? q.optionsEn[optIdx] : null;
 
                             // Styles based on submission state
-                            let optionStyle = 'border-white/5 hover:border-white/15 bg-[#070e1b] text-slate-300';
+                            let optionStyle = 'border-[#C49E3A]/40 hover:border-[#C49E3A] bg-white text-[#002147]';
                             if (advancedQuizSubmitted) {
                               if (isCorrect) {
-                                optionStyle = 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400';
+                                optionStyle = 'border-emerald-400 bg-emerald-50 text-emerald-800 font-bold';
                               } else if (isSelected && !isCorrect) {
-                                optionStyle = 'border-rose-500/30 bg-rose-500/10 text-rose-400';
+                                optionStyle = 'border-rose-300 bg-rose-50 text-rose-700 font-bold';
                               } else {
-                                optionStyle = 'border-white/5 bg-slate-950/20 text-slate-500';
+                                optionStyle = 'border-[#C49E3A]/20 bg-white/60 text-[#002147]/40';
                               }
                             } else if (isSelected) {
-                              optionStyle = 'border-amber-500 text-amber-400 bg-amber-500/5 shadow-md shadow-amber-500/5';
+                              optionStyle = 'border-[#C49E3A] bg-[#C49E3A]/15 text-[#002147] font-black shadow-sm';
                             }
 
                             return (
@@ -5183,22 +5181,22 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                                 key={optIdx}
                                 disabled={advancedQuizSubmitted}
                                 onClick={() => setAdvancedQuizAnswers(prev => ({ ...prev, [qIdx]: optIdx }))}
-                                className={`w-full p-4 rounded-xl border text-right transition-all flex flex-col gap-1 text-xs font-semibold ${optionStyle}`}
+                                className={`w-full p-4 rounded-xl border text-right transition-all flex flex-col gap-1 text-xs font-semibold cursor-pointer ${optionStyle}`}
                               >
                                 <div className="flex justify-between items-center w-full">
                                   <span>{opt}</span>
                                   {!advancedQuizSubmitted && isSelected && (
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#C49E3A]" />
                                   )}
                                   {advancedQuizSubmitted && isCorrect && (
-                                    <span className="text-[10px] font-black uppercase text-emerald-400 tracking-widest shrink-0">✓ {isRtl ? 'صحيح' : 'Correct'}</span>
+                                    <span className="text-[10px] font-black uppercase text-emerald-800 tracking-widest shrink-0">✓ {isRtl ? 'صحيح' : 'Correct'}</span>
                                   )}
                                   {advancedQuizSubmitted && isSelected && !isCorrect && (
-                                    <span className="text-[10px] font-black uppercase text-rose-400 tracking-widest shrink-0">✗ {isRtl ? 'خطأ' : 'Wrong'}</span>
+                                    <span className="text-[10px] font-black uppercase text-rose-700 tracking-widest shrink-0">✗ {isRtl ? 'خطأ' : 'Wrong'}</span>
                                   )}
                                 </div>
                                 {optEn && (
-                                  <span className="text-[10px] text-slate-400 font-mono italic mt-0.5 block text-right">
+                                  <span className="text-[10px] text-[#002147]/60 font-mono italic mt-0.5 block text-right">
                                     {optEn}
                                   </span>
                                 )}
@@ -5211,18 +5209,18 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         {advancedQuizSubmitted && (
                           <div className={`p-4 rounded-xl border leading-relaxed text-xs space-y-1 ${
                             selectedOptIdx === q.correctIndex 
-                              ? 'bg-emerald-500/5 border-emerald-500/10 text-slate-300' 
-                              : 'bg-slate-900 border-white/5 text-slate-300'
+                              ? 'bg-emerald-50 border-emerald-200 text-[#002147]/80' 
+                              : 'bg-white border-[#C49E3A]/30 text-[#002147]/80'
                           }`}>
-                            <div className="font-bold text-amber-400 text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <div className="font-bold text-[#C49E3A] text-[10px] uppercase tracking-wider mb-1 flex items-center gap-1">
                               <Info size={12} />
                               {isRtl ? 'التفسير العلمي والأكاديمي:' : 'Academic Explanation:'}
                             </div>
-                            <p className="text-slate-300 leading-relaxed text-right">
+                            <p className="text-[#002147]/80 leading-relaxed text-right">
                               {isRtl ? q.explanation : (q.explanationEn || q.explanation)}
                             </p>
                             {isRtl && q.explanationEn && (
-                              <p className="text-[10px] font-mono text-slate-400 italic text-right border-t border-white/5 pt-1 mt-1">
+                              <p className="text-[10px] font-mono text-[#002147]/60 italic text-right border-t border-[#C49E3A]/20 pt-1 mt-1">
                                 {q.explanationEn}
                               </p>
                             )}
@@ -5233,17 +5231,17 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                   })}
 
                   {/* Submission and Scoring Area */}
-                  <div className="border-t border-white/5 pt-6 flex flex-col items-center gap-4">
+                  <div className="border-t border-[#C49E3A]/20 pt-6 flex flex-col items-center gap-4">
                     {!advancedQuizSubmitted ? (
                       <div className="w-full text-center space-y-3">
                         {Object.keys(advancedQuizAnswers).length < 3 && (
-                          <p className="text-xs text-amber-400 animate-pulse font-medium">
+                          <p className="text-xs text-[#C49E3A] animate-pulse font-medium">
                             {isRtl 
                               ? `⚠️ الرجاء الإجابة على جميع الأسئلة لتسليم التقييم (المتبقي: ${3 - Object.keys(advancedQuizAnswers).length})` 
                               : `⚠️ Please answer all questions before submitting (Remaining: ${3 - Object.keys(advancedQuizAnswers).length})`}
                           </p>
                         )}
-                        <button
+                        <PrimaryButton
                           onClick={() => {
                             if (!lesson.quiz) return;
                             let correctCount = 0;
@@ -5277,22 +5275,22 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                             }
                           }}
                           disabled={Object.keys(advancedQuizAnswers).length < 3}
-                          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:from-slate-800 disabled:to-slate-800 text-slate-950 disabled:text-slate-500 font-black py-4 rounded-2xl transition-all shadow-lg active:scale-[0.98] text-xs uppercase tracking-wider flex justify-center items-center gap-2"
+                          className="w-full !py-4 !rounded-2xl text-xs uppercase tracking-wider flex justify-center items-center gap-2 cursor-pointer shadow-lg"
                         >
                           <Award size={16} />
                           {isRtl ? 'تأكيد الإجابات واجتياز الاختبار 🎓' : 'Submit Answers & Verify Mastery 🎓'}
-                        </button>
+                        </PrimaryButton>
                       </div>
                     ) : (
-                      <div className="w-full text-center space-y-4 bg-slate-950/60 p-6 rounded-3xl border border-white/5">
+                      <div className="w-full text-center space-y-4 bg-[#fdfaf3] p-6 rounded-3xl border border-[#C49E3A]/30">
                         <div className="flex flex-col items-center gap-1.5">
-                          <span className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-black">
+                          <span className="text-[10px] text-[#002147]/60 uppercase tracking-widest font-mono font-black">
                             {isRtl ? 'نتيجة تقييم الوحدة المعرفي' : 'UNIT ASSESSMENT SCORE'}
                           </span>
-                          <div className="text-4xl font-black text-amber-400 font-mono tracking-tighter">
+                          <div className="text-4xl font-black text-[#002147] font-mono tracking-tighter">
                             {advancedQuizScore} / 3
                           </div>
-                          <span className="text-xs text-slate-300 font-semibold">
+                          <span className="text-xs text-[#002147]/80 font-semibold">
                             {isRtl 
                               ? `النسبة المكتسبة: ${Math.round((advancedQuizScore / 3) * 100)}%`
                               : `Score Earned: ${Math.round((advancedQuizScore / 3) * 100)}%`}
@@ -5300,22 +5298,22 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                         </div>
 
                         {advancedQuizScore >= 2 ? (
-                          <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 space-y-2 max-w-md mx-auto">
-                            <h4 className="font-black text-sm">
+                          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 space-y-2 max-w-md mx-auto">
+                            <h4 className="font-black text-sm text-emerald-800">
                               {isRtl ? '🎉 تهانينا الحارة يا بطل التميز المعرفي!' : '🎉 Congratulations, Knowledge Champion!'}
                             </h4>
-                            <p className="text-[11px] leading-relaxed text-slate-300">
+                            <p className="text-[11px] leading-relaxed text-emerald-800/80">
                               {isRtl 
                                 ? 'لقد نجحت وتجاوزت اختبار هذه الوحدة بامتياز! تم ترقية حسابك وحصد مكافأة التميز الأكاديمي (+100 XP) بنجاح.'
                                 : 'You have successfully passed the unit quiz! Your progress has been logged and (+100 XP) has been awarded.'}
                             </p>
                           </div>
                         ) : (
-                          <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 space-y-2 max-w-md mx-auto">
-                            <h4 className="font-black text-sm">
+                          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 space-y-2 max-w-md mx-auto">
+                            <h4 className="font-black text-sm text-rose-800">
                               {isRtl ? '⚠️ مراجعة مطلوبة لضمان الاتقان' : '⚠️ Review Required for Mastery'}
                             </h4>
-                            <p className="text-[11px] leading-relaxed text-slate-300">
+                            <p className="text-[11px] leading-relaxed text-rose-800/80">
                               {isRtl 
                                 ? 'تحتاج لتحقيق درجة 2/3 (66%) على الأقل لاجتياز الوحدة. لا تقلق، اقرأ مفهوم الوحدة من جديد وأعد المحاولة!'
                                 : 'You need at least a 2/3 (66%) score to pass. Read the concept details on the left and try again!'}
@@ -5323,27 +5321,27 @@ const ADVANCED_LESSON_CHAPTERS: Record<number, { title: string; content: string;
                           </div>
                         )}
 
-                        <button
+                        <GhostButton
                           onClick={() => {
                             setAdvancedQuizAnswers({});
                             setAdvancedQuizSubmitted(false);
                             setAdvancedQuizScore(0);
                           }}
-                          className="px-6 py-3 bg-[#0d162e] hover:bg-slate-900 border border-white/10 text-slate-300 hover:text-white font-black text-xs rounded-xl transition-all inline-flex items-center gap-2"
+                          className="px-6 py-3 text-xs inline-flex items-center gap-2 cursor-pointer"
                         >
                           <RotateCcw size={13} />
                           {isRtl ? 'إعادة المحاولة مجدداً' : 'Retake Assessment'}
-                        </button>
+                        </GhostButton>
                       </div>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="p-8 text-center text-slate-400 text-xs">
+                <div className="p-8 text-center text-[#002147]/60 text-xs">
                   {isRtl ? 'لا يوجد اختبار متاح لهذه الوحدة بعد.' : 'No quiz is defined for this unit yet.'}
                 </div>
               )}
-            </div>
+            </GoldCard>
           )}
         </div>
       </div>
