@@ -13,6 +13,7 @@ import { PROMPT_TEMPLATES_DATA } from './PromptTemplatesData';
 import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
 import { CapstoneProjectHub } from './CapstoneProjectHub';
 import { AiFoundationLessonCheck } from './AiFoundationLessonCheck';
+import { AiCertificateTest } from './AiCertificateTest';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { saveEarnedCertificate } from '../services/certificateService';
@@ -2503,10 +2504,38 @@ export const AiCurriculum = ({
 
 
   // Advanced Certificate States
-  const [advCertName, setAdvCertName] = useState<string>('');
+  const [advCertName, setAdvCertName] = useState<string>(() => {
+    try { const r = localStorage.getItem('ai_family_certificate'); return r ? (JSON.parse(r).name || '') : ''; } catch { return ''; }
+  });
   const [advCertTrack, setAdvCertTrack] = useState<string>('هندسة الأوامر المتقدمة');
-  const [advCertProj, setAdvCertProj] = useState<string>('film');
-  const [examStep, setExamStep] = useState<number>(0); // 0: intro, 1: generation task, 2: mega-prompt task, 3: ethics, 4: final project, 5: certified!
+  const [advCertProj, setAdvCertProj] = useState<string>(() => {
+    try { const r = localStorage.getItem('ai_family_certificate'); return r ? (JSON.parse(r).proj || 'film') : 'film'; } catch { return 'film'; }
+  });
+  // Saved family certificate (issued once; restored on reload so the certificate isn't lost).
+  const savedFamilyCert = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('ai_family_certificate');
+      return raw ? JSON.parse(raw) as { name: string; proj: string; date: string; code: string } : null;
+    } catch { return null; }
+  }, []);
+  const [examStep, setExamStep] = useState<number>(savedFamilyCert ? 5 : 0); // 0: intro, 1: generation task, 2: mega-prompt task, 3: ethics + graded test, 4: final project, 5: certified!
+  const [certTestPassed, setCertTestPassed] = useState<boolean>(() => {
+    try { return !!localStorage.getItem('ai_cert_test_passed') || !!localStorage.getItem('ai_family_certificate'); } catch { return false; }
+  });
+  const [familyCertDate, setFamilyCertDate] = useState<string>(savedFamilyCert?.date || '');
+  const [certFormError, setCertFormError] = useState<string>('');
+  const familyCertCode = useMemo(() => {
+    const base = `${advCertName.trim()}|${familyCertDate}|family`;
+    let h = 2166136261;
+    for (let i = 0; i < base.length; i++) { h ^= base.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return `AIF-${(h >>> 0).toString(36).toUpperCase().padStart(7, '0').slice(0, 7)}`;
+  }, [advCertName, familyCertDate]);
+  useEffect(() => {
+    if (examStep !== 5 || !familyCertDate || !advCertName.trim()) return;
+    try {
+      localStorage.setItem('ai_family_certificate', JSON.stringify({ name: advCertName.trim(), proj: advCertProj, date: familyCertDate, code: familyCertCode }));
+    } catch { /* ignore */ }
+  }, [examStep, advCertName, advCertProj, familyCertDate, familyCertCode]);
   const [examAns1, setExamAns1] = useState<string>('');
   const [examAns2, setExamAns2] = useState<string>('');
   const [examAns3, setExamAns3] = useState<string>('');
@@ -7810,8 +7839,8 @@ Output Summary for [${topic}]:
                         </h3>
                         <p className="text-slate-400 text-xs leading-relaxed max-w-2xl">
                           {isRtl 
-                            ? 'أثبت خبرة عائلتك وبراعتكم التقنية! قم بحل أسئلة الفحص العملي الأربعة، واختر موضوع مشروع تخرج عائلتك لتوليد وطباعة شهادة احترافية مذهلة باللغتين فخمة التوقيع!'
-                            : 'Solve the 4 professional examination challenges, present your graduation project details, and dynamically compile your high-res dual-lingual certificate.'}
+                            ? 'أثبت ما تعلمته! أكمل خطوات الاختبار الأربع، ومنها اختبار شهادة من 10 أسئلة، ثم اختر مشروع تخرجك لتصدر شهادتك وتطبعها.'
+                            : 'Complete the 4 exam steps, including a 10-question certificate test, then choose your graduation project to issue and print your certificate.'}
                         </p>
                       </div>
 
@@ -7837,8 +7866,8 @@ Output Summary for [${topic}]:
                           </h4>
                           <p className="text-slate-300 text-xs leading-relaxed">
                             {isRtl 
-                              ? 'يتوجب على العائلات مراجعة المستويات وتجريب التحديات الأسبوعية. الامتحان يتكون من 4 مهام عملية لتقييم صياغة الأوامر الكبرى Mega-Prompts والتحري النقدي والمخاطر. بمجرد النجاح، ستولد عائلتكم شهادة سفير مبرورة مدمجة للتفتيش والطباعة.' 
-                              : 'Candidates are requested to compile their answers to prompt structures. Gold certifications will render instantly upon completion.'}
+                              ? 'راجع دروس المستوى التأسيسي أولاً. الاختبار 4 خطوات: كتابة أمر لصورة، كتابة أمر منظّم، اختبار شهادة من 10 أسئلة (النجاح من 8)، ثم وصف مشروع التخرج. بعد النجاح تُصدر الشهادة باسمك ويمكنك حفظها صورةً أو طباعتها.' 
+                              : 'Review the foundational lessons first. The exam has 4 steps: an image prompt, a structured prompt, a 10-question certificate test (pass with 8), and your graduation project. Pass and the certificate is issued in your name to save or print.'}
                           </p>
                         </div>
 
@@ -7880,9 +7909,10 @@ Output Summary for [${topic}]:
                           <button
                             onClick={() => {
                               if (!examAns1.trim()) {
-                                alert(isRtl ? 'يرجى كتابة مقترح التعويذة للمتابعة!' : 'Please write your prompt to continue!');
+                                setCertFormError(isRtl ? 'اكتب أمر الصورة للمتابعة.' : 'Write your prompt to continue.');
                                 return;
                               }
+                              setCertFormError('');
                               setExamStep(2);
                             }}
                             className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-2.5 rounded-xl text-xs"
@@ -7925,9 +7955,10 @@ Output Summary for [${topic}]:
                           <button
                             onClick={() => {
                               if (examAns2.length < 30) {
-                                alert(isRtl ? 'يرجى كتابة أمر كاف ومفصل للمتابعة!' : 'Please compose a detailed model instruction!');
+                                setCertFormError(isRtl ? 'الأمر قصير جداً؛ اكتب 30 حرفاً على الأقل.' : 'Too short; write at least 30 characters.');
                                 return;
                               }
+                              setCertFormError('');
                               setExamStep(3);
                             }}
                             className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-2.5 rounded-xl text-xs"
@@ -7942,12 +7973,12 @@ Output Summary for [${topic}]:
                     {examStep === 3 && (
                       <div className="space-y-6 text-right">
                         <div className="space-y-1">
-                          <span className="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded border border-amber-500/20 font-black uppercase tracking-wider">{isRtl ? 'الخطوة 3 من 4: حماية الوجوه ودرء الإشاعات' : 'STEP 3 OF 4'}</span>
-                          <h4 className="text-lg font-black text-white mt-1">{isRtl ? 'معالجة فخاخ التزييف الشخصي والقرصنة' : 'Ethics & Deepfake audit check'}</h4>
+                          <span className="text-xs bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded border border-amber-500/20 font-black uppercase tracking-wider">{isRtl ? 'الخطوة 3 من 4: الأمان واختبار الشهادة' : 'STEP 3 OF 4'}</span>
+                          <h4 className="text-lg font-black text-white mt-1">{isRtl ? 'الأمان من التزييف + اختبار الشهادة' : 'Deepfake safety + certificate test'}</h4>
                           <p className="text-xs text-slate-400 leading-normal">
                             {isRtl 
-                              ? 'سياق طوارئ: اتصل شخص يحاكي تماماً صوت والدتكم، ويطلب فوراً تحويل مال أو مشاركة صور خاصة بالهوية. ما هو التصرف الفني الأمثل والتحري الفوري الذي اتفقت عليه عائلتكم بالميثاق؟'
-                              : 'Your mom calls with her voice, begging you to wire money or share identification files. How does the family safeguard this event?'}
+                              ? 'موقف طارئ: اتصل شخص بصوت يشبه صوت والدتك تماماً، ويطلب بسرعة تحويل مال أو إرسال صور الهوية. اكتب ماذا تفعل للتحقق، ثم أجب عن أسئلة اختبار الشهادة بالأسفل.'
+                              : 'Someone calls in a voice exactly like your mom\'s, urgently asking for money or ID photos. Write how you would verify, then answer the certificate test below.'}
                           </p>
                         </div>
 
@@ -7956,24 +7987,45 @@ Output Summary for [${topic}]:
                           onChange={(e) => setExamAns3(e.target.value)}
                           rows={4}
                           className="w-full bg-[#001a38]/90 border border-white/10 rounded-2xl p-4 text-xs font-semibold text-white focus:outline-none focus:border-amber-500 placeholder:text-slate-600"
-                          placeholder={isRtl ? 'اكتب خطوات التحري والتحقق (مثل استخدام كلمة السر، عزل النبرة، إبلاغ الراشدين)...' : 'Describe security verification steps...'}
+                          placeholder={isRtl ? 'اكتب خطوات التحقق (مثل: أغلق الخط، اتصل بالرقم المعروف، اسأل عن كلمة السر العائلية، أخبر أحد الكبار)...' : 'Describe your verification steps...'}
                         />
+
+                        {certTestPassed ? (
+                          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-bold">
+                            {isRtl ? '✓ نجحت في اختبار الشهادة.' : '✓ Certificate test passed.'}
+                          </div>
+                        ) : (
+                          <AiCertificateTest
+                            isRtl={isRtl}
+                            onPass={() => {
+                              setCertTestPassed(true);
+                              setCertFormError('');
+                              try { localStorage.setItem('ai_cert_test_passed', new Date().toISOString().split('T')[0]); } catch { /* ignore */ }
+                            }}
+                          />
+                        )}
 
                         <div className="flex justify-between items-center pt-2">
                           <button onClick={() => setExamStep(2)} className="text-xs text-slate-400 hover:text-white">{isRtl ? 'الرجوع' : 'Back'}</button>
                           <button
                             onClick={() => {
                               if (!examAns3.trim()) {
-                                alert(isRtl ? 'يرجى كتابة التزام الحماية!' : 'Please write verification response!');
+                                setCertFormError(isRtl ? 'اكتب خطوات التحقق أولاً.' : 'Write your verification steps first.');
                                 return;
                               }
+                              if (!certTestPassed) {
+                                setCertFormError(isRtl ? 'أكمل اختبار الشهادة وانجح فيه (8 من 10) للمتابعة.' : 'Pass the certificate test (8 of 10) to continue.');
+                                return;
+                              }
+                              setCertFormError('');
                               setExamStep(4);
                             }}
                             className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-6 py-2.5 rounded-xl text-xs"
                           >
-                            {isRtl ? 'المتابعة للتعميد المشترك' : 'Next'}
+                            {isRtl ? 'المتابعة لمشروع التخرج' : 'Next'}
                           </button>
                         </div>
+                        {certFormError && <p role="alert" className="text-xs font-bold text-red-300">{certFormError}</p>}
                       </div>
                     )}
 
@@ -8021,22 +8073,22 @@ Output Summary for [${topic}]:
 
                           <div className="space-y-4 text-right">
                             <div className="space-y-1">
-                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم البطل الخريج بالكامل (عربي-إنجليزي):' : 'Graduate Full Name (Ar-En):'}</label>
+                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'اسم الخريج كما يظهر في الشهادة:' : 'Graduate name as shown on the certificate:'}</label>
                               <input
                                 type="text"
                                 value={advCertName}
                                 onChange={(e) => setAdvCertName(e.target.value)}
                                 className="w-full bg-[#001a38]/95 border border-white/10 rounded-xl px-4 py-2 text-xs text-amber-300 font-black focus:outline-none focus:border-amber-500"
-                                placeholder={isRtl ? 'مثال: أسعد بن ياسر الخليلي' : 'e.g., Asad bin Yasir Al Khalil'}
+                                placeholder={isRtl ? 'مثال: سارة محمد العتيبي' : 'e.g., Sara Mohammed'}
                               />
                             </div>
 
                             <div className="space-y-1">
-                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'تاريخ تسليم الاعتماد بالتقويم:' : 'Graduation date:'}</label>
+                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'تاريخ الإصدار (يُسجّل تلقائياً):' : 'Issue date (set automatically):'}</label>
                               <input
                                 type="text"
-                                value={certificationDate}
-                                onChange={(e) => setCertificationDate(e.target.value)}
+                                readOnly
+                                value={familyCertDate || certificationDate}
                                 className="w-full bg-[#001a38]/95 border border-white/10 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-amber-500"
                               />
                             </div>
@@ -8045,18 +8097,32 @@ Output Summary for [${topic}]:
 
                         <div className="flex justify-between items-center pt-2">
                           <button onClick={() => setExamStep(3)} className="text-xs text-slate-400 hover:text-white">{isRtl ? 'الرجوع' : 'Back'}</button>
+                          {certFormError && <p role="alert" className="text-xs font-bold text-red-300">{certFormError}</p>}
                           <button
                             onClick={() => {
                               if (!advCertName.trim()) {
-                                alert(isRtl ? 'يرجى كتابة اسم البطل الخريج لطبع الشهادة!' : 'Please type graduation name to generate certificate!');
+                                setCertFormError(isRtl ? 'اكتب اسم الخريج لإصدار الشهادة.' : 'Type the graduate name to issue the certificate.');
                                 return;
                               }
+                              if (!certTestPassed) {
+                                setCertFormError(isRtl ? 'يجب النجاح في اختبار الشهادة أولاً.' : 'Pass the certificate test first.');
+                                setExamStep(3);
+                                return;
+                              }
+                              setCertFormError('');
+                              const issued = familyCertDate || new Date().toISOString().split('T')[0];
+                              setFamilyCertDate(issued);
+                              let firstTime = true;
+                              try {
+                                firstTime = !localStorage.getItem('ai_family_cert_xp_given');
+                                localStorage.setItem('ai_family_cert_xp_given', '1');
+                              } catch { /* ignore */ }
+                              if (firstTime) setXp(prev => prev + 500);
                               setExamStep(5);
-                              setXp(prev => prev + 500);
                             }}
                             className="bg-[#C49E3A] hover:bg-[#b08c2f] text-[#002147] font-black px-8 py-3 rounded-xl text-xs active:scale-95 transition-all"
                           >
-                            {isRtl ? 'بناء الرمز واعتماد الشهادة العائلية الاحترافية 🎓🎉' : 'Generate Gold Ambassador Certificate 🎓🎉'}
+                            {isRtl ? 'إصدار الشهادة 🎓🎉' : 'Issue certificate 🎓🎉'}
                           </button>
                         </div>
                       </div>
@@ -8068,11 +8134,11 @@ Output Summary for [${topic}]:
                         {/* Prompt layout completion banner */}
                         <div className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
                           <div className="space-y-1">
-                            <h4 className="text-md font-black text-emerald-400">{isRtl ? '🎉 مبارك التخرج والتحليق بالمعارف!' : '🎉 Congratulations Graduate node!'}</h4>
+                            <h4 className="text-md font-black text-emerald-400">{isRtl ? '🎉 مبارك التخرج!' : '🎉 Congratulations, graduate!'}</h4>
                             <p className="text-slate-300 text-xs">
                               {isRtl 
-                                ? `تم صيانة وفحص الرمز الأكاديمي بنجاح؛ مضافاً +500 XP لمحافظ عائلتكم. نرجو منكم طباعة المخطوطة الذهبية الفخمة بالأسفل وعرضها باللقاء الأسري!` 
-                                : `Credential verified! Added +500 Wisdom XP into your master academy. Print your dual-signed diploma below.`}
+                                ? `صدرت شهادتك وحُفظت في هذا الجهاز (تُضاف 500 XP مرة واحدة فقط). يمكنك حفظها صورةً أو طباعتها بالأسفل.` 
+                                : `Your certificate is issued and saved on this device (+500 XP, once). Save it as an image or print it below.`}
                             </p>
                           </div>
 
@@ -8085,7 +8151,7 @@ Output Summary for [${topic}]:
                                     const options = {
                                       cacheBust: true,
                                       pixelRatio: 2.5,
-                                      backgroundColor: '#001a38',
+                                      backgroundColor: '#fdfaf3',
                                       styleSheetsFilter: (styleSheet: CSSStyleSheet) => {
                                         try {
                                           const rules = styleSheet.cssRules;
@@ -8116,49 +8182,47 @@ Output Summary for [${topic}]:
                             <button
                               onClick={() => {
                                 const projTitle = advCertProj === 'film' 
-                                  ? 'صناعة وسينما الأفلام التوليدية المتقدمة (Short Cinema Film Generation)'
+                                  ? 'فيلم قصير بالذكاء الاصطناعي (AI Short Film)'
                                   : advCertProj === 'story'
-                                  ? 'تأليف وكتب الأطفال الرقمية المتسقة (Consistent Thematic Book Writing)'
+                                  ? 'قصة أطفال مصوّرة (Illustrated Kids Story)'
                                   : advCertProj === 'bot'
-                                  ? 'برمجة وتدريب مساعد الوالدين المنزلي الذكي (Domestic AI Agent Development)'
-                                  : 'أمن الوجوه وتوعية الهوية المدرسية للأطفال (Face Identity Defense Campaign)';
+                                  ? 'مساعد ذكي للأسرة (Family AI Assistant)'
+                                  : 'حملة توعية بحماية الصور والهوية (Online Identity Safety Campaign)';
 
                                 const html = `
                                   <div style="max-width: 900px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #010409; font-family: 'Cairo', sans-serif; box-sizing: border-box;" dir="rtl">
                                     <div style="border: 12px double #b45309; padding: 45px; border-radius: 4px; border-style: double; position: relative; background: radial-gradient(circle, #fff 70%, #fffdf5 100%);">
                                       {/* Golden badge inside certificate print */}
                                       <div style="text-align: center; margin-bottom: 30px;">
-                                        <h2 style="font-size: 15px; font-weight: 900; color: #b45309; letter-spacing: 4px; margin: 0 0 10px 0; text-transform: uppercase;">أكاديمية المستقبل وعلم الرياضيات التأسيسية</h2>
-                                        <h1 style="font-size: 30px; font-weight: 900; color: #002147; margin: 0 0 10px 0; letter-spacing: -1px;">الشهادة المتقدمة للتفوق والذكاء الاصطناعي التوليدي</h1>
-                                        <p style="font-size: 11px; font-weight: bold; color: #64748b; margin: 0; text-transform: uppercase; letter-spacing: 2px;">ADVANCED PROFESSIONAL CERTIFICATE IN GENERATIVE AI MASTERY & ETHICS</p>
+                                        <h2 style="font-size: 15px; font-weight: 900; color: #b45309; letter-spacing: 4px; margin: 0 0 10px 0; text-transform: uppercase;">أكاديمية باسم الخليل الرقمية</h2>
+                                        <h1 style="font-size: 30px; font-weight: 900; color: #002147; margin: 0 0 10px 0; letter-spacing: -1px;">شهادة إتمام المنهج الذكي للذكاء الاصطناعي</h1>
+                                        <p style="font-size: 11px; font-weight: bold; color: #64748b; margin: 0; text-transform: uppercase; letter-spacing: 2px;">CERTIFICATE OF COMPLETION — AI CURRICULUM</p>
                                       </div>
 
                                       <div style="text-align: center; font-size: 16px; line-height: 2; color: #334155; margin-bottom: 40px;">
-                                        بناءً على النجاح المميز في اجتياز غوامض التقييمات العلمية، والدفاع عن مشروع تخرج عائلتكم المتميز:<br>
+                                        بعد النجاح في اختبار الشهادة وتقديم مشروع التخرج:<br>
                                         <strong style="font-size: 18px; color: #002147; background-color: #f0fdf4; padding: 4px 12px; border-radius: 4px;">"${projTitle}"</strong>
-                                        <br><span style="font-size: 15px;">يُشيد مجلس أمناء أكاديمية المستقبليات بسائر أفراد عائلة المستكشف الشجاع:</span>
-                                        <h2 style="font-size: 38px; font-weight: 900; color: #b45309; margin: 25px 0; text-decoration: underline; background: linear-gradient(to right, #b45309, #d97706); -webkit-background-clip: text; color: #b45309;">${advCertName}</h2>
-                                        <p style="font-size: 16px; font-weight: bold; color: #010409;">سفيراً معتمداً مستقبلياً للتقنيات والوعي والأمن التعددي بالمنزل</p>
-                                        <p style="font-size: 13px; color: #64748b; max-width: 700px; margin: 15px auto 0 auto; line-height: 1.6;">تم منحه هذا الاعتماد الشرفي تقديراً لإتمامه 52 تحدياً منوعاً، وفهم الأنماط اللغوية وتعمير صور ومقاطع سينما تحمي أخوة الأطفال من خدع ومكائد الهلوسة الرقمية الفانية.</p>
+                                        <br><span style="font-size: 15px;">تشهد أكاديمية باسم الخليل الرقمية بأن:</span>
+                                        <h2 style="font-size: 38px; font-weight: 900; color: #b45309; margin: 25px 0; text-decoration: underline; background: linear-gradient(to right, #b45309, #d97706); -webkit-background-clip: text; color: #b45309;">${advCertName.replace(/[<>&"]/g, '')}</h2>
+                                        <p style="font-size: 16px; font-weight: bold; color: #010409;">أتمّ المنهج الذكي للذكاء الاصطناعي بنجاح</p>
+                                        <p style="font-size: 13px; color: #64748b; max-width: 700px; margin: 15px auto 0 auto; line-height: 1.6;">تقديراً لتعلّمه كتابة الأوامر، وصناعة المحتوى بالذكاء الاصطناعي، والاستخدام الآمن والمسؤول، وكشف المحتوى المزيف.</p>
                                       </div>
 
                                       <div style="display: flex; justify-content: space-between; align-items: end; border-top: 2px solid #e1e8f0; padding-top: 30px; margin-top: 40px; font-size: 12px; color: #64748b;">
                                         <div>
-                                          <strong>توقيع مجلس الأمناء والاعتماد:</strong>
-                                          <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #002147; margin-top: 5px;">Academy Founders Team</div>
-                                          <div style="font-size: 10px; color: #94a3b8; font-family: monospace;">Fingerprint: ${Math.random().toString(36).substring(2, 10).toUpperCase()}</div>
+                                          <strong>الجهة المانحة:</strong>
+                                          <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #002147; margin-top: 5px;">إدارة الأكاديمية</div>
                                         </div>
                                         <div style="text-align: center;">
                                           <div style="width: 50px; height: 50px; border: 4px double #b45309; border-radius: 50%; margin: 0 auto 10px auto; display: flex; align-items: center; justify-content: center; background-color: #fffbeb;">
                                             <span style="font-size: 18px; color: #b45309;">★</span>
                                           </div>
-                                          <strong style="color: #010409;">تاريخ التقييم والتعميد:</strong><br>
-                                          <span style="font-weight: bold; color: #002147;">${certificationDate || new Date().toISOString().split('T')[0]}</span>
+                                          <strong style="color: #010409;">تاريخ الإصدار:</strong><br>
+                                          <span style="font-weight: bold; color: #002147;">${familyCertDate || new Date().toISOString().split('T')[0]}</span>
                                         </div>
                                         <div style="text-align: left;">
-                                          <strong>رقم المصادقة المعتمد:</strong><br>
-                                          <span style="font-family: monospace; font-weight: bold; color: #002147;">CERT-${Math.floor(Math.random() * 900000 + 100000)}</span><br>
-                                          <span style="font-size: 9px; color: #94a3b8;">Verified Ambassador Security Node</span>
+                                          <strong>رقم الشهادة:</strong><br>
+                                          <span style="font-family: monospace; font-weight: bold; color: #002147;">${familyCertCode}</span>
                                         </div>
                                       </div>
                                     </div>
@@ -8178,73 +8242,73 @@ Output Summary for [${topic}]:
                                 setExamAns2('');
                                 setExamAns3('');
                                 setExamAns4('');
-                                setAdvCertName('');
-                                setExamStep(0);
+                                setExamStep(4);
                               }}
                               className="bg-white/5 hover:bg-white/10 text-slate-300 font-bold px-4 py-2.5 rounded-xl text-xs border border-white/5"
                             >
-                              {isRtl ? 'إعادة التقديم' : 'Reset'}
+                              {isRtl ? 'تعديل الاسم أو المشروع' : 'Edit name or project'}
                             </button>
                           </div>
                         </div>
 
                         {/* Interactive scroll preview replica of gold certificate */}
-                        <div id="ai-gold-certificate-card" className="bg-slate-950 border border-white/10 rounded-3xl p-8 md:p-12 relative overflow-hidden select-text text-center shadow-2xl">
+                        <div id="ai-gold-certificate-card" className="bg-[#fdfaf3] border border-[#C49E3A]/40 rounded-3xl p-8 md:p-12 relative overflow-hidden select-text text-center shadow-2xl">
                           {/* Radial Ambient Gold */}
                           <div className="absolute right-[-40px] top-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                           <div className="absolute left-[-40px] bottom-[-40px] w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
                           
-                          <div className="border-8 border-double border-amber-500/40 p-8 md:p-12 rounded-3xl space-y-8 relative">
+                          <div className="border-8 border-double border-[#C49E3A] p-8 md:p-12 rounded-3xl space-y-8 relative bg-white">
                             {/* Certificate header */}
                             <div className="space-y-2">
-                              <span className="text-amber-400 font-black tracking-widest text-xs block font-mono">
-                                {isRtl ? 'أكاديمية عائلات المستقبل والعلوم الذكية' : 'FUTURE HOUSEHOLD ACADEMY & SCIENCES'}
+                              <span className="text-[#C49E3A] font-black tracking-widest text-xs block">
+                                {isRtl ? 'أكاديمية باسم الخليل الرقمية' : 'BASIM ALKHALIL DIGITAL ACADEMY'}
                               </span>
-                              <h3 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                                {isRtl ? 'شهادة التخرج والاعتماد الذهبية 🏆' : 'Gold Generative AI Master Certificate'}
+                              <h3 className="text-3xl md:text-4xl font-extrabold text-[#002147] tracking-tight leading-tight">
+                                {isRtl ? 'شهادة إتمام المنهج الذكي 🏆' : 'AI Curriculum Certificate of Completion'}
                               </h3>
-                              <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full my-4" />
+                              <div className="w-24 h-1 bg-[#C49E3A] mx-auto rounded-full my-4" />
                             </div>
 
                             {/* Main text of certification */}
-                            <div className="space-y-4 text-slate-200 text-sm md:text-md max-w-2xl mx-auto leading-relaxed">
+                            <div className="space-y-4 text-[#002147] text-sm md:text-md max-w-2xl mx-auto leading-relaxed">
                               <p className="font-semibold">
                                 {isRtl 
-                                  ? 'بموجب دفاعه ومراجعة نتائجه التفصيلية في امتحان صائدي التعاويذ والكلمة المرجعية وحماية الأطفال، تم منح سليل الكرام البطل:' 
-                                  : 'Following successful completion of the master curriculum, continuous tests, and defense of the final project:'}
+                                  ? 'بعد النجاح في اختبار الشهادة وتقديم مشروع التخرج، تشهد الأكاديمية بأن:' 
+                                  : 'Having passed the certificate test and presented a graduation project, the academy certifies that:'}
                               </p>
-                              <h2 className="text-3xl md:text-5xl font-black text-amber-300 tracking-tight py-4 block hover:text-amber-200 transition-colors">
+                              <h2 className="text-3xl md:text-5xl font-black text-[#C49E3A] tracking-tight py-4 block">
                                 {advCertName}
                               </h2>
-                              <p className="font-semibold text-slate-300">
+                              <p className="font-semibold text-[#002147]">
                                 {isRtl 
-                                  ? `مرتبة التفوق والتقدير بدرجة (سفير الأمان والذكاء التوليدي المعتمد)` 
-                                  : 'The title of certified Generative AI Family Ambassador'}
+                                  ? 'أتمّ المنهج الذكي للذكاء الاصطناعي بنجاح' 
+                                  : 'has successfully completed the AI curriculum'}
                               </p>
-                              <p className="text-slate-400 text-xs text-center pr-8 pl-8 leading-relaxed">
+                              <p className="text-slate-600 text-xs text-center pr-8 pl-8 leading-relaxed">
                                 {isRtl 
-                                  ? `تقديراً لدفاعه العملي المتميز في حقل: (${
-                                      advCertProj === 'film' ? 'الأفلام السينمائية والتحريك' : 
-                                      advCertProj === 'story' ? 'رسم وتوليف وتصميم قصص الأطفال المغرية' :
-                                      advCertProj === 'bot' ? 'صناعة تليجرام وبوتات الوالدين المنزلي' : 
-                                      'توعية وحملات أمان الوجوه الرقمية للمدارس'
+                                  ? `مشروع التخرج: (${
+                                      advCertProj === 'film' ? 'فيلم قصير بالذكاء الاصطناعي' : 
+                                      advCertProj === 'story' ? 'قصة أطفال مصوّرة' :
+                                      advCertProj === 'bot' ? 'مساعد ذكي للأسرة' : 
+                                      'حملة توعية بحماية الصور والهوية'
                                     })`
-                                  : `Issued with honors for the graduation project on Generative Multi-modal Applications.`}
+                                  : `Graduation project: ${advCertProj === 'film' ? 'AI short film' : advCertProj === 'story' ? 'Illustrated kids story' : advCertProj === 'bot' ? 'Family AI assistant' : 'Online identity safety campaign'}`}
                               </p>
                             </div>
 
                             {/* Signatures replica block */}
-                            <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-6 font-mono text-xs text-slate-500">
+                            <div className="pt-8 border-t border-[#C49E3A]/30 flex flex-col sm:flex-row justify-between items-center gap-6 text-xs text-slate-600">
                               <div className="text-right">
-                                <span>{isRtl ? 'توقيع الهيئة العلمية للأكاديمية:' : 'ACCREDITATION TEAM:'}</span>
-                                <div className="text-amber-400 font-extrabold font-serif text-sm mt-1">Generative AI Board</div>
+                                <span>{isRtl ? 'الجهة المانحة:' : 'Issued by:'}</span>
+                                <div className="text-[#002147] font-extrabold text-sm mt-1">{isRtl ? 'إدارة الأكاديمية' : 'Academy administration'}</div>
+                                <div className="mt-1">{isRtl ? 'تاريخ الإصدار:' : 'Issue date:'} <strong className="text-[#002147]">{familyCertDate}</strong></div>
                               </div>
-                              <div className="w-16 h-16 border-2 border-double border-amber-500/30 rounded-full flex items-center justify-center bg-amber-500/5 rotate-12 shrink-0">
-                                <span className="text-amber-400 font-bold">GOLD</span>
+                              <div className="w-16 h-16 border-2 border-double border-[#C49E3A] rounded-full flex items-center justify-center bg-[#fdfaf3] rotate-12 shrink-0">
+                                <span className="text-[#C49E3A] font-bold">★</span>
                               </div>
                               <div className="text-left">
-                                <span className="block">{isRtl ? 'الرقم التسلسلي والأمان:' : 'VERIFICATION CODE:'}</span>
-                                <strong className="text-slate-300 font-bold block mt-1">CERT-2026-{Math.floor(Math.random() * 90000 + 10000)}</strong>
+                                <span className="block">{isRtl ? 'رقم الشهادة:' : 'Certificate no.:'}</span>
+                                <strong className="text-[#002147] font-bold block mt-1 font-mono">{familyCertCode}</strong>
                               </div>
                             </div>
                           </div>
