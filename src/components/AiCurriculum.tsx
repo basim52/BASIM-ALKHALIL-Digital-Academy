@@ -12,6 +12,7 @@ import { PROMPT_PROFESSIONAL_DATA } from './PromptProData';
 import { PROMPT_TEMPLATES_DATA } from './PromptTemplatesData';
 import { MEGA_PROMPTS_DATA } from './MegaPromptLabData';
 import { CapstoneProjectHub } from './CapstoneProjectHub';
+import { AiFoundationLessonCheck } from './AiFoundationLessonCheck';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { saveEarnedCertificate } from '../services/certificateService';
@@ -217,7 +218,7 @@ export const AI_CURRICULUM_DATA = {
           detailed_explanation: "هندسة الأوامر أو الصياغة الذكية (Prompt Engineering) تتطلب تقديم سياق دقيق وتحديد القيود المطلوبة بدقة للحصول على أفضل التوقعات اللغوية الممكنة من النموذج التوليدي.",
           family_activity: {
             activity_name: "مختبر التعاويذ",
-            activity_description: "نستخدم نفس الطلب الأساسي ونضيف إليه عنصرًا واحدًا من الوصفة في كل مرة لنرى الفرق المدهش!\n\nالخطوات:\n1. الطلب الأساسي: 'اكتب لي عن التفاح'. النتيجة: عامة ومملة ومختصرة.\n2. تضيف الدور: 'تخيل أنك شاعر جاهلي غاضب. اكتب لي عن التفاح'. النتيجة: شعرية وفصيحة ومليئة بالحماس.\n3. تضيف التنسيق: 'تخيل أنك شاعر جاهلي. اكتب لي عن التفاح في 3 أسطر فقط'. النتيجة: موجزة ومركزة ورائعة القافية.\n4.ضيف القيود: 'اكتب لي عن التفاح بأسلوب مضحك، ولا تستخدم كلمة أحمر'. النتيجة: قمة الإبداع وعصف ذهني حقيقي!",
+            activity_description: "نستخدم نفس الطلب الأساسي ونضيف إليه عنصرًا واحدًا من الوصفة في كل مرة لنرى الفرق المدهش!\n\nالخطوات:\n1. الطلب الأساسي: 'اكتب لي عن التفاح'. النتيجة: عامة ومملة ومختصرة.\n2. نضيف الدور: 'تخيل أنك شاعر جاهلي غاضب. اكتب لي عن التفاح'. النتيجة: شعرية وفصيحة ومليئة بالحماس.\n3. نضيف التنسيق: 'تخيل أنك شاعر جاهلي. اكتب لي عن التفاح في 3 أسطر فقط'. النتيجة: موجزة ومركزة ورائعة القافية.\n4. نضيف القيود: 'اكتب لي عن التفاح بأسلوب مضحك، ولا تستخدم كلمة أحمر'. النتيجة: قمة الإبداع وعصف ذهني حقيقي!",
             lesson_learned: "المدخلات الذائبة تفرز نتائج ذائبة. المدخلات المركبة المهندسة بحب وفطنة تمنحك استجابة سحرية فائقة التميز."
           },
           image_description: "يد بشرية تكتب على لوحة مفاتيح سحرية، وتخرج منها 5 خيوط ملونة تتجمع لتشكل نجمة لامعة",
@@ -252,7 +253,7 @@ export const AI_CURRICULUM_DATA = {
           detailed_explanation: "الهلوسة هي ميزة وعيب في آن واحد. ميزة عندما نطلب منه كتابة قصة خيالية جديدة كلياً، وعيب شديد عندما نطلب منه حقائق علمية دقيقة دون الرجوع لمدققات خارجية موثوقة.",
           family_activity: {
             activity_name: "لعبة كشف الكذاب الرقمي",
-            activity_description: "سنعرض 5 'حقائق'، بعضها حقيقي وبعضها مولود من هلوسة الذكاء الاصطناعي المتطور. من يكتشف المزيف أولاً؟\n\nالخطوات:\n1. 'مدينة أثرية مفقودة اكتُشفت في صحراء الربع الخالي عام 2023 اسمها مدينة زارا، وكانت عاصمة مملكة النساء.' (هلوسة)\n2. 'الزرافة لها نفس عدد فقرات الرقبة لدى الإنسان (7 فقرات).' (حقيقة طبيعية)\n3. 'العالم الفيزيائي الجزائري 'مالك بن نبي' هو أول من اقترح نظرية الانفجار العظيم.' (هلوسة تاريخية)\n4. 'الأخطبوط لديه 3 قلوب ودمه أزرق.' (حقيقة فلكية مذهلة)\n5. 'في عام 2024، أعلنت السعودية عن اكتشاف نوع جديد من الصقور يمكنه الطيران بسرعة 500 كم/ساعة.' (هلوسة مخترعة)",
+            activity_description: "سنعرض 5 'حقائق'، بعضها حقيقي وبعضها مولود من هلوسة الذكاء الاصطناعي المتطور. من يكتشف المزيف أولاً؟\n\nالخطوات:\n1. 'مدينة أثرية مفقودة اكتُشفت في صحراء الربع الخالي عام 2023 اسمها مدينة زارا، وكانت عاصمة مملكة النساء.' (هلوسة)\n2. 'الزرافة لها نفس عدد فقرات الرقبة لدى الإنسان (7 فقرات).' (حقيقة طبيعية)\n3. 'العالم الفيزيائي الجزائري 'مالك بن نبي' هو أول من اقترح نظرية الانفجار العظيم.' (هلوسة تاريخية)\n4. 'الأخطبوط لديه 3 قلوب ودمه أزرق.' (حقيقة علمية مذهلة)\n5. 'في عام 2024، أعلنت السعودية عن اكتشاف نوع جديد من الصقور يمكنه الطيران بسرعة 500 كم/ساعة.' (هلوسة مخترعة)",
             lesson_learned: "الأسلوب المقنع والجذاب في المخرجات لا يعني الصواب والصدقية دائمًا. العقل البشري المدرب هو الحَكَم والمدقق النهائي للأخبار والحقائق."
           },
           image_description: "روبوت يمسك كتابًا مكتوبًا عليه 'حقائق'، لكن صفحات الكتاب تتحول إلى فراشات وتطير بعيدًا",
@@ -276,11 +277,11 @@ export const AI_CURRICULUM_DATA = {
         {
           lesson_number: 11,
           lesson_title: "التزييف العميق - حماية هويتنا الرقمية",
-          core_concept: "التزييف العميق (Deepfake) هو استخدام الذكاء الاصطناعي لتركيب وجه شخص على جسد آخر، أو تقليد صوته بطريقة واقعية جداً يصعب تمييزها عن الحقيقة.\n\nتخيل: محتال يأخذ 3 ثوانٍ فقط من صوتك من فيديو عائلي نشرته على الإنترنت. يستخدم الذكاء الاصطناعي لينتحل شخصيتك. ثم يتصل بجدتك ويقول بصوتك: 'جدتي، أنا في ورطة وأحتاج مالاً بسرعة'. هذا ليس فيلماً، بل يحدث الآن في العالم الحقيقي.\n\nالخبر الجيد: هناك حماية. العائلة الذكية تتفق على 'كلمة سر عائلية' لا تُكتب ولا تُنشر على الإنترنت أبداً.",
-          detailed_explanation: "من خلال الخوارزميات التخاصمية والنمذجة العميقة، تتدرب الرياضات الشبكية على مطابقة التفاصيل الصوتية للفرد بدقة تامة، مما يصنع مخرجات بصرية وصوتية مفبركة بالكامل تخدع البسطاء.",
+          core_concept: "التزييف العميق (Deepfake) هو استخدام الذكاء الاصطناعي لتركيب وجه شخص على جسد آخر، أو تقليد صوته بطريقة واقعية جداً يصعب تمييزها عن الحقيقة.\n\nتخيل: محتال يأخذ مقطعاً قصيراً جداً من صوتك من فيديو عائلي نشرته على الإنترنت. يستخدم الذكاء الاصطناعي لينتحل شخصيتك. ثم يتصل بجدتك ويقول بصوتك: 'جدتي، أنا في ورطة وأحتاج مالاً بسرعة'. هذا ليس فيلماً، بل يحدث الآن في العالم الحقيقي.\n\nالخبر الجيد: هناك حماية. العائلة الذكية تتفق على 'كلمة سر عائلية' لا تُكتب ولا تُنشر على الإنترنت أبداً.",
+          detailed_explanation: "تتدرّب الشبكات العصبية العميقة على عيّنات من صوت الشخص أو صوره حتى تتعلّم ملامحه ونبرته، ثم تُنتج صوتاً أو فيديو مفبركاً يبدو حقيقياً. لذلك لا نثق بالصوت أو الصورة وحدهما عند أي طلب عاجل، بل نتحقق بطريقة ثانية.",
           family_activity: {
             activity_name: "وضع ميثاق الأمان العائلي",
-            activity_description: "تجلس العائلة معاً وتكتب 'ميثاق الأمان الرقمي' في 5 بنود أساسية ترفع سقف الوعي والحماية بالمنزل.\n\nالبنود المقترحة:\n1. الكلمة السرية العائلية: كلمة خاصة جداً لا نكتبها بالواتساب، نتداولها شفهياً فقط لتأكيد هويتنا بالاتصالات والمواقف الطارئة المريبة.\n2. مشاركة الميديا بحذر: لا نرفع فيديوهات بدقة خارقة للوجوه أو كلام متصل طويل يسهل استنساخه للغرباء.\n3. التشكك الصحي والتحقق الفوري عند سماع طلب عاجل مريب بالغثيان والمال.\n4. سرعة إبلاغ الوالدين بلا تردد.\n5. صون وحماية خصوصية وأسرار محيطنا.",
+            activity_description: "تجلس العائلة معاً وتكتب 'ميثاق الأمان الرقمي' في 5 بنود أساسية ترفع سقف الوعي والحماية بالمنزل.\n\nالبنود المقترحة:\n1. الكلمة السرية العائلية: كلمة خاصة جداً لا نكتبها بالواتساب، نتداولها شفهياً فقط لتأكيد هويتنا بالاتصالات والمواقف الطارئة المريبة.\n2. مشاركة الميديا بحذر: لا نرفع فيديوهات بدقة خارقة للوجوه أو كلام متصل طويل يسهل استنساخه للغرباء.\n3. التشكك الصحي والتحقق الفوري عند سماع طلب عاجل مريب يتعلق بالمال أو بالمعلومات الخاصة.\n4. سرعة إبلاغ الوالدين بلا تردد.\n5. صون وحماية خصوصية وأسرار محيطنا.",
             lesson_learned: "الوعي المسبق والتحصين الممنهج هو درعنا الأول ضد جرائم وعوالم الاحتيال الرقمي المستحدثة بالدماغ الاصطناعي."
           },
           image_description: "قناعان متطابقان لوجه إنسان، أحدهما يحمله روبوت والآخر يحمله إنسان حقيقي، والمشهد يبدو محيراً",
@@ -312,7 +313,7 @@ export const AI_CURRICULUM_DATA = {
           lesson_number: 13,
           lesson_title: "الإبداع المشترك - السيمفونية بين الإنسان والآلة",
           core_concept: "أعلى مراحل استخدام الذكاء الاصطناعي ليست 'الآلة تحل محلنا'، بل 'الإنسان والآلة يبدعان معاً'. هذه الشراكة اسمها 'الإبداع المشترك'.\n\nالإنسان يأتي بالشيء الوحيد الذي لا تملكه الآلة: الرؤية، المشاعر، التجربة الحياتية، الذوق الفني، السؤال الوجودي 'لماذا؟'.\n\nالآلة تأتي بما لا يملكه الإنسان: السرعة الخارقة، القدرة على استكشاف 1000 احتمال في ثوانٍ، ربط أفكار من مجالات بعيدة لم تخطر على بال أحد.\n\nمثال: موسيقي يشعر بالحزن لحظة غروب الشمس على شاطئ مهجور. يصف للذكاء الاصطناعي شعوره، فيولد له 10 مقاطع موسيقية أولية. يختار واحداً ويعدله بيديه ويضيف إليه إحساسه الشخصي. النتيجة: عمل فني لا يمكن أن يصنعه الإنسان وحده ولا الآلة وحدها.",
-          detailed_explanation: "اللحاف الإبداعي ينطلق من الروح الإنسانية المفعمة بالمعاني والجمال. تستوعب الآلة هذا الاهتمام وتصيغ مسارات من الصور أو الكيد لحكاية مترابطة وبشرية الهوية.",
+          detailed_explanation: "الفكرة والمشاعر تأتي منّا نحن البشر، والآلة تساعدنا في تحويلها إلى كلمات وصور. كلما وصفنا الشخصيات والمكان والمشكلة والنهاية بوضوح، خرجت القصة أكثر ترابطاً وأقرب إلى روحنا.",
           family_activity: {
             activity_name: "السيمفونية العائلية",
             activity_description: "نصنع 'عملاً فنياً ورقمياً مشتركاً' بين كل أفراد العائلة ومساعدنا الذكي. موضوعنا: 'أغرب إجازة صيفية في الفضاء الخارجي'.\n\nالخطوات:\n1. الفصل الأول: المساعد التوليدي يبدأ - نطرح الفكرة الأساسية ليصيغ لنا نواة وسرد أولي للقصة الكونية.\n2. الفصل الثاني: الأب يتدخل بقلبه ليضيف عقدة أو مغامرة مضحكة واجهتها أسرتنا هناك.\n3. الفصل الثالث: الأم تصقل الحوار ليماثل طيبة وعبارات بيتنا الداخلي البهي.\n4. الفصل الرابع: الأولاد يستعينون بمولد صور لتقديم 3 مشاهد فلكية مع تعاويذ دقيقة التناسق والبريق.\n5. العرض المشترك فخرًا بحصاد إبداعنا.",
@@ -340,10 +341,10 @@ export const AI_CURRICULUM_DATA = {
           lesson_number: 15,
           lesson_title: "مشروع 2: بناء معرض الفن العائلي",
           core_concept: "حتى الآن، كنا نولد صوراً متفرقة. ماذا لو صنعنا 'معرضاً فنياً' كاملاً له قصة وموضوع واحد؟ هذا يسمى 'التوليد المتسق' وهو مهارة متقدمة.\n\nلبناء معرض فني عائلي:\n1. نختار موضوعاً موحداً (مثال: 'مخلوقات أسطورية من خيالنا').\n2. نكتب 'تعاويذ' متسقة: كل الصور يجب أن تكون بنفس الأسلوب الفني (مثال: 'بأسلوب الألوان المائية'، 'إضاءة ذهبية دافئة').\n3. كل فرد يولد 3 صور تمثل 'أعماله الفنية'.\n4. نطبع الصور أو نعرضها على شاشة كبيرة وصناعة 'ليلة افتتاح' للمعرض دافئة الروح وصداها بهيج.",
-          detailed_explanation: "الحفاظ على الاتساق الأسلوبي وتجانس البسملة البصرية يسهم في تصميم هويات فنية متكاملة (Visual Brand Curation) وتروية حكايات متسلسلة تسحر أنظار الزوار والمهتمين بالجمال العصري.",
+          detailed_explanation: "الحفاظ على الاتساق الأسلوبي وتجانس الهوية البصرية يسهم في تصميم هويات فنية متكاملة (Visual Brand Curation) وتروية حكايات متسلسلة تسحر أنظار الزوار والمهتمين بالجمال العصري.",
           family_activity: {
             activity_name: "ليلة افتتاح المعرض",
-            activity_description: "نخطط وننفذ 'معرض الفن الأسرى الأول الموحد الهيئة'. الموضوع المنسق: 'عائلتنا ومحطاتنا عبر العصور التاريخية الوهيبة'.\n\nالخطوات:\n1. التخطيط: اختيار 4 حقب متقاربة (مثال: الفراعنة، الأندلس البهية، كبائن الفضاء سنة 3000، وعوالم الأوريغامي الورقية) بأسلوب كرتوني دافئ.\n2. التوليد المتسق: يتولى كل بطل حقبة ويصيغ تعويضتها مع الحفاظ على الأسلوب المتفق لإبراز فخامة عائلتنا الكريمة.\n3. التجهيز المثير: تعليق أو عرض الصور بشاشتنا مع بطاقات تعريفية بخط اليد تحكي سيرة كل لوحة وريشة كاتبها الفريد.\n4. الافتتاح الرسمي والتصويت السري للأفضل بمرح وسرور.",
+            activity_description: "نخطط وننفذ 'معرض الفن الأسري الأول'. الموضوع المنسق: 'عائلتنا ومحطاتنا عبر العصور التاريخية'.\n\nالخطوات:\n1. التخطيط: اختيار 4 حقب متقاربة (مثال: الفراعنة، الأندلس البهية، كبائن الفضاء سنة 3000، وعوالم الأوريغامي الورقية) بأسلوب كرتوني دافئ.\n2. التوليد المتسق: يتولى كل بطل حقبة ويكتب وصف صورتها مع الحفاظ على الأسلوب المتفق لإبراز فخامة عائلتنا الكريمة.\n3. التجهيز المثير: تعليق أو عرض الصور بشاشتنا مع بطاقات تعريفية بخط اليد تحكي سيرة كل لوحة وريشة كاتبها الفريد.\n4. الافتتاح الرسمي والتصويت السري للأفضل بمرح وسرور.",
             lesson_learned: "الذكاء الاصطناعي هو الفرشاة العصرية الرائدة والريشة المتوقعة، والوجدان الإنساني الأسري المترابط هو المشكل اللامع والمنسق الفعلي لكل المعرض اللطيف."
           },
           image_description: "جدار معرض في منزل، عليه صور مؤطرة لمخلوقات خيالية ملونة، وأفراد العائلة يقفون أمامها ويتحدثون عنها بحماس",
@@ -360,7 +361,7 @@ export const AI_CURRICULUM_DATA = {
         {
           lesson_number: 16,
           lesson_title: "تحدي العباقرة - نصنع حلاً لعالمنا",
-          core_concept: "بعد كل ما تعلمناه، السؤال الأهم الآن: كيف نستخدم هذه القوة الرقمية في خدمة وعون الإنسانية والآخرين من حولنا؟ الذكاء الاصطناعي التوليدي هو معول حقيقي لنشر الأثر والخير والتغيير الإيجابي العميم.\n\nالتحدي العملي: كيف تستطيع عائلتتا اللطيفة تطويع هذه الأداة المعرفية الشعلة لإغاثة أو مساعدة 5 أشخاص آخرين على الأقل بشكل نافع ومبهج ومرن بالواقع؟",
+          core_concept: "بعد كل ما تعلمناه، السؤال الأهم الآن: كيف نستخدم هذه القوة الرقمية في خدمة وعون الإنسانية والآخرين من حولنا؟ الذكاء الاصطناعي التوليدي هو معول حقيقي لنشر الأثر والخير والتغيير الإيجابي العميم.\n\nالتحدي العملي: كيف تستطيع عائلتنا اللطيفة تطويع هذه الأداة المعرفية الشعلة لإغاثة أو مساعدة 5 أشخاص آخرين على الأقل بشكل نافع ومبهج ومرن بالواقع؟",
           detailed_explanation: "تسخير العلوم لصالح النفع الإنساني والمجتمعي (Social Good Integrations) يسهم في صناعة جيل معطاء ورائد، حريص على إثراء فضيلة المروءة وفن المساعدة الرقمية والواعية لأجل الإعمار.",
           family_activity: {
             activity_name: "مسابقة الحلول العائلية",
@@ -378,7 +379,7 @@ export const AI_CURRICULUM_DATA = {
           detailed_explanation: "صياغة التوثيق المعرفي في قوالب روائية ملحمية وبطولية مرحة (Saga Coding & Story Curation) يمتن الترابط الأسري والاحترام البالغ للجهد المتبادل والتفوق العلمي الجماعي.",
           family_activity: {
             activity_name: "كتابة الأسطورة والقصة الخالدة",
-            activity_description: "نجلس مع العائلة لنضع المادة الخام لأبرز ما قاسيناه وكافحناه ومرحنا به بالبرنامج، ونستشرف القصة معاً بلهفة ورقي.\n\nالخطوات:\n1. استرجاع المشاهد: أطرف كلمة، أول صلصال ملون، تحدي الدب الداشر، تعويذة الشاعر الغاضب بالدرس 7.\n2. التغذية الحية: نلقي بهذه الومضات للمساعد التوليدي ونطلب حياكتها بأسلوب هاري بوتر الملحمي أو السندباد كأبطال بررة باسم العائلة.\n3. التنقيح وصناعة نسخة ملونة مزينة بتصاميم ورسومات تذكارية مبهجة.\n4. الحفظ الخالد في صندوق ومجلس العائلة.",
+            activity_description: "نجلس مع العائلة لنضع المادة الخام لأبرز ما قاسيناه وكافحناه ومرحنا به بالبرنامج، ونستشرف القصة معاً بلهفة ورقي.\n\nالخطوات:\n1. استرجاع المشاهد: أطرف كلمة، أول صورة رسمناها بالذكاء الاصطناعي، أطرف هلوسة اكتشفناها، والشاعر الجاهلي الغاضب في الدرس 7.\n2. التغذية الحية: نلقي بهذه الومضات للمساعد التوليدي ونطلب حياكتها بأسلوب هاري بوتر الملحمي أو السندباد كأبطال بررة باسم العائلة.\n3. التنقيح وصناعة نسخة ملونة مزينة بتصاميم ورسومات تذكارية مبهجة.\n4. الحفظ الخالد في صندوق ومجلس العائلة.",
             lesson_learned: "المعرفة الحية لا تبقى في صمت الكراسات الصخرية، بل تتعطر وتخلد في طيات القصص الودودة والأساطير المليئة بالفخر والحنان العائلي الممتد."
           },
           image_description: "كتاب قديم مفتوح تخرج منه شخصيات العائلة مرسومة كأبطال أسطوريين، مع تنين وقلاع ونجوم، والألوان ذهبية ودافئة",
@@ -2549,8 +2550,6 @@ export const AiCurriculum = ({
   const [l11Loading, setL11Loading] = useState<boolean>(false);
 
   // General multiple choice quiz state for other lessons
-  const [lQuizAnswer, setLQuizAnswer] = useState<string | null>(null);
-  const [lQuizFeedback, setLQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
 
   // Advanced level quiz state
   const [advancedQuizAnswers, setAdvancedQuizAnswers] = useState<Record<number, number>>({});
@@ -3590,16 +3589,6 @@ export const AiCurriculum = ({
     }
   };
 
-  const handleQuizAnswer = (answer: string) => {
-    setLQuizAnswer(answer);
-    if (answer === 'A') {
-      setLQuizFeedback('correct');
-      completeCurrentLesson(50);
-    } else {
-      setLQuizFeedback('wrong');
-    }
-  };
-
   // Lesson Complete Helper
   const completeCurrentLesson = (xpEarned: number) => {
     if (selectedLesson && !completedLessons.includes(selectedLesson.lesson_number)) {
@@ -3662,8 +3651,6 @@ export const AiCurriculum = ({
     setL11Symphony(null);
     setL11Loading(false);
     // Generic Quiz resets
-    setLQuizAnswer(null);
-    setLQuizFeedback(null);
     setAdvancedQuizAnswers({});
     setAdvancedQuizSubmitted(false);
     setAdvancedQuizScore(0);
@@ -7696,7 +7683,7 @@ Output Summary for [${topic}]:
                                 {isDayComplete ? '✓ لقد أنجزت هذا التحدي بالكامل اليوم! 🎉 (+10 XP)' : '✓ علمني كمنجِز وحصل +10 XP'}
                               </button>
                               <p className="text-[10px] text-slate-500 font-medium text-center">
-                                {isRtl ? 'التدسيق الأسرى والتطبيق يزيد من فرص استيعاب الدرس.' : 'Active hand-on play cements modern LLM paradigms.'}
+                                {isRtl ? 'التنسيق الأسري والتطبيق يزيد من فرص استيعاب الدرس.' : 'Active hand-on play cements modern LLM paradigms.'}
                               </p>
                             </div>
                           </div>
@@ -7953,7 +7940,7 @@ Output Summary for [${topic}]:
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/40 p-5 rounded-2xl border border-white/5">
                           <div className="space-y-4 text-right">
                             <div className="space-y-1">
-                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'نمط وحقل مشروع التخرّج الأسرى:' : 'Project category:'}</label>
+                              <label className="block text-xs font-black text-amber-400">{isRtl ? 'نمط وحقل مشروع التخرّج الأسري:' : 'Project category:'}</label>
                               <select
                                 value={advCertProj}
                                 onChange={(e) => setAdvCertProj(e.target.value)}
@@ -8030,7 +8017,7 @@ Output Summary for [${topic}]:
                             <h4 className="text-md font-black text-emerald-400">{isRtl ? '🎉 مبارك التخرج والتحليق بالمعارف!' : '🎉 Congratulations Graduate node!'}</h4>
                             <p className="text-slate-300 text-xs">
                               {isRtl 
-                                ? `تم صيانة وفحص الرمز الأكاديمي بنجاح؛ مضافاً +500 XP لمحافظ عائلتكم. نرجو منكم طباعة المخطوطة الذهبية الفخمة بالأسفل وعرضها باللقاء الأسرى!` 
+                                ? `تم صيانة وفحص الرمز الأكاديمي بنجاح؛ مضافاً +500 XP لمحافظ عائلتكم. نرجو منكم طباعة المخطوطة الذهبية الفخمة بالأسفل وعرضها باللقاء الأسري!` 
                                 : `Credential verified! Added +500 Wisdom XP into your master academy. Print your dual-signed diploma below.`}
                             </p>
                           </div>
@@ -10060,135 +10047,15 @@ Output Summary for [${topic}]:
                     </div>
                   )}
 
-                  {/* GENERAL INTERACTIVE LESSON CHALLENGE (FOR LESSONS 5, 6, 9, 10, 11, 14, 15, 16, 17, 18, 19, 20) */}
+                  {/* LESSON CHECK (3 questions from the lesson) FOR LESSONS WITHOUT A DEDICATED GAME: 5, 6, 9, 10, 11, 14–20 */}
                   {![1, 2, 3, 4, 7, 8, 12, 13].includes(selectedLesson.lesson_number) && (
-                    <div className="space-y-6">
-                      <GoldCard className="p-6 md:p-8 space-y-6 relative overflow-hidden bg-white border-[#C49E3A]/40 shadow-sm">
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase font-black tracking-widest text-[#C49E3A] block">
-                            {isRtl ? 'تحدي سفير الذكاء الاصطناعي 🌟' : 'AI AMBASSADOR CHALLENGE 🌟'}
-                          </span>
-                          <h5 className="text-xl font-black text-[#002147]">
-                            {isRtl ? 'تحدي سفير الذكاء الاصطناعي 🌟' : 'AI Ambassador Challenge 🌟'}
-                          </h5>
-                        </div>
-                        <p className="text-[#002147]/80 text-sm leading-relaxed text-right">
-                          {isRtl 
-                            ? 'أثبت جدارتك واستيعابك للفكرة الجوهرية لهذا الدرس بحل هذا التحدي السريع لتربح 50 نقطة XP!'
-                            : "Prove your grasp of this lesson's core idea to earn 50 XP in this quick challenge!"}
-                        </p>
-
-                        <div className="p-5 bg-[#fdfaf3] rounded-2xl border border-[#C49E3A]/30 space-y-4 shadow-inner">
-                          <span className="text-xs font-bold text-[#002147]/70 block uppercase tracking-widest">
-                            {isRtl ? 'السؤال التفاعلي:' : 'Interactive Question:'}
-                          </span>
-                          <p className="text-lg font-black text-[#002147] leading-relaxed">
-                            {selectedLesson.lesson_number === 5 && (isRtl ? 'كيف يتم تمثيل ومعالجة الصوت في الحاسوب عن طريق الذكاء الاصطناعي؟' : 'How is sound represented and processed in AI?')}
-                            {selectedLesson.lesson_number === 6 && (isRtl ? 'ما هو المبدأ الأساسي الذي تقوم عليه صناعة الفيديو بالذكاء الاصطناعي؟' : 'What is the main principle behind AI video generation?')}
-                            {selectedLesson.lesson_number === 9 && (isRtl ? 'ماذا يُقصد بمصطلح "الهلوسة" في النماذج اللغوية الكبيرة؟' : 'What does "Hallucination" refer to in Language Models?')}
-                            {selectedLesson.lesson_number === 10 && (isRtl ? 'كيف ينتج "التحيز الخفي" في مخرجات وقرارات الذكاء الاصطناعي؟' : 'How does "implicit bias" arise in AI outputs?')}
-                            {selectedLesson.lesson_number === 11 && (isRtl ? 'ما هو أسلوب الأمان الأول للأسرة ضد مخاطر الاحتيال الصوتي أو البصري المولد بالذكاء الاصطناعي؟' : 'What is the family\'s primary safety shield against AI voice/video deepfake fraud?')}
-                            {selectedLesson.lesson_number === 14 && (isRtl ? 'ما هي ركيزة قيادتك وتوجيهك الفعال للمساعد الشخصي والتعليمي؟' : 'What is the pillar of your effective leadership when steering your custom tutor?')}
-                            {selectedLesson.lesson_number === 15 && (isRtl ? 'تجميع معرض فني ومثالي باستخدام مولدات الصور بالذكاء الاصطناعي ينبع من:' : 'Assembling an ideal gallery using AI image generators stems from:')}
-                            {selectedLesson.lesson_number === 16 && (isRtl ? 'ما هي المرجعية السامية والقيمة المثالية لتعلم واستخدام الذكاء الاصطناعي؟' : 'What is the ultimate purpose of learning and using AI?')}
-                            {selectedLesson.lesson_number === 17 && (isRtl ? 'كيف نخلد مخرجات ومحطات الرحلة العائلية بشكل جذاب؟' : 'How do we immortalize our family travel milestones brilliantly?')}
-                            {selectedLesson.lesson_number === 18 && (isRtl ? 'ما هو التعهد والمسؤولية الكبرى الملقاة على عاتق "سفير الذكاء الاصطناعي"؟' : 'What is the major pledge of being an AI Ambassador?')}
-                            {selectedLesson.lesson_number === 19 && (isRtl ? 'كيف تواكب الكوكبة العائلية التطور المعرفي المتسارع للذكاء الاصطناعي بلا تشتت؟' : 'How does the family catch up with accelerating AI progress without losing focus?')}
-                            {selectedLesson.lesson_number === 20 && (isRtl ? 'ما هو العهد والدرس الأخير لرحلتنا التعليمية والريادية؟' : 'What is the ultimate lesson of our learning and pioneering journey?')}
-                          </p>
-
-                          <div className="grid grid-cols-1 gap-3 pt-2">
-                            {/* Option 1 */}
-                            <AnswerOption
-                              onClick={() => handleQuizAnswer('A')}
-                              selected={lQuizAnswer === 'A'}
-                              dir={isRtl ? 'rtl' : 'ltr'}
-                              label={
-                                <>
-                                  <span className="text-right">
-                                    {selectedLesson.lesson_number === 5 && (isRtl ? 'تحويل الصوت إلى بيانات رقمية تصف شكل الموجات الصوتية الفريدة وترجمتها 🌊' : 'Converting voice to wave-descriptive digital data and compiling it 🌊')}
-                                    {selectedLesson.lesson_number === 6 && (isRtl ? 'توليد سلسلة سريعة من الصور المتعاقبة (الإطارات) لخلق وهم الحركة والانسيابية 🎥' : 'Generating a consecutive sequence of images (frames) mimicking fluid kinetic motion 🎥')}
-                                    {selectedLesson.lesson_number === 9 && (isRtl ? 'تخمين كلمة تبدو لغوياً ومنطقياً صحيحة بثقة تامة دون الاعتماد على حقيقة أو حقائق عينية 🧠' : 'Guessing text that seems linguistically or contextually accurate without real factual lookup 🧠')}
-                                    {selectedLesson.lesson_number === 10 && (isRtl ? 'بسبب عدم توازن البيانات التاريخية والتحيزات النمطية البشرية التي غُذي بها النموذج 📊' : 'Due to unbalance or bias in historical human training sets fed to the model 📊')}
-                                    {selectedLesson.lesson_number === 11 && (isRtl ? 'اتفاق العائلة على رمز أو كلمة سرية خاصة وسرية للتحقق المباشر من المكالمات المريبة 🔐' : 'Agreeing on a private family password/secret to dynamically authenticate unexpected incoming requests 🔐')}
-                                    {selectedLesson.lesson_number === 14 && (isRtl ? 'بتطوير مهارة طرح الأسئلة وصياغة دور واضح وشجاع في نص الاستجابة والتعلم 🎓' : 'By mastering inquiry skills and defining clean roles inside active learning sessions 🎓')}
-                                    {selectedLesson.lesson_number === 15 && (isRtl ? 'كتابة تعاويذ وهندسة فنية متناسقة ومترابطة تحكي مسار قصتنا العائلية بانسجام أسلوبي 🎨' : 'Engineering cohesive and connected prompts portraying our family history beautifully 🎨')}
-                                    {selectedLesson.lesson_number === 16 && (isRtl ? 'بناء وتوجيه حلول ذكية لخدمة الإنسانية ومساعدة المحيط والمجتمع من حولنا 🤝' : 'Constructing and steering smart tools to solve real humanitarian and social dilemmas 🤝')}
-                                    {selectedLesson.lesson_number === 17 && (isRtl ? 'بصياغة رحلتنا وإنجازنا كقصة ملحمية تاريخية خيالية مسجلة بقالب الذكاء التوليدي 📖' : 'Compiling our milestones as an epic storybook documented via generative AI templates 📖')}
-                                    {selectedLesson.lesson_number === 18 && (isRtl ? 'تحمل ميثاق نشر الأخلاقيات، الإبداع الرقمي، الوعي والأمان والخير في المجتمع ✨' : 'Fostering best ethics, digital creativity, and helpful awareness in our community ✨')}
-                                    {selectedLesson.lesson_number === 19 && (isRtl ? 'بتخصيص ساعة شهرية مستدامة لتجربة أداة ذكية جديدة ومرحة بالتناوب ومشاركة الإبداعات 🕰️' : 'Allocating a sustainable monthly hour exploring a funny smart toy and celebrating creation 🕰️')}
-                                    {selectedLesson.lesson_number === 20 && (isRtl ? 'أن العلم والإبداع التقني مسؤولية نستخدمها بحكمة وحب وشغف لنبني غدًا أفضل 🌍✨' : 'That science and smart crafts are responsibilities handled with pure love to build a brighter future 🌍✨')}
-                                  </span>
-                                  {lQuizAnswer === 'A' && <span className="text-[10px] font-black text-[#C49E3A] ms-2">{isRtl ? 'محدد' : 'Selected'}</span>}
-                                </>
-                              }
-                            />
-
-                            {/* Option 2 */}
-                            <AnswerOption
-                              onClick={() => handleQuizAnswer('B')}
-                              selected={lQuizAnswer === 'B'}
-                              dir={isRtl ? 'rtl' : 'ltr'}
-                              label={
-                                <>
-                                  <span className="text-right">
-                                    {selectedLesson.lesson_number === 5 && (isRtl ? 'استخدام الحرارة لضغط المذياع 🌡️' : 'Using temperature to compress hardware 🌡️')}
-                                    {selectedLesson.lesson_number === 6 && (isRtl ? 'تبديل كوابل الشاشات الملوّنة 💾' : 'Changing cables on old colored televisions 💾')}
-                                    {selectedLesson.lesson_number === 9 && (isRtl ? 'إغلاق البرنامج وتحديثه بشكل سنوي 🔄' : 'Shutting down the software and upgrading yearly 🔄')}
-                                    {selectedLesson.lesson_number === 10 && (isRtl ? 'زيادة حرارة المعالج أو استهلاك الأسلاك للطاقة المرتفعه 🔋' : 'Processor heating issues or heavy electricity consumption levels 🔋')}
-                                    {selectedLesson.lesson_number === 11 && (isRtl ? 'توقيف تشغيل الهاتف الخلوي والإنترنت بالكلية 📵' : 'Turning off mobile connectivity and internet access completely 📵')}
-                                    {selectedLesson.lesson_number === 14 && (isRtl ? 'تكرار نفس المدخلات مئة مرة متتالية دون تعديل 📝' : 'Repeating the exact same prompt 100 times without edits 📝')}
-                                    {selectedLesson.lesson_number === 15 && (isRtl ? 'شراء أصباغ وفرشاة دهان مادية لوضعها على الأسطح 🖌️' : 'Purchasing a real paintbrush and acrylic colors 🖌️')}
-                                    {selectedLesson.lesson_number === 16 && (isRtl ? 'كتابة واجبات الآخرين بشكل عشوائي دون فهم أو وعي 📝' : 'Copying homework blindly without cognitive comprehension 📝')}
-                                    {selectedLesson.lesson_number === 17 && (isRtl ? 'نسيان المحطات وحذف الرسائل من الذاكرة بمرور الوقت 🧹' : 'Ignoring memories and choosing to forget everything 🧹')}
-                                    {selectedLesson.lesson_number === 18 && (isRtl ? 'التنافس في معدلات الألعاب الرقمية السريعة فقط 🎮' : 'Only playing arcade or competitive shooter games 🎮')}
-                                    {selectedLesson.lesson_number === 19 && (isRtl ? 'متابعة شاشات التلفاز طيلة اليوم والليل دون تفاعل لغوي 📺' : 'Watching generic televisions all days and nights without talking 📺')}
-                                    {selectedLesson.lesson_number === 20 && (isRtl ? 'جمع أكبر باقة من التطبيقات والأجهزة الذكية لحفظها في الخزانة 📱' : 'Storage of as many apps and phones in the home closets 📱')}
-                                  </span>
-                                  {lQuizAnswer === 'B' && <span className="text-[10px] font-black text-[#C49E3A] ms-2">{isRtl ? 'محدد' : 'Selected'}</span>}
-                                </>
-                              }
-                            />
-                          </div>
-                        </div>
-
-                        {lQuizFeedback === 'correct' && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl flex items-center gap-3 shadow-sm"
-                          >
-                            <span className="text-xl">🎉</span>
-                            <div className="text-right">
-                              <h6 className="font-black text-xs">{isRtl ? 'إجابة عبقرية وصحيحة تماماً!' : 'Brilliant! Absolutely correct!'}</h6>
-                              <p className="text-[10px] text-[#002147]/70 mt-1">
-                                {isRtl 
-                                  ? 'أحسنت يا بطل! لقد استوعبت الدرس واستحقيت شعار ومكافأة السفير بجدية تامة. استمر في رحلتك!' 
-                                  : 'Awesome work! You secured the understanding and officially earned your 50 XP award.'}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {lQuizFeedback === 'wrong' && (
-                          <motion.div 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="p-4 bg-rose-50 text-rose-800 border border-rose-200 rounded-2xl flex items-center gap-3 shadow-sm"
-                          >
-                            <span className="text-xl">💡</span>
-                            <div className="text-right">
-                              <h6 className="font-black text-xs">{isRtl ? 'اقتربت جداً! فكر في الخيار الأول مجدداً' : 'So close! Give the first option another thought'}</h6>
-                              <p className="text-[10px] text-[#002147]/70 mt-1">
-                                {isRtl 
-                                  ? 'الذكاء الاصطناعي يزدهر بالمحاولة! جرب اختيار الإجابة الأكثر شمولاً وأخلاقية مرة أخرى.' 
-                                  : 'Success rises from trying! Choose the most ethical answer.'}
-                              </p>
-                            </div>
-                          </motion.div>
-                        )}
-                      </GoldCard>
-                    </div>
+                    <AiFoundationLessonCheck
+                      key={selectedLesson.lesson_number}
+                      lessonNumber={selectedLesson.lesson_number}
+                      isRtl={isRtl}
+                      alreadyCompleted={completedLessons.includes(selectedLesson.lesson_number)}
+                      onPass={() => completeCurrentLesson(50)}
+                    />
                   )}
 
                 </div>
