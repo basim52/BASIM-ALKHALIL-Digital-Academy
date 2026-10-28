@@ -2,7 +2,7 @@ import { addDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 
-/** End-of-level test: 15–20 questions drawn from the level's own lessons (no AI calls), one per screen. */
+/** End-of-level test: 10 questions drawn from the level's own lessons (no AI calls), one per screen. */
 export const LEVEL_TEST_PASS = 80;
 
 export interface LevelTestQuestion { lessonId: string; lessonOrder: number; lessonTitleAr: string; q: SaraChoiceQuestion }
@@ -26,8 +26,8 @@ function shuffle<T>(a: T[]): T[] {
   return r;
 }
 
-/** Up to 18 questions: one per lesson first (spread across the level), then fill from remaining questions; options shuffled. */
-export function buildLevelTest(lessons: SaraTrackLesson[], count = 18): LevelTestQuestion[] {
+/** Up to 10 questions: one per lesson first (spread across the level), then fill from remaining questions; options shuffled. */
+export function buildLevelTest(lessons: SaraTrackLesson[], count = 10): LevelTestQuestion[] {
   const pools = shuffle(lessons.filter(l => l.content)).map(l => ({ l, qs: shuffle([l.content!.check, ...l.content!.exercises]) }));
   const out: LevelTestQuestion[] = [];
   const seen = new Set<string>();
