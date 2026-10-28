@@ -2472,7 +2472,11 @@ export const AiCurriculum = ({
   const [feedbackRunning, setFeedbackRunning] = useState<boolean>(false);
 
   // Academy Addons States - New additions
-  const [completed30DayChallenges, setCompleted30DayChallenges] = useState<number[]>([]);
+  // Challenge progress is saved on this device (new keys; nothing existing is touched).
+  const [completed30DayChallenges, setCompleted30DayChallenges] = useState<number[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem('ai_challenges_30d_done') || '[]'); return Array.isArray(v) ? v : []; } catch { return []; }
+  });
+  const [copiedChallengePrompt, setCopiedChallengePrompt] = useState<boolean>(false);
   const [selected30DayDay, setSelected30DayDay] = useState<number>(1);
   const [activeChallengeView, setActiveChallengeView] = useState<'52weeks' | '30days'>('52weeks');
 
@@ -2486,7 +2490,15 @@ export const AiCurriculum = ({
   const [toolsSearchQuery, setToolsSearchQuery] = useState<string>('');
   const [selectedToolCategory, setSelectedToolCategory] = useState<string>('all');
   const [favoriteTools, setFavoriteTools] = useState<string[]>([]);
-  const [completedChallengeWeeks, setCompletedChallengeWeeks] = useState<number[]>([]);
+  const [completedChallengeWeeks, setCompletedChallengeWeeks] = useState<number[]>(() => {
+    try { const v = JSON.parse(localStorage.getItem('ai_challenges_52w_done') || '[]'); return Array.isArray(v) ? v : []; } catch { return []; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('ai_challenges_52w_done', JSON.stringify(completedChallengeWeeks)); } catch { /* ignore */ }
+  }, [completedChallengeWeeks]);
+  useEffect(() => {
+    try { localStorage.setItem('ai_challenges_30d_done', JSON.stringify(completed30DayChallenges)); } catch { /* ignore */ }
+  }, [completed30DayChallenges]);
   const [expandedMonth, setExpandedMonth] = useState<number | null>(null);
 
 
@@ -7336,12 +7348,12 @@ Output Summary for [${topic}]:
                       {
                         num: 1,
                         theme: isRtl ? 'الشهر الأول: كسر الحاجز والألفة والرموز 🧱' : 'Month 1: Initial Discovery & Boundaries',
-                        desc: isRtl ? 'إعداد القاموس العائلي واختيار كلمة سر الطوارئ لحرجبة خدع الاتصالات والتوليد الشخصي.' : 'Draft personal definitions, establish safety keywords, and customize base avatars.',
+                        desc: isRtl ? 'إعداد القاموس العائلي واختيار كلمة سر للطوارئ تحمينا من خدع الاتصالات والأصوات المزيفة.' : 'Draft personal definitions, establish safety keywords, and customize base avatars.',
                         weeks: [
-                          { w: 1, title: isRtl ? 'ميثاق المرجعية العائلية' : 'Week 1: Digital Vows', mission: isRtl ? 'اكتب كلمة السر العائلية على ورقة، وعلقها في غرفة الطعام وقم باختبارها في مكالمة طارئة تمثيلية.' : 'Determine your unique family passcode, write it on the kitchen board, and complete a drill.' },
-                          { w: 2, title: isRtl ? 'ألعاب الأوامر العكسية' : 'Week 2: Adversarial Prompts', mission: isRtl ? 'تنافس عائلياً لدفع الذكاء لكتابة سطر متكامل بـ 20 كلمة دون استخدام حرف الراء على الإطلاق!' : 'Force Gemini to compile 5 paragraphs where every word excludes the Arabic letter Ra/Alif.' },
+                          { w: 1, title: isRtl ? 'ميثاق المرجعية العائلية' : 'Week 1: Digital Vows', mission: isRtl ? 'اتفقوا شفهياً على كلمة السر العائلية (لا تُكتب ولا تُرسل في أي مكان)، ثم اختبروها في مكالمة طارئة تمثيلية.' : 'Agree on a spoken family code word (never written down or sent online), then test it in a pretend emergency call.' },
+                          { w: 2, title: isRtl ? 'ألعاب الأوامر العكسية' : 'Week 2: Adversarial Prompts', mission: isRtl ? 'تنافس عائلياً لدفع الذكاء لكتابة سطر متكامل بـ 20 كلمة دون استخدام حرف الراء على الإطلاق!' : 'Compete as a family to get the AI to write a 20-word sentence without using the letter R even once!' },
                           { w: 3, title: isRtl ? 'رسم حيوان مركب مدهش' : 'Week 3: Animal Fusion', mission: isRtl ? 'دع أطفالك يدمجون ملامح زرافة ونمر وصقر في جملة واطلب من مولد مرئي إخراج لوحة زيتية لها.' : 'Combine features of an giraffe, tiger, and falcon into one creative style prompt and render it.' },
-                          { w: 4, title: isRtl ? 'لقاء حواري مع الفلسفة' : 'Week 4: Historic Chat Sim', mission: isRtl ? 'اسأل ChatGPT أن يتكلم بلسان الفيلسوف ابن رشد، وتناقش معه أسرياً حول متى يجب تصديق العينين.' : 'Trigger Al-Farabi simulation script, debating when standard humans can believe their own ears.' }
+                          { w: 4, title: isRtl ? 'لقاء حواري مع الفلسفة' : 'Week 4: Historic Chat Sim', mission: isRtl ? 'اسأل ChatGPT أن يتكلم بلسان الفيلسوف ابن رشد، وتناقش معه أسرياً حول متى يجب تصديق العينين.' : 'Ask ChatGPT to speak as the philosopher Ibn Rushd, then discuss as a family when we should trust what we see.' }
                         ]
                       },
                       {
@@ -7352,7 +7364,7 @@ Output Summary for [${topic}]:
                           { w: 5, title: isRtl ? 'مباراة التعرف الصوري المنزلي' : 'Week 5: Visual Pattern Spotter', mission: isRtl ? 'ابحث في البيت عن 5 أغراض تبدو وكأن لها وجوهاً بشرية (أزرار، مقابس)، والتقطها وسجل معانيها.' : 'Collect 5 items in the room resembling human expressions (sockets, hangers) for pattern play.' },
                           { w: 6, title: isRtl ? 'صياغة المساعد المنزلي البسيط' : 'Week 6: Mini-Home Persona Generator', mission: isRtl ? 'برمج مساعداً ذكياً على متصفحك يمثل "الجد الحكيم" ليرد على تساؤلات الصغار مع الاستشهاد بكنوز التراث.' : 'Establish a customized prompt to simulate an ancient wise elder who answers questions.' },
                           { w: 7, title: isRtl ? 'سلسلة نمط فيبوناتشي البصري' : 'Week 7: Drawing Golden Spirals', mission: isRtl ? 'تأمل شكل قوقعة حلزونية بالمنزل وأجرِ مع أولادك بحثاً للذكاء يربط الرياضيات والجمال الطبيعي.' : 'Examine Fibonacci sequences in shells and let models illustrate spiral designs.' },
-                          { w: 8, title: isRtl ? 'مسابقة كشف الأكواد المزيفة' : 'Week 8: Identify Code Vulnerabilities', mission: isRtl ? 'اطبع دالة برمجية خاطئة واطلب من أولادك مع الآلة كشف الخلل الأسمى في ترتيب الجمل.' : 'Print a broken python snippet, and trace execution to spot logic errors.' }
+                          { w: 8, title: isRtl ? 'مسابقة كشف الأخطاء البرمجية' : 'Week 8: Identify Code Vulnerabilities', mission: isRtl ? 'اطبع دالة برمجية خاطئة واطلب من أولادك مع الآلة كشف الخلل في ترتيب الأسطر.' : 'Print a broken python snippet, and trace execution to spot logic errors.' }
                         ]
                       },
                       {
@@ -7361,9 +7373,9 @@ Output Summary for [${topic}]:
                         desc: isRtl ? 'بناء حصانة أسرية ضد هجمات الوجوه والأصوات الرقمية.' : 'Shielding family elements from synthetic clones and media manipulation.',
                         weeks: [
                           { w: 9, title: isRtl ? 'صيد التزييف الصوري' : 'Week 9: Spot the AI Artifact', mission: isRtl ? 'ابحث عن صور ذكاء اصطناعي واجعل أطفالك يكشفون الأطراف الإضافية أو الظلال الملتوية للكشف بالعين.' : 'Audit generated photos, seeking visual errors like extra fingers or melted backgrounds.' },
-                          { w: 10, title: isRtl ? 'تحدي استنساخ بصمة الصوت' : 'Week 10: Cloned Voice Awareness', mission: isRtl ? 'سجلوا 10 ثوانٍ من صوتكم وجربوا استنساخه بـ ElevenLabs ثم صمموا خطة الطوارئ لمنع فخ الاتصالات.' : 'Clone a voice with ElevenLabs, then simulate an active protection plan with the passcode.' },
-                          { w: 11, title: isRtl ? 'متحف الأخبار الضالة' : 'Week 11: Debunking Mock Articles', mission: isRtl ? 'ولد مقالة تزييف لحدث لم يحصل أبداً وتدربوا على دحض أدلته بأسماء وبحث حيازة ومفاتيح المعاني.' : 'Draft a fake historical event, and guide children in debunking its structural references.' },
-                          { w: 12, title: isRtl ? 'مسابقة الأمان والدروع' : 'Week 12: Household Cyber Drill', mission: isRtl ? 'تعمل العائلة على تطبيق محاكي تزييف ومراجعة ميثاق الأمان للتأكيد على الالتزام بالقواعد الخمسة.' : 'Review your safety charter and verify each family member remembers our secret word.' }
+                          { w: 10, title: isRtl ? 'تحدي الوعي بالأصوات المستنسخة' : 'Week 10: Cloned Voice Awareness', mission: isRtl ? 'استمعوا مع الوالدين لمقاطع توعوية منشورة عن الأصوات المولّدة (دون رفع أصواتكم لأي أداة)، ثم تدربوا على خطة الطوارئ: نغلق الخط، نتصل بالرقم المعروف، ونسأل عن كلمة السر.' : 'With a parent, listen to published awareness clips about AI-generated voices (never upload your own voice), then practise the plan: hang up, call back on the known number, ask for the code word.' },
+                          { w: 11, title: isRtl ? 'متحف الأخبار الضالة' : 'Week 11: Debunking Mock Articles', mission: isRtl ? 'ولّدوا مقالة عن حدث لم يحصل أبداً، ثم تدربوا على كشفها: ابحثوا عن الأسماء والتواريخ في مصادر موثوقة.' : 'Draft a fake historical event, and guide children in debunking its structural references.' },
+                          { w: 12, title: isRtl ? 'مسابقة الأمان والدروع' : 'Week 12: Household Cyber Drill', mission: isRtl ? 'راجعوا ميثاق الأمان العائلي وتأكدوا أن كل فرد يتذكر القواعد الخمس وكلمة السر.' : 'Review your safety charter and verify each family member remembers our secret word.' }
                         ]
                       },
                       {
@@ -7380,10 +7392,10 @@ Output Summary for [${topic}]:
                       {
                         num: 5,
                         theme: isRtl ? 'الشهر الخامس: عوالم النغم والصوت المولد 🎵' : 'Month 5: Harmony, Voice & Sound',
-                        desc: isRtl ? 'تليحين وتأدية الأناشيد والمؤثرات العائلية الرائعة.' : 'Synthesizing local audio hooks and vocals dynamically.',
+                        desc: isRtl ? 'تلحين الأناشيد وصناعة المؤثرات الصوتية العائلية.' : 'Synthesizing local audio hooks and vocals dynamically.',
                         weeks: [
                           { w: 17, title: isRtl ? 'كتابة كلمات النشيد الأسري' : 'Week 17: Writing Anthem Lyrics', mission: isRtl ? 'اكتبوا كلمات أنشودة تصف عادات عائلتكم، وحسنوا وزنها وألفاظها بالمعاون الرقمي وبلاغات المعاني.' : 'Draft custom lyrics reflecting family traditions, and tune them utilizing text engines.' },
-                          { w: 18, title: isRtl ? 'التلحين والتوليد الموسيقي بـ Suno' : 'Week 18: composing with Suno', mission: isRtl ? 'أدخل الكلمات لـ Suno واختر نمط الإيقاع (دوف، ألماني، عربي تراثي) واصنع نسختك المفصلة.' : 'Input your lyrics in Suno, pick a cultural acoustic genre, and generate custom melodies.' },
+                          { w: 18, title: isRtl ? 'التلحين والتوليد الموسيقي بـ Suno' : 'Week 18: composing with Suno', mission: isRtl ? 'أدخل الكلمات لـ Suno واختر نمط الإيقاع (هادئ، حماسي، عربي تراثي) واصنع نسختك المفصلة.' : 'Input your lyrics in Suno, pick a cultural acoustic genre, and generate custom melodies.' },
                           { w: 19, title: isRtl ? 'إصدار المؤثرات الصوتية للألعاب' : 'Week 19: Sound Design Play', mission: isRtl ? 'اصنع مؤثر صوتي (رياح زحل، قفزة نمر) وسجلوها في تليفون العائلة لاستخدامها بالألعاب.' : 'Generate specialized SFX clips (Jupiter winds, tiger leaps) for family quiz games.' },
                           { w: 20, title: isRtl ? 'نشر اللوحة السمعية بالبيت' : 'Week 20: Sharing our Playlist', mission: isRtl ? 'اجمعوا ملف الأصوات العائلية وعلقوها في كود سري ليتشاركها الأقارب والأجداد للابتهاج.' : 'Assemble generated tracks into a shared safe playlist and display it on the whiteboard.' }
                         ]
@@ -7395,7 +7407,7 @@ Output Summary for [${topic}]:
                         weeks: [
                           { w: 21, title: isRtl ? 'صياغة المدرس السقراطي الذكي' : 'Week 21: Socrates Agent Creation', mission: isRtl ? 'قم ببناء أمر لجعل الروبوت يشرح الكيمياء لأحد الصغار بالأسئلة التدريجية دون إعطائه الجواب مباشرة.' : 'Command Gemini to explain complex items to a child using interactive questions.' },
                           { w: 22, title: isRtl ? 'تحدي تحضير العروض التقديمية السريعة' : 'Week 22: Designing with Gamma', mission: isRtl ? 'ادخل موضوعاً مدرسياً لـ Gamma واخرج لوحة عرض متكاملة بالتصاميم والخطط المرافقة في دقيقة.' : 'Deploy Gamma app to construct a lesson deck based on raw historical references.' },
-                          { w: 23, title: isRtl ? 'تلخيص الكتب والآداب الرقمية' : 'Week 23: Text Summaries Audit', mission: isRtl ? 'ارفعوا ملف PDF لكتّاب أو رواية قديمة، وابدأ حواراً دقيقاً مع الكتاب لشرح الدروس المخفية للوالدين.' : 'Upload a complex historical book chapter and analyze the main ethical takeaways.' },
+                          { w: 23, title: isRtl ? 'تلخيص الكتب والآداب الرقمية' : 'Week 23: Text Summaries Audit', mission: isRtl ? 'ارفعوا ملف PDF لكتاب أو رواية قديمة، وابدؤوا حواراً مع المساعد لاستخراج الدروس والعِبر وناقشوها مع الوالدين.' : 'Upload a complex historical book chapter and analyze the main ethical takeaways.' },
                           { w: 24, title: isRtl ? 'مسابقة الأسئلة والجوائز الذكية' : 'Week 24: AI Quiz Night', mission: isRtl ? 'دع المساعد الذكي يولد 10 أسئلة صعبة بشتى الفنون، وابدأ منافسة دافئة بين الأبناء والأمهات بالبيت.' : 'Instruct the robot to compose a 10-question trivia game, and run a family trivia night.' }
                         ]
                       },
@@ -7404,10 +7416,10 @@ Output Summary for [${topic}]:
                         theme: isRtl ? 'الشهر السابع: تطوير الألعاب التوضيحية وتجريب البرمجة 💻' : 'Month 7: Game Design & Kid-Coding',
                         desc: isRtl ? 'ابتكار الأكواد اللطيفة، وتعديل الصفحات لتشغيل أول مسرح ألعاب.' : 'Constructing simple web interfaces and modifying raw script rules.',
                         weeks: [
-                          { w: 25, title: isRtl ? 'صفحة الترحيب الخاصة بالصغار' : 'Week 25: Kids Greeting Page', mission: isRtl ? 'برمج صفحة إنترنت بسيطة بلغة HTML تحمل صوركم العائلية ورسالة حماسية وقم بفتحها على الشاشة.' : 'Compose a welcome HTML greeting page carrying family details directly in browser.' },
+                          { w: 25, title: isRtl ? 'صفحة الترحيب الخاصة بالصغار' : 'Week 25: Kids Greeting Page', mission: isRtl ? 'برمج صفحة إنترنت بسيطة بلغة HTML تحمل رسمة أو إيموجي ورسالة حماسية (بدون صور شخصية) وقم بفتحها على الشاشة.' : 'Build a simple HTML welcome page with a drawing or emoji and a cheerful message (no personal photos).' },
                           { w: 26, title: isRtl ? 'تعديل قوانين لعبة المتاهة' : 'Week 26: Custom Maze Play', mission: isRtl ? 'اطلب كود لعبة ثعبان بسيطة بالمتصفح، وغير السرعة والألوان وقم باللعب بها سوياً.' : 'Get a raw canvas Snake game script, alter velocity parameters and test your changes.' },
                           { w: 27, title: isRtl ? 'تصميم بطل بكسل ثلاثي الأبعاد' : 'Week 27: Designing 3D Pixel Art', mission: isRtl ? 'استعن بمولد تشكيلي لصياغة لوحة بكسل طريفة لشخصيات بيتكم المفضلة وقارن تماثل الألوان.' : 'Construct cute pixel grids from prompt strings matching family visual style.' },
-                          { w: 28, title: isRtl ? 'رحلة ميكنة النشر بالبرامج' : 'Week 28: Simple Shell Play', mission: isRtl ? 'تعرف على فنان الأوامر بالآلة، مبرزاً الأنماط المتكررة في تسريع الملفات وتصنيفها.' : 'Run brief command automation examples to list, catalog and group system items.' }
+                          { w: 28, title: isRtl ? 'رحلة ميكنة النشر بالبرامج' : 'Week 28: Simple Shell Play', mission: isRtl ? 'تعرّف مع أحد الوالدين على سطر الأوامر، واطلب من المساعد أوامر بسيطة لعرض الملفات وترتيبها في مجلدات.' : 'Run brief command automation examples to list, catalog and group system items.' }
                         ]
                       },
                       {
@@ -7418,7 +7430,7 @@ Output Summary for [${topic}]:
                           { w: 29, title: isRtl ? 'هندسة الشعار الأسمى للمنزل' : 'Week 29: Designing our crest', mission: isRtl ? 'ادخل منصة Brandmark، وصمم شعاراً أنيقاً يمثل قوة وطيبة عائلتكم الكريمة واطبعوه كشارات.' : 'Construct a family crest utilizing logo creators with deep gold and slate color palettes.' },
                           { w: 30, title: isRtl ? 'تخطيط هوية المنتجات اللذيذة' : 'Week 30: Homemade Label Play', mission: isRtl ? 'هل عائلتكم تصنع حلوى أو طعام شهير؟ صمموا ملصقاً غذائياً طريفاً للمنتج بمولدات الصورة.' : 'Generate customized product labels for family homemade cookies or foods.' },
                           { w: 31, title: isRtl ? 'كتابة تدوينة الشرف الأسري' : 'Week 31: Framing family values', mission: isRtl ? 'صمم ملصقاً كبيراً يجمع المبادئ الأساسية للعائلة بالاعتماد على التوليد الخطاط والصور الراقية.' : 'Design a large values summary poster incorporating elegant calligraphic typography.' },
-                          { w: 32, title: isRtl ? 'متحف الكروت والمناسبات' : 'Week 32: Custom Cards Creation', mission: isRtl ? 'ولد كروت تهنئة أعياد ومناسباف مخصصة لكل حبيب وقريب بالذكاء الإبداعي بدلاً من الصور الجاهزة المكررة.' : 'Draft highly personalized greeting cards with custom prompts for upcoming relatives birthdays.' }
+                          { w: 32, title: isRtl ? 'متحف الكروت والمناسبات' : 'Week 32: Custom Cards Creation', mission: isRtl ? 'ولد كروت تهنئة أعياد ومناسبات مخصصة لكل حبيب وقريب بالذكاء الإبداعي بدلاً من الصور الجاهزة المكررة.' : 'Draft highly personalized greeting cards with custom prompts for upcoming relatives birthdays.' }
                         ]
                       },
                       {
@@ -7438,7 +7450,7 @@ Output Summary for [${topic}]:
                         desc: isRtl ? 'إنتاج المشاهد، تحريك الرسوم الصامتة وصناعة أول شاشات سينما عائلية.' : 'Compiling active clips, editing timelines, and adding acoustic SFX.',
                         weeks: [
                           { w: 37, title: isRtl ? 'رسم خريطة السيناريو واللقطات' : 'Week 37: Storyboard sketching', mission: isRtl ? 'اكتبوا سيناريو لـ 5 لقطات متتالية (مثال: نيزك يقترب، إنذار بالمركبة، هبوط آمن) واصنعوا رسوماتها التوجيهية.' : 'Compose a 5-scened storyboard outlining custom fantasy space adventures.' },
-                          { w: 38, title: isRtl ? 'الإنماء بالذكاء بـ Runaway أو Luma' : 'Week 38: Rendering scenes', mission: isRtl ? 'حول الصور الثابتة إلى لقطات حركية فائقة الواقعية بلمسة دافئة من مولدات المشاهد الحديثة.' : 'Convert static background images into fluid, lively movie segments with Runway.' },
+                          { w: 38, title: isRtl ? 'تحريك المشاهد بـ Runway أو Luma' : 'Week 38: Rendering scenes', mission: isRtl ? 'حول الصور الثابتة إلى لقطات حركية فائقة الواقعية بلمسة دافئة من مولدات المشاهد الحديثة.' : 'Convert static background images into fluid, lively movie segments with Runway.' },
                           { w: 39, title: isRtl ? 'دمج المقاطع والمؤثرات الصوتية' : 'Week 39: Music scoring', mission: isRtl ? 'اجمعوا الفيديوهات وصممو لها النشيد والمؤثرات الصوتية والتعليق بصوت حماسي جذاب.' : 'Stitch generated clips inside timelines with custom vocals and background orchestra hooks.' },
                           { w: 40, title: isRtl ? 'مساء السينما والعرض الأبهر بالبيت' : 'Week 40: Popcorn Movie Premiere', mission: isRtl ? 'أطفئوا الأنوار، جهزوا الفشار، واعرضوا فيلمكم المكتمل لعائلة المستقبل على شاشة البيت الكبيرة!' : 'Dim living room lights, bring popcorn, and celebrate your first custom short film premiere!' }
                         ]
@@ -7450,8 +7462,8 @@ Output Summary for [${topic}]:
                         weeks: [
                           { w: 41, title: isRtl ? 'صيد الانحياز الثقافي الفاضح' : 'Week 41: Cultural Bias Spotter', mission: isRtl ? 'اطلب من الآلة رسم "شخص حكيم" وتفقد هل يرسمه دائماً بهيئة معينة؟ ناقش بطلان النمط المسبق.' : 'Ask image models to paint "a brilliant doctor" and inspect if it exhibits biases or gender stereotypes.' },
                           { w: 42, title: isRtl ? 'تحدي كشف كذبة الهلوسة' : 'Week 42: Hallucination Bait Drill', mission: isRtl ? 'سل الروبوت عن تفاصيل معركة تاريخية مخترعة (لا صحة لها) وتتبع هل يؤلف رداً واكشف هلوسة عقله المبرر!' : 'Ask tools about fictional events to record how easily the machine hallucinates fake details.' },
-                          { w: 43, title: isRtl ? 'البحث عن بصمة الصورة الحقيقة' : 'Week 43: Finding True Photorealism', mission: isRtl ? 'تأمل الملامحات وحركة تدفق الدم بالصورة وصنفها ومييز الكائنات الرقمية المصطنعة بكل فخر.' : 'Distinguish authentic historical photos from generated ones under family inspection.' },
-                          { w: 44, title: isRtl ? 'حقوق ملكية المبدعين الصغار' : 'Week 44: Creative Intellectual Property', mission: isRtl ? 'ناقشوا سوياً هل يحق للروبوت أن يأخذ رسومات الفانين القدامى ليتعلم؟ ودونوا موقف عائلتكم التقني.' : 'Hold debates on whether machine models violate painters copyrights during deep training runs.' }
+                          { w: 43, title: isRtl ? 'البحث عن بصمة الصورة الحقيقة' : 'Week 43: Finding True Photorealism', mission: isRtl ? 'تأمّلوا تفاصيل الصور (الأصابع، الكتابة، الظلال، الخلفية) وصنّفوها: حقيقية أم مولّدة؟' : 'Distinguish authentic historical photos from generated ones under family inspection.' },
+                          { w: 44, title: isRtl ? 'حقوق ملكية المبدعين الصغار' : 'Week 44: Creative Intellectual Property', mission: isRtl ? 'ناقشوا سوياً هل يحق للروبوت أن يأخذ رسومات الفنانين ليتعلم؟ ودونوا موقف عائلتكم التقني.' : 'Hold debates on whether machine models violate painters copyrights during deep training runs.' }
                         ]
                       },
                       {
@@ -7460,13 +7472,13 @@ Output Summary for [${topic}]:
                         desc: isRtl ? 'مراجعة المهارات العملية، تقديم مشروع التخرج وطباعة شهادة التفوق والعلوم المعتمدة!' : 'Completing graduation modules, presenting final projects and unlocking certificates.',
                         weeks: [
                           { w: 45, title: isRtl ? 'تحضير مسودة مشروع التخرج' : 'Week 45: Framing your theme', mission: isRtl ? 'اختر واحداً من المشاريع الكبرى (فيلم، قصة، بوت، حملة) واكتب ملخصه وخلفيته.' : 'Draft a structural pitch summarizing your family final generative AI masterpiece.' },
-                          { w: 46, title: isRtl ? 'التصحيح المتبادل للتطبيقات' : 'Week 46: Beta Testing edits', mission: isRtl ? 'اعرض العمل على باق الأعضاء، لتلقي تحسينات وتدقيق الأخطاء في الصور والأوامر بذكاء مروق.' : 'Showcase intermediate models to all nodes, gathering design tips before compiling outputs.' },
-                          { w: 47, title: isRtl ? 'توثيق العقل التوليدي وجمع الرمز' : 'Week 47: Exporting code bases', mission: isRtl ? 'احزم الصور والأصوات والنصوص في ملف سحابي واحد وقدم مشروعك لقسم التفتيش التفاعلي.' : 'Export all assets, prompts, and notes into single folders preparing for official submittal.' },
-                          { w: 48, title: isRtl ? 'الامتحان الاحترافي والاعتماد' : 'Week 48: Submitting Graduate Exam', mission: isRtl ? 'افتح قسم الشهادة الاحترافية بأكاديميتنا، وأجب عن الفروض الأربعة الحية في المتصفح.' : 'Take the 4-step professional exam built inside our active certification workspace.' },
-                          { w: 49, title: isRtl ? 'توليد ومراجعة الشهادة الكبرى' : 'Week 49: Generating Credentials', mission: isRtl ? 'سجل اسم البطل وافحص تقييم اللجنة التفاعلية لتوليد الشهادة الذهبية البراقة.' : 'Input graduate name and generate the elegant royal gold bilingual certificate.' },
+                          { w: 46, title: isRtl ? 'التصحيح المتبادل للتطبيقات' : 'Week 46: Beta Testing edits', mission: isRtl ? 'اعرض العمل على باقي أفراد العائلة لتلقي الملاحظات وتصحيح الأخطاء في الصور والأوامر.' : 'Showcase intermediate models to all nodes, gathering design tips before compiling outputs.' },
+                          { w: 47, title: isRtl ? 'توثيق العقل التوليدي وجمع الرمز' : 'Week 47: Exporting code bases', mission: isRtl ? 'احزم الصور والأصوات والنصوص في ملف سحابي واحد وجهّزه للعرض.' : 'Export all assets, prompts, and notes into single folders preparing for official submittal.' },
+                          { w: 48, title: isRtl ? 'الامتحان الاحترافي والاعتماد' : 'Week 48: Submitting Graduate Exam', mission: isRtl ? 'افتح قسم الشهادة في المنهج الذكي، وأجب عن أسئلة اختبار الشهادة.' : 'Open the certificate section of the AI curriculum and take the certificate test.' },
+                          { w: 49, title: isRtl ? 'توليد ومراجعة الشهادة الكبرى' : 'Week 49: Generating Credentials', mission: isRtl ? 'بعد النجاح في الاختبار، اكتب اسمك لإصدار الشهادة الذهبية.' : 'Input graduate name and generate the elegant royal gold bilingual certificate.' },
                           { w: 50, title: isRtl ? 'مهرجان التتويج وطباعة الشهادات' : 'Week 50: Grand Printing Ceremony', mission: isRtl ? 'انقر على خيار الطباعة لتوليد شهادة ورقية حقيقية، وعلقها في إطار فخم بغرفة الجلوس!' : 'Print your high-resolution physical credential certificate and frame it proudly.' },
                           { w: 51, title: isRtl ? 'ميثاق المتابعة والتدشين النهائي' : 'Week 51: Pledge for continuous learning', mission: isRtl ? 'جددوا ميثاق الأسر واحتفلوا بالإنجاز العبقري كعائلة رقمية واعية رائدة.' : 'Renew family pledges to maintain human authored sovereignty over digital machines.' },
-                          { w: 52, title: isRtl ? 'أبطال الأكاديمية الدائمون 🏆' : 'Week 52: Legends Board 🏆', mission: isRtl ? 'سجلوا أسماءكم في لوحة الشرف الدائمة كأول عائلة تنهي 52 تحدياً بنجاح باهر وامتياز!' : 'Log your names in the permanent master registry of certified generative leaders!' }
+                          { w: 52, title: isRtl ? 'أبطال الأكاديمية الدائمون 🏆' : 'Week 52: Legends Board 🏆', mission: isRtl ? 'سجلوا أسماءكم في لوحة الشرف الدائمة بعد إنهاء الـ 52 تحدياً بنجاح!' : 'Log your names in the permanent master registry of certified generative leaders!' }
                         ]
                       }
                     ].map((m) => {
@@ -7546,6 +7558,7 @@ Output Summary for [${topic}]:
                                           onClick={() => {
                                             if (isDone) {
                                               setCompletedChallengeWeeks(prev => prev.filter(id => id !== w.w));
+                                              setXp(prev => Math.max(0, prev - 10));
                                             } else {
                                               setCompletedChallengeWeeks(prev => [...prev, w.w]);
                                               setXp(prev => prev + 10);
@@ -7626,12 +7639,12 @@ Output Summary for [${topic}]:
                       {(() => {
                         const challenges30 = [
                           { day: 1, challenge: isRtl ? "اسأل ChatGPT: 'ما هو الذكاء الاصطناعي؟ اشرح لي كأني في العاشرة.'" : "Ask ChatGPT: 'What is AI? Explain to me as if I am 10 years old.'", tool: "ChatGPT", promptText: "What is artificial intelligence? Explain it to me like I am 10 years old with analogies." },
-                          { day: 2, challenge: isRtl ? "استخدم Bing Image Creator لتوليد صورة لـ 'حيوان خيالي لم يكتشف بعد'." : "Use Bing Image Creator to generate an image of 'a newly discovered mythical animal'.", tool: "Copilot Designer", promptText: "A newly discovered amazing mythical friendly space creature, Pixar style, highly details, 8k resolution" },
-                          { day: 3, challenge: isRtl ? "اطلب من الذكاء الاصطناعي كتابة قصة قصيرة (100 كلمة) عنك كبطل." : "Ask AI to write a short story (100 words)...", tool: "Claude / Gemini", promptText: "Write a short adventure story (100 words) where the main character is Basim Al Khalil, who finds a magical compass in Riyadh." },
+                          { day: 2, challenge: isRtl ? "استخدم Bing Image Creator لتوليد صورة لـ 'حيوان خيالي لم يكتشف بعد'." : "Use Bing Image Creator to generate an image of 'a newly discovered mythical animal'.", tool: "Bing Image Creator", promptText: "A newly discovered friendly mythical creature, colourful cartoon style, highly detailed" },
+                          { day: 3, challenge: isRtl ? "اطلب من الذكاء الاصطناعي كتابة قصة قصيرة (100 كلمة) عنك كبطل." : "Ask AI to write a short story (100 words)...", tool: "Claude / Gemini", promptText: "Write a short adventure story (100 words) where the main character is a curious kid (use my first name only) who finds a magical compass in Riyadh." },
                           { day: 4, challenge: isRtl ? "استخدم أداة ElevenLabs لتحويل جملة 'صباح الخير' إلى صوت." : "Use ElevenLabs tool to convert 'Good Morning'...", tool: "ElevenLabs" },
                           { day: 5, challenge: isRtl ? "تعلم 5 كلمات إنجليزية جديدة بالذكاء الاصطناعي." : "Learn 5 new English words...", tool: "ChatGPT / Claude", promptText: "Teach me 5 useful English vocabulary words. Give each with a simple sentence and a fun arabic mnemonic to remember it." },
                           { day: 6, challenge: isRtl ? "اطلب من الذكاء الاصطناعي أن يشرح لك موضوعاً دراسياً صعباً." : "Ask AI to explain a complex school topic...", tool: "Gemini", promptText: "Explain how photosynthesis works in plants. Use interactive steps and an elegant bullet list." },
-                          { day: 7, challenge: isRtl ? "ابنِ شخصية خيالية (اسم، شكل، قصة) باستخدام DALL-E وChatGPT." : "Build a fictional character with DALL-E...", tool: "ChatGPT Plus" },
+                          { day: 7, challenge: isRtl ? "ابنِ شخصية خيالية (اسم، شكل، قصة) بمساعد محادثة ومولّد صور." : "Build a fictional character (name, look, story) with a chat assistant and an image generator.", tool: "ChatGPT / Gemini + Bing Image Creator" },
                           { day: 8, challenge: isRtl ? "استخدم Perplexity للبحث عن 'أحدث اكتشاف في الفضاء'." : "Use Perplexity to search for...", tool: "Perplexity AI" },
                           { day: 9, challenge: isRtl ? "خطط وجباتك ليوم كامل باستخدام الذكاء الاصطناعي." : "Plan a full day healthy diet meal plan...", tool: "ChatGPT / Gemini", promptText: "Plan a single-day healthy family food menu utilizing local Middle Eastern ingredients. Must be low sugar." },
                           { day: 10, challenge: isRtl ? "اكتب قصيدة هايكو (3 أسطر) عن التكنولوجيا." : "Write an elegant Haiku poem (3 lines)...", tool: "Claude", promptText: "Write an inspiring Haiku poem about future quantum computers and nature." },
@@ -7640,17 +7653,17 @@ Output Summary for [${topic}]:
                           { day: 13, challenge: isRtl ? "صمم شعاراً لاسمك باستخدام Canva AI." : "Design an awesome logo with Canva AI...", tool: "Canva AI" },
                           { day: 14, challenge: isRtl ? "مارس محادثة إنجليزية لمدة 5 دقائق مع الذكاء الاصطناعي." : "Practice English for 5 minutes with AI...", tool: "AI Voice / ChatGPT" },
                           { day: 15, challenge: isRtl ? "استخدم Gamma لصنع عرض تقديمي عن هوايتك." : "Use Gamma to quickly frame presentation...", tool: "Gamma App" },
-                          { day: 16, challenge: isRtl ? "تولّد 3 صور لنفس الفكرة بأدوات مختلفة وقارن بينها." : "Generate 3 images of the exact same prompt...", tool: "Midjourney / Bing" },
-                          { day: 17, challenge: isRtl ? "اكتب 'رسالة إلى نفسك بعد 5 سنوات' واطلب من الذكاء الاصطناعي تحسينها." : "Write a 'Letter to future self'...", tool: "Claude-3.5" },
-                          { day: 18, challenge: isRtl ? "استخدم RunwayML أو Luma لتوليد فيديو 5 ثوانٍ من نص." : "Use Runway or Luma for 5-sec video...", tool: "Luma Dream Machine" },
+                          { day: 16, challenge: isRtl ? "تولّد 3 صور لنفس الفكرة بأدوات مختلفة وقارن بينها." : "Generate 3 images of the exact same prompt...", tool: "Bing Image Creator / Gemini / Canva AI" },
+                          { day: 17, challenge: isRtl ? "اكتب 'رسالة إلى نفسك بعد 5 سنوات' واطلب من الذكاء الاصطناعي تحسينها." : "Write a 'Letter to future self'...", tool: "Claude" },
+                          { day: 18, challenge: isRtl ? "استخدم Runway أو Luma لتوليد فيديو قصير من نص." : "Use Runway or Luma for 5-sec video...", tool: "Luma Dream Machine" },
                           { day: 19, challenge: isRtl ? "تعلم كيف تقول 'شكراً' بـ 10 لغات بالذكاء الاصطناعي." : "Learn to speak 'Thank you' in 10 languages...", tool: "Google Translate / Gemini" },
                           { day: 20, challenge: isRtl ? "صمم 'روتيناً صباحياً مثالياً' بمساعدة الذكاء الاصطناعي." : "Design 'Perfect Morning Routine'...", tool: "ChatGPT" },
                           { day: 21, challenge: isRtl ? "اكتب 'أمراً عملاقاً' (Mega-Prompt) من 100 كلمة لبناء لعبة." : "Write a massive 'Mega-Prompt'...", tool: "Claude AI", promptText: "Act as a text-based RPG game about a Cyber-Riyadh in 2080. You offer 3 choices at each turn. Start the game welcome screen." },
-                          { day: 22, challenge: isRtl ? "استخدم أداة إزالة خلفية صورة (Remove.bg) على صورة لك." : "Utilize an AI image background eraser tool...", tool: "Remove.bg" },
-                          { day: 23, challenge: isRtl ? "تخيل وصف 'مدينة المستقبل' واطلب من الذكاء الاصطناعي رسمها." : "Describe 'the eco-city of 2050'...", tool: "Bing Creator" },
+                          { day: 22, challenge: isRtl ? "استخدم أداة إزالة الخلفية (Remove.bg) على صورة لعبة أو نبتة أو حيوانك الأليف (لا ترفع صور وجهك)." : "Use an AI background remover on a photo of a toy, plant or pet (not your face).", tool: "Remove.bg" },
+                          { day: 23, challenge: isRtl ? "تخيل وصف 'مدينة المستقبل' واطلب من الذكاء الاصطناعي رسمها." : "Describe 'the eco-city of 2050'...", tool: "Bing Image Creator" },
                           { day: 24, challenge: isRtl ? "اكتب 'ميثاق أخلاقيات' شخصي لاستخدامك للذكاء الاصطناعي." : "Draft a personal 'Ethics Charter'...", tool: "Google Gemini" },
                           { day: 25, challenge: isRtl ? "تعلم مهارة جديدة في 15 دقيقة (مثلاً: طي الورق، طبخة سريعة)." : "Learn a brand new skill in 15 minutes...", tool: "AI Assistant" },
-                          { day: 26, challenge: isRtl ? "حلل صورة قديمة لك واطلب من الذكاء الاصطناعي وصف المشاعر فيها." : "Upload an old family photo and ask for emotion description...", tool: "Gemini / Claude App" },
+                          { day: 26, challenge: isRtl ? "ارفع صورة منظر طبيعي أو لوحة فنية (بدون وجوه العائلة) واطلب من الذكاء الاصطناعي وصف المشاعر فيها." : "Upload a landscape or painting (no family faces) and ask AI to describe the mood...", tool: "Gemini / Claude App" },
                           { day: 27, challenge: isRtl ? "اصنع 'بودكاست' صغير (3 دقائق) بصوت مولّد عن موضوع تحبه." : "Produce a tiny 3-minute podcast script...", tool: "NotebookLM / Suno" },
                           { day: 28, challenge: isRtl ? "علم شخصاً آخر (صديق، فرد عائلة) شيئاً واحداً تعلمته." : "Teach a friend or absolute beginner...", tool: "Real Life Discussion" },
                           { day: 29, challenge: isRtl ? "ابنِ معرضاً من 6 صور أنتجتها خلال الشهر." : "Assemble an online virtual photo-gallery...", tool: "Canva Design Studio" },
@@ -7686,12 +7699,14 @@ Output Summary for [${topic}]:
                                 <div className="flex justify-between items-center">
                                   <button
                                     onClick={() => {
-                                      navigator.clipboard.writeText(currentChallenge.promptText!);
-                                      setFamilyName(prev => prev); // dummy trigger update
+                                      navigator.clipboard?.writeText(currentChallenge.promptText!).then(() => {
+                                        setCopiedChallengePrompt(true);
+                                        setTimeout(() => setCopiedChallengePrompt(false), 1800);
+                                      }).catch(() => { /* clipboard blocked: text is still selectable */ });
                                     }}
                                     className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 hover:text-white transition-colors border border-amber-500/30 px-2.5 py-1 rounded text-[10px] font-black"
                                   >
-                                    {isRtl ? 'نسخ التعويذة البرمجية (Prompt) 📋' : 'Copy Prompt 📋'}
+                                    {copiedChallengePrompt ? (isRtl ? 'تم النسخ ✓' : 'Copied ✓') : (isRtl ? 'نسخ الأمر (Prompt) 📋' : 'Copy Prompt 📋')}
                                   </button>
                                   <span className="text-[10px] text-amber-400 font-black">{isRtl ? '💡 أمر مقترح وبسيط للبدء:' : '💡 Good Starter Prompt:'}</span>
                                 </div>
@@ -7707,6 +7722,7 @@ Output Summary for [${topic}]:
                                 onClick={() => {
                                   if (isDayComplete) {
                                     setCompleted30DayChallenges(prev => prev.filter(d => d !== selected30DayDay));
+                                    setXp(prev => Math.max(0, prev - 10));
                                   } else {
                                     setCompleted30DayChallenges(prev => [...prev, selected30DayDay]);
                                     setXp(prev => prev + 10);
