@@ -17,6 +17,7 @@ import { toToolCalls, type BoardAction } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 import { extractLessonItems, recordLastLesson } from '../lib/repeatPractice';
+import { normalizeChoice, optionText } from '../lib/choiceQuestion';
 import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue, LessonSteps } from './BoardNextTransition';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
@@ -174,7 +175,7 @@ export function lessonBoardActions(lesson: SaraTrackLesson, useAlt: boolean): Bo
   ];
 }
 
-const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; locked?: boolean }> = ({ q, picked, onPick, locked }) => (
+const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; locked?: boolean }> = ({ q: raw, picked, onPick, locked }) => { const q = normalizeChoice(raw); return (
   <div className="space-y-1.5">
     <p className="text-[13px] font-black text-slate-800 leading-snug">{q.promptAr}{q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{q.promptEn}</span>}</p>
     <div className="grid gap-1.5">
@@ -182,12 +183,12 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
         const state = picked === null ? '' : i === q.correctIndex && picked === i ? 'bg-emerald-100 border-emerald-500' : picked === i ? 'bg-rose-100 border-rose-400' : 'opacity-70';
         return (
           <button key={i} disabled={locked} onClick={() => onPick(i)} dir="auto"
-            className={`w-full text-start px-3 py-1 rounded-xl border-2 border-slate-200 bg-white text-[13px] font-bold active:scale-[0.99] ${state}`}>{o}</button>
+            className={`w-full text-start px-3 py-1 rounded-xl border-2 border-slate-200 bg-white text-[#002147] text-[13px] font-bold active:scale-[0.99] ${state}`}>{o}</button>
         );
       })}
     </div>
   </div>
-);
+); };
 
 /** Tracks that get «حاور سارة» after the exercises (Conversation + Grammar: foundations, advanced). */
 const CALL_TRACKS: Record<string, 'conversation' | 'grammar'> = { conversation_v2: 'conversation', foundations: 'grammar', advanced_v2: 'grammar' };
@@ -520,9 +521,9 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 {/* no instant hint: the pick is only highlighted, right/wrong is revealed at the end */}
                 <p className="text-[13px] font-black text-slate-800 leading-snug mb-1.5">{cur.q.promptAr}{cur.q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{cur.q.promptEn}</span>}</p>
                 <div className="grid gap-1.5">
-                  {cur.q.options.map((o, i) => (
+                  {cur.q.options.map(optionText).map((o, i) => (
                     <button key={i} dir="auto" data-testid="test-option" onClick={() => setTest({ ...test, pick: i })}
-                      className={`w-full text-start px-3 py-1.5 rounded-xl border-2 text-[13px] font-bold ${test.pick === i ? 'bg-sky-100 border-sky-500' : 'bg-white border-slate-200'}`}>{o}</button>
+                      className={`w-full text-start px-3 py-1.5 rounded-xl border-2 text-[#002147] text-[13px] font-bold ${test.pick === i ? 'bg-sky-100 border-sky-500' : 'bg-white border-slate-200'}`}>{o}</button>
                   ))}
                 </div>
               </div>

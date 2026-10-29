@@ -12,6 +12,7 @@ import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
 import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
 import type { SaraChoiceQuestion } from '../data/saraTracks/foundations';
+import { normalizeChoice } from '../lib/choiceQuestion';
 import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue, LessonSteps } from './BoardNextTransition';
 import { extractLessonItems } from '../lib/repeatPractice';
 import type { RepeatTeacher } from './SaraRepeatPractice';
@@ -34,14 +35,14 @@ const useVoice = (voice: string) => {
   };
 };
 
-const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; big?: boolean }> = ({ q, picked, onPick, big }) => (
+const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; big?: boolean }> = ({ q: raw, picked, onPick, big }) => { const q = normalizeChoice(raw); return (
   <div className="grid gap-1.5 shrink-0">
     {q.options.map((o, i) => {
       const st = picked === null ? 'bg-white text-[#001a38] border-amber-300' : i === q.correctIndex ? 'bg-emerald-100 text-emerald-900 border-emerald-500' : i === picked ? 'bg-rose-100 text-rose-900 border-rose-500' : 'bg-white/60 text-slate-600 border-slate-200';
       return <button key={i} dir="ltr" data-testid="tutor-option" disabled={picked !== null} onClick={() => onPick(i)} className={`px-3 py-2.5 rounded-xl border text-[14px] font-bold text-start ${big ? 'border-2 text-[16px] font-black' : ''} ${big && !/[a-z\u0600-\u06FF]/i.test(o) ? 'text-center text-[30px] py-1.5' : ''} ${st}`}>{o}</button>;
     })}
   </div>
-);
+); };
 
 export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBack: () => void; mockLessonOrder?: number; mockStep?: Step }> = ({ track, uid, onBack, mockLessonOrder, mockStep }) => {
   const persona = personaById(track.personaId);
