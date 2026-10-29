@@ -126,14 +126,16 @@ export async function loadLevelTestAttempts(uid: string): Promise<LevelTestAttem
   }
 }
 
-export interface LevelTestSummary { trackId: string; trackTitleAr: string; levelId: string; levelTitleAr: string; latest: LevelTestAttempt; best: LevelTestAttempt; attempts: number }
+export interface LevelTestSummary { trackId: string; trackTitleAr: string; levelId: string; levelTitleAr: string; latest: LevelTestAttempt; best: LevelTestAttempt; attempts: number; /** attempts in the last 30 days (max 3) */ recent: number }
 export function summarizeLevelTests(list: LevelTestAttempt[]): LevelTestSummary[] {
   const m = new Map<string, LevelTestSummary>();
   for (const a of list.slice().sort((x, y) => x.createdAtMs - y.createdAtMs)) {
     const k = `${a.trackId}:${a.levelId}`;
     const cur = m.get(k);
-    if (!cur) m.set(k, { trackId: a.trackId, trackTitleAr: a.trackTitleAr, levelId: a.levelId, levelTitleAr: a.levelTitleAr, latest: a, best: a, attempts: 1 });
+    if (!cur) m.set(k, { trackId: a.trackId, trackTitleAr: a.trackTitleAr, levelId: a.levelId, levelTitleAr: a.levelTitleAr, latest: a, best: a, attempts: 1, recent: 0 });
     else { cur.latest = a; cur.attempts++; if (a.score > cur.best.score) cur.best = a; }
   }
+  const now = Date.now(); const seen = new Set<string>();
+  for (const a of list) { const k = `${a.trackId}:${a.levelId}:${a.createdAtMs}`; if (seen.has(k)) continue; seen.add(k); if (now - a.createdAtMs < 30 * 24 * 60 * 60 * 1000) m.get(`${a.trackId}:${a.levelId}`)!.recent++; }
   return [...m.values()];
 }

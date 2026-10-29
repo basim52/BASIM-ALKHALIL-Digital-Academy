@@ -27,7 +27,7 @@ export interface SaraReport {
   lastAt: number; lastTrack: string | null;
   board: { n: number; week: number; correct: number; total: number; byPersona: Record<string, number>; last: { at: number; topic: string; personaId: string } | null };
   calls: { n: number; week: number; minutes: number; words: number; last: number };
-  tests: { n: number; passed: number; best: { name: string; score: number } | null; last: { name: string; score: number; at: number } | null };
+  tests: { n: number; passed: number; attempts?: number; best: { name: string; score: number } | null; last: { name: string; score: number; at: number } | null };
   exams: { sets: number; correct: number; total: number };
   /** Onboarding path (users/{uid}.onboarding) — null when the student has not set one. */
   path: { titleAr: string; titleEn: string; level: string | null; minutes: number; checks: number } | null;
@@ -81,7 +81,9 @@ export async function loadSaraReport(uid: string): Promise<SaraReport | null> {
   }
   const callList: any[] = Array.isArray(u.saraCalls) ? u.saraCalls : [];
   const calls = { n: callList.length, week: callList.filter(c => Number(c.at) >= since).length, minutes: Math.round(callList.reduce((s, c) => s + (Number(c.seconds) || 0), 0) / 60), words: callList.reduce((s, c) => s + (Number(c.words) || 0), 0), last: Math.max(0, ...callList.map(c => Number(c.at) || 0)) };
-  const tests: SaraReport['tests'] = { n: lt.length, passed: lt.filter(a => a.passed).length, best: null, last: null };
+  // Official result per level = its LAST attempt (all attempts stay saved). n = levels tested, passed = levels whose last attempt passed.
+  const lastByLevel = new Map<string, any>(); for (const a of lt) { const k = `${a.trackId}:${a.levelId}`; const c = lastByLevel.get(k); if (!c || (Number(a.createdAtMs) || 0) >= (Number(c.createdAtMs) || 0)) lastByLevel.set(k, a); }
+  const tests: SaraReport['tests'] = { n: lastByLevel.size, attempts: lt.length, passed: [...lastByLevel.values()].filter(a => a.passed).length, best: null, last: null };
   for (const a of lt) {
     const name = String(a.levelTitleAr || a.levelId || ''), score = Math.round(Number(a.score) || 0), at = Number(a.createdAtMs) || 0;
     if (!tests.best || score > tests.best.score) tests.best = { name, score };

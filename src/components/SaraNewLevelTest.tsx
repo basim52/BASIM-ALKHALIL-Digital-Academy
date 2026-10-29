@@ -3,21 +3,27 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X, Volume2, RotateCcw, Lock } from 'lucide-react';
 import { buildNewTrackTest, NEW_TRACK_META, levelTitleAr, type NewTrackKey, type NewTestItem, type NewLevelId } from '../lib/saraNewTrackTests';
 import { MarksStrip } from './LevelTestMarks';
+import { useLevelTestQuota, quotaLabel } from '../lib/saraLevelGate';
 import { saveLevelTestAttempt, gradeWeighted, LEVEL_TEST_PASS, type LevelTestAttempt } from '../lib/saraLevelTests';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 
 /** Card at the end of a level-1 lesson list: locked for students until lesson 30 is passed; admin open. */
-export const NewLevelTestCard: React.FC<{ track: NewTrackKey; level?: NewLevelId; open: boolean; onStart: () => void }> = ({ track, level = 'a', open, onStart }) => (
-  <button data-testid="new-level-test-card" disabled={!open} onClick={() => { saraUnlockNarrator(); onStart(); }}
-    className={`w-full min-w-0 flex items-center gap-2 p-2.5 rounded-xl border-2 text-start ${open ? 'bg-[#002147] border-[#C49E3A]' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
+export const NewLevelTestCard: React.FC<{ track: NewTrackKey; level?: NewLevelId; open: boolean; onStart: () => void; uid?: string; admin?: boolean; refresh?: number }> = ({ track, level = 'a', open, onStart, uid, admin, refresh = 0 }) => {
+  const quota = useLevelTestQuota(uid, NEW_TRACK_META[track].trackId, level, refresh);
+  const can = open && (admin || (!quota.loading && quota.remaining > 0));
+  return (
+  <button data-testid="new-level-test-card" disabled={!can} onClick={() => { saraUnlockNarrator(); onStart(); }}
+    className={`w-full min-w-0 flex items-center gap-2 p-2.5 rounded-xl border-2 text-start ${can ? 'bg-[#002147] border-[#C49E3A]' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
     <span className="text-xl">🏁</span>
     <span className="flex-1 min-w-0">
-      <span className={`block text-[13px] font-black ${open ? 'text-amber-300' : 'text-[#002147]'}`}>اختبار نهاية {levelTitleAr(level)}</span>
-      <span className={`block text-[11px] font-bold ${open ? 'text-white/80' : 'text-slate-500'}`}>{open ? `من دروس ${NEW_TRACK_META[track].titleAr} الـ ${NEW_TRACK_META[track].total} · النجاح ${LEVEL_TEST_PASS}%` : `يفتح بعد إنهاء الدرس ${({ a: 30, b: 60, c: 90, d: 120 })[level]}`}</span>
+      <span className={`block text-[13px] font-black ${can ? 'text-amber-300' : 'text-[#002147]'}`}>اختبار نهاية {levelTitleAr(level)}</span>
+      <span className={`block text-[11px] font-bold ${can ? 'text-white/80' : 'text-slate-500'}`}>{open ? `من دروس ${NEW_TRACK_META[track].titleAr} الـ ${NEW_TRACK_META[track].total} · النجاح ${LEVEL_TEST_PASS}%` : `يفتح بعد إنهاء الدرس ${({ a: 30, b: 60, c: 90, d: 120 } as Record<string, number>)[level]}`}</span>
+      {open && !quota.loading && <span data-testid="level-test-quota" className={`block text-[11px] font-black ${can ? 'text-[#C49E3A]' : 'text-rose-600'}`}>{quotaLabel(quota)}{quota.last ? ` · آخر محاولة ${quota.last.score}%` : ''}</span>}
     </span>
-    {!open && <Lock size={14} className="text-slate-400" />}
+    {!can && <Lock size={14} className="text-slate-400" />}
   </button>
-);
+  );
+};
 
 export const SaraNewLevelTest: React.FC<{ track: NewTrackKey; level?: NewLevelId; uid?: string; onClose: () => void }> = ({ track, level = 'a', uid, onClose }) => {
   const meta = { ...NEW_TRACK_META[track], levelId: level, levelTitleAr: levelTitleAr(level) };
@@ -28,6 +34,7 @@ export const SaraNewLevelTest: React.FC<{ track: NewTrackKey; level?: NewLevelId
   const [picked, setPicked] = useState<number | null>(null);
   const [audio, setAudio] = useState<null | 'loading' | 'failed'>(null);
   const [result, setResult] = useState<LevelTestAttempt | null>(null);
+  const quota = useLevelTestQuota(uid, meta.trackId, level, result ? result.createdAtMs : 0);
   const q = qs[i];
   const play = (t?: string) => {
     if (!t) return; saraUnlockNarrator(); setAudio('loading');
@@ -76,13 +83,15 @@ export const SaraNewLevelTest: React.FC<{ track: NewTrackKey; level?: NewLevelId
           <p className="text-5xl">{result.passed ? '🎉' : '💪'}</p>
           <p className="text-[18px] font-black text-[#002147]">{result.score}/100 · {result.correct}/{result.total} صح</p>
           <MarksStrip items={result.items} />
+          <p data-testid="level-test-quota-after" className="text-[12px] font-black text-[#C49E3A]">هذي «آخر محاولة» وهي اللي تنحسب في تقريرك · {quotaLabel(quota)}</p>
+          {!result.passed && <p className="text-[12px] font-bold text-slate-600">تقدر تكمل للمستوى اللي بعده عادي، والاختبار ما يوقف تقدمك.</p>}
           <p className="text-[13px] font-bold text-slate-600">{result.passed ? `نجحت في اختبار ${meta.levelTitleAr}! انحفظت النتيجة في تقريرك.` : `تحتاج ${LEVEL_TEST_PASS}% للنجاح. انحفظت المحاولة، راجع الدروس وحاول مرة ثانية.`}</p>
           {result.weakLessons.length > 0 && <div className="w-full rounded-xl bg-white border border-amber-200 p-2 text-start">
             <p className="text-[12px] font-black text-[#C49E3A]">دروس تحتاج مراجعة:</p>
             {result.weakLessons.slice(0, 4).map(w => <p key={w.id} className="text-[12px] font-bold text-slate-700 truncate">{w.order}. {w.titleAr}</p>)}
           </div>}
           <div className="flex gap-2 w-full mt-1">
-            <button onClick={() => { setResult(null); setI(0); setAnswers([]); setSeed(s => s + 1); }} className="flex-1 py-2.5 rounded-xl bg-[#002147] text-amber-300 font-black text-sm">اختبار جديد</button>
+            {quota.remaining > 0 && !quota.loading && <button onClick={() => { setResult(null); setI(0); setAnswers([]); setSeed(s => s + 1); }} className="flex-1 py-2.5 rounded-xl bg-[#002147] text-amber-300 font-black text-sm">اختبار جديد</button>}
             <button onClick={onClose} className="flex-1 py-2.5 rounded-xl bg-[#C49E3A] text-[#002147] font-black text-sm">رجوع</button>
           </div>
         </div>}

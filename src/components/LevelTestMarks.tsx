@@ -1,5 +1,6 @@
 import React from 'react';
 import type { LevelTestItem } from '../lib/saraLevelTests';
+import { useLevelTestQuota, type LevelTestQuota } from '../lib/saraLevelGate';
 
 const D: Record<string, string> = { easy: 'سهل', medium: 'متوسط', hard: 'صعب' };
 /** Per-question marks: «س٣ صعب 0/14». Old attempts (no items) show nothing. */
@@ -18,4 +19,10 @@ export const MarksStrip: React.FC<{ items?: LevelTestItem[] }> = ({ items }) => 
       </div>
     </div>
   );
+};
+
+/** Render-prop wrapper so lists can read the attempts quota per level (hooks can't run in loops). */
+export const LevelQuota: React.FC<{ uid?: string; trackId: string; levelId: string; refresh?: number; children: (q: LevelTestQuota) => React.ReactNode }> = ({ uid, trackId, levelId, refresh, children }) => {
+  const q = useLevelTestQuota(uid, trackId, levelId, refresh);
+  return <>{children(q)}</>;
 };

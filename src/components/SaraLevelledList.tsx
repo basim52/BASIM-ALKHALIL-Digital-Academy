@@ -6,7 +6,7 @@ import type { NewTrackKey, NewLevelId } from '../lib/saraNewTrackTests';
 import { saraUnlockNarrator } from './SaraTrackPlayer';
 
 interface Item { id: string; order: number; titleAr: string; icon?: string }
-/** Lesson list split by level: level 2 opens only after the level-1 end test is passed (admin open). */
+/** Lesson list split by level: the next level opens when the previous level's lessons are finished (or its test was passed, older rule kept so nothing re-locks). Failing a test never blocks progress. */
 export function SaraLevelledList<T extends Item>({ lessons, unlockedRaw, unlockAll, uid, track, trackId, refresh, onOpen, onTest }: {
   lessons: T[]; unlockedRaw: number; unlockAll?: boolean; uid?: string; track: NewTrackKey; trackId: string; refresh: number;
   onOpen: (l: T) => void; onTest: (level: NewLevelId) => void;
@@ -19,10 +19,10 @@ export function SaraLevelledList<T extends Item>({ lessons, unlockedRaw, unlockA
         const ls = lessons.filter(l => l.order >= lv.from && l.order <= lv.to);
         if (!ls.length) return null;
         const prev = li > 0 ? SARA_NEW_LEVELS[li - 1] : null;
-        const gate = !prev || !!unlockAll || passed[prev.id];
+        const gate = !prev || !!unlockAll || passed[prev.id] || unlockedRaw > prev.to;
         return (
           <React.Fragment key={lv.id}>
-            <p className="text-[12px] font-black text-[#C49E3A] mt-1">{lv.titleAr}{!gate && <span className="text-slate-500"> · يفتح بعد النجاح في اختبار {prev?.titleAr}</span>}</p>
+            <p className="text-[12px] font-black text-[#C49E3A] mt-1">{lv.titleAr}{!gate && <span className="text-slate-500"> · يفتح بعد إنهاء دروس {prev?.titleAr}</span>}</p>
             {ls.map(l => {
               const open = gate && l.order <= unlocked;
               return (
@@ -34,7 +34,7 @@ export function SaraLevelledList<T extends Item>({ lessons, unlockedRaw, unlockA
                 </button>
               );
             })}
-            <NewLevelTestCard track={track} level={lv.id} open={!!unlockAll || (gate && unlockedRaw > lv.to)} onStart={() => onTest(lv.id)} />
+            <NewLevelTestCard uid={uid} admin={!!unlockAll} refresh={refresh} track={track} level={lv.id} open={!!unlockAll || (gate && unlockedRaw > lv.to)} onStart={() => onTest(lv.id)} />
           </React.Fragment>
         );
       })}

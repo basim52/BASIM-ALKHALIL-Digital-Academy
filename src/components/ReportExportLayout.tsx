@@ -80,7 +80,7 @@ export const ReportExportLayout = React.forwardRef<HTMLDivElement, { data: Repor
               <span style={{ background: t.passed ? GOLD : '#9f1239', color: t.passed ? NAVY : '#fff', fontWeight: 900, fontSize: 17, padding: '3px 12px', borderRadius: 999, whiteSpace: 'nowrap' }}>{t.passed ? 'ناجح ✓' : 'لم ينجح بعد'}</span>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
-              <span style={chip}>آخر نتيجة {t.latest}%</span><span style={chip}>أفضل نتيجة {t.best}%</span><span style={chip}>المحاولات {t.attempts}</span>
+              <span style={chip}>آخر محاولة (المعتمدة) {t.latest}%</span><span style={chip}>أفضل نتيجة {t.best}%</span><span style={chip}>المحاولات {t.attempts}</span>
               {t.date && <span style={{ fontSize: 16, color: '#ffffff90', whiteSpace: 'nowrap', marginRight: 'auto' }}>{t.date}</span>}
             </div>
             {t.weak.length > 0 && <p style={{ margin: '6px 0 0', fontSize: 17, color: GOLD_L, fontWeight: 700, lineHeight: 1.4, ...one }}>دروس ضعيفة: {t.weak.slice(0, 5).join(' · ')}</p>}

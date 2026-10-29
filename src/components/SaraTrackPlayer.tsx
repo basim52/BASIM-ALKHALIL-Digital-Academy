@@ -20,7 +20,8 @@ const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 import { extractLessonItems, recordLastLesson } from '../lib/repeatPractice';
 import { normalizeChoice, optionText } from '../lib/choiceQuestion';
 import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue, LessonSteps } from './BoardNextTransition';
-import { MarksStrip } from './LevelTestMarks';
+import { MarksStrip, LevelQuota } from './LevelTestMarks';
+import { quotaLabel } from '../lib/saraLevelGate';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -404,15 +405,17 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   const last = lv.lessons[lv.lessons.length - 1].order;
                   const testOpen = !!unlockAll || unlockedRaw > last;
                   return (
-                    <button data-testid={`level-test-${lv.id}`} disabled={!testOpen} onClick={() => startTest(lv)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-start ${testOpen ? 'bg-[#002147] border-amber-400 text-white' : 'bg-slate-100 border-slate-200 text-slate-500 opacity-70'}`}>
+                    <LevelQuota uid={uid} trackId={track.id} levelId={lv.id} refresh={test?.result?.createdAtMs ?? 0}>{q => { const can = testOpen && (!!unlockAll || (!q.loading && q.remaining > 0)); return (
+                    <button data-testid={`level-test-${lv.id}`} disabled={!can} onClick={() => startTest(lv)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-start ${can ? 'bg-[#002147] border-amber-400 text-white' : 'bg-slate-100 border-slate-200 text-slate-500 opacity-70'}`}>
                       <span className="text-lg">🏁</span>
                       <span className="flex-1 min-w-0">
                         <span className="block text-[13px] font-black truncate">اختبار نهاية المستوى — {lv.titleAr}</span>
                         <span className="block text-[11px] opacity-80 truncate">{testOpen ? `النجاح من ${LEVEL_TEST_PASS}%` : `يفتح بعد اجتياز الدرس ${last}`}</span>
+                        {testOpen && !q.loading && <span data-testid="level-test-quota" className={`block text-[11px] font-black ${can ? 'text-amber-300' : 'text-rose-600'}`}>{quotaLabel(q)}{q.last ? ` · آخر محاولة ${q.last.score}%` : ''}</span>}
                       </span>
-                      {!testOpen && <Lock size={14} />}
-                    </button>
+                      {!can && <Lock size={14} />}
+                    </button>); }}</LevelQuota>
                   );
                 })()}
                 </React.Fragment>
@@ -494,6 +497,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   <p className={`text-[14px] font-black ${r.passed ? 'text-emerald-700' : 'text-rose-700'}`}>{r.passed ? '🎉 ناجح' : `لم تنجح بعد — النجاح من ${LEVEL_TEST_PASS}%`}</p>
                   <p className="text-[11px] text-slate-500 font-bold">{r.correct} من {r.total} · {test.levelTitleAr}{test.saved === false ? ' · محفوظ على الجهاز' : ''}</p>
                   <MarksStrip items={r.items} />
+                  <LevelQuota uid={uid} trackId={track.id} levelId={test.levelId} refresh={r.createdAtMs}>{q => <p data-testid="level-test-quota-after" className="text-[11px] font-black text-[#C49E3A]">«آخر محاولة» هي اللي تنحسب في تقريرك{q.loading ? '' : ` · ${quotaLabel(q)}`}</p>}</LevelQuota>
+                  {!r.passed && <p className="text-[11px] font-bold text-slate-600">تقدر تكمل الدروس والمستوى اللي بعده عادي، الاختبار ما يوقف تقدمك.</p>}
                 </div>
                 {r.weakLessons.length > 0 && <p className="text-[12px] font-black text-slate-700">دروس تحتاج مراجعة:</p>}
                 <div className="flex-1 min-h-0 grid gap-1.5 content-start overflow-hidden">
@@ -508,7 +513,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   {r.weakLessons.length > 5 && <p className="text-[11px] text-slate-500 font-bold">+{r.weakLessons.length - 5} دروس أخرى</p>}
                 </div>
                 <div className="shrink-0 flex gap-2">
-                  <button data-testid="level-test-retry" onClick={() => { const lv = levels.find(v => v.id === test.levelId); if (lv) startTest(lv); }} className="flex-1 py-2 rounded-xl bg-amber-400 text-slate-950 text-[13px] font-black">🔁 إعادة الاختبار</button>
+                  <LevelQuota uid={uid} trackId={track.id} levelId={test.levelId} refresh={r.createdAtMs}>{q => !q.loading && q.remaining > 0 ? <button data-testid="level-test-retry" onClick={() => { const lv = levels.find(v => v.id === test.levelId); if (lv) startTest(lv); }} className="flex-1 py-2 rounded-xl bg-amber-400 text-slate-950 text-[13px] font-black">🔁 إعادة الاختبار</button> : null}</LevelQuota>
                   {r.passed && <button data-testid="level-test-cert" onClick={() => setCert({ unitId: `${track.id}:${test.levelId}`, unitTitle: `${track.titleAr} — ${test.levelTitleAr} (${r.score}%)`, unitTitleAr: `${track.titleAr} — ${test.levelTitleAr} (${r.score}%)`, completedAt: r.createdAtMs, studentName: auth.currentUser?.displayName || undefined })} className="flex-1 py-2 rounded-xl bg-[#C49E3A] text-[#002147] text-[13px] font-black">🎓 شهادتي</button>}
                   <button onClick={() => setTest(null)} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("رجوع للدروس", "Back to lessons")}</button>
                 </div>

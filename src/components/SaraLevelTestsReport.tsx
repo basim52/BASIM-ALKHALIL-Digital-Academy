@@ -73,7 +73,7 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
         dateLabel: new Date().toLocaleDateString('ar-SA-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }),
         weekly: wk ? { done: wk.completed.length, goal: wk.goal, minutes: wk.minutes, lastTest: lt ? `${lt.pct}%` : null, weakest: wk.weakest ? `${wk.weakest.name} ${wk.weakest.avg}%` : null } : null,
         tracks: ALL_TRACKS.map(t => ({ title: t.titleAr, done: doneOf(t), total: t.lessons.length })),
-        levelTests: (rows || []).map(r => ({ title: `${r.trackTitleAr} · ${r.levelTitleAr}`, passed: r.best.passed, latest: r.latest.score, best: r.best.score, attempts: r.attempts, date: fmt(r.latest.createdAtMs), weak: r.latest.weakLessons.map(w => `${w.order}. ${w.titleAr}`) })),
+        levelTests: (rows || []).map(r => ({ title: `${r.trackTitleAr} · ${r.levelTitleAr}`, passed: r.latest.passed, latest: r.latest.score, best: r.best.score, attempts: r.attempts, date: fmt(r.latest.createdAtMs), weak: r.latest.weakLessons.map(w => `${w.order}. ${w.titleAr}`) })),
         calls: calls.slice(-5).reverse().map(c => ({ title: c.scenarioAr || c.scenario, date: fmt(c.at), duration: dur(c.seconds), turns: c.turns, words: c.words, verdict: c.review?.verdictAr, corrections: (c.review?.points || []).slice(0, 2).map(p => `«${p.said}» ← ${p.better}`), topic: c.topicAr || c.topicEn, focus: c.focus || [] })),
         passMark: LEVEL_TEST_PASS,
       });
@@ -134,13 +134,13 @@ export const SaraLevelTestsReport: React.FC<{ studentId?: string; isRtl?: boolea
       {rows && rows.length > 0 && (
         <div className="grid gap-2">
           {rows.map(r => (
-            <div key={`${r.trackId}:${r.levelId}`} className={`rounded-2xl p-3 border ${r.best.passed ? 'border-[#C49E3A]/70' : 'border-rose-400/50'}`} style={{ background: '#0a2d5c' }}>
+            <div key={`${r.trackId}:${r.levelId}`} className={`rounded-2xl p-3 border ${r.latest.passed ? 'border-[#C49E3A]/70' : 'border-rose-400/50'}`} style={{ background: '#0a2d5c' }}>
               <div className="flex items-center gap-2">
                 <span className="text-[13px] font-black text-white flex-1 min-w-0 truncate">{r.trackTitleAr} · {r.levelTitleAr}</span>
-                <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${r.best.passed ? 'bg-[#C49E3A] text-[#002147]' : 'bg-rose-500/90 text-white'}`}>{r.best.passed ? (isRtl ? 'ناجح ✓' : 'Passed') : (isRtl ? 'لم ينجح بعد' : 'Not yet')}</span>
+                <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${r.latest.passed ? 'bg-[#C49E3A] text-[#002147]' : 'bg-rose-500/90 text-white'}`}>{r.latest.passed ? (isRtl ? 'ناجح ✓' : 'Passed') : (isRtl ? 'لم ينجح بعد' : 'Not yet')}</span>
               </div>
               <div className="mt-2 grid grid-cols-3 gap-1.5 text-center">
-                {[[isRtl ? 'آخر نتيجة' : 'Latest', `${r.latest.score}%`], [isRtl ? 'أفضل نتيجة' : 'Best', `${r.best.score}%`], [isRtl ? 'المحاولات' : 'Attempts', String(r.attempts)]].map(([k, v]) => (
+                {[[isRtl ? 'آخر محاولة (المعتمدة)' : 'Last attempt (official)', `${r.latest.score}%`], [isRtl ? 'أفضل نتيجة' : 'Best', `${r.best.score}%`], [isRtl ? 'المحاولات' : 'Attempts', `${r.recent}/3 · ${isRtl ? 'الكل' : 'all'} ${r.attempts}`]].map(([k, v]) => (
                   <div key={k} className="rounded-xl bg-[#002147] border border-[#C49E3A]/20 py-1.5">
                     <p className="text-[10px] font-bold text-white/60">{k}</p>
                     <p className="text-[15px] font-black text-[#C49E3A] leading-tight">{v}</p>

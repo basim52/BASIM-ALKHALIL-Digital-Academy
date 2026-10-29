@@ -26,7 +26,7 @@ export interface PlanDay { dayIdx: number; labelAr: string; study: boolean; task
 export interface SaraPlan { weekStart: string; createdAt: number; perDay: number; studyDays: number[]; isNew: boolean; focusAr: string[]; days: PlanDay[]; priorityTrackId?: string; fromBasket?: boolean;
   /** Built from the onboarding path plan (lib/pathPlan) — tasks may point at tutor tracks; done-state via pathTaskDone. */
   fromPath?: boolean; pathOption?: 'light' | 'medium' | 'intense' }
-export interface PlanState { unlocked: Record<string, number>; passedTests: Set<string>; exam: ExamResults }
+export interface PlanState { unlocked: Record<string, number>; passedTests: Set<string>; attemptedTests?: Set<string>; exam: ExamResults }
 
 export const CORE_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
 export const ALL_PLAN_TRACKS: SaraTrack[] = [...CORE_TRACKS, ...NEW_SKILL_TRACKS];
@@ -59,13 +59,15 @@ export async function loadPlanState(uid?: string): Promise<PlanState & { attempt
   const passedTests = new Set(attempts.filter(a => a.passed).map(a => `${a.trackId}:${a.levelId}`));
   const exam: ExamResults = { ...cloudExam };
   for (const [k, v] of Object.entries(readExamResults(uid))) if (!exam[k] || v.lastAt > exam[k].lastAt) exam[k] = v;
-  return { unlocked, passedTests, exam, attempts };
+  const attemptedTests = new Set(attempts.map(a => `${a.trackId}:${a.levelId}`));
+  return { unlocked, passedTests, attemptedTests, exam, attempts };
 }
 
 /** Is this task already done according to real progress? (reviews are ticked by the student) */
 export function taskDone(t: PlanTask, s: PlanState, weekStartMs: number): boolean {
   if (t.kind === 'lesson') return (s.unlocked[t.trackId] || 1) > (t.order || 0);
-  if (t.kind === 'test') return s.passedTests.has(`${t.trackId}:${t.levelId}`);
+  // A taken test counts (failing never blocks: 3 attempts / 30 days, official result = last attempt).
+  if (t.kind === 'test') return (s.attemptedTests || s.passedTests).has(`${t.trackId}:${t.levelId}`);
   if (t.kind === 'exam') return !!(t.setId && s.exam[t.setId] && s.exam[t.setId].lastAt >= weekStartMs);
   return false;
 }

@@ -48,7 +48,7 @@ export async function computeSaraSkills(uid: string | undefined, placementLevel?
       const u = Math.max(Number(remote[t.id]) || 1, local(t.id));
       total += t.lessons.length; passed += Math.min(t.lessons.length, u - 1);
     }
-    const best = tests.filter(x => s.tracks.some(t => t.id === x.trackId)).map(x => x.best.score);
+    const best = tests.filter(x => s.tracks.some(t => t.id === x.trackId)).map(x => x.latest.score); // official result = last attempt
     return { id: s.id, labelAr: s.labelAr, labelEn: s.labelEn, passed, total, pct: total ? Math.round((passed / total) * 100) : 0, testBest: best.length ? Math.max(...best) : null };
   });
   // IELTS/STEP practice: real raw counts + time (cloud ∪ device). No band predictions.

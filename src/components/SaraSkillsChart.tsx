@@ -17,7 +17,7 @@ export const SaraSkillsChart: React.FC<{ uid?: string; isRtl?: boolean; placemen
             <span className="text-slate-800 font-extrabold text-xs">%{s.pct}</span>
           </div>
           <div className="h-2 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full ${COLORS[s.id]} rounded-full transition-all`} style={{ width: `${s.pct}%` }} /></div>
-          <p className="mt-1 text-[10px] font-bold text-slate-400">{s.passed}/{s.total} {isRtl ? 'درس' : 'lessons'}{s.testBest !== null ? (isRtl ? ` · أفضل اختبار مستوى ${s.testBest}%` : ` · best level test ${s.testBest}%`) : ''}</p>
+          <p className="mt-1 text-[10px] font-bold text-slate-400">{s.passed}/{s.total} {isRtl ? 'درس' : 'lessons'}{s.testBest !== null ? (isRtl ? ` · آخر اختبار مستوى ${s.testBest}%` : ` · last level test ${s.testBest}%`) : ''}</p>
         </div>
       ))}
       {data && !data.hasData && (
