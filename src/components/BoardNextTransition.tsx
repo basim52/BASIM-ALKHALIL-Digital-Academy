@@ -32,19 +32,20 @@ export function useBoardNextTransition(o: Opts) {
   const [left, setLeft] = useState<number | null>(null);
   const pending = useRef(false), had = useRef(false), manual = useRef(false);
   const t0 = useRef(Date.now());
+  const sayDone = useRef(true), waitCue = useRef(false);
   const timers = useRef<number[]>([]);
   const clear = () => { timers.current.forEach(t => clearTimeout(t)); timers.current = []; };
-  const hide = useCallback(() => { clear(); setBanner(null); setLeft(null); }, []);
+  const hide = useCallback(() => { clear(); waitCue.current = false; setBanner(null); setLeft(null); }, []);
   const reset = useCallback(() => { hide(); pending.current = false; had.current = false; manual.current = false; t0.current = Date.now(); }, [hide]);
 
   const show = (auto: boolean, speak: boolean) => {
     if (!opts.current.active) return;
     clear(); setBanner({ auto }); setLeft(null);
     if (!speak) return;
-    let begun = false;
-    const begin = () => { if (begun) return; begun = true; if (auto) setLeft(opts.current.seconds ?? 3); };
-    opts.current.say(L('أحسنت! خلنا نبدأ التمارين', "Well done! Let's start the exercises."), begin);
-    timers.current.push(window.setTimeout(begin, 6000)); // slow/failed line: count down anyway
+    // The cue and a short countdown run together (no dead wait for the voice to load); the move waits for the cue to finish so it is never cut off.
+    sayDone.current = false; waitCue.current = false;
+    opts.current.say(L('أحسنت! خلنا نبدأ التمارين', "Well done! Let's start the exercises."), () => { sayDone.current = true; if (waitCue.current) { waitCue.current = false; advance(); } });
+    if (auto) setLeft(opts.current.seconds ?? 2);
   };
 
   const advance = useCallback(() => {
@@ -62,7 +63,12 @@ export function useBoardNextTransition(o: Opts) {
   // countdown tick
   useEffect(() => {
     if (left === null) return;
-    if (left <= 0) { advance(); return; }
+    if (left <= 0) {
+      if (sayDone.current) { advance(); return; }
+      waitCue.current = true; // cue still speaking: move as soon as it ends (max 4s)
+      const t = window.setTimeout(() => { if (waitCue.current) { waitCue.current = false; advance(); } }, 4000);
+      return () => clearTimeout(t);
+    }
     const t = window.setTimeout(() => setLeft(s => (s === null ? null : s - 1)), 1000);
     return () => clearTimeout(t);
   }, [left, advance]);
@@ -120,27 +126,56 @@ export function useBoardNextTransition(o: Opts) {
 /**
  * Exercises finished: the teacher (own cloud voice) cues the next step once, and the gold card highlights
  * «تدرّب على نطق كلمات الدرس» (opened only by the student's tap — the camera is never opened automatically),
- * with «الدرس التالي» as the secondary action.
+ * with «الدرس التالي» as the secondary action. When the cue ends the practice opens by itself after 2s («ابقَ هنا» cancels).
  */
 export const ExercisesDoneCue: React.FC<{
-  say: (text: string) => void;
+  say: (text: string, onEnd?: () => void) => void;
   onRepeat?: () => void;
   onNext?: () => void;
   nextLabel?: string;
   nextTestId?: string;
 }> = ({ say, onRepeat, onNext, nextLabel, nextTestId = 'cue-next-lesson' }) => {
+  const [left, setLeft] = useState<number | null>(null);
+  const cancelled = useRef(false);
+  const go = useRef(onRepeat); go.current = onRepeat;
   useEffect(() => {
-    // deferred one tick so a stop() from the click that opened this screen (or a StrictMode remount) can't cut it off
-    const t = window.setTimeout(() => say(onRepeat ? L('ممتاز! الحين ردّد معي كلمات الدرس', 'Excellent! Now repeat the lesson words with me.') : L('ممتاز! يلا للدرس التالي', "Excellent! Let's go to the next lesson.")), 150);
+    // deferred one tick so a stop() from the click that opened this screen (or a StrictMode remount) can't cut it off.
+    // After «ردّد معي» ends, a 2s countdown opens the practice by itself (camera stays off until the student taps it).
+    const t = window.setTimeout(() => say(onRepeat ? L('ممتاز! الحين ردّد معي كلمات الدرس', 'Excellent! Now repeat the lesson words with me.') : L('ممتاز! يلا للدرس التالي', "Excellent! Let's go to the next lesson."),
+      () => { if (go.current && !cancelled.current) setLeft(2); }), 150);
     return () => clearTimeout(t);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (left === null || cancelled.current) return;
+    if (left <= 0) { setLeft(null); go.current?.(); return; }
+    const t = window.setTimeout(() => setLeft(s => (s === null ? null : s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [left]);
+  const stay = () => { cancelled.current = true; setLeft(null); };
   return (
     <div data-testid="exercises-done-cue" role="status" className="rounded-2xl border-2 border-[#E8C766] bg-[#C49E3A] text-[#002147] p-2.5 flex flex-col gap-1.5 shadow-lg">
-      <p className="text-[13px] font-black text-center">{onRepeat ? L('ممتاز! 🌟 الخطوة الجاية: ردّد كلمات الدرس', 'Excellent! 🌟 Next: repeat the lesson words') : L('ممتاز! 🌟 الخطوة الجاية: الدرس التالي', 'Excellent! 🌟 Next: the next lesson')}</p>
-      {onRepeat && <button type="button" onClick={onRepeat} data-testid="lesson-repeat-open"
+      <p className="text-[13px] font-black text-center">{onRepeat ? L('ممتاز! 🌟 الخطوة الجاية: ردّد كلمات الدرس', 'Excellent! 🌟 Next: repeat the lesson words') : L('ممتاز! 🌟 الخطوة الجاية: الدرس التالي', 'Excellent! 🌟 Next: the next lesson')}
+        {left !== null && <> <span data-testid="repeat-auto-count" className="inline-flex w-6 h-6 items-center justify-center rounded-full bg-[#002147] text-amber-300 text-[13px] align-middle">{left}</span></>}</p>
+      {onRepeat && <button type="button" onClick={() => { stay(); onRepeat(); }} data-testid="lesson-repeat-open"
         className="w-full py-2.5 rounded-xl bg-[#002147] text-amber-300 text-[14px] font-black ring-4 ring-[#E8C766]/70 animate-pulse active:scale-95 transition-transform">🎙️ تدرّب على نطق كلمات الدرس</button>}
-      {onNext && <button type="button" onClick={onNext} data-testid={nextTestId}
+      {left !== null && <button type="button" onClick={stay} data-testid="repeat-auto-stay" className="self-center text-[11px] font-black underline underline-offset-2 text-[#002147]/80">{L('ابقَ هنا', 'Stay here')}</button>}
+      {onNext && <button type="button" onClick={() => { stay(); onNext(); }} data-testid={nextTestId}
         className={`w-full py-2 rounded-xl text-[13px] font-black ${onRepeat ? 'bg-white/80 text-[#002147] border border-[#002147]/20' : 'bg-[#002147] text-amber-300 ring-4 ring-[#E8C766]/70 animate-pulse'}`}>{nextLabel || L('الدرس التالي ←', 'Next lesson →')}</button>}
+    </div>
+  );
+};
+
+/** Small «شرح ← تمارين ← ردّد معي» progress strip shown above every lesson stage. */
+export const LessonSteps: React.FC<{ at: 0 | 1 | 2; repeat?: boolean }> = ({ at, repeat = true }) => {
+  const names = [L('شرح', 'Explain'), L('تمارين', 'Exercises'), ...(repeat ? [L('ردّد معي', 'Repeat')] : [])];
+  return (
+    <div data-testid="lesson-steps" className="shrink-0 flex items-center justify-center gap-1 text-[11px] font-black">
+      {names.map((n, i) => (
+        <React.Fragment key={i}>
+          {i > 0 && <span aria-hidden className="text-[#C49E3A]">←</span>}
+          <span data-testid={i === at ? 'lesson-step-active' : undefined} className={`px-2 py-0.5 rounded-full border ${i === at ? 'bg-[#002147] text-amber-300 border-[#C49E3A]' : i < at ? 'bg-[#C49E3A] text-[#002147] border-[#C49E3A]' : 'bg-[#fdfaf3] text-[#002147]/60 border-[#C49E3A]/40'}`}>{i < at ? '✓ ' : ''}{n}</span>
+        </React.Fragment>
+      ))}
     </div>
   );
 };

@@ -255,9 +255,11 @@ interface Props {
   uid?: string;
   /** Label of the final «back» button. */
   backLabel?: string;
+  /** Opened straight from the lesson: start the lesson words at once, camera left off (opens only on the student's tap). */
+  autoStart?: boolean;
 }
 
-export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TEACHER, lesson, uid, backLabel }) => {
+export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TEACHER, lesson, uid, backLabel, autoStart }) => {
   const saraNarrate = teacher.narrate, saraStopNarrator = teacher.stop, saraUnlockNarrator = teacher.unlock;
   const lessonItems = lesson?.items?.length ? lesson.items : null;
   const [level, setLevel] = useState<Level | 'lesson' | null>(null);
@@ -305,7 +307,7 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
     say(t, () => rec.start(t, keep(i), true));
   }, [rec, say, keep]);
 
-  const begin = (lv: Level | 'lesson') => {
+  const begin = (lv: Level | 'lesson', withCam = true) => {
     saraUnlockNarrator();
     const base = lv === 'lesson' ? (lessonItems || []) : ITEMS[lv];
     // Previous weak words (up to 3) open round 1, labelled «مراجعة».
@@ -318,11 +320,13 @@ export const SaraRepeatPractice: React.FC<Props> = ({ onClose, teacher = SARA_TE
     void (async () => {
       const micOk = await rec.warm();
       if (!aliveRef.current) return;
-      await cam.start();
-      if (!aliveRef.current) return;
+      if (withCam) { await cam.start(); if (!aliveRef.current) return; }
       if (micOk) present(0, list[0]); else say(list[0]); // mic blocked: keep the how-to-allow message on screen
     })();
   };
+
+  const autoRef = useRef(false);
+  useEffect(() => { if (autoStart && lessonItems && !autoRef.current) { autoRef.current = true; begin('lesson', false); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Weak-words memory: an item scored under the pass threshold adds its unclear words; a review word said well is dropped.
   const remember = (i: number) => {

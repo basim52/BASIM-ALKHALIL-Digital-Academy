@@ -12,7 +12,7 @@ import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
 import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
 import type { SaraChoiceQuestion } from '../data/saraTracks/foundations';
-import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue } from './BoardNextTransition';
+import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue, LessonSteps } from './BoardNextTransition';
 import { extractLessonItems } from '../lib/repeatPractice';
 import type { RepeatTeacher } from './SaraRepeatPractice';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
@@ -85,6 +85,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
         <ExplainLangToggle />
         {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 {t("محاورة", "Talk with")} {NM}</button>}
       </div>
+      {lesson?.content && <LessonSteps at={step.k === 'done' ? 2 : step.k === 'check' || step.k === 'ex' ? 1 : 0} repeat={repeatItems.length > 0} />}
       {body}
       <TtsDebugOverlay />
     </div>
@@ -144,7 +145,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       </Suspense>}
     </div>
     {trans.banner}
-    {!trans.banner && nextBtn(t('الشرح', 'Explanation'), () => setStep({ k: 'explain' }))}
+    {!trans.banner && nextBtn(t('التمارين', 'Exercises'), () => { v.stop(); setPicked(null); setCheckWrong(false); setStep({ k: 'check' }); })}
   </>);
 
   if (step.k === 'explain') return shell(head, <>
@@ -208,7 +209,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       <p className="text-[12px] font-bold text-white/80">{correct === total ? t('ممتاز!', 'Excellent!') : t('تقدر تعيد الدرس متى ما بغيت.', 'You can redo the lesson any time.')}</p>
     </div>
     <div className="shrink-0">
-      <ExercisesDoneCue say={text => v.play(text)} onRepeat={repeatItems.length > 0 ? () => { v.stop(); setRepeatOpen(true); } : undefined}
+      <ExercisesDoneCue say={(text, end) => v.play(text, { done: end })} onRepeat={repeatItems.length > 0 ? () => { v.stop(); setRepeatOpen(true); } : undefined}
         onNext={nextLesson ? () => { v.stop(); setLesson(nextLesson); setStep({ k: 'board' }); setCorrect(0); } : () => { v.stop(); setLesson(null); }}
         nextLabel={nextLesson ? t("الدرس التالي", "Next lesson") : t("قائمة الدروس", "Lesson list")} nextTestId={nextLesson ? 'tutor-next-lesson' : 'tutor-lesson-list'} />
     </div>
@@ -217,7 +218,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     </div>
     {repeatOpen && lessonRaw && repeatItems.length > 0 && (
       <Suspense fallback={null}>
-        <SaraRepeatPractice uid={uid} teacher={teacher} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}
+        <SaraRepeatPractice autoStart uid={uid} teacher={teacher} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}
           lesson={{ trackId: track.id, lessonId: lessonRaw.id, titleAr: lessonRaw.titleAr, titleEn: lessonRaw.titleEn, items: repeatItems }} />
       </Suspense>
     )}

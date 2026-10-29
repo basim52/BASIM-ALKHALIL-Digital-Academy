@@ -17,7 +17,7 @@ import { toToolCalls, type BoardAction } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 import { extractLessonItems, recordLastLesson } from '../lib/repeatPractice';
-import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue } from './BoardNextTransition';
+import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue, LessonSteps } from './BoardNextTransition';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -338,6 +338,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
     setCheckPick(i);
     if (i === lesson.content.check.correctIndex) {
       markPassed();
+      // one continuous flow: short cue in Sara's own voice, then straight into the exercises (buttons below stay as fallback)
+      sayLine(L('صح! يلا للتمارين', 'Correct! On to the exercises.'), () => { if (modeRef.current === 'learn') { setExIdx(0); setExPick(null); setExScore(0); setMode('exercises'); } });
     } else {
       setUseAlt(true); // re-explain from another angle on the same page
       startNarration(lesson, true);
@@ -421,6 +423,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         )}
 
         {/* One-page lesson (no scrolling) */}
+        {lesson?.content && (mode === 'board' || mode === 'learn' || mode === 'exercises') && <div className="px-3 pt-2"><LessonSteps at={mode === 'exercises' ? (exIdx < lesson.content.exercises.length ? 1 : 2) : 0} repeat={repeatItems.length > 0} /></div>}
         {lesson?.content && mode === 'learn' && (
           <div className="flex-1 min-h-0 flex flex-col gap-1.5 p-2.5 overflow-hidden">
             <div className="flex items-center gap-2">
@@ -461,7 +464,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             </div>
             {passed && (
               <div className="flex gap-2">
-                <button onClick={() => { stop(); setMode('exercises'); }} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[13px] font-black">{L(`تمارين (${lesson.content.exercises.length}) — اختياري`, `Exercises (${lesson.content.exercises.length}), optional`)}</button>
+                <button onClick={() => { stop(); setMode('exercises'); }} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[13px] font-black">{L(`تمارين (${lesson.content.exercises.length})`, `Exercises (${lesson.content.exercises.length})`)}</button>
                 <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("✅ الدرس التالي ←", "✅ Next lesson →")}</button>
               </div>
             )}
@@ -585,7 +588,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   preset={lessonCallPreset({ id: lesson.id, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: CALL_TRACKS[track.id], tag: CALL_TRACKS[track.id],
                     phrases: [...new Set(lesson.content.example.flatMap(e => e.en.replace(/\b[AB]:\s*/g, '\n').split(/\n|(?<=[.!?])\s+/)).map(x => x.trim()).filter(x => x.length > 3 && x.split(/\s+/).length <= 9))].slice(0, 4),
                     starter: `Let's practise "${lesson.titleEn}" in a real conversation. ${lesson.content.example[0]?.en || ''} Now you try — what would you say?` })} />}
-                <ExercisesDoneCue say={t => sayLine(t)} onRepeat={repeatItems.length > 0 ? () => { stop(); setRepeatOpen(true); } : undefined}
+                <ExercisesDoneCue say={(t, end) => sayLine(t, end)} onRepeat={repeatItems.length > 0 ? () => { stop(); setRepeatOpen(true); } : undefined}
                   onNext={goNext} nextLabel={nextLesson ? L("الدرس التالي ←", "Next lesson →") : L("رجوع للدروس", "Back to lessons")} />
                 <button onClick={() => { stop(); setLessonId(null); }} className="w-full py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("رجوع للدروس", "Back to lessons")}</button>
               </div>
@@ -594,7 +597,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         )}
         {repeatOpen && lessonRaw && repeatItems.length > 0 && (
           <Suspense fallback={null}>
-            <SaraRepeatPractice uid={uid} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}
+            <SaraRepeatPractice autoStart uid={uid} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}
               lesson={{ trackId: track.id, lessonId: lessonRaw.id, titleAr: lessonRaw.titleAr, titleEn: lessonRaw.titleEn, items: repeatItems }} />
           </Suspense>
         )}
