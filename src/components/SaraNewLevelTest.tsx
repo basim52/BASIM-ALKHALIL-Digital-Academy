@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, Volume2, RotateCcw, Lock } from 'lucide-react';
 import { buildNewTrackTest, NEW_TRACK_META, levelTitleAr, type NewTrackKey, type NewTestItem, type NewLevelId } from '../lib/saraNewTrackTests';
-import { saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestAttempt } from '../lib/saraLevelTests';
+import { MarksStrip } from './LevelTestMarks';
+import { saveLevelTestAttempt, gradeWeighted, LEVEL_TEST_PASS, type LevelTestAttempt } from '../lib/saraLevelTests';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 
 /** Card at the end of a level-1 lesson list: locked for students until lesson 30 is passed; admin open. */
@@ -39,10 +40,10 @@ export const SaraNewLevelTest: React.FC<{ track: NewTrackKey; level?: NewLevelId
     if (i + 1 < qs.length) { setI(i + 1); return; }
     const wrongByLesson: Record<string, number> = {}; let correct = 0;
     qs.forEach((x, k) => { if (a[k] === x.correctIndex) correct++; else wrongByLesson[x.lessonId] = (wrongByLesson[x.lessonId] || 0) + 1; });
-    const score = Math.round((correct / qs.length) * 100);
+    const { items, score } = gradeWeighted(qs, a);
     const weakLessons = Object.entries(wrongByLesson).map(([id, wrong]) => { const x = qs.find(y => y.lessonId === id)!; return { id, order: x.lessonOrder, titleAr: x.lessonTitleAr, wrong }; })
       .sort((p, r) => r.wrong - p.wrong || p.order - r.order);
-    const att: LevelTestAttempt = { trackId: meta.trackId, trackTitleAr: meta.titleAr, levelId: meta.levelId, levelTitleAr: meta.levelTitleAr, score, correct, total: qs.length, passed: score >= LEVEL_TEST_PASS, wrongByLesson, weakLessons, createdAtMs: Date.now() };
+    const att: LevelTestAttempt = { trackId: meta.trackId, trackTitleAr: meta.titleAr, levelId: meta.levelId, levelTitleAr: meta.levelTitleAr, score, correct, total: qs.length, passed: score >= LEVEL_TEST_PASS, items, scoring: 'weighted', wrongByLesson, weakLessons, createdAtMs: Date.now() };
     setResult(att); void saveLevelTestAttempt(uid, att);
   };
   return (
@@ -72,7 +73,8 @@ export const SaraNewLevelTest: React.FC<{ track: NewTrackKey; level?: NewLevelId
         </div>}
         {result && <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 p-4 text-center overflow-hidden" data-testid="new-level-test-result">
           <p className="text-5xl">{result.passed ? '🎉' : '💪'}</p>
-          <p className="text-[18px] font-black text-[#002147]">{result.correct}/{result.total} ({result.score}%)</p>
+          <p className="text-[18px] font-black text-[#002147]">{result.score}/100 · {result.correct}/{result.total} صح</p>
+          <MarksStrip items={result.items} />
           <p className="text-[13px] font-bold text-slate-600">{result.passed ? `نجحت في اختبار ${meta.levelTitleAr}! انحفظت النتيجة في تقريرك.` : `تحتاج ${LEVEL_TEST_PASS}% للنجاح. انحفظت المحاولة، راجع الدروس وحاول مرة ثانية.`}</p>
           {result.weakLessons.length > 0 && <div className="w-full rounded-xl bg-white border border-amber-200 p-2 text-start">
             <p className="text-[12px] font-black text-[#C49E3A]">دروس تحتاج مراجعة:</p>

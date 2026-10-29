@@ -19,6 +19,7 @@ const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 import { extractLessonItems, recordLastLesson } from '../lib/repeatPractice';
 import { normalizeChoice, optionText } from '../lib/choiceQuestion';
 import { useBoardNextTransition, boardDrawMs, ExercisesDoneCue, LessonSteps } from './BoardNextTransition';
+import { MarksStrip } from './LevelTestMarks';
 import { trackLevels, buildLevelTest, scoreLevelTest, saveLevelTestAttempt, LEVEL_TEST_PASS, type LevelTestQuestion, type LevelTestAttempt } from '../lib/saraLevelTests';
 
 interface Props {
@@ -484,9 +485,10 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             return (
               <div data-testid="level-test-result" className="flex-1 min-h-0 flex flex-col gap-2 p-3 overflow-hidden">
                 <div className={`rounded-2xl p-3 text-center border-2 ${r.passed ? 'bg-emerald-50 border-emerald-400' : 'bg-rose-50 border-rose-300'}`}>
-                  <p className="text-3xl font-black text-[#002147]">{r.score}%</p>
+                  <p className="text-3xl font-black text-[#002147]">{r.items ? `${r.score}/100` : `${r.score}%`}</p>
                   <p className={`text-[14px] font-black ${r.passed ? 'text-emerald-700' : 'text-rose-700'}`}>{r.passed ? '🎉 ناجح' : `لم تنجح بعد — النجاح من ${LEVEL_TEST_PASS}%`}</p>
                   <p className="text-[11px] text-slate-500 font-bold">{r.correct} من {r.total} · {test.levelTitleAr}{test.saved === false ? ' · محفوظ على الجهاز' : ''}</p>
+                  <MarksStrip items={r.items} />
                 </div>
                 {r.weakLessons.length > 0 && <p className="text-[12px] font-black text-slate-700">دروس تحتاج مراجعة:</p>}
                 <div className="flex-1 min-h-0 grid gap-1.5 content-start overflow-hidden">
