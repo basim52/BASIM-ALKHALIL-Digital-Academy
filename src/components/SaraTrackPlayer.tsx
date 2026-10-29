@@ -177,6 +177,9 @@ export function lessonBoardActions(lesson: SaraTrackLesson, useAlt: boolean): Bo
   ];
 }
 
+import { SpellingExercise } from './SpellingExercise';
+import { spellingItemsFor } from '../lib/spelling';
+
 const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; locked?: boolean }> = ({ q: raw, picked, onPick, locked }) => { const q = normalizeChoice(raw); return (
   <div className="space-y-1.5">
     <p className="text-[13px] font-black text-slate-800 leading-snug"><BidiText text={q.promptAr} />{q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{q.promptEn}</span>}</p>
@@ -237,6 +240,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const { view: lesson, loading: enLoading } = useLessonView(lessonRaw, lang);
   // «تدرّب على نطق كلمات الدرس»: the lesson's own English items (button hidden when there are none).
   const repeatItems = useMemo(() => (lessonRaw ? extractLessonItems(lessonRaw) : []), [lessonRaw]);
+  const spellItems = useMemo(() => (lessonRaw ? spellingItemsFor(lessonRaw as any) : []), [lessonRaw]);
   const [repeatOpen, setRepeatOpen] = useState(false);
   const boardCalls = useMemo(() => (lesson?.content ? toToolCalls(lessonBoardActions(lesson, useAlt)) : []), [lesson, useAlt]);
 
@@ -426,7 +430,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         )}
 
         {/* One-page lesson (no scrolling) */}
-        {lesson?.content && (mode === 'board' || mode === 'learn' || mode === 'exercises') && <div className="px-3 pt-2"><LessonSteps at={mode === 'exercises' ? (exIdx < lesson.content.exercises.length ? 1 : 2) : 0} repeat={repeatItems.length > 0} /></div>}
+        {lesson?.content && (mode === 'board' || mode === 'learn' || mode === 'exercises') && <div className="px-3 pt-2"><LessonSteps at={mode === 'exercises' ? (exIdx < lesson.content.exercises.length + spellItems.length ? 1 : 2) : 0} repeat={repeatItems.length > 0} /></div>}
         {lesson?.content && mode === 'learn' && (
           <div className="flex-1 min-h-0 flex flex-col gap-1.5 p-2.5 overflow-hidden">
             <div className="flex items-center gap-2">
@@ -467,7 +471,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             </div>
             {passed && (
               <div className="flex gap-2">
-                <button onClick={() => { stop(); setMode('exercises'); }} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[13px] font-black">{L(`تمارين (${lesson.content.exercises.length})`, `Exercises (${lesson.content.exercises.length})`)}</button>
+                <button onClick={() => { stop(); setMode('exercises'); }} className="flex-1 py-2 rounded-xl bg-[#58cc02] text-white text-[13px] font-black">{L(`تمارين (${lesson.content.exercises.length + spellItems.length})`, `Exercises (${lesson.content.exercises.length + spellItems.length})`)}</button>
                 <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("✅ الدرس التالي ←", "✅ Next lesson →")}</button>
               </div>
             )}
@@ -571,11 +575,19 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         )}
 
         {/* Optional exercises (one per screen, same page frame) */}
-        {lesson?.content && mode === 'exercises' && (
+        {lesson?.content && mode === 'exercises' && (() => { const exN = lesson.content.exercises.length; const exTotal = exN + spellItems.length; return (
           <div className="flex-1 min-h-0 flex flex-col gap-3 p-3 overflow-hidden">
-            {exIdx < lesson.content.exercises.length ? (
+            {exIdx >= exN && exIdx < exTotal ? (
               <>
-                <p className="text-[11px] font-black text-slate-500">{L('تمرين', 'Exercise')} {exIdx + 1} {L('من', 'of')} {lesson.content.exercises.length}</p>
+                <p className="text-[11px] font-black text-slate-500">{L('تمرين', 'Exercise')} {exIdx + 1} {L('من', 'of')} {exTotal} · {L('إملاء', 'Spelling')}</p>
+                <div className="rounded-2xl p-3 bg-white border-2 border-amber-200 overflow-y-auto">
+                  <SpellingExercise key={`${lesson.id}-sp-${exIdx}`} item={spellItems[exIdx - exN]} speak={w => sayLine(w)}
+                    onDone={first => { if (first) setExScore(s => s + 1); setExIdx(i => i + 1); }} />
+                </div>
+              </>
+            ) : exIdx < exN ? (
+              <>
+                <p className="text-[11px] font-black text-slate-500">{L('تمرين', 'Exercise')} {exIdx + 1} {L('من', 'of')} {exTotal}</p>
                 <div className="rounded-2xl p-3 bg-white border-2 border-amber-200">
                   <Choice key={`${lesson.id}-ex-${exIdx}`} q={lesson.content.exercises[exIdx]} picked={exPick} locked={exPick !== null}
                     onPick={i => { setExPick(i); if (i === lesson.content!.exercises[exIdx].correctIndex) setExScore(s => s + 1); }} />
@@ -587,7 +599,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             ) : (
               <div className="rounded-2xl p-4 bg-white border-2 border-emerald-300 text-center space-y-2">
                 <p className="text-2xl">🌟</p>
-                <p className="text-sm font-black text-slate-800">{L('نتيجتك:', 'Your score:')} {exScore} {L('من', 'of')} {lesson.content.exercises.length}</p>
+                <p className="text-sm font-black text-slate-800">{L('نتيجتك:', 'Your score:')} {exScore} {L('من', 'of')} {exTotal}</p>
                 {CALL_TRACKS[track.id] && <SaraLessonCall uid={uid}
                   preset={lessonCallPreset({ id: lesson.id, titleAr: lesson.titleAr, titleEn: lesson.titleEn, kind: CALL_TRACKS[track.id], tag: CALL_TRACKS[track.id],
                     phrases: [...new Set(lesson.content.example.flatMap(e => e.en.replace(/\b[AB]:\s*/g, '\n').split(/\n|(?<=[.!?])\s+/)).map(x => x.trim()).filter(x => x.length > 3 && x.split(/\s+/).length <= 9))].slice(0, 4),
@@ -598,7 +610,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
               </div>
             )}
           </div>
-        )}
+        ); })()}
         {repeatOpen && lessonRaw && repeatItems.length > 0 && (
           <Suspense fallback={null}>
             <SaraRepeatPractice autoStart uid={uid} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}

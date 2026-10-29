@@ -6,11 +6,13 @@ import { READING_TRACK } from '../src/data/saraTracks/reading';
 import { WRITING_TRACK } from '../src/data/saraTracks/writing';
 import { TUTOR_TRACKS } from '../src/data/tutorTracks/index';
 import { normalizeChoice, choiceProblems } from '../src/lib/choiceQuestion';
+import { spellingItemsFor, spellingProblems } from '../src/lib/spelling';
 
 const tracks: { id: string; lessons: any[] }[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK, ...TUTOR_TRACKS] as any;
-let total = 0, bad = 0;
+let total = 0, bad = 0, spTotal = 0;
+const spSummary: string[] = [];
 for (const t of tracks) {
-  let tq = 0, tb = 0;
+  let tq = 0, tb = 0, sl = 0, si = 0;
   for (const l of t.lessons) {
     const c = l.content; if (!c) { console.log(`${t.id} ${l.id}: no content`); continue; }
     const qs = [['check', c.check], ...(c.exercises || []).map((e: unknown, i: number) => [`ex${i + 1}`, e])] as [string, unknown][];
@@ -20,9 +22,13 @@ for (const t of tracks) {
       const p = choiceProblems(normalizeChoice(raw));
       if (p.length) { tb++; console.log(`${t.id} ${l.id} ${k}: ${p.join(", ")} ${JSON.stringify(normalizeChoice(raw).options)} ci=${normalizeChoice(raw).correctIndex}`); }
     }
+    const sp = spellingItemsFor(l); if (sp.length) sl++; si += sp.length;
+    for (const it of sp) { const p = spellingProblems(it); if (p.length) { tb++; console.log(`${t.id} ${l.id} spelling «${it.word}»: ${p.join(', ')}`); } }
   }
-  console.log(`== ${t.id}: ${t.lessons.length} lessons, ${tq} questions, ${tb} problems`);
+  console.log(`== ${t.id}: ${t.lessons.length} lessons, ${tq} questions, ${tb} problems · spelling: ${sl} lessons, ${si} items`);
+  spTotal += si; spSummary.push(`${t.id}: ${sl}/${t.lessons.length} lessons, ${si} items`);
   total += tq; bad += tb;
 }
-console.log(`TOTAL ${total} questions, ${bad} problems`);
+console.log(`TOTAL ${total} questions, ${spTotal} spelling items, ${bad} problems`);
+console.log(spSummary.join('\n'));
 process.exit(bad ? 1 : 0);

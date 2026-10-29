@@ -1,4 +1,6 @@
 import { BidiText } from './BidiText';
+import { SpellingExercise } from './SpellingExercise';
+import { spellingItemsFor } from '../lib/spelling';
 import { useT } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Volume2, Square, Lock, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
@@ -23,7 +25,7 @@ const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 const saveUnlocked = saveTutorUnlocked;
 export { readTutorUnlocked };
 
-type Step = { k: 'board' } | { k: 'explain' } | { k: 'check' } | { k: 'ex'; i: number } | { k: 'done' };
+type Step = { k: 'board' } | { k: 'explain' } | { k: 'check' } | { k: 'ex'; i: number } | { k: 'spell'; i: number } | { k: 'done' };
 
 const useVoice = (voice: string) => {
   const [st, setSt] = useState<'idle' | 'loading' | 'failed' | 'blocked'>('idle');
@@ -77,6 +79,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const teacher: RepeatTeacher = useMemo(() => ({ id: persona.id, nameAr: persona.nameAr, face: persona.id, male: persona.gender === 'male',
     narrate: (text, b, f, e) => { void saraNarrate(text, b, f, e, persona.voice); }, stop: saraStopNarrator, unlock: saraUnlockNarrator }), [persona]);
   const repeatItems = useMemo(() => (lessonRaw ? extractLessonItems(lessonRaw) : []), [lessonRaw]);
+  const spellItems = useMemo(() => (lessonRaw ? spellingItemsFor(lessonRaw as any) : []), [lessonRaw]);
   const [repeatOpen, setRepeatOpen] = useState(false);
 
   const shell = (head: React.ReactNode, body: React.ReactNode) => (
@@ -87,7 +90,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
         <ExplainLangToggle />
         {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 {t("محاورة", "Talk with")} {NM}</button>}
       </div>
-      {lesson?.content && <LessonSteps at={step.k === 'done' ? 2 : step.k === 'check' || step.k === 'ex' ? 1 : 0} repeat={repeatItems.length > 0} />}
+      {lesson?.content && <LessonSteps at={step.k === 'done' ? 2 : step.k === 'check' || step.k === 'ex' || step.k === 'spell' ? 1 : 0} repeat={repeatItems.length > 0} />}
       {body}
       <TtsDebugOverlay />
     </div>
@@ -133,7 +136,11 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
 
   const c = lesson.content!;
   if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
-  const total = 1 + c.exercises.length;
+  const total = 1 + c.exercises.length + spellItems.length;
+  const finish = () => {
+    setStep({ k: 'done' });
+    if (!mockStep && lesson.order >= unlocked && lesson.order < track.lessons.length + 1) { const nu = lesson.order + 1; setUnlocked(nu); saveUnlocked(track.id, uid, nu); }
+  };
   const head = <><p {...longPressDebug()} className="text-[10px] text-amber-300 font-bold select-none">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{t(lesson.titleAr, lesson.titleEn)}{enLoading ? ' · …EN' : ''}</p></>;
   const kids = persona.kids && lesson.kids ? lesson.kids : null; // «من الصفر» teachers: picture-card board instead of tldraw
   const narration = kids ? `${c.explanationAr} ${kids.say}` : `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
@@ -168,10 +175,23 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     {nextBtn(t('سؤال سريع', 'Quick question'), () => { setPicked(null); setCheckWrong(false); setStep({ k: 'check' }); })}
   </>);
 
+  if (step.k === 'spell' && spellItems[step.i]) {
+    const si = step.i;
+    return shell(head, <>
+      <p className="text-[12px] font-black text-amber-200 shrink-0">{t('تمرين', 'Exercise')} {c.exercises.length + si + 1} / {total - 1} · {t('إملاء', 'Spelling')}</p>
+      <div className="rounded-2xl bg-white p-3 overflow-y-auto">
+        <SpellingExercise key={`${lesson.id}-sp-${si}`} kids={!!persona.kids} item={spellItems[si]} speak={w => v.play(w)}
+          onDone={first => { if (first) setCorrect(x => x + 1); if (si + 1 < spellItems.length) setStep({ k: 'spell', i: si + 1 }); else finish(); }} />
+      </div>
+      <div className="flex-1" />
+    </>);
+  }
+
   if (step.k === 'check' || step.k === 'ex') {
     const q = step.k === 'check' ? c.check : c.exercises[step.i];
     const n = step.k === 'check' ? 1 : step.i + 2;
-    const isLast = step.k === 'ex' && step.i === c.exercises.length - 1;
+    const isLast = step.k === 'ex' && step.i === c.exercises.length - 1 && !spellItems.length;
+    const lastEx = step.k === 'ex' && step.i === c.exercises.length - 1;
     return shell(head, <>
       <div className="flex items-center gap-2 shrink-0">
         <p data-testid="tutor-q" tabIndex={-1} className="flex-1 text-[11px] font-black text-amber-300 outline-none">{t('سؤال', 'Question')} {n} {t('من', 'of')} {total}</p>
@@ -194,11 +214,9 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       {nextBtn(isLast ? t('النتيجة', 'Result') : t('التالي', 'Next'), () => {
         setPicked(null);
         if (step.k === 'check') setStep({ k: 'ex', i: 0 });
-        else if (!isLast) setStep({ k: 'ex', i: step.i + 1 });
-        else {
-          setStep({ k: 'done' });
-          if (!mockStep && lesson.order >= unlocked && lesson.order < track.lessons.length + 1) { const nu = lesson.order + 1; setUnlocked(nu); saveUnlocked(track.id, uid, nu); }
-        }
+        else if (!lastEx) setStep({ k: 'ex', i: step.i + 1 });
+        else if (spellItems.length) setStep({ k: 'spell', i: 0 });
+        else finish();
       }, picked === null)}
     </>);
   }
