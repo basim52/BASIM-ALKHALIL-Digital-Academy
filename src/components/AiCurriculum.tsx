@@ -9412,11 +9412,6 @@ Output Summary for [${topic}]:
                 </div>
 
                 <div className="border-t border-[#C49E3A]/20 pt-6 mt-8 flex flex-col md:flex-row gap-4 justify-between items-center relative z-10">
-                  <div className="flex items-center gap-2">
-                    <Info size={14} className="text-[#C49E3A]" />
-                    <span className="text-[10px] text-[#002147] font-black uppercase tracking-widest">{isRtl ? 'تذكر: الذكاء الاصطناعي مدعوم بنماذج الأكاديمية وGemini' : 'Powered securely by Basim Al Khalil Academy AI Platform'}</span>
-                  </div>
-
                   <div className="flex items-center gap-3">
                     <GhostButton
                       onClick={() => {
