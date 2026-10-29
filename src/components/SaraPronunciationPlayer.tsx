@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import MixedText from './MixedText';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
@@ -72,7 +73,7 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
         {l.exercises.map((e, ei) => (
           <div key={ei} className="rounded-xl bg-white border border-amber-200 p-1.5 flex items-center gap-1.5 flex-wrap">
             {e.play && <button onClick={() => play(e.play!)} className="w-7 h-7 rounded-full bg-[#C49E3A] text-[#002147] flex items-center justify-center shrink-0" aria-label="play"><Volume2 size={14} /></button>}
-            <p className="text-[12px] font-black text-slate-800 flex-1 min-w-[120px]">{e.promptAr}</p>
+            <p className="text-[12px] font-black text-slate-800 flex-1 min-w-[120px]"><BidiText text={e.promptAr} /></p>
             <div className="flex gap-1 flex-wrap">
               {e.options.map((o, oi) => {
                 const p = picked[ei]; const st = p === null ? 'bg-slate-50 border-slate-200' : oi === e.correctIndex ? 'bg-emerald-100 border-emerald-500' : p === oi ? 'bg-rose-100 border-rose-400' : 'opacity-60 border-slate-200';

@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import { useT } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Volume2, Square, Lock, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
@@ -178,12 +179,12 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       </div>
       {persona.kids ? (
         <div className="rounded-2xl bg-white p-3 shrink-0" style={{ border: `4px solid ${persona.kids.accent}`, background: persona.kids.soft }} data-testid="kids-question">
-          <p className="text-[14px] font-black" style={{ color: persona.kids.ink }}>{q.promptAr}</p>
+          <p className="text-[14px] font-black" style={{ color: persona.kids.ink }}><BidiText text={q.promptAr} /></p>
           {q.promptEn && <p dir="ltr" className="text-[18px] font-black text-start mt-1" style={{ color: persona.kids.ink }}>{q.promptEn.split('___').map((p, i, a) => <React.Fragment key={i}>{p}{i < a.length - 1 && <span className="inline-block w-12 mx-1 border-b-[3px] align-baseline" style={{ borderColor: persona.kids!.accent, background: '#fff' }}>&nbsp;</span>}</React.Fragment>)}</p>}
         </div>
       ) : (
       <div className="rounded-xl bg-[#0a2d5c] border border-amber-400/40 p-3 shrink-0">
-        <p className="text-[14px] font-black">{q.promptAr}</p>
+        <p className="text-[14px] font-black"><BidiText text={q.promptAr} /></p>
         {q.promptEn && <p dir="ltr" className="text-[15px] font-black text-amber-200 text-start mt-1">{q.promptEn}</p>}
       </div>)}
       <Choices big={!!persona.kids} q={q} picked={picked} onPick={i => { setPicked(i); if (i === q.correctIndex) setCorrect(x => x + 1); else if (step.k === 'check') setCheckWrong(true); }} />

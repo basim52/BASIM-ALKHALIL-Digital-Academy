@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
 import SaraLessonBoard from './SaraLessonBoard';
@@ -103,7 +104,7 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
       {(step === 'practice' || step === 'review') && q && <>
         <p className="text-[12px] font-black text-[#C49E3A]">{step === 'review' ? 'مراجعة كلمات الدروس السابقة' : 'تمارين الدرس'}</p>
         <div className="rounded-2xl bg-white border-2 border-amber-300 p-3 text-center">
-          <p className="text-[12px] font-bold text-slate-600">{q.promptAr}</p>
+          <p className="text-[12px] font-bold text-slate-600"><BidiText text={q.promptAr} /></p>
           <p dir="auto" className="text-2xl font-black text-[#002147] mt-1">{q.show}</p>
           {q.say && <button onClick={() => say(q.say!)} className="mt-1 px-2 py-0.5 rounded-lg bg-[#C49E3A] text-[#002147] text-[11px] font-black inline-flex items-center gap-1">{audio === 'failed' ? <RotateCcw size={12} /> : <Volume2 size={12} />}اسمع</button>}
         </div>

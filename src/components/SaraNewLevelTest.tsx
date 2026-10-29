@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, Volume2, RotateCcw, Lock } from 'lucide-react';
 import { buildNewTrackTest, NEW_TRACK_META, levelTitleAr, type NewTrackKey, type NewTestItem, type NewLevelId } from '../lib/saraNewTrackTests';
@@ -58,7 +59,7 @@ export const SaraNewLevelTest: React.FC<{ track: NewTrackKey; level?: NewLevelId
         {!result && q && <div className="flex-1 min-h-0 flex flex-col p-3 gap-2 overflow-hidden" data-testid="new-level-test-q">
           <div className="h-1.5 rounded bg-slate-200"><div className="h-full rounded bg-[#C49E3A]" style={{ width: `${(i / qs.length) * 100}%` }} /></div>
           <div className="rounded-2xl bg-white border-2 border-amber-300 p-3 text-center">
-            <p className="text-[13px] font-black text-slate-700">{q.promptAr}</p>
+            <p className="text-[13px] font-black text-slate-700"><BidiText text={q.promptAr} /></p>
             {q.show && <p dir="auto" className="text-[19px] font-black text-[#002147] mt-1">{q.show}</p>}
             {q.play && <button onClick={() => play(q.play)} className="mt-1.5 px-3 py-1 rounded-lg bg-[#C49E3A] text-[#002147] text-[12px] font-black inline-flex items-center gap-1">
               {audio === 'failed' ? <><RotateCcw size={13} />تعذّر الصوت، إعادة المحاولة</> : audio === 'loading' ? 'سارة تجهّز الصوت…' : <><Volume2 size={13} />اسمع سارة</>}</button>}

@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import React, { useEffect, useState } from 'react';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 
@@ -15,7 +16,7 @@ const hl = (t: string) => t.split(/([A-Za-z][A-Za-z'’\- ]*[A-Za-z])/g).map((p,
 
 export const BoardChoice: React.FC<{ q: BoardQuestion; picked: number | null; onPick: (i: number) => void; locked?: boolean }> = ({ q, picked, onPick, locked }) => (
   <div className="space-y-1.5">
-    <p className="text-[13px] font-black text-slate-800 leading-snug">{q.promptAr}{q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{q.promptEn}</span>}</p>
+    <p className="text-[13px] font-black text-slate-800 leading-snug"><BidiText text={q.promptAr} />{q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{q.promptEn}</span>}</p>
     <div className="grid gap-1.5">
       {q.options.map((o, i) => {
         const state = picked === null ? '' : i === q.correctIndex && picked === i ? 'bg-emerald-100 border-emerald-500' : picked === i ? 'bg-rose-100 border-rose-400' : 'opacity-70';

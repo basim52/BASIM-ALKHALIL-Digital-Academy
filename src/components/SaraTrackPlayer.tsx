@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import { trackSpeech, watchSpeechElement } from '../lib/speechLevel';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync, L } from '../lib/explainLang';
@@ -178,7 +179,7 @@ export function lessonBoardActions(lesson: SaraTrackLesson, useAlt: boolean): Bo
 
 const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; locked?: boolean }> = ({ q: raw, picked, onPick, locked }) => { const q = normalizeChoice(raw); return (
   <div className="space-y-1.5">
-    <p className="text-[13px] font-black text-slate-800 leading-snug">{q.promptAr}{q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{q.promptEn}</span>}</p>
+    <p className="text-[13px] font-black text-slate-800 leading-snug"><BidiText text={q.promptAr} />{q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{q.promptEn}</span>}</p>
     <div className="grid gap-1.5">
       {q.options.map((o, i) => {
         const state = picked === null ? '' : i === q.correctIndex && picked === i ? 'bg-emerald-100 border-emerald-500' : picked === i ? 'bg-rose-100 border-rose-400' : 'opacity-70';
@@ -521,7 +522,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
               </div>
               <div className="rounded-2xl p-3 bg-white border-2 border-amber-200">
                 {/* no instant hint: the pick is only highlighted, right/wrong is revealed at the end */}
-                <p className="text-[13px] font-black text-slate-800 leading-snug mb-1.5">{cur.q.promptAr}{cur.q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{cur.q.promptEn}</span>}</p>
+                <p className="text-[13px] font-black text-slate-800 leading-snug mb-1.5"><BidiText text={cur.q.promptAr} />{cur.q.promptEn && <span dir="ltr" className="block text-[#002147] font-bold">{cur.q.promptEn}</span>}</p>
                 <div className="grid gap-1.5">
                   {cur.q.options.map(optionText).map((o, i) => (
                     <button key={i} dir="auto" data-testid="test-option" onClick={() => setTest({ ...test, pick: i })}
@@ -576,7 +577,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
               <>
                 <p className="text-[11px] font-black text-slate-500">{L('تمرين', 'Exercise')} {exIdx + 1} {L('من', 'of')} {lesson.content.exercises.length}</p>
                 <div className="rounded-2xl p-3 bg-white border-2 border-amber-200">
-                  <Choice q={lesson.content.exercises[exIdx]} picked={exPick} locked={exPick !== null}
+                  <Choice key={`${lesson.id}-ex-${exIdx}`} q={lesson.content.exercises[exIdx]} picked={exPick} locked={exPick !== null}
                     onPick={i => { setExPick(i); if (i === lesson.content!.exercises[exIdx].correctIndex) setExScore(s => s + 1); }} />
                 </div>
                 {exPick !== null && (

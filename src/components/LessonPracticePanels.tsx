@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import React, { useMemo, useState } from 'react';
 import { Volume2, RotateCcw, CheckCircle2, XCircle } from 'lucide-react';
 import type { SaraBoardExercise, SaraBoardQuestion } from '../types';
@@ -12,7 +13,7 @@ const MCItem: React.FC<{ prompt: string; sub?: string; options: string[]; correc
   const [sel, setSel] = useState<number | null>(null);
   return (
     <div className={card}>
-      <p className="text-xs sm:text-sm font-black text-white">{prompt}</p>
+      <p className="text-xs sm:text-sm font-black text-white"><BidiText text={prompt} /></p>
       {sub && <p className="text-[11px] text-slate-300" dir="ltr">{sub}</p>}
       <div className="flex flex-wrap gap-1.5">
         {options.map((o, i) => {
@@ -44,7 +45,7 @@ const OrderItem: React.FC<{ ex: SaraBoardExercise }> = ({ ex }) => {
   const check = () => setChecked(normalizeSpoken(built).join(' ') === normalizeSpoken(ex.answer).join(' '));
   return (
     <div className={card}>
-      <p className="text-xs sm:text-sm font-black text-white">{ex.promptAr}</p>
+      <p className="text-xs sm:text-sm font-black text-white"><BidiText text={ex.promptAr} /></p>
       <div className="min-h-[34px] p-2 rounded-xl bg-white/5 border border-dashed border-white/20 flex flex-wrap gap-1.5" dir="ltr">
         {picked.map((i, k) => (
           <button key={k} onClick={() => { setPicked(p => p.filter((_, j) => j !== k)); setChecked(null); }} className="px-2 py-1 rounded-lg bg-amber-400 text-slate-950 text-xs font-black cursor-pointer">{pool[i].w}</button>
@@ -70,7 +71,7 @@ const TranslateItem: React.FC<{ ex: SaraBoardExercise }> = ({ ex }) => {
   const [res, setRes] = useState<null | { ok: boolean; pct: number }>(null);
   return (
     <div className={card}>
-      <p className="text-xs sm:text-sm font-black text-white">{ex.promptAr}</p>
+      <p className="text-xs sm:text-sm font-black text-white"><BidiText text={ex.promptAr} /></p>
       <input dir="ltr" value={txt} onChange={e => { setTxt(e.target.value); setRes(null); }} placeholder="Type in English…" className="w-full px-2.5 py-1.5 rounded-lg bg-white/10 border border-white/15 text-white text-xs" />
       <div className="flex items-center gap-2 flex-wrap">
         <button disabled={!txt.trim()} onClick={() => { const r = checkSpokenAnswer(txt, ex.answer, 0.8); setRes({ ok: r.passed, pct: Math.round(r.score * 100) }); }} className="px-3 py-1 rounded-lg bg-emerald-500 disabled:opacity-40 text-slate-950 text-xs font-black cursor-pointer">تحقّق</button>

@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
@@ -1156,7 +1157,7 @@ export const RolePlayModal: React.FC<RolePlayModalProps> = ({
                               {ex.promptEn}
                             </p>
                             <p className="text-[11px] text-slate-400">
-                              {ex.promptAr}
+                              <BidiText text={ex.promptAr} />
                             </p>
                           </div>
 

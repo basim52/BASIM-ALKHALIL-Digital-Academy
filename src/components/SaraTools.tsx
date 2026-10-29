@@ -1,3 +1,4 @@
+import { BidiText } from './BidiText';
 import { getExplainLang, L, useExplainLang } from '../lib/explainLang';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { X, Volume2, Square, Mic, Printer, CheckCircle2 } from 'lucide-react';
@@ -57,7 +58,7 @@ const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: 
 );
 const QHead: React.FC<{ q: SaraChoiceQuestion }> = ({ q }) => (
   <div className="rounded-xl bg-white border border-amber-200 p-2.5">
-    <p className="text-[13px] font-black text-slate-800">{q.promptAr}</p>
+    <p className="text-[13px] font-black text-slate-800"><BidiText text={q.promptAr} /></p>
     {q.promptEn && <p dir="ltr" className="text-[13px] font-bold text-[#002147] text-start mt-1">{q.promptEn}</p>}
   </div>
 );
@@ -267,7 +268,7 @@ const Worksheet: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unloc
         <ol className="grid gap-2 list-decimal ps-5">
           {items.map((q, k) => (
             <li key={k} className="text-[12px]">
-              <p className="font-bold">{q.promptAr}</p>
+              <p className="font-bold"><BidiText text={q.promptAr} /></p>
               {q.promptEn && <p dir="ltr" className="text-start">{q.promptEn}</p>}
               <p className="flex flex-wrap gap-x-3">{q.options.map((o, oi) => <span key={oi} className={key && oi === q.correctIndex ? 'font-black text-emerald-700 underline' : ''}>{'أبجد'[oi] || oi + 1}) {o}</span>)}</p>
             </li>

@@ -1,3 +1,4 @@
+import { BidiText } from '../BidiText';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Eye } from 'lucide-react';
 import { GoldCard, PrimaryButton, AnswerOption } from '../ui/academy';
@@ -96,7 +97,7 @@ export const PathCheckView: React.FC<{ uid?: string; profile: any; rec: Onboardi
         {!finished ? (<>
           <p className="text-[12px] font-bold text-[#E6C36A]">{t(`سؤال ${i + 1} من ${qs.length}`, `Question ${i + 1} of ${qs.length}`)}</p>
           <GoldCard>
-            <p className="text-[14px] font-black leading-7 mb-3" dir="auto">{qs[i].q.promptAr}{qs[i].q.promptEn && <span dir="ltr" className="block">{qs[i].q.promptEn}</span>}</p>
+            <p className="text-[14px] font-black leading-7 mb-3" dir="auto"><BidiText text={qs[i].q.promptAr} />{qs[i].q.promptEn && <span dir="ltr" className="block">{qs[i].q.promptEn}</span>}</p>
             <div className="grid gap-2">{qs[i].q.options.map((o, k) => (
               <AnswerOption key={k} dir="ltr" label={o} disabled={picked !== null} selected={picked === k}
                 state={picked === null ? 'normal' : k === qs[i].q.correctIndex ? (picked === k ? 'correct' : 'normal') : picked === k ? 'wrong' : 'normal'} onClick={() => setPicked(k)} />
