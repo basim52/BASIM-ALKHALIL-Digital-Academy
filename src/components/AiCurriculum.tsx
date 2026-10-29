@@ -9411,7 +9411,7 @@ Output Summary for [${topic}]:
 
                 </div>
 
-                <div className="border-t border-[#C49E3A]/20 pt-6 mt-8 flex flex-col md:flex-row gap-4 justify-between items-center relative z-10">
+                <div className="border-t border-[#C49E3A]/20 pt-6 mt-8 flex flex-col md:flex-row gap-4 justify-end items-center relative z-10">
                   <div className="flex items-center gap-3">
                     <GhostButton
                       onClick={() => {
