@@ -45,20 +45,20 @@ export const LessonTile: React.FC<LessonTileProps> = ({
       {order}
     </span>
     <span className="flex-1 min-w-0">
-      <span className="block text-[13px] sm:text-sm font-black text-[#002147] truncate">
+      <span className="block text-[13px] sm:text-sm font-black text-[#002147] leading-snug line-clamp-2 break-words">
         {!locked && emoji ? `${emoji} ` : ''}{title}
       </span>
       {subtitle && (
-        <span dir="ltr" className="block text-[11px] font-bold text-[#002147]/65 truncate">
+        <span dir="auto" className="block mt-0.5 text-[11px] font-bold text-[#002147]/65 line-clamp-1">
           {subtitle}
         </span>
       )}
+      {level && (
+        <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-[#002147] text-[#E6C36A] text-[10px] font-black">
+          {level}
+        </span>
+      )}
     </span>
-    {level && (
-      <span className="px-2 py-0.5 rounded-full bg-[#002147] text-[#E6C36A] text-[10px] font-black shrink-0">
-        {level}
-      </span>
-    )}
     {locked ? (
       <span className="text-xs shrink-0" aria-label="locked">🔒</span>
     ) : done ? (
