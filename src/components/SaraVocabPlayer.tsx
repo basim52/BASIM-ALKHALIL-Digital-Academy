@@ -1,5 +1,6 @@
 import { BidiText } from './BidiText';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
+import { HearWord } from './HearWord';
 import SaraLevelledList from './SaraLevelledList';
 import SaraLessonBoard from './SaraLessonBoard';
 import { levelTitleAr, type NewLevelId } from '../lib/saraNewTrackTests';
@@ -91,6 +92,7 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
         <div className="flex-1 min-h-0 rounded-2xl bg-[#002147] border-2 border-[#C49E3A] flex flex-col items-center justify-center gap-2 p-3 text-center">
           <span className="text-6xl leading-none">{w.emoji}</span>
           <p dir="ltr" className="text-3xl font-black text-white">{w.en}</p>
+          <HearWord word={w.en} dark />
           <p className="text-xl font-black text-amber-300">{w.ar}</p>
           <p dir="ltr" className="text-[14px] font-bold text-slate-200">{w.example}</p>
         </div>

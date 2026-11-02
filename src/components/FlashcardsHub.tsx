@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { HearWord } from './HearWord';
 import {
   Volume2,
   RotateCw,
@@ -2429,6 +2430,7 @@ export const FlashcardsHub: React.FC<FlashcardsHubProps> = ({
                     >
                       {currentCard.word}
                     </h2>
+                    <HearWord word={currentCard.word} showIpa={false} />
 
                     <div dir="ltr">
                       <span className="inline-block text-xs sm:text-sm font-mono font-bold text-[#C49E3A] bg-[#fdfaf3] border border-[#C49E3A]/40 px-3.5 py-1 rounded-full">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { HearWord } from './HearWord';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
@@ -396,6 +397,7 @@ export const VisualDictionary: React.FC<VisualDictionaryProps> = ({
                         >
                           {selectedItem.word}
                         </h2>
+                        <HearWord word={selectedItem.word} className="mt-1" />
                       </div>
 
                       <button
