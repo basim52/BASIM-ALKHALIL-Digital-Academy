@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { HearWord } from './HearWord';
+import { spellCheck } from '../lib/freeWordApis';
 import { BidiText } from './BidiText';
 import { SpellingItem, spellingFeedback } from '../lib/spelling';
 
@@ -12,7 +14,20 @@ export const SpellingExercise: React.FC<{ item: SpellingItem; onDone: (firstTry:
   const put = (ch: string) => { if (res) return; setFilled(prev => { const k = prev.findIndex(x => !x); if (k < 0) return prev; const f = [...prev]; f[k] = ch.toLowerCase(); return f; }); };
   const clear = (k: number) => { if (res) return; setFilled(prev => { const f = [...prev]; f[k] = ''; return f; }); };
   const check = () => { const r = spellingFeedback(item, filled); setRes(r); setTries(t => t + 1); if (r.ok) speak?.(w); };
-  const retry = () => { setFilled(Array(n).fill('')); setRes(null); };
+  const retry = () => { setFilled(Array(n).fill('')); setRes(null); setHint(null); };
+  // Datamuse «تقصد؟» — only after a wrong attempt. If what they typed is itself another English word, warn; if their try was close, confirm the intended word.
+  const [hint, setHint] = useState<null | { kind: 'other' | 'close'; typed: string }>(null);
+  useEffect(() => {
+    if (!res || res.ok) return;
+    const typed = w.split('').map((c, i) => { const k = item.blanks.indexOf(i); return k < 0 ? c : (filled[k] || ''); }).join('').toLowerCase();
+    let live = true;
+    spellCheck(typed).then(r => {
+      if (!live || !r || typed === w.toLowerCase()) return;
+      if (r.realWordFreq >= 1) setHint({ kind: 'other', typed });
+      else if (r.suggestions.includes(w.toLowerCase())) setHint({ kind: 'close', typed });
+    });
+    return () => { live = false; };
+  }, [res]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const masked = useMemo(() => w.split('').map((c, i) => (item.blanks.includes(i) ? '_' : c)).join(''), [w, item.blanks]);
   const sentenceParts = useMemo(() => {
@@ -38,7 +53,7 @@ export const SpellingExercise: React.FC<{ item: SpellingItem; onDone: (firstTry:
 
   return (
     <div className="space-y-2" dir="rtl">
-      <p className="text-[13px] font-black text-slate-800"><BidiText text={`أكمل الحروف الناقصة: ${masked}`} /></p>
+      <div className="flex items-center justify-between gap-2 flex-wrap"><p className="text-[13px] font-black text-slate-800"><BidiText text={`أكمل الحروف الناقصة: ${masked}`} /></p><HearWord word={w} showIpa={false} /></div>
       <div dir="ltr" className={`rounded-2xl bg-[#fdfaf3] border border-[#C49E3A]/40 px-3 py-2 text-[#002147] font-bold leading-[2.2] ${kids ? 'text-[19px]' : 'text-[16px]'}`}>
         {sentenceParts ? <>{sentenceParts[0]}{word}{sentenceParts[1]}</> : word}
       </div>
@@ -62,6 +77,9 @@ export const SpellingExercise: React.FC<{ item: SpellingItem; onDone: (firstTry:
         <div className="rounded-xl bg-rose-50 border border-rose-300 p-2 text-[12.5px] font-bold text-slate-800 space-y-1">
           <p>❌ الكتابة الصحيحة: <span dir="ltr" className="font-black text-[15px]">{w.split('').map((c, i) => <span key={i} className={item.blanks.includes(i) ? 'text-[#C49E3A] underline decoration-2' : 'text-[#002147]'}>{c}</span>)}</span> ({item.ar})</p>
           {res.wrong.map(x => <p key={x.pos}>• الحرف رقم {x.pos + 1}: كتبت «<span dir="ltr">{x.got || '—'}</span>» والصحيح «<span dir="ltr" className="text-[#C49E3A] font-black">{x.want}</span>»</p>)}
+          {hint && (hint.kind === 'other'
+            ? <p className="text-[#002147]">🔎 انتبه: «<span dir="ltr">{hint.typed}</span>» كلمة إنجليزية ثانية، والمطلوب «<span dir="ltr" className="font-black">{w}</span>».</p>
+            : <p className="text-[#002147]">🔎 تقصد: <span dir="ltr" className="font-black">{w}</span>؟ قربت كثير!</p>)}
           {res.tips.map((t, i) => <p key={i} className="text-[#002147]">💡 <BidiText text={t} /></p>)}
           <div className="flex gap-1.5 pt-1">
             <button onClick={retry} className="flex-1 h-9 rounded-xl bg-[#C49E3A] text-[#002147] font-black">حاول مرة ثانية</button>
