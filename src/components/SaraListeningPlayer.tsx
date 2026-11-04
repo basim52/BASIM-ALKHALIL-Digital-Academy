@@ -65,7 +65,7 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
       {step === 'q' && <>
         <p className="text-[12px] text-slate-600 font-bold">اسمع الحوار من سارة، وبعدين جاوب. تقدر تعيده كل ما احتجت.</p>
         {imgs?.scene
-          ? <button onClick={() => setZoom(imgs.scene)} className="w-full h-28 shrink-0 rounded-xl overflow-hidden bg-slate-200" aria-label={l.titleAr} data-testid="listen-scene"><img src={imgs.scene} alt={l.titleAr} className="w-full h-full object-cover" /></button>
+          ? <button onClick={() => setZoom(imgs.scene)} className="w-full h-28 shrink-0 rounded-xl overflow-hidden bg-slate-200" aria-label={l.titleAr} data-testid="listen-scene"><img src={imgs.scene} alt={l.titleAr} loading="lazy" decoding="async" className="w-full h-full object-cover" /></button>
           : <ScenarioArt title={`${l.titleAr} ${l.titleEn}`} className="w-full h-14 shrink-0" />}
         <div className="flex">{audioBtn(l.audioText, 'اسمع الحوار')}</div>
         <div className="flex-1 min-h-0 grid gap-2 content-start">
