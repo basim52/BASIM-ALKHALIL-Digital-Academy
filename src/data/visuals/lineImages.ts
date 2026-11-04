@@ -421,5 +421,25 @@ export const LINE_IMAGES: Record<string, Record<string, string>> = {
   "p1": "/visuals/daily/daily-b-14/p1.webp",
   "p2": "/visuals/daily/daily-b-14/p2.webp",
   "p3": "/visuals/daily/daily-b-14/p3.webp"
+ },
+ "daily-b-15": {
+  "d0": "/visuals/daily/daily-b-15/d0.webp",
+  "d1": "/visuals/daily/daily-b-15/p0.webp",
+  "d2": "/visuals/daily/daily-b-15/d2.webp",
+  "d3": "/visuals/daily/daily-b-15/p2.webp",
+  "p0": "/visuals/daily/daily-b-15/p0.webp",
+  "p1": "/visuals/daily/daily-b-15/p1.webp",
+  "p2": "/visuals/daily/daily-b-15/p2.webp",
+  "p3": "/visuals/daily/daily-b-15/p3.webp"
+ },
+ "daily-b-16": {
+  "d0": "/visuals/daily/daily-b-16/d0.webp",
+  "d1": "/visuals/daily/daily-b-16/p0.webp",
+  "d2": "/visuals/daily/daily-b-16/d2.webp",
+  "d3": "/visuals/daily/daily-b-16/p2.webp",
+  "p0": "/visuals/daily/daily-b-16/p0.webp",
+  "p1": "/visuals/daily/daily-b-16/p1.webp",
+  "p2": "/visuals/daily/daily-b-16/p2.webp",
+  "p3": "/visuals/daily/daily-b-16/p3.webp"
  }
 };
