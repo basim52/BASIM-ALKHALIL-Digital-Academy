@@ -11,6 +11,8 @@ import { readUnlocked, progressKey, saraNarrate, saraStopNarrator, saraUnlockNar
 import { pushTrackProgress, syncTrackProgress } from '../lib/saraProgressSync';
 import SaraLessonCall, { lessonCallPreset, levelToCefr } from './SaraLessonCall';
 import SaraSentenceBuilder from './SaraSentenceBuilder';
+import VisualCardsGrid from './VisualCardsGrid';
+import { visualCardsFor, visualTitleFor } from '../data/saraVisualCards';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
 interface Q { promptAr: string; show: string; options: string[]; correct: number; say?: string }
@@ -37,10 +39,11 @@ function reviewQs(l: SaraVocabLesson): Q[] {
   return back.flatMap((b, i) => shuffle(b.words, l.order + i).slice(0, i === 0 ? 2 : 1).map((w, k) => makeQ(w, b.words, k + i, l.order * 7 + i * 3 + k)));
 }
 
-type Step = 'learn' | 'practice' | 'review' | 'build' | 'done';
+type Step = 'cards' | 'learn' | 'practice' | 'review' | 'build' | 'done';
 
 const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void; uid?: string }> = ({ l, onBack, onPassed, onBoard, uid }) => {
-  const [step, setStep] = useState<Step>('learn');
+  const visual = useMemo(() => visualCardsFor(l.id), [l.id]);
+  const [step, setStep] = useState<Step>(() => (visualCardsFor(l.id).length ? 'cards' : 'learn'));
   const [card, setCard] = useState(0);
   const [audio, setAudio] = useState<null | 'loading' | 'failed'>(null);
   const [paused, setPaused] = useState(false);
@@ -84,8 +87,9 @@ const Lesson: React.FC<{ l: SaraVocabLesson; onBack: () => void; onPassed: () =>
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.icon} {l.titleAr}</p>
         {onBoard && <button onClick={() => { saraStopNarrator(); onBoard(); }} data-testid="open-board" className="shrink-0 px-1.5 py-1 rounded-lg bg-[#083344] text-teal-100 border border-teal-400/60 text-[10px] font-black leading-tight">🧑‍🏫 اشرح بالسبورة التفاعلية</button>}
-        <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{step === 'learn' ? `${card + 1}/10` : step === 'done' ? '✓' : step === 'build' ? '🧩' : `${(step === 'review' ? practice.length : 0) + qi + 1}/${total}`}</span>
+        <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{step === 'cards' ? '🖼️' : step === 'learn' ? `${card + 1}/10` : step === 'done' ? '✓' : step === 'build' ? '🧩' : `${(step === 'review' ? practice.length : 0) + qi + 1}/${total}`}</span>
       </div>
+      {step === 'cards' && <VisualCardsGrid cards={visual} titleAr={visualTitleFor(l.id)} seed={l.order} onDone={() => setStep('learn')} doneLabel="كمّل لكلمات الدرس" />}
       {step === 'learn' && <>
         {controls}
         {card === 0 && <p className="text-[12.5px] font-bold text-slate-700">{intro}</p>}
