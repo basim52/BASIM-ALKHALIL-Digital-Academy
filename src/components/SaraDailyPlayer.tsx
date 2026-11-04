@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom';
+import { LINE_IMAGES } from '../data/visuals/lineImages';
 import MixedText from './MixedText';
 import { ScenarioArt } from './visualCards/ActivityPictures';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
@@ -15,11 +16,6 @@ import SaraLessonCall, { lessonCallPreset, levelToCefr } from './SaraLessonCall'
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
 
-/** Pilot: per-phrase illustrations (by English title). Display only. */
-const PHRASE_PICS: Record<string, string[]> = {
-  'At the Airport: Check-in': ['checkin', 'window-seat', 'bags', 'boarding-pass'].map(n => `/visuals/daily/airport/${n}.webp`),
-};
-
 function shuffle<T>(a: T[], seed: number): T[] {
   const r = [...a]; let s = seed * 9301 + 49297;
   for (let i = r.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor((s / 233280) * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
@@ -29,7 +25,9 @@ type Step = 'learn' | 'dialogue' | 'practice' | 'role' | 'done';
 
 const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void; uid?: string }> = ({ l, onBack, onPassed, onBoard, uid }) => {
   const [step, setStep] = useState<Step>('learn');
-  const pics = PHRASE_PICS[l.titleEn];
+  const imgs = LINE_IMAGES[l.id];
+  const pics = imgs && l.phrases.every((_, i) => imgs[`p${i}`]) ? l.phrases.map((_, i) => imgs[`p${i}`]) : undefined;
+  const dPics = imgs ? l.dialogue.map((_, i) => imgs[`d${i}`]) : [];
   const [zoom, setZoom] = useState<string | null>(null);
   const [audio, setAudio] = useState<{ t: string; s: 'loading' | 'failed' } | null>(null);
   const [paused, setPaused] = useState(false);
@@ -76,7 +74,7 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
   const go = (s: Step) => { saraStopNarrator(); setAudio(null); setStep(s); };
   const stepNo = { learn: 1, dialogue: 2, practice: 3, role: 4, done: 4 }[step];
   return (
-    <div className={`flex-1 min-h-0 flex flex-col p-2.5 gap-1.5 ${pics && step === 'learn' ? 'overflow-y-auto' : 'overflow-hidden'}`} data-testid="daily-lesson">
+    <div className={`flex-1 min-h-0 flex flex-col p-2.5 gap-1.5 ${(pics && step === 'learn') || (step === 'dialogue' && dPics.some(Boolean)) ? 'overflow-y-auto' : 'overflow-hidden'}`} data-testid="daily-lesson">
       {zoom && createPortal(<button onClick={() => setZoom(null)} className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" aria-label="إغلاق" data-testid="phrase-pic-zoom"><img src={zoom} alt="" className="max-w-full max-h-full rounded-2xl shadow-2xl" /></button>, document.body)}
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
@@ -112,9 +110,12 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
         {controls(dialogueText)}
         <div className="grid gap-1.5">
           {l.dialogue.map((d, i) => (
-            <div key={i} className={`rounded-xl px-2.5 py-1.5 border-2 ${d.sp === 'A' ? 'bg-white border-amber-300' : 'bg-[#002147] border-[#002147]'}`}>
+            <div key={i} className={`rounded-xl px-2.5 py-1.5 border-2 ${d.sp === 'A' ? 'bg-white border-amber-300' : 'bg-[#002147] border-[#002147]'} ${dPics[i] ? 'flex items-center gap-2' : ''}`}>
+              {dPics[i] && <button onClick={() => setZoom(dPics[i]!)} className="shrink-0 w-[4.5rem] h-[4.5rem] rounded-lg overflow-hidden bg-slate-200" aria-label={`صورة: ${d.ar}`} data-testid="dialogue-pic"><img src={dPics[i]} alt={d.ar} loading="lazy" className="w-full h-full object-cover" /></button>}
+              <div className="flex-1 min-w-0">
               <p dir="ltr" className={`text-[13.5px] font-black text-left ${d.sp === 'A' ? 'text-[#002147]' : 'text-white'}`}>{d.sp === 'A' ? '👩 Sara: ' : '🙋 You: '}{d.en}</p>
               <p className={`text-[12px] font-bold ${d.sp === 'A' ? 'text-slate-500' : 'text-amber-300'}`}>{d.ar}</p>
+              </div>
             </div>
           ))}
         </div>

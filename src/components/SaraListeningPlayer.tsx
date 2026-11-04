@@ -1,5 +1,7 @@
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import { ScenarioArt, pictureForWord } from './visualCards/ActivityPictures';
+import { createPortal } from 'react-dom';
+import { LINE_IMAGES } from '../data/visuals/lineImages';
 import { VisualCardArt } from './visualCards/VisualCardArt';
 import SaraLevelledList from './SaraLevelledList';
 import SaraLessonBoard from './SaraLessonBoard';
@@ -32,6 +34,8 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
   const [picked, setPicked] = useState<(number | null)[]>(l.questions.map(() => null));
   const [typed, setTyped] = useState('');
   const [score, setScore] = useState<number | null>(null);
+  const imgs = LINE_IMAGES[l.id];
+  const [zoom, setZoom] = useState<string | null>(null);
   useEffect(() => () => saraStopNarrator(), []);
   const play = (text: string) => {
     saraUnlockNarrator(); setAudio('loading');
@@ -51,6 +55,7 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
   );
   return (
     <div className="flex-1 min-h-0 flex flex-col p-3 gap-2 overflow-hidden" data-testid="listening-lesson">
+      {zoom && createPortal(<button onClick={() => setZoom(null)} className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" aria-label="إغلاق" data-testid="pic-zoom"><img src={zoom} alt="" className="max-w-full max-h-full rounded-2xl shadow-2xl" /></button>, document.body)}
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.titleAr}</p>
@@ -59,7 +64,9 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
       </div>
       {step === 'q' && <>
         <p className="text-[12px] text-slate-600 font-bold">اسمع الحوار من سارة، وبعدين جاوب. تقدر تعيده كل ما احتجت.</p>
-        <ScenarioArt title={`${l.titleAr} ${l.titleEn}`} className="w-full h-14 shrink-0" />
+        {imgs?.scene
+          ? <button onClick={() => setZoom(imgs.scene)} className="w-full h-28 shrink-0 rounded-xl overflow-hidden bg-slate-200" aria-label={l.titleAr} data-testid="listen-scene"><img src={imgs.scene} alt={l.titleAr} className="w-full h-full object-cover" /></button>
+          : <ScenarioArt title={`${l.titleAr} ${l.titleEn}`} className="w-full h-14 shrink-0" />}
         <div className="flex">{audioBtn(l.audioText, 'اسمع الحوار')}</div>
         <div className="flex-1 min-h-0 grid gap-2 content-start">
           {l.questions.map((q, qi) => (
@@ -88,8 +95,10 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
       </>}
       {step === 'done' && <div className="flex-1 min-h-0 flex flex-col gap-2">
         <p className="text-[14px] font-black text-emerald-700">أحسنت! الأسئلة {right}/3 والإملاء {score}%. انفتح الدرس التالي.</p>
-        <div dir="ltr" className="flex-1 min-h-0 overflow-hidden rounded-xl bg-[#002147] text-white p-2 text-[12px] leading-snug">
-          {l.scriptLines.map((s, i) => <p key={i}>{s}</p>)}
+        <div dir="ltr" className={`flex-1 min-h-0 ${imgs ? 'overflow-y-auto' : 'overflow-hidden'} rounded-xl bg-[#002147] text-white p-2 text-[12px] leading-snug`}>
+          {l.scriptLines.map((s, i) => imgs?.[`d${i}`]
+            ? <div key={i} className="flex items-center gap-2 py-0.5"><button onClick={() => setZoom(imgs[`d${i}`])} className="shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-slate-200" aria-label={s} data-testid="script-pic"><img src={imgs[`d${i}`]} alt="" loading="lazy" className="w-full h-full object-cover" /></button><p className="flex-1">{s}</p></div>
+            : <p key={i}>{s}</p>)}
           <p className="mt-1 text-amber-300 font-black">✍️ {l.dictation}</p>
         </div>
         <button onClick={onBack} className="py-2.5 rounded-xl bg-[#C49E3A] text-[#002147] font-black text-sm">رجوع للدروس</button>
