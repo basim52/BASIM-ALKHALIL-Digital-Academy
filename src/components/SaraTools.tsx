@@ -15,7 +15,7 @@ import { savePlacementLevel } from '../lib/placement';
 import { buildRoadmap, LESSON_MIN, type Roadmap, readBasket, writeBasketLocal, basketAdd, basketRemove, smartBasket, buildBasketPlan, cleanBasket, type BasketData } from '../lib/saraPlan';
 import { buildSaraPlan, loadPlanState, taskDone, readSavedPlan, savePlan, weekStartIso, WEEK_ORDER, DEFAULT_STUDY_DAYS, type SaraPlan, type PlanState, type PlanTask, type PlanKind } from '../lib/saraPlan';
 import { trackLevels, saveLevelTestAttempt, summarizeLevelTests, type LevelTestAttempt } from '../lib/saraLevelTests';
-import SaraBoardTutor from './SaraBoardTutor';
+import SaraBoardTutor, { type SaraClassTool } from './SaraBoardTutor';
 import { getDailyTopic, readFreeTopicDay, type FreeTopicDay } from '../lib/saraDailyTopic';
 import { readLocalOnboarding } from '../lib/onboardingGate';
 import type { OnboardingRecord } from '../lib/onboarding';
@@ -23,7 +23,7 @@ import type { OnboardingRecord } from '../lib/onboarding';
 export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach' | 'grammar' | 'board';
 export const SARA_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
 export interface PlacementOutcome { level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'; bandId: string; trackId: string; score: number }
-interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void; onOpenTrack?: (trackId: string) => void }
+interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void; onOpenTrack?: (trackId: string) => void; classTools?: SaraClassTool[]; classPersona?: string }
 
 const TITLES_EN: Record<SaraToolId, string> = {
   placement: '🎯 Placement test', speed: '⚡ Speed challenge', worksheet: '📝 Worksheet', plan: '🗓️ Weekly study plan',
@@ -835,7 +835,7 @@ const GrammarCheck: React.FC = () => {
 };
 
 /** One-page Sara tool (same look as the track player). */
-export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPlacementDone, onOpenTrack }) => {
+export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPlacementDone, onOpenTrack, classTools, classPersona }) => {
   const [lang] = useExplainLang();
   if (!tool) return null;
   const p = { uid, unlockAll };
@@ -857,7 +857,7 @@ export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPl
         {tool === 'pronunciation' && <Pronunciation {...p} />}
         {tool === 'voicecoach' && <VoiceCoach {...p} />}
         {tool === 'grammar' && <GrammarCheck />}
-        {tool === 'board' && <SaraBoardTutor uid={uid} />}
+        {tool === 'board' && <SaraBoardTutor uid={uid} unlockAll={unlockAll} tools={classTools} initialPersona={classPersona} />}
       </div>
     </div>
   );

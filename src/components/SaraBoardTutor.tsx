@@ -16,6 +16,11 @@ import { SaraTracksHub } from './SaraTracksHub';
 import { TUTOR_FILL_BLANK_TRACKS } from '../data/fillBlankTracks';
 const FillBlankPlayer = lazy(() => import('./SaraFillBlankPlayer').then(m => ({ default: m.FillBlankPlayer })));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
+import SaraVocabPlayer from './SaraVocabPlayer';
+import { VOCAB_LESSONS } from '../data/saraTracks/vocabulary';
+
+export interface SaraClassTool { id: string; icon: string; labelAr: string; labelEn: string; group: 'learn' | 'practice' | 'progress' | 'settings'; onClick: () => void; keepOpen?: boolean }
+const CLASS_GROUPS: [SaraClassTool['group'], string, string][] = [['learn', '📚 التعلّم والمناهج', '📚 Learn'], ['practice', '🗣️ التدريب والمحادثة', '🗣️ Practice & talk'], ['progress', '📈 تقدّمي', '📈 My progress'], ['settings', '⚙️ الإعدادات', '⚙️ Settings']];
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -65,9 +70,9 @@ const TeacherPhoto: React.FC<{ p: BoardPersona; size: number; ring?: string; cla
     className={`rounded-full object-cover shrink-0 ${className}`} style={{ width: size, height: size, boxShadow: `0 0 0 3px ${ring}` }} />;
 };
 
-export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; persona?: string; board?: BoardResult } }> = ({ uid, mock }) => {
+export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools?: SaraClassTool[]; initialPersona?: string; mock?: { step: Step; persona?: string; board?: BoardResult } }> = ({ uid, unlockAll, tools, initialPersona, mock }) => {
   const [step, setStep] = useState<Step>(mock?.step || 'pick');
-  const [persona, setPersona] = useState<BoardPersona>(personaById(mock?.persona || 'grammar'));
+  const [persona, setPersona] = useState<BoardPersona>(personaById(mock?.persona || initialPersona || 'grammar'));
   const [topic, setTopic] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -80,6 +85,8 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
   const voice = usePersonaVoice();
   const [track, setTrack] = useState<TutorTrack | null>(null);
   const [saraHub, setSaraHub] = useState(false);
+  const [vocabOpen, setVocabOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [fbOpen, setFbOpen] = useState(false);
   const [repeatOpen, setRepeatOpen] = useState(false); // «ردّد مع سارة» (pilot: Sara only)
   // Practise the student's last passed Sara lesson; null → the built-in sentences (level pick).
@@ -187,6 +194,46 @@ export const SaraBoardTutor: React.FC<{ uid?: string; mock?: { step: Step; perso
         <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L("مناهج سارة", "Sara's Curricula")}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L("القواعد · المحادثة · القراءة · الكتابة — على السبورة بصوت سارة", "Grammar · Conversation · Reading · Writing, on the board in Sara's voice")}</span></span>
       </button>
     )}
+    {persona.id === 'sara' && (
+      <button onClick={() => { voice.stop(); setVocabOpen(true); }} data-testid="sara-class-vocab-open"
+        className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
+        <span className="text-[20px]">🔤</span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L("مفردات سارة", "Sara's Vocabulary")}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L(`${VOCAB_LESSONS.length} درس · بطاقات مصورة وتمرين بالصور`, `${VOCAB_LESSONS.length} lessons · picture cards & picture quiz`)}</span></span>
+      </button>
+    )}
+    {persona.id === 'sara' && !!tools?.length && (
+      <button onClick={() => { voice.stop(); setToolsOpen(true); }} data-testid="sara-class-tools-open"
+        className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
+        <span className="text-[20px]">🧰</span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L("أنشطة سارة", "Sara's activities")}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L("الاستماع · النطق · المحادثة · الاختبارات · تقدّمك", "Listening · Pronunciation · Talk · Tests · Progress")}</span></span>
+      </button>
+    )}
+    {toolsOpen && tools && (
+      <div className="fixed inset-0 z-[215] bg-slate-950/60 flex items-stretch justify-center" data-testid="sara-class-tools" onClick={() => setToolsOpen(false)}>
+        <div className="w-full max-w-xl h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
+            <span className="text-lg">🧰</span><p className="flex-1 text-sm font-black">{L("أنشطة سارة", "Sara's activities")}</p>
+            <button onClick={() => setToolsOpen(false)} className="px-2 py-1 rounded-lg hover:bg-white/10 text-[13px] font-black" aria-label="close">✕</button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-3 content-start">
+            {CLASS_GROUPS.map(([g, ar, en]) => { const items = tools.filter(x => x.group === g); if (!items.length) return null; return (
+              <section key={g} className="rounded-2xl bg-white border-2 border-amber-200 p-2.5">
+                <h3 className="text-[13px] font-black text-[#002147] mb-2">{L(ar, en)}</h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {items.map(x => (
+                    <button key={x.id} data-testid={`sara-class-tool-${x.id}`} onClick={() => { voice.stop(); if (!x.keepOpen) setToolsOpen(false); x.onClick(); }}
+                      className="rounded-xl bg-[#fdfaf3] border border-amber-300 px-1 py-2 flex flex-col items-center gap-1 active:scale-95 transition-transform">
+                      <span className="w-10 h-10 rounded-full bg-[#002147] border-2 border-[#C49E3A] text-amber-300 flex items-center justify-center text-[17px]">{x.icon}</span>
+                      <span className="text-[11px] font-black text-[#002147] text-center leading-tight">{L(x.labelAr, x.labelEn)}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>); })}
+          </div>
+        </div>
+      </div>
+    )}
+    {vocabOpen && <SaraVocabPlayer isOpen uid={uid} unlockAll={unlockAll} onClose={() => { cancelAllSpeech(); setVocabOpen(false); }} />}
     {saraHub && <SaraTracksHub isOpen uid={uid} onClose={() => setSaraHub(false)} />}
     {personaTrack && (
       <button onClick={() => { voice.stop(); setTrack(personaTrack); }} data-testid="tutor-track-open"
