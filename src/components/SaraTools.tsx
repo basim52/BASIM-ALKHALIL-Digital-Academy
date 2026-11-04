@@ -10,6 +10,8 @@ import { READING_TRACK } from '../data/saraTracks/reading';
 import { WRITING_TRACK } from '../data/saraTracks/writing';
 import { readUnlocked, saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
+import { PictureHint, pictureForWord, ScenarioArt, MouthArt, mouthKindFor, MOUTH_TIP } from './visualCards/ActivityPictures';
+import { VisualCardArt } from './visualCards/VisualCardArt';
 import { db } from '../lib/firebase';
 import { savePlacementLevel } from '../lib/placement';
 import { buildRoadmap, LESSON_MIN, type Roadmap, readBasket, writeBasketLocal, basketAdd, basketRemove, smartBasket, buildBasketPlan, cleanBasket, type BasketData } from '../lib/saraPlan';
@@ -48,18 +50,25 @@ const getSR = (): any => (typeof window !== 'undefined' ? ((window as any).Speec
 const Btn: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { tone?: 'navy' | 'amber' | 'ghost' }> = ({ tone = 'navy', className = '', ...p }) => (
   <button {...p} className={`px-3 py-2 rounded-xl text-[13px] font-black disabled:opacity-40 ${tone === 'navy' ? 'bg-[#002147] text-white' : tone === 'amber' ? 'bg-amber-400 text-slate-950' : 'bg-white border border-amber-300 text-slate-800'} ${className}`} />
 );
-const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void }> = ({ q, picked, onPick }) => (
+const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void }> = ({ q, picked, onPick }) => {
+  const pics = q.options.map(o => pictureForWord(o));
+  const allPics = pics.every(Boolean);
+  return (
   <div className="grid gap-1.5">
     {q.options.map((o, i) => {
       const st = picked === null ? 'bg-white border-amber-300' : i === q.correctIndex ? 'bg-emerald-100 border-emerald-500' : i === picked ? 'bg-rose-100 border-rose-500' : 'bg-white border-slate-200 opacity-60';
-      return <button key={i} data-testid="tool-option" disabled={picked !== null} onClick={() => onPick(i)} className={`px-3 py-2 rounded-xl border text-[13px] font-bold text-start ${st}`}>{o}</button>;
+      return <button key={i} data-testid="tool-option" disabled={picked !== null} onClick={() => onPick(i)} className={`px-3 py-2 rounded-xl border text-[13px] font-bold text-start flex items-center gap-2 ${st}`}>{allPics && <span dir="ltr" className="w-10 h-9 shrink-0 rounded-md overflow-hidden bg-white"><VisualCardArt scene={pics[i]!} className="w-full h-full" /></span>}<span>{o}</span></button>;
     })}
   </div>
-);
+  );
+};
 const QHead: React.FC<{ q: SaraChoiceQuestion }> = ({ q }) => (
-  <div className="rounded-xl bg-white border border-amber-200 p-2.5">
+  <div className="rounded-xl bg-white border border-amber-200 p-2.5 flex gap-2 items-start">
+    {q.promptEn && <PictureHint text={q.promptEn} className="w-16 h-14" />}
+    <div className="flex-1 min-w-0">
     <p className="text-[13px] font-black text-slate-800"><BidiText text={q.promptAr} /></p>
     {q.promptEn && <p dir="ltr" className="text-[13px] font-bold text-[#002147] text-start mt-1">{q.promptEn}</p>}
+    </div>
   </div>
 );
 
@@ -268,6 +277,7 @@ const Worksheet: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unloc
         <ol className="grid gap-2 list-decimal ps-5">
           {items.map((q, k) => (
             <li key={k} className="text-[12px]">
+              {q.promptEn && <PictureHint text={q.promptEn} className="w-14 h-12 float-end ms-2" />}
               <p className="font-bold"><BidiText text={q.promptAr} /></p>
               {q.promptEn && <p dir="ltr" className="text-start">{q.promptEn}</p>}
               <p className="flex flex-wrap gap-x-3">{q.options.map((o, oi) => <span key={oi} className={key && oi === q.correctIndex ? 'font-black text-emerald-700 underline' : ''}>{'أبجد'[oi] || oi + 1}) {o}</span>)}</p>
@@ -638,6 +648,7 @@ const RolePlay: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlock
   return (
     <div className="flex-1 min-h-0 p-3 flex flex-col gap-2">
       <LessonPicker tracks={[CONVERSATION_TRACK]} uid={uid} unlockAll={unlockAll} value={id} onChange={v => { setId(v); setStep(0); setPicked(null); setStars(0); }} />
+      <ScenarioArt title={`${l.titleAr} ${l.titleEn || ''}`} className="w-full h-20 shrink-0" />
       <div className="rounded-xl bg-[#083344] text-teal-50 p-2.5 text-[12px]" dir="ltr">
         <p className="font-black text-amber-300 text-start">👩‍🏫 Sara</p>
         <p className="text-start">{lines[Math.min(step, lines.length - 1)]?.en}</p>
@@ -666,7 +677,7 @@ const RolePlay: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, unlock
 };
 
 /* ---------------- listen-and-repeat card (pronunciation + voice coach) ---------------- */
-const RepeatCard: React.FC<{ items: string[] }> = ({ items }) => {
+const RepeatCard: React.FC<{ items: string[]; mouth?: boolean }> = ({ items, mouth }) => {
   const [i, setI] = useState(0);
   const mic = useMic();
   const target = items[i] || '';
@@ -675,7 +686,12 @@ const RepeatCard: React.FC<{ items: string[] }> = ({ items }) => {
     <div className="grid gap-2">
       <div className="rounded-xl bg-white border border-amber-200 p-3 text-center">
         <p className="text-[11px] font-black text-slate-500">{i + 1} / {items.length}</p>
+        {mouth && target.includes('—') && <div dir="ltr" className="flex items-center justify-center gap-2 my-1">
+          {target.split('—').map((w, k) => <PictureHint key={k} word text={w.trim()} className="w-14 h-12" />)}
+          <MouthArt kind={mouthKindFor(target)} className="w-20 h-14" />
+        </div>}
         <p dir="ltr" data-testid="repeat-target" className="text-[18px] font-black text-[#002147]">{target}</p>
+        {mouth && target.includes('—') && <p className="text-[11px] font-bold text-slate-600">👄 {MOUTH_TIP[mouthKindFor(target)]}</p>}
       </div>
       <div className="flex gap-2 justify-center">
         <Btn tone="ghost" disabled={i === 0} onClick={() => { setI(i - 1); mic.reset(); }}>{L("السابق", "Previous")}</Btn>
@@ -720,7 +736,7 @@ const Pronunciation: React.FC<{ uid?: string; unlockAll?: boolean }> = ({ uid, u
       </select>
       <p className="text-[11px] text-slate-600">{L("استمع للمجموعة كاملة بصوت سارة، ثم كرّر كل كلمة.", "Listen to the whole set in Sara's voice, then repeat each word.")}</p>
       <SaraSetButton key={set} text={items.map(s => s.replace(/—/g, ',')).join('. ')} label={L("استمع للمجموعة", "Listen to the set")} />
-      <RepeatCard key={set} items={items} />
+      <RepeatCard key={set} items={items} mouth={!l?.content} />
     </div>
   );
 };

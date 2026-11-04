@@ -325,7 +325,7 @@ export const VisualCardArt: React.FC<{ scene: Scene; className?: string; label?:
       break;
   }
   return (
-    <svg viewBox="0 0 120 100" className={className} role="img" aria-label={label}>
+    <svg viewBox="0 0 120 100" direction="ltr" style={{ direction: 'ltr' }} className={className} role="img" aria-label={label}>
       <rect x="0" y="0" width="120" height="100" fill="#F7FAFF" />
       {body}
     </svg>
