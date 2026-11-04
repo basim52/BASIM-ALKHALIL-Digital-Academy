@@ -1,6 +1,7 @@
 import { L, useT } from '../lib/explainLang';
 import { getExplainLang } from '../lib/explainLang';
 import ExplainLangToggle from './ExplainLangToggle';
+import ActivityArt from './visualCards/ActivityArt';
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Volume2, Square, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
@@ -20,7 +21,14 @@ import SaraVocabPlayer from './SaraVocabPlayer';
 import { VOCAB_LESSONS } from '../data/saraTracks/vocabulary';
 
 export interface SaraClassTool { id: string; icon: string; labelAr: string; labelEn: string; group: 'learn' | 'practice' | 'progress' | 'settings'; onClick: () => void; keepOpen?: boolean }
-const CLASS_GROUPS: [SaraClassTool['group'], string, string][] = [['learn', '📚 التعلّم والمناهج', '📚 Learn'], ['practice', '🗣️ التدريب والمحادثة', '🗣️ Practice & talk'], ['progress', '📈 تقدّمي', '📈 My progress'], ['settings', '⚙️ الإعدادات', '⚙️ Settings']];
+const CLASS_PATH: [string, string, string, string[]][] = [
+  ['1', 'اعرف مستواك', 'Find your level', ['placement']],
+  ['2', 'اسمع وتعلّم', 'Listen & learn', ['curricula', 'listening', 'daily', 'worksheet', 'whiteboard']],
+  ['3', 'انطق صح', 'Say it right', ['pronunciation', 'phonetic', 'voicecoach']],
+  ['4', 'تكلّم', 'Speak', ['free', 'roleplay', 'live', 'call']],
+  ['5', 'تمرّن واختبر نفسك', 'Practise & test', ['grammar', 'speed', 'exam']],
+  ['6', 'شوف تقدّمك', 'See your progress', ['achievements', 'notebook', 'memory', 'parent', 'archive-list', 'archive-now']],
+];
 
 const OWNER = 'sara-board';
 type Step = 'pick' | 'board' | 'check' | 'done';
@@ -70,7 +78,7 @@ const TeacherPhoto: React.FC<{ p: BoardPersona; size: number; ring?: string; cla
     className={`rounded-full object-cover shrink-0 ${className}`} style={{ width: size, height: size, boxShadow: `0 0 0 3px ${ring}` }} />;
 };
 
-export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools?: SaraClassTool[]; initialPersona?: string; mock?: { step: Step; persona?: string; board?: BoardResult } }> = ({ uid, unlockAll, tools, initialPersona, mock }) => {
+export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools?: SaraClassTool[]; initialPersona?: string; initialToolsOpen?: boolean; mock?: { step: Step; persona?: string; board?: BoardResult } }> = ({ uid, unlockAll, tools, initialPersona, initialToolsOpen, mock }) => {
   const [step, setStep] = useState<Step>(mock?.step || 'pick');
   const [persona, setPersona] = useState<BoardPersona>(personaById(mock?.persona || initialPersona || 'grammar'));
   const [topic, setTopic] = useState('');
@@ -86,7 +94,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
   const [track, setTrack] = useState<TutorTrack | null>(null);
   const [saraHub, setSaraHub] = useState(false);
   const [vocabOpen, setVocabOpen] = useState(false);
-  const [toolsOpen, setToolsOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(!!initialToolsOpen);
   const [fbOpen, setFbOpen] = useState(false);
   const [repeatOpen, setRepeatOpen] = useState(false); // «ردّد مع سارة» (pilot: Sara only)
   // Practise the student's last passed Sara lesson; null → the built-in sentences (level pick).
@@ -216,19 +224,40 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
             <button onClick={() => setToolsOpen(false)} className="px-2 py-1 rounded-lg hover:bg-white/10 text-[13px] font-black" aria-label="close">✕</button>
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-3 content-start">
-            {CLASS_GROUPS.map(([g, ar, en]) => { const items = tools.filter(x => x.group === g); if (!items.length) return null; return (
-              <section key={g} className="rounded-2xl bg-white border-2 border-amber-200 p-2.5">
-                <h3 className="text-[13px] font-black text-[#002147] mb-2">{L(ar, en)}</h3>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {items.map(x => (
-                    <button key={x.id} data-testid={`sara-class-tool-${x.id}`} onClick={() => { voice.stop(); if (!x.keepOpen) setToolsOpen(false); x.onClick(); }}
-                      className="rounded-xl bg-[#fdfaf3] border border-amber-300 px-1 py-2 flex flex-col items-center gap-1 active:scale-95 transition-transform">
-                      <span className="w-10 h-10 rounded-full bg-[#002147] border-2 border-[#C49E3A] text-amber-300 flex items-center justify-center text-[17px]">{x.icon}</span>
-                      <span className="text-[11px] font-black text-[#002147] text-center leading-tight">{L(x.labelAr, x.labelEn)}</span>
-                    </button>
-                  ))}
-                </div>
-              </section>); })}
+            {(() => {
+              const tap = (x: SaraClassTool) => { voice.stop(); if (!x.keepOpen) setToolsOpen(false); x.onClick(); };
+              const used = new Set(CLASS_PATH.flatMap(p => p[3]));
+              const steps = CLASS_PATH.map(([n, ar, en, ids]) => [n, ar, en, ids.map(id => tools.find(t => t.id === id)).filter(Boolean) as SaraClassTool[]] as const);
+              const extra = tools.filter(t => !used.has(t.id) && t.group !== 'settings');
+              const settings = tools.filter(t => !used.has(t.id) && t.group === 'settings');
+              return <>
+                <p className="text-[12px] font-bold text-slate-600 text-center">{L('امشِ مع بندق وسلمى ويوسف خطوة خطوة 👣', 'Walk the path step by step 👣')}</p>
+                {steps.map(([n, ar, en, items], si) => !items.length ? null : (
+                  <section key={n} className="relative ps-10" data-testid={`sara-class-step-${n}`}>
+                    {si < steps.length - 1 && <span className="absolute start-[15px] top-8 bottom-[-14px] w-1 rounded bg-amber-300" />}
+                    <span className="absolute start-0 top-0 w-8 h-8 rounded-full bg-[#002147] border-2 border-[#C49E3A] text-amber-300 font-black text-sm flex items-center justify-center">{n}</span>
+                    <h3 className="text-[14px] font-black text-[#002147] mb-1.5 pt-1">{L(ar, en)}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {items.map(x => (
+                        <button key={x.id} data-testid={`sara-class-tool-${x.id}`} onClick={() => tap(x)}
+                          className="rounded-2xl bg-white border-2 border-amber-200 overflow-hidden flex flex-col active:scale-95 transition-transform text-center">
+                          <ActivityArt id={x.id} className="w-full aspect-[4/3] block" />
+                          <span className="px-1 py-1.5 text-[12px] font-black text-[#002147] leading-tight">{L(x.labelAr, x.labelEn)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </section>))}
+                {extra.length > 0 && <div className="grid grid-cols-2 gap-2">{extra.map(x => (
+                  <button key={x.id} data-testid={`sara-class-tool-${x.id}`} onClick={() => tap(x)} className="rounded-2xl bg-white border-2 border-amber-200 overflow-hidden flex flex-col">
+                    <ActivityArt id={x.id} className="w-full aspect-[4/3] block" /><span className="py-1.5 text-[12px] font-black text-[#002147]">{L(x.labelAr, x.labelEn)}</span></button>))}</div>}
+                {settings.length > 0 && <section className="rounded-2xl bg-white border border-slate-200 p-2">
+                  <h3 className="text-[12px] font-black text-slate-500 mb-1.5">{L('⚙️ الإعدادات', '⚙️ Settings')}</h3>
+                  <div className="grid grid-cols-4 gap-1.5">{settings.map(x => (
+                    <button key={x.id} data-testid={`sara-class-tool-${x.id}`} onClick={() => tap(x)} className="rounded-xl bg-[#fdfaf3] border border-amber-200 overflow-hidden flex flex-col">
+                      <ActivityArt id={x.id} className="w-full aspect-[4/3] block" /><span className="py-1 text-[10px] font-black text-[#002147] leading-tight">{L(x.labelAr, x.labelEn)}</span></button>))}</div>
+                </section>}
+              </>;
+            })()}
           </div>
         </div>
       </div>

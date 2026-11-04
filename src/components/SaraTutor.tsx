@@ -504,6 +504,9 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const [showNewChatConfirm, setShowNewChatConfirm] = useState<boolean>(false);
   const [showMobileToolsDrawer, setShowMobileToolsDrawer] = useState<boolean>(false);
   const [saraClassPersona, setSaraClassPersona] = useState<string | undefined>(undefined);
+  // When a student opens an activity from Sara's class, closing it brings them back to the class (activities sheet open).
+  const classReturnRef = useRef(false);
+  const [saraClassToolsOpen, setSaraClassToolsOpen] = useState(false);
   const [mobileTab, setMobileTab] = useState<'chat' | 'board' | 'curriculum' | 'scenarios' | 'lab'>('chat');
   // 💬 The chat lives on its own full-screen view. Browser/phone back closes it (one history entry while open).
   const [chatViewOpen, setChatViewOpen] = useState<boolean>(false);
@@ -3110,7 +3113,8 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   };
 
   const saraClassTools: SaraClassTool[] = (() => {
-    const go = (fn: () => void) => () => { setSaraTool(null); fn(); };
+    const stay = (fn: () => void) => () => { classReturnRef.current = false; setSaraTool(null); fn(); };
+    const go = (fn: () => void) => () => { classReturnRef.current = true; setSaraTool(null); fn(); };
     return [
       { id: 'curricula', icon: '📚', labelAr: 'المناهج', labelEn: 'Curricula', group: 'learn', onClick: go(() => handleOpenCurriculum('all')) },
       { id: 'listening', icon: '🎧', labelAr: 'الاستماع', labelEn: 'Listening', group: 'learn', onClick: go(() => handleOpenCurriculum('listening')) },
@@ -3121,13 +3125,13 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       { id: 'worksheet', icon: '📄', labelAr: 'ورقة عمل', labelEn: 'Worksheet', group: 'learn', onClick: go(() => setIsWorksheetModalOpen(true)) },
       { id: 'whiteboard', icon: '✨', labelAr: 'السبورة الذكية', labelEn: 'Whiteboard', group: 'learn', onClick: go(() => { if (!isWhiteboardOpen) openWhiteboardModal(); }) },
       { id: 'free', icon: '💬', labelAr: 'محاورة حرة', labelEn: 'Free talk', group: 'practice', onClick: go(() => setIsFreeChatOpen(true)) },
-      { id: 'live', icon: isLiveMode ? '🔴' : '🎙️', labelAr: isLiveMode ? 'إيقاف اللايف' : 'محادثة لايف', labelEn: isLiveMode ? 'Stop live' : 'Live chat', group: 'practice', onClick: go(toggleLiveVoiceMode) },
+      { id: 'live', icon: isLiveMode ? '🔴' : '🎙️', labelAr: isLiveMode ? 'إيقاف اللايف' : 'محادثة لايف', labelEn: isLiveMode ? 'Stop live' : 'Live chat', group: 'practice', onClick: stay(toggleLiveVoiceMode) },
       { id: 'call', icon: '📞', labelAr: 'اتصال بسارة', labelEn: 'Call Sara', group: 'practice', onClick: go(() => setIsPhoneCallModalOpen(true)) },
       { id: 'roleplay', icon: '🎮', labelAr: 'لعب الأدوار', labelEn: 'Role-play', group: 'practice', onClick: go(() => setIsRolePlayModalOpen(true)) },
       { id: 'speed', icon: '⚡', labelAr: 'تحدي السرعة', labelEn: 'Speed challenge', group: 'practice', onClick: go(() => setIsSpeedDrillModalOpen(true)) },
       { id: 'phonetic', icon: '🔬', labelAr: 'مختبر النطق', labelEn: 'Pronunciation lab', group: 'practice', onClick: go(() => { setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Al-Khalil Digital Academy'); setIsPhoneticModalOpen(true); }) },
       { id: 'voicecoach', icon: '🎤', labelAr: 'مدرب الصوت', labelEn: 'Voice coach', group: 'practice', onClick: go(() => setIsVoiceCoachModalOpen(true)) },
-      { id: 'grammar', icon: '✍️', labelAr: 'تدقيق نحوي', labelEn: 'Grammar check', group: 'practice', onClick: () => setSaraTool('grammar') },
+      { id: 'grammar', icon: '✍️', labelAr: 'تدقيق نحوي', labelEn: 'Grammar check', group: 'practice', onClick: () => { classReturnRef.current = true; setSaraTool('grammar'); } },
       { id: 'memory', icon: '🧠', labelAr: 'ذاكرة سارة', labelEn: 'Memory', group: 'progress', onClick: go(() => setIsAdaptiveMemoryModalOpen(true)) },
       { id: 'achievements', icon: '🏆', labelAr: `الإنجازات · 🔥${streak.current}`, labelEn: `Achievements · 🔥${streak.current}`, group: 'progress', onClick: go(() => setIsAchievementsModalOpen(true)) },
       { id: 'notebook', icon: '📓', labelAr: 'دفتر الأخطاء', labelEn: 'Mistakes notebook', group: 'progress', onClick: go(() => setIsNotebookModalOpen(true)) },
@@ -3137,9 +3141,21 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       { id: 'sound', icon: voiceEnabled ? '🔊' : '🔇', labelAr: voiceEnabled ? 'الصوت مفعّل' : 'الصوت مكتوم', labelEn: voiceEnabled ? 'Sound on' : 'Muted', group: 'settings', keepOpen: true, onClick: () => { if (isSpeaking) cancelAllSpeech(); setVoiceEnabled(!voiceEnabled); } },
       { id: 'rate', icon: saraSpeechRate === 0.8 ? '🐢' : saraSpeechRate === 1.2 ? '🚀' : '⚡', labelAr: `سرعة الصوت ${saraSpeechRate}x`, labelEn: `Voice speed ${saraSpeechRate}x`, group: 'settings', keepOpen: true, onClick: () => setSaraSpeechRate(saraSpeechRate === 1.0 ? 0.8 : saraSpeechRate === 0.8 ? 1.2 : 1.0) },
       { id: 'lang', icon: activeLang === 'ar' ? '🇸🇦' : '🇬🇧', labelAr: 'اللغة', labelEn: 'Language', group: 'settings', keepOpen: true, onClick: () => handleToggleLanguage() },
-      { id: 'sara3d', icon: '👩‍🏫', labelAr: isSara3DOpen ? 'إخفاء سارة 3D' : 'سارة 3D', labelEn: isSara3DOpen ? 'Hide 3D Sara' : 'Sara 3D', group: 'settings', onClick: go(() => setIsSara3DOpen(!isSara3DOpen)) },
+      { id: 'sara3d', icon: '👩‍🏫', labelAr: isSara3DOpen ? 'إخفاء سارة 3D' : 'سارة 3D', labelEn: isSara3DOpen ? 'Hide 3D Sara' : 'Sara 3D', group: 'settings', onClick: stay(() => setIsSara3DOpen(!isSara3DOpen)) },
     ];
   })();
+  const classActivityOpen = isExamOpen || isWorksheetModalOpen || isWhiteboardOpen || isFreeChatOpen || isPhoneCallModalOpen || isRolePlayModalOpen || isSpeedDrillModalOpen
+    || isPhoneticModalOpen || isVoiceCoachModalOpen || isAdaptiveMemoryModalOpen || isAchievementsModalOpen || isNotebookModalOpen || isParentInsightsModalOpen
+    || isArchiveModalOpen || showArchiveConfirm || isListeningOpen || isPronOpen || isDailyOpen || isTrackOpen || isCurriculumModalOpen || (saraTool !== null && saraTool !== 'board');
+  const classActivityWasOpen = useRef(false);
+  useEffect(() => {
+    if (classActivityOpen) { classActivityWasOpen.current = true; return; }
+    if (classActivityWasOpen.current && classReturnRef.current && saraTool === null) {
+      classReturnRef.current = false; setSaraClassPersona('sara'); setSaraClassToolsOpen(true); setSaraTool('board');
+    }
+    classActivityWasOpen.current = false;
+  }, [classActivityOpen, saraTool]);
+
 
   return (
     <div className={`min-h-screen bg-[#F8FAFC] flex flex-col ${isRtl ? 'font-arabic' : 'font-sans'}`} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -7279,7 +7295,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         )}
       </AnimatePresence>
 
-      <SaraTools tool={saraTool} onClose={() => { cancelAllSpeech(); setSaraTool(null); setSaraClassPersona(undefined); }} uid={profile.uid} classTools={saraClassTools} classPersona={saraClassPersona}
+      <SaraTools tool={saraTool} onClose={() => { cancelAllSpeech(); if (saraTool === 'board') classReturnRef.current = false; setSaraTool(null); setSaraClassPersona(undefined); setSaraClassToolsOpen(false); }} uid={profile.uid} classTools={saraClassTools} classPersona={saraClassPersona} classToolsOpen={saraClassToolsOpen}
         onOpenTrack={id => { const m: Record<string, string> = { foundations: 'grammar', advanced_v2: 'grammar', conversation_v2: 'conversation', reading_v2: 'reading', writing_v2: 'writing', listening: 'listening', pronunciation: 'pronunciation', vocabulary: 'vocabulary', daily: 'daily' };
           if (id === 'exam-prep') setIsExamOpen(true); else handleOpenCurriculum(m[id] || 'all'); }}
         unlockAll={MASTER_ADMINS.includes(String((profile as any).email || auth.currentUser?.email || '').trim().toLowerCase()) || (profile as any).role === UserRole.PARENT || (profile as any).role === UserRole.ADMIN} />
