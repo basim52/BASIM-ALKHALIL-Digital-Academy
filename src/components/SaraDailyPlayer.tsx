@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import MixedText from './MixedText';
 import { ScenarioArt } from './visualCards/ActivityPictures';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
@@ -14,6 +15,11 @@ import SaraLessonCall, { lessonCallPreset, levelToCefr } from './SaraLessonCall'
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
 
+/** Pilot: per-phrase illustrations (by English title). Display only. */
+const PHRASE_PICS: Record<string, string[]> = {
+  'At the Airport: Check-in': ['checkin', 'window-seat', 'bags', 'boarding-pass'].map(n => `/visuals/daily/airport/${n}.webp`),
+};
+
 function shuffle<T>(a: T[], seed: number): T[] {
   const r = [...a]; let s = seed * 9301 + 49297;
   for (let i = r.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor((s / 233280) * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
@@ -23,6 +29,8 @@ type Step = 'learn' | 'dialogue' | 'practice' | 'role' | 'done';
 
 const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () => void; onBoard?: () => void; uid?: string }> = ({ l, onBack, onPassed, onBoard, uid }) => {
   const [step, setStep] = useState<Step>('learn');
+  const pics = PHRASE_PICS[l.titleEn];
+  const [zoom, setZoom] = useState<string | null>(null);
   const [audio, setAudio] = useState<{ t: string; s: 'loading' | 'failed' } | null>(null);
   const [paused, setPaused] = useState(false);
   const say = (t: string) => {
@@ -68,7 +76,8 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
   const go = (s: Step) => { saraStopNarrator(); setAudio(null); setStep(s); };
   const stepNo = { learn: 1, dialogue: 2, practice: 3, role: 4, done: 4 }[step];
   return (
-    <div className="flex-1 min-h-0 flex flex-col p-2.5 gap-1.5 overflow-hidden" data-testid="daily-lesson">
+    <div className={`flex-1 min-h-0 flex flex-col p-2.5 gap-1.5 ${pics && step === 'learn' ? 'overflow-y-auto' : 'overflow-hidden'}`} data-testid="daily-lesson">
+      {zoom && createPortal(<button onClick={() => setZoom(null)} className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4" aria-label="إغلاق" data-testid="phrase-pic-zoom"><img src={zoom} alt="" className="max-w-full max-h-full rounded-2xl shadow-2xl" /></button>, document.body)}
       <div className="flex items-center gap-2">
         <button onClick={onBack} className="p-1.5 rounded-lg bg-[#002147] text-white" aria-label="back"><ArrowRight size={16} /></button>
         <p className="flex-1 text-[14px] font-black text-[#002147] truncate">{((l.order - 1) % 30) + 1}. {l.icon} {l.titleAr}</p>
@@ -76,11 +85,21 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
         <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{stepNo}/4</span>
       </div>
       {step === 'learn' && <>
-        <ScenarioArt title={`${l.titleAr} ${l.titleEn}`} icon={l.icon} className="w-full h-16 shrink-0" />
+        {!pics && <ScenarioArt title={`${l.titleAr} ${l.titleEn}`} icon={l.icon} className="w-full h-16 shrink-0" />}
         {controls(learnText)}
         <p className="text-[12.5px] leading-snug font-bold text-slate-700 bg-white rounded-xl border-2 border-amber-300 p-2"><MixedText text={l.introAr} /></p>
-        <div className="grid gap-1.5">
-          {l.phrases.map((p, i) => (
+        <div className={pics ? 'grid grid-cols-2 gap-1.5' : 'grid gap-1.5'}>
+          {l.phrases.map((p, i) => pics?.[i] ? (
+            <div key={i} className="rounded-xl bg-[#002147] overflow-hidden flex flex-col" data-testid="phrase-pic-card">
+              <button onClick={() => setZoom(pics[i])} className="block w-full aspect-square bg-slate-200" aria-label={`صورة: ${p.ar}`}>
+                <img src={pics[i]} alt={p.ar} loading="lazy" className="w-full h-full object-cover" />
+              </button>
+              <button onClick={() => say(p.en)} className="text-start px-2 py-1.5 flex items-start gap-1.5 flex-1">
+                <Volume2 size={13} className="text-[#C49E3A] shrink-0 mt-0.5" />
+                <span className="flex-1 min-w-0"><span dir="ltr" className="block text-[12.5px] leading-tight font-black text-white text-left">{p.en}</span><span className="block text-[11px] leading-tight font-bold text-amber-300 mt-0.5">{p.ar}</span></span>
+              </button>
+            </div>
+          ) : (
             <button key={i} onClick={() => say(p.en)} className="text-start rounded-xl bg-[#002147] px-2.5 py-1.5 flex items-center gap-2">
               <Volume2 size={14} className="text-[#C49E3A] shrink-0" />
               <span className="flex-1 min-w-0"><span dir="ltr" className="block text-[13.5px] font-black text-white text-left">{p.en}</span><span className="block text-[12px] font-bold text-amber-300">{p.ar}</span></span>
