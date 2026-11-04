@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BadgeArt } from './visualCards/ActivityPictures';
 import {
   X,
   Trophy,
@@ -368,12 +369,8 @@ export const SaraAchievementsModal: React.FC<SaraAchievementsModalProps> = ({
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-md ${
-                        badge.isUnlocked
-                          ? 'bg-amber-400/20 border border-amber-400/40'
-                          : 'bg-white/5 border border-white/10 grayscale'
-                      }`}>
-                        {badge.isUnlocked ? badge.icon : '🔒'}
+                      <div className="w-14 h-14 shrink-0">
+                        <BadgeArt icon={badge.icon} unlocked={badge.isUnlocked} className="w-14 h-14" />
                       </div>
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-1.5">

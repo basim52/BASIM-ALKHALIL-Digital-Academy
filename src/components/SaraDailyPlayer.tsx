@@ -1,4 +1,5 @@
 import MixedText from './MixedText';
+import { ScenarioArt } from './visualCards/ActivityPictures';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
 import SaraLessonBoard from './SaraLessonBoard';
@@ -75,6 +76,7 @@ const Lesson: React.FC<{ l: SaraDailyLesson; onBack: () => void; onPassed: () =>
         <span className="text-[10px] font-black px-1.5 rounded bg-[#002147] text-amber-300">{stepNo}/4</span>
       </div>
       {step === 'learn' && <>
+        <ScenarioArt title={`${l.titleAr} ${l.titleEn}`} icon={l.icon} className="w-full h-16 shrink-0" />
         {controls(learnText)}
         <p className="text-[12.5px] leading-snug font-bold text-slate-700 bg-white rounded-xl border-2 border-amber-300 p-2"><MixedText text={l.introAr} /></p>
         <div className="grid gap-1.5">

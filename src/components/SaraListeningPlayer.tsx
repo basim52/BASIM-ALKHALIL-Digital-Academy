@@ -1,4 +1,6 @@
 import { SaraNewLevelTest } from './SaraNewLevelTest';
+import { ScenarioArt, pictureForWord } from './visualCards/ActivityPictures';
+import { VisualCardArt } from './visualCards/VisualCardArt';
 import SaraLevelledList from './SaraLevelledList';
 import SaraLessonBoard from './SaraLessonBoard';
 import { levelTitleAr, type NewLevelId } from '../lib/saraNewTrackTests';
@@ -57,16 +59,17 @@ const Lesson: React.FC<{ l: SaraListeningLesson; onBack: () => void; onPassed: (
       </div>
       {step === 'q' && <>
         <p className="text-[12px] text-slate-600 font-bold">اسمع الحوار من سارة، وبعدين جاوب. تقدر تعيده كل ما احتجت.</p>
+        <ScenarioArt title={`${l.titleAr} ${l.titleEn}`} className="w-full h-14 shrink-0" />
         <div className="flex">{audioBtn(l.audioText, 'اسمع الحوار')}</div>
         <div className="flex-1 min-h-0 grid gap-2 content-start">
           {l.questions.map((q, qi) => (
             <div key={qi} className="rounded-xl bg-white border border-amber-200 p-2">
               <p className="text-[12px] font-black text-slate-800">{q.questionAr} <span dir="ltr" className="text-[#002147]">{q.questionEn}</span></p>
               <div className="flex flex-wrap gap-1 mt-1">
-                {q.options.map((o, oi) => {
+                {(() => { const pics = q.options.map(o => pictureForWord(o)); const allPics = pics.every(Boolean); return q.options.map((o, oi) => {
                   const p = picked[qi]; const st = p === null ? 'bg-slate-50 border-slate-200' : oi === q.correctIndex ? 'bg-emerald-100 border-emerald-500' : p === oi ? 'bg-rose-100 border-rose-400' : 'opacity-60 border-slate-200';
-                  return <button key={oi} dir="ltr" disabled={p !== null} onClick={() => setPicked(v => v.map((x, k) => (k === qi ? oi : x)))} className={`px-2 py-1 rounded-lg border text-[12px] font-bold ${st}`}>{o}</button>;
-                })}
+                  return <button key={oi} dir="ltr" disabled={p !== null} onClick={() => setPicked(v => v.map((x, k) => (k === qi ? oi : x)))} className={`px-2 py-1 rounded-lg border text-[12px] font-bold inline-flex items-center gap-1 ${st}`}>{allPics && <span className="w-8 h-7 rounded overflow-hidden bg-white"><VisualCardArt scene={pics[oi]!} className="w-full h-full" /></span>}{o}</button>;
+                }); })()}
               </div>
             </div>
           ))}

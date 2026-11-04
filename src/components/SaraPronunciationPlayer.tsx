@@ -1,4 +1,5 @@
 import { BidiText } from './BidiText';
+import { MouthArt, mouthKindFor, MOUTH_TIP } from './visualCards/ActivityPictures';
 import MixedText from './MixedText';
 import { SaraNewLevelTest } from './SaraNewLevelTest';
 import SaraLevelledList from './SaraLevelledList';
@@ -63,7 +64,10 @@ const Lesson: React.FC<{ l: SaraPronLesson; onBack: () => void; onPassed: () => 
         </button>
         <button onClick={() => { if (paused) { resumeNarrator(); setPaused(false); } else { pauseNarrator(); setPaused(true); } }} className="px-3 py-1.5 rounded-xl bg-[#002147] text-amber-300 text-[12px] font-black">{paused ? '▶️ كمّلي' : '⏸️ إيقاف مؤقت'}</button>
       </div>
-      <p className="text-[12.5px] leading-snug font-bold text-slate-700 bg-white rounded-xl border-2 border-amber-300 p-2"><MixedText text={l.ideaAr} /></p>
+      <div className="flex gap-1.5 items-stretch">
+        <div className="shrink-0 flex flex-col items-center bg-white rounded-xl border-2 border-amber-300 p-1" data-testid="pron-mouth"><MouthArt kind={mouthKindFor(l.titleEn)} className="w-16 h-12" /><span className="text-[9px] font-black text-slate-500 max-w-[4.5rem] text-center leading-tight">{MOUTH_TIP[mouthKindFor(l.titleEn)]}</span></div>
+        <p className="flex-1 text-[12.5px] leading-snug font-bold text-slate-700 bg-white rounded-xl border-2 border-amber-300 p-2"><MixedText text={l.ideaAr} /></p>
+      </div>
       <div className="flex flex-wrap gap-1.5 items-center">
         {l.pairs ? l.pairs.map((p, i) => <span key={i} className="flex items-center gap-1">{chip(p[0], `a${i}`)}<span className="text-slate-400 text-[11px]">/</span>{chip(p[1], `b${i}`)}</span>)
           : l.words!.map((w, i) => chip(w, `w${i}`))}
