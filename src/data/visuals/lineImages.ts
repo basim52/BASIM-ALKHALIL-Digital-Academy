@@ -372,5 +372,21 @@ export const LINE_IMAGES: Record<string, Record<string, string>> = {
   "p1": "/visuals/daily/daily-b-08/p1.webp",
   "p2": "/visuals/daily/daily-b-08/p2.webp",
   "p3": "/visuals/daily/daily-b-08/p3.webp"
+ },
+ "daily-b-09": {
+  "d1": "/visuals/daily/daily-b-09/p0.webp",
+  "d3": "/visuals/daily/daily-b-09/p1.webp",
+  "p0": "/visuals/daily/daily-b-09/p0.webp",
+  "p1": "/visuals/daily/daily-b-09/p1.webp",
+  "p2": "/visuals/daily/daily-b-09/p2.webp",
+  "p3": "/visuals/daily/daily-b-09/p3.webp"
+ },
+ "daily-b-10": {
+  "d1": "/visuals/daily/daily-b-10/p0.webp",
+  "d3": "/visuals/daily/daily-b-10/p1.webp",
+  "p0": "/visuals/daily/daily-b-10/p0.webp",
+  "p1": "/visuals/daily/daily-b-10/p1.webp",
+  "p2": "/visuals/daily/daily-b-10/p2.webp",
+  "p3": "/visuals/daily/daily-b-10/p3.webp"
  }
 };
