@@ -57,7 +57,7 @@ const Choices: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: 
   <div className="grid gap-1.5">
     {q.options.map((o, i) => {
       const st = picked === null ? 'bg-white border-amber-300' : i === q.correctIndex ? 'bg-emerald-100 border-emerald-500' : i === picked ? 'bg-rose-100 border-rose-500' : 'bg-white border-slate-200 opacity-60';
-      return <button key={i} data-testid="tool-option" disabled={picked !== null} onClick={() => onPick(i)} className={`px-3 py-2 rounded-xl border text-[13px] font-bold text-start flex items-center gap-2 ${st}`}>{allPics && <span dir="ltr" className="w-10 h-9 shrink-0 rounded-md overflow-hidden bg-white"><VisualCardArt scene={pics[i]!} className="w-full h-full" /></span>}<span>{o}</span></button>;
+      return <button key={i} data-testid="tool-option" disabled={picked !== null} onClick={() => onPick(i)} className={`px-3 py-2 rounded-xl border text-[13px] font-bold text-start flex items-center gap-2 ${st}`}>{allPics && <span dir="ltr" className="w-10 h-9 shrink-0 rounded-md overflow-hidden bg-white"><VisualCardArt scene={pics[i]!} className="w-full h-full" /></span>}<span dir="auto">{o}</span></button>;
     })}
   </div>
   );
