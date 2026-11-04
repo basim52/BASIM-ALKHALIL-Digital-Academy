@@ -97,7 +97,16 @@ export type Scene =
   | { k: 'body'; part: BodyPart }
   | { k: 'mood'; mood: Mood; bubble?: string }
   | { k: 'family'; acc?: Accessory; small?: boolean; group?: boolean; parent?: Accessory }
-  | { k: 'weather'; w: 'sun' | 'rain' | 'wind' | 'cloud' | 'storm' | 'snow' | 'warm' };
+  | { k: 'weather'; w: 'sun' | 'rain' | 'wind' | 'cloud' | 'storm' | 'snow' | 'warm' }
+  | { k: 'pron'; p: Pron; item?: string }
+  | { k: 'demo'; d: Demo; e: string }
+  | { k: 'time'; t: TimeK; e?: string }
+  | { k: 'clock'; h: number; m: number }
+  | { k: 'cmp'; n: 1 | 2 | 3; e: string }
+  | { k: 'freq'; n: number; e: string }
+  | { k: 'kid'; who: KidId | 'bunduq'; e: string; mood?: Mood }
+  | { k: 'yesno'; e: string; ok: boolean; who?: KidId | 'bunduq' }
+  | { k: 'many'; e: string; n: number };
 
 const Ground = () => <rect x="0" y="86" width="120" height="14" fill="#EEF2F7" />;
 const Cloud = ({ x, y, c = '#fff' }: { x: number; y: number; c?: string }) => <g fill={c} stroke="#C9D2DE" strokeWidth=".8"><ellipse cx={x} cy={y} rx="14" ry="8" /><ellipse cx={x - 9} cy={y + 3} rx="9" ry="6" /><ellipse cx={x + 10} cy={y + 3} rx="10" ry="6" /></g>;
@@ -150,11 +159,155 @@ function weather(w: Extract<Scene, { k: 'weather' }>['w']) {
   }
 }
 
+
+/**
+ * The academy's kid characters (own designs, flat style matching «بندق»):
+ * «سلمى» — a girl in a teal hijab; «يوسف» — a boy with short dark hair and a gold-striped navy shirt.
+ * (x,y) = body centre; feet reach y+26 at scale 1.
+ */
+export type KidId = 'salma' | 'yousef';
+export const Kid: React.FC<{ x: number; y: number; s?: number; who: KidId; mood?: Mood; arms?: 'down' | 'up' | 'front' | 'point'; flip?: boolean }> = ({ x, y, s = 1, who, mood = 'happy', arms = 'down', flip }) => {
+  const SKIN = '#F2C9A0', SKIN_D = '#D9A57A';
+  const shirt = who === 'salma' ? '#7C5CC4' : NAVY;
+  const armL = arms === 'up' ? 'M-9 -2 Q-16 -12 -15 -22' : 'M-9 -2 Q-14 6 -13 14';
+  const armR = arms === 'up' ? 'M9 -2 Q16 -12 15 -22' : arms === 'point' ? 'M9 -2 Q18 -4 26 -6' : arms === 'front' ? 'M9 -2 Q8 8 2 10' : 'M9 -2 Q14 6 13 14';
+  const hR = arms === 'up' ? [15, -22] : arms === 'point' ? [26, -6] : arms === 'front' ? [2, 10] : [13, 14];
+  const hL = arms === 'up' ? [-15, -22] : [-13, 14];
+  const sad = mood === 'sad', closed = mood === 'sleep' || mood === 'tired';
+  return (
+    <g transform={`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`}>
+      <ellipse cx="0" cy="27" rx="13" ry="2.4" fill="#000" opacity=".12" />
+      <rect x="-7" y="12" width="5.5" height="14" rx="2.5" fill={who === 'salma' ? '#334155' : '#475569'} />
+      <rect x="1.5" y="12" width="5.5" height="14" rx="2.5" fill={who === 'salma' ? '#334155' : '#475569'} />
+      <path d={armL} stroke={shirt} strokeWidth="5" fill="none" strokeLinecap="round" />
+      <path d={armR} stroke={shirt} strokeWidth="5" fill="none" strokeLinecap="round" />
+      {who === 'salma'
+        ? <path d="M-10 -6 Q-12 14 -12 16 H12 Q12 14 10 -6 Q0 -10 -10 -6 Z" fill={shirt} />
+        : <><rect x="-10" y="-7" width="20" height="21" rx="5" fill={shirt} /><rect x="-10" y="2" width="20" height="2.4" fill={GOLD} /></>}
+      <circle cx={hL[0]} cy={hL[1]} r="2.8" fill={SKIN} />
+      <circle cx={hR[0]} cy={hR[1]} r="2.8" fill={SKIN} />
+      {who === 'salma' && <path d="M-13 -14 Q-14 -34 0 -35 Q14 -34 13 -14 Q12 -4 0 -4 Q-12 -4 -13 -14 Z" fill="#0F9D8F" />}
+      <circle cx="0" cy="-19" r="10" fill={SKIN} stroke={SKIN_D} strokeWidth=".8" />
+      {who === 'salma' && <path d="M-11 -20 Q-10 -31 0 -31 Q10 -31 11 -20 Q8 -27 0 -27 Q-8 -27 -11 -20 Z" fill="#0B7F74" />}
+      {who === 'yousef' && <path d="M-10.5 -20 Q-11 -31 0 -31 Q11 -31 10.5 -20 Q9 -26 4 -26 Q0 -23 -4 -26 Q-9 -26 -10.5 -20 Z" fill="#2B1B10" />}
+      {closed ? <><path d="M-6 -19 Q-4 -17 -2 -19" stroke={NAVY} strokeWidth="1.3" fill="none" /><path d="M2 -19 Q4 -17 6 -19" stroke={NAVY} strokeWidth="1.3" fill="none" /></>
+        : <><circle cx="-4" cy="-19" r="1.7" fill={NAVY} /><circle cx="4" cy="-19" r="1.7" fill={NAVY} /><circle cx="-3.5" cy="-19.7" r=".5" fill="#fff" /><circle cx="4.5" cy="-19.7" r=".5" fill="#fff" /></>}
+      <circle cx="-7" cy="-15" r="1.8" fill="#FF8FA3" opacity=".5" /><circle cx="7" cy="-15" r="1.8" fill="#FF8FA3" opacity=".5" />
+      {sad ? <path d="M-3 -12 Q0 -14.5 3 -12" stroke={NAVY} strokeWidth="1.3" fill="none" strokeLinecap="round" />
+        : mood === 'excited' ? <path d="M-3.5 -14 Q0 -9 3.5 -14 Z" fill={NAVY} />
+        : <path d="M-3.5 -14 Q0 -11 3.5 -14" stroke={NAVY} strokeWidth="1.3" fill="none" strokeLinecap="round" />}
+    </g>
+  );
+};
+
+/** Dashed gold ring used to say «this one». */
+const Ring = ({ x, y, rx = 16, ry = 22 }: { x: number; y: number; rx?: number; ry?: number }) => <ellipse cx={x} cy={y} rx={rx} ry={ry} fill="none" stroke="#E11D48" strokeWidth="1.8" strokeDasharray="4 2.5" />;
+
+export type Pron = 'I' | 'you' | 'he' | 'she' | 'it' | 'we' | 'they';
+function pron(p: Pron, item?: string) {
+  const it = item ? <text x={0} y={0} fontSize="11" textAnchor="middle">{item}</text> : null;
+  const tag = (x: number, y: number) => item ? <g transform={`translate(${x} ${y})`}>{it}</g> : null;
+  switch (p) {
+    case 'I': return <><Ground /><Mascot x={60} y={58} s={1.25} mood="proud" arms="front" /><Ring x={60} y={56} rx={26} ry={32} />{tag(84, 70)}</>;
+    case 'you': return <><Ground /><Mascot x={26} y={62} s={0.9} mood="happy" arms="up" /><Kid x={86} y={60} who="salma" flip /><Ring x={86} y={52} rx={15} ry={34} /><path d="M42 44 H64" stroke="#E11D48" strokeWidth="2" /><path d="M68 44 l-6 -3.5 v7 Z" fill="#E11D48" />{tag(100, 74)}</>;
+    case 'he': return <><Ground /><Kid x={34} y={60} who="salma" mood="calm" arms="point" /><Kid x={88} y={60} who="yousef" /><Ring x={88} y={52} rx={15} ry={34} />{tag(102, 74)}</>;
+    case 'she': return <><Ground /><Kid x={34} y={60} who="yousef" mood="calm" arms="point" /><Kid x={88} y={60} who="salma" /><Ring x={88} y={52} rx={15} ry={34} />{tag(102, 74)}</>;
+    case 'it': return <><Ground /><Kid x={34} y={60} who="yousef" arms="point" /><Cube x={74} y={88} w={26} /><Ring x={92} y={70} rx={22} ry={22} />{tag(108, 52)}</>;
+    case 'we': return <><Ground /><Mascot x={40} y={62} s={0.9} mood="excited" arms="up" /><Kid x={78} y={60} who="salma" mood="excited" arms="up" /><Ring x={58} y={54} rx={44} ry={36} />{tag(108, 74)}</>;
+    case 'they': return <><Ground /><Mascot x={20} y={64} s={0.75} mood="calm" /><Kid x={66} y={60} who="salma" /><Kid x={96} y={60} who="yousef" /><Ring x={81} y={52} rx={30} ry={34} />{tag(110, 20)}</>;
+  }
+}
+
+export type Demo = 'this' | 'that' | 'these' | 'those';
+function demo(d: Demo, e: string) {
+  const near = d === 'this' || d === 'these', many = d === 'these' || d === 'those';
+  const xs = many ? [0, 1, 2] : [0];
+  return <><Ground /><path d="M44 86 L118 60" stroke="#E2E8F0" strokeWidth="1" />
+    <Mascot x={22} y={62} s={0.9} mood="happy" arms="front" />
+    {near
+      ? xs.map(i => <text key={i} x={46 + i * 15} y={86 - i * 2} fontSize="20" textAnchor="middle">{e}</text>)
+      : <>{xs.map(i => <text key={i} x={92 + i * 9} y={66} fontSize="11" textAnchor="middle">{e}</text>)}<path d="M40 56 H80" stroke="#E11D48" strokeWidth="1.8" strokeDasharray="4 3" /><path d="M84 56 l-6 -3.5 v7 Z" fill="#E11D48" /></>}
+    <text x={near ? 60 : 100} y={near ? 38 : 40} fontSize="10" fontWeight="900" fill={NAVY} textAnchor="middle">{near ? 'قريب' : 'بعيد'}</text></>;
+}
+
+export type TimeK = 'past' | 'now' | 'future' | 'habit' | 'progress' | 'perfect' | 'pastprog' | 'pastperfect' | 'plan';
+function timeline(t: TimeK, e?: string) {
+  const Y = 66, P = 22, N = 60, F = 98;
+  const dot = (x: number, c = '#E11D48', r = 4) => <circle cx={x} cy={Y} r={r} fill={c} stroke="#fff" strokeWidth="1.2" />;
+  const mk = (x: number) => <text x={x} y={Y - 10} fontSize="15" textAnchor="middle">{e || '⭐'}</text>;
+  const marks = <><line x1="6" y1={Y} x2="110" y2={Y} stroke={NAVY} strokeWidth="2" /><path d={`M116 ${Y} l-7 -4 v8 Z`} fill={NAVY} />
+    <line x1={N} y1={Y - 6} x2={N} y2={Y + 6} stroke={GOLD} strokeWidth="2.5" />
+    <text x={P} y={Y + 18} fontSize="8.5" fontWeight="900" fill="#64748B" textAnchor="middle">الماضي</text>
+    <text x={N} y={Y + 18} fontSize="8.5" fontWeight="900" fill={GOLD} textAnchor="middle">الآن</text>
+    <text x={F} y={Y + 18} fontSize="8.5" fontWeight="900" fill="#64748B" textAnchor="middle">المستقبل</text></>;
+  let m: React.ReactNode = null;
+  switch (t) {
+    case 'past': m = <>{dot(P)}{mk(P)}</>; break;
+    case 'now': m = <>{dot(N)}{mk(N)}</>; break;
+    case 'future': m = <>{dot(F, '#22C55E')}{mk(F)}</>; break;
+    case 'plan': m = <><path d={`M${N} ${Y - 4} Q79 ${Y - 30} ${F} ${Y - 4}`} fill="none" stroke="#22C55E" strokeWidth="2" strokeDasharray="4 3" />{dot(F, '#22C55E')}<text x={N} y={Y - 26} fontSize="13" textAnchor="middle">🗓️</text>{mk(F)}</>; break;
+    case 'habit': m = <>{[16, 32, 48, 64, 80, 96].map(x => <circle key={x} cx={x} cy={Y} r="3.2" fill="#3B82F6" stroke="#fff" />)}<text x={N} y={Y - 12} fontSize="15" textAnchor="middle">{e || '🔁'}</text></>; break;
+    case 'progress': m = <><rect x={N - 14} y={Y - 5} width="28" height="10" rx="5" fill="#FDE68A" stroke={GOLD} /><path d={`M${N - 12} ${Y} q3 -4 6 0 t6 0 t6 0 t6 0`} stroke="#E11D48" strokeWidth="1.6" fill="none" />{mk(N)}</>; break;
+    case 'pastprog': m = <><rect x={P - 14} y={Y - 5} width="28" height="10" rx="5" fill="#FDE68A" stroke={GOLD} /><path d={`M${P - 12} ${Y} q3 -4 6 0 t6 0 t6 0 t6 0`} stroke="#E11D48" strokeWidth="1.6" fill="none" />{mk(P)}</>; break;
+    case 'perfect': m = <><path d={`M${P} ${Y - 4} Q41 ${Y - 30} ${N - 2} ${Y - 6}`} fill="none" stroke="#E11D48" strokeWidth="2" /><path d={`M${N - 2} ${Y - 6} l-7 -1 l3 -6 Z`} fill="#E11D48" />{dot(P)}<text x={N + 10} y={Y - 14} fontSize="15" textAnchor="middle">{e || '✅'}</text></>; break;
+    case 'pastperfect': m = <>{dot(12, '#94A3B8')}<text x={12} y={Y - 10} fontSize="9" fontWeight="900" fill="#64748B" textAnchor="middle">1</text>{dot(36)}<text x={36} y={Y - 10} fontSize="9" fontWeight="900" fill="#E11D48" textAnchor="middle">2</text><text x={24} y={Y - 24} fontSize="14" textAnchor="middle">{e || '📌'}</text></>; break;
+  }
+  return <>{marks}{m}<Mascot x={18} y={26} s={0.5} mood="happy" /></>;
+}
+
+function clock(h: number, mi: number) {
+  const a = (mi / 60) * 360, b = ((h % 12) / 12) * 360 + mi / 2, R = 30, cx = 70, cy = 48;
+  const hand = (deg: number, len: number, w: number, c: string) => <line x1={cx} y1={cy} x2={cx + len * Math.sin(deg * Math.PI / 180)} y2={cy - len * Math.cos(deg * Math.PI / 180)} stroke={c} strokeWidth={w} strokeLinecap="round" />;
+  return <><Ground /><circle cx={cx} cy={cy} r={R} fill="#fff" stroke={NAVY} strokeWidth="2.5" />
+    {Array.from({ length: 12 }).map((_, i) => <circle key={i} cx={cx + (R - 5) * Math.sin(i * Math.PI / 6)} cy={cy - (R - 5) * Math.cos(i * Math.PI / 6)} r={i % 3 === 0 ? 1.8 : 1} fill={NAVY} />)}
+    {hand(b, 15, 3.2, NAVY)}{hand(a, 23, 2, '#E11D48')}<circle cx={cx} cy={cy} r="2.2" fill={GOLD} />
+    <Mascot x={20} y={66} s={0.65} mood="happy" arms="up" /></>;
+}
+
+/** Three sizes for comparatives/superlatives; n = which one is highlighted (1 small … 3 biggest). */
+function cmp(n: 1 | 2 | 3, e: string) {
+  const sz = [16, 26, 38], xs = [22, 52, 92];
+  return <><Ground />{sz.map((z, i) => <text key={i} x={xs[i]} y={88} fontSize={z} textAnchor="middle" opacity={i + 1 === n ? 1 : 0.35}>{e}</text>)}
+    <Ring x={xs[n - 1]} y={88 - sz[n - 1] * 0.35} rx={sz[n - 1] * 0.62} ry={sz[n - 1] * 0.62} /></>;
+}
+
+/** How often: filled days of a 7-day week. */
+function freq(n: number, e: string) {
+  return <><text x="60" y="34" fontSize="20" textAnchor="middle">{e}</text>
+    {Array.from({ length: 7 }).map((_, i) => <g key={i}><rect x={8 + i * 15.2} y="50" width="13" height="16" rx="3" fill={i < n ? '#22C55E' : '#E2E8F0'} stroke={i < n ? '#15803D' : '#CBD5E1'} />{i < n && <path d={`M${11 + i * 15.2} 58 l3 3 l5 -6`} stroke="#fff" strokeWidth="1.6" fill="none" />}</g>)}
+    <text x="60" y="84" fontSize="9" fontWeight="900" fill="#64748B" textAnchor="middle">{`${n} / 7 أيام`}</text></>;
+}
+
+/** A scene with one of the kids (or Bunduq) holding/near an emoji — jobs, clothes, routines. */
+function kidEmoji(who: KidId | 'bunduq', e: string, mood?: Mood) {
+  return <><Ground />{who === 'bunduq' ? <Mascot x={38} y={62} mood={mood || 'happy'} arms="front" /> : <Kid x={38} y={60} who={who} mood={mood} arms="front" />}<text x="86" y="66" fontSize="32" textAnchor="middle">{e}</text></>;
+}
+
+/** Yes / no ability or rule: emoji with a green tick or red cross. */
+function yesNo(e: string, ok: boolean, who: KidId | 'bunduq' = 'bunduq') {
+  return <>{kidEmoji(who, e, ok ? 'excited' : 'sad')}<circle cx="104" cy="22" r="10" fill={ok ? '#22C55E' : '#EF4444'} />
+    <path d={ok ? 'M99 22 l4 4 l7 -8' : 'M100 18 l8 8 M108 18 l-8 8'} stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round" /></>;
+}
+
+/** One vs many of the same thing (a/an vs plural, there is vs there are). */
+function many(e: string, n: number) {
+  return <><Ground />{Array.from({ length: n }).map((_, i) => <text key={i} x={n === 1 ? 70 : 44 + (i % 4) * 20} y={n === 1 ? 74 : 62 + Math.floor(i / 4) * 22} fontSize={n === 1 ? 34 : 20} textAnchor="middle">{e}</text>)}<Mascot x={18} y={64} s={0.65} mood="happy" arms="up" /></>;
+}
+
 export const VisualCardArt: React.FC<{ scene: Scene; className?: string; label?: string }> = ({ scene, className, label }) => {
   let body: React.ReactNode;
   switch (scene.k) {
     case 'prep': body = prep(scene.p); break;
     case 'weather': body = weather(scene.w); break;
+    case 'pron': body = pron(scene.p, scene.item); break;
+    case 'demo': body = demo(scene.d, scene.e); break;
+    case 'time': body = timeline(scene.t, scene.e); break;
+    case 'clock': body = clock(scene.h, scene.m); break;
+    case 'cmp': body = cmp(scene.n, scene.e); break;
+    case 'freq': body = freq(scene.n, scene.e); break;
+    case 'kid': body = kidEmoji(scene.who, scene.e, scene.mood); break;
+    case 'yesno': body = yesNo(scene.e, scene.ok, scene.who); break;
+    case 'many': body = many(scene.e, scene.n); break;
     case 'color': body = <><Ground /><line x1="58" y1="74" x2="74" y2="38" stroke="#64748B" strokeWidth="1" /><ellipse cx="78" cy="26" rx="16" ry="19" fill={scene.c} stroke="#334155" strokeWidth="1.2" /><path d="M76 45 l2 -2 l2 2 Z" fill={scene.c} stroke="#334155" strokeWidth=".8" /><ellipse cx="72" cy="19" rx="4" ry="6" fill="#fff" opacity=".35" /><Mascot x={40} y={62} mood="excited" /></>; break;
     case 'shape': body = <><Ground />{shapePath(scene.sh)}<Mascot x={30} y={62} s={0.9} mood="happy" arms="front" /></>; break;
     case 'count': body = <><Ground />{Array.from({ length: scene.n }).map((_, i) => <Cube key={i} x={44 + (i % 5) * 14} y={88 - Math.floor(i / 5) * 15} w={12} />)}<Mascot x={22} y={62} s={0.85} mood="happy" arms="up" /></>; break;

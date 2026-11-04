@@ -179,6 +179,8 @@ export function lessonBoardActions(lesson: SaraTrackLesson, useAlt: boolean): Bo
 }
 
 import { SpellingExercise } from './SpellingExercise';
+import VisualCardsGrid from './VisualCardsGrid';
+import { visualCardsFor, visualTitleFor } from '../data/saraVisualCards';
 import { spellingItemsFor } from '../lib/spelling';
 
 const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (i: number) => void; locked?: boolean }> = ({ q: raw, picked, onPick, locked }) => { const q = normalizeChoice(raw); return (
@@ -212,7 +214,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   };
   const [useAlt, setUseAlt] = useState(false);
   const [checkPick, setCheckPick] = useState<number | null>(null);
-  const [mode, setMode] = useState<'learn' | 'exercises' | 'board' | 'sentences'>('board');
+  const [mode, setMode] = useState<'learn' | 'exercises' | 'board' | 'sentences' | 'cards'>('board');
   const [boardReplay, setBoardReplay] = useState(0);
   const modeRef = useRef(mode); modeRef.current = mode;
   const [exIdx, setExIdx] = useState(0);
@@ -478,6 +480,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                 <button onClick={goNext} className="flex-1 py-2 rounded-xl bg-[#002147] text-white text-[13px] font-black">{L("✅ الدرس التالي ←", "✅ Next lesson →")}</button>
               </div>
             )}
+            {visualCardsFor(lesson.id).length > 0 && <button onClick={() => { stop(); setMode('cards'); }} data-testid="lesson-cards-open" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">{L(`🖼️ بطاقات مصوّرة (${visualCardsFor(lesson.id).length})`, `🖼️ Picture cards (${visualCardsFor(lesson.id).length})`)}</button>}
             {passed && repeatItems.length > 0 && <button onClick={() => { stop(); setRepeatOpen(true); }} data-testid="lesson-repeat-open" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">🎙️ تدرّب على نطق كلمات الدرس</button>}
             {passed && track.id === 'conversation_v2' && (
               <button onClick={() => { stop(); setMode('sentences'); }} data-testid="open-sentence-builder" className="w-full py-2 rounded-xl bg-white border-2 border-[#C49E3A] text-[#002147] text-[13px] font-black">{L("🧩 ابنِ جملك — 5 بطاقات", "🧩 Build your sentences, 5 cards")}</button>
@@ -568,6 +571,12 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
             </div>
             {trans.banner}
             {!trans.banner && <button data-testid="board-to-check" onClick={() => { stop(); setMode('learn'); }} className="shrink-0 w-full py-2.5 rounded-xl bg-amber-400 text-[#001a38] text-[14px] font-black">{passed ? L('رجوع للدرس ←', 'Back to the lesson →') : L('سؤال الفهم ←', 'Check question →')}</button>}
+          </div>
+        )}
+
+        {lesson?.content && mode === 'cards' && (
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden" data-testid="lesson-cards">
+            <VisualCardsGrid cards={visualCardsFor(lesson.id)} titleAr={visualTitleFor(lesson.id)} seed={lesson.order} onDone={() => setMode('learn')} doneLabel={L('رجوع للدرس', 'Back to the lesson')} />
           </div>
         )}
 
