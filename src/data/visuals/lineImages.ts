@@ -250,5 +250,15 @@ export const LINE_IMAGES: Record<string, Record<string, string>> = {
   "p1": "/visuals/daily/daily-a-25/p1.webp",
   "p2": "/visuals/daily/daily-a-25/p2.webp",
   "p3": "/visuals/daily/daily-a-25/p3.webp"
+ },
+ "daily-a-26": {
+  "d0": "/visuals/daily/daily-a-26/p0.webp",
+  "d1": "/visuals/daily/daily-a-26/p1.webp",
+  "d2": "/visuals/daily/daily-a-26/p1.webp",
+  "d3": "/visuals/daily/daily-a-26/p3.webp",
+  "p0": "/visuals/daily/daily-a-26/p0.webp",
+  "p1": "/visuals/daily/daily-a-26/p1.webp",
+  "p2": "/visuals/daily/daily-a-26/p2.webp",
+  "p3": "/visuals/daily/daily-a-26/p3.webp"
  }
 };
