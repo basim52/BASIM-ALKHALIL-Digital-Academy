@@ -1,8 +1,19 @@
 import type { Request, Response } from 'express';
-import { parseRequest, parseReply } from '../lib/abboud/protocol';
-import { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
+import { parseRequest, parseReply } from '../lib/abboud/protocol.js';
+import { SESSIONS_CONFIG } from '../lib/abboud/curriculum.js';
 
-type Generate = (prompt: string, instruction: string) => Promise<string>;
+import { Type, type Schema } from '@google/genai';
+
+const RESPONSE_SCHEMA: Schema = {
+  type: Type.OBJECT, required: ['verdict', 'turns'],
+  properties: {
+    verdict: { type: Type.STRING, enum: ['accurate', 'inaccurate', 'off_topic'] },
+    turns: { type: Type.ARRAY, items: { type: Type.OBJECT, required: ['speaker', 'text'], properties: { speaker: { type: Type.STRING, enum: ['badr', 'reem', 'sara'] }, text: { type: Type.STRING } } } },
+    misconception: { type: Type.OBJECT, required: ['incorrect', 'correct', 'reason'], properties: { incorrect: { type: Type.STRING }, correct: { type: Type.STRING }, reason: { type: Type.STRING } } }
+  }
+};
+
+type Generate = (prompt: string, instruction: string, schema: Schema) => Promise<string>;
 export function abboudTeacherHandler(generate: Generate) {
   return async (req: Request, res: Response) => {
     res.setHeader('Cache-Control', 'no-store');
@@ -22,14 +33,21 @@ answer: verify the answer resolves Badr's actual question. Badr briefly acknowle
 correct: compare teacher correction with Reem's actual preceding error and its context, not just presence of keywords. If fully correct, Reem repeats the corrected sentence; Sara gives a brief accurate summary, not inflated praise.
 review_one (session 5 only): Abboud must ask a clear relevant first review QUESTION; Badr answers THAT question accurately, do not ask a new one.
 review_two (session 5 only): Abboud must ask a DIFFERENT relevant second review QUESTION; Reem answers THAT question, Sara briefly closes.
+board: The teacher tapped boardFocus.text from his ACTUAL explanation and selected boardFocus.speaker. This is a separate board interaction, NOT lesson completion or a new teacher answer. If the focused idea is valid, only the selected student speaks (one short application/answer grounded in that idea). If inaccurate or off-topic, only Sara gives a specific gentle correction. Never mark the ordinary lesson stage complete. No invented objects, colors or numbers absent from the explanation. Read the focus and selected speaker only from the untrusted JSON user payload.
 Session 5: after correct, ask Abboud to pose two review questions in separate turns; don't claim completion before both. No timers.`;
+    let text: string;
     try {
-      const text = await generate(JSON.stringify(input), instruction);
-      const reply = parseReply(JSON.parse(text), input.stage);
-      return res.json(reply);
+      text = await generate(JSON.stringify(input), instruction, RESPONSE_SCHEMA);
     } catch {
       // No canned replies or permissive merges: unavailable/invalid AI is not student understanding.
+      console.warn(JSON.stringify({ event: 'abboud_teacher_failure', kind: 'provider', stage: input.stage, sessionId: input.sessionId }));
       return res.status(503).json({ error: 'AI_UNAVAILABLE', message: 'تعذّر تفاعل الطالبين الآن. احتفظنا بدورك؛ حاول مجدداً.' });
+    }
+    try {
+      return res.json(parseReply(JSON.parse(text), input.stage, input.stage === 'board' ? input.boardFocus.speaker : undefined));
+    } catch {
+      console.warn(JSON.stringify({ event: 'abboud_teacher_failure', kind: 'schema', stage: input.stage, sessionId: input.sessionId }));
+      return res.status(502).json({ error: 'AI_INVALID_RESPONSE', message: 'رد الطالبين غير صالح. لم يتقدّم الدرس؛ حاول مجدداً.' });
     }
   };
 }

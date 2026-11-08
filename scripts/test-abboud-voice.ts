@@ -81,3 +81,37 @@ test('cloud TTS waits for media ended, then highlights the next student, and rel
     await playing; assert.equal(revoke.mock.callCount(), 2); assert.equal(AudioElement.latest.onended, null);
   } finally { voice.stop(); mock.restoreAll(); }
 });
+test('blocked cloud autoplay can be retried synchronously on the replay click without refetching TTS', async () => {
+  let gesture = false; let plays = 0;
+  class ReplayAudio {
+    static latest: ReplayAudio;
+    src = ''; onplaying: (() => void) | null = null; onended: (() => void) | null = null; onerror: (() => void) | null = null;
+    constructor() { ReplayAudio.latest = this; }
+    pause() {} load() {} removeAttribute() { this.src = ''; }
+    play() { plays++; if (!gesture) return Promise.reject(new Error('NotAllowedError')); this.onplaying?.(); return Promise.resolve(); }
+  }
+  Object.assign(globalThis, { Audio: ReplayAudio });
+  const fetcher = mock.method(globalThis, 'fetch', async () => new Response(JSON.stringify({ audio: 'd2F2' })));
+  const voice = new ClassroomVoice(); const turns = [{ speaker: 'badr', text: 'Cloud response' }] satisfies Parameters<ClassroomVoice['play']>[0];
+  try {
+    await assert.rejects(voice.play(turns, () => {}, () => {}), /AUDIO_BLOCKED/);
+    assert.equal(fetcher.mock.callCount(), 1);
+    gesture = true;
+    const replay = voice.play(turns, () => {}, () => {});
+    assert.equal(plays, 2, 'audio.play must occur before any async boundary on a replay click');
+    assert.equal(fetcher.mock.callCount(), 1, 'replay must not burn a second TTS request');
+    ReplayAudio.latest.onended?.(); await replay;
+  } finally { voice.stop(); mock.restoreAll(); }
+});
+test('native fallback replay also stays in the user click instead of awaiting another failed cloud fetch', async () => {
+  const fetcher = mock.method(globalThis, 'fetch', async () => new Response('{}', { status: 503 }));
+  const voice = new ClassroomVoice(); const turns = [{ speaker: 'reem', text: 'Read this board word' }] satisfies Parameters<ClassroomVoice['play']>[0];
+  try {
+    const first = voice.play(turns, () => {}, () => {}); const failed = assert.rejects(first, /AUDIO_FAILED/);
+    await tick(); assert.ok(latest); latest.onerror?.(); await failed;
+    const before = spoken.length;
+    const replay = voice.play(turns, () => {}, () => {});
+    assert.equal(spoken.length, before + 1, 'native speak must run in the replay click');
+    assert.equal(fetcher.mock.callCount(), 1); assert.ok(latest); latest.onend?.(); await replay;
+  } finally { voice.stop(); mock.restoreAll(); spoken.length = 0; }
+});

@@ -1,4 +1,4 @@
-import { abboudTeacherHandler } from './abboudTeacher';
+import { abboudTeacherHandler } from './abboudTeacher.js';
 import { LESSON_TRIGRAMS_B64 } from "./generated/lessonTrigrams.js";
 import { textTrigrams } from "./lessonTextNorm.js";
 import "dotenv/config";
@@ -2147,11 +2147,11 @@ ${JSON.stringify(texts)}`;
   // - Badr (curious AI student) asks questions based on Abboud's explanation.
   // - Reem (friendly AI student) attempts application with deliberate pedagogical beginner errors.
   // - Supervisor Sara evaluates accuracy, intervenes gently when needed, and avoids false praise.
-  app.post("/api/sara/abboud-teacher", abboudTeacherHandler(async (prompt, systemInstruction) => {
+  app.post("/api/sara/abboud-teacher", abboudTeacherHandler(async (prompt, systemInstruction, responseSchema) => {
     if (!initAI() || !aiLive) throw new Error('AI_UNAVAILABLE');
     const result = await callAiWithRetry({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      config: { systemInstruction, responseMimeType: 'application/json' }
+      config: { systemInstruction, responseMimeType: 'application/json', responseSchema, temperature: 0.3 }
     });
     return result.text || '';
   }));

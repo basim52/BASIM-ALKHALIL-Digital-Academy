@@ -6,6 +6,8 @@ const voices = { badr: 'Puck', reem: 'Aoede', sara: 'Kore' };
 /** Activity-owned queue: completion means ended, not merely a fulfilled TTS fetch. */
 export class ClassroomVoice {
   private generation = 0;
+  private audioCache = new Map<string, string>();
+  private nativeReplay = new Set<string>();
   private controller: AbortController | null = null;
   private audio: HTMLAudioElement | null = null;
   private utterance: SpeechSynthesisUtterance | null = null;
@@ -29,18 +31,32 @@ export class ClassroomVoice {
       for (const turn of turns) {
         if (generation !== this.generation) return;
         const lang = /[\u0600-\u06ff]/.test(turn.text) ? 'ar' : 'en';
-        let audio: string | null = null;
-        const fetchTimeout = setTimeout(() => controller.abort(), 15000);
-        try {
-          const response = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ text: turn.text, lang, voiceName: voices[turn.speaker] }) });
-          const data: unknown = await response.json();
-          if (response.ok && typeof data === 'object' && data !== null && 'audio' in data && typeof data.audio === 'string' && data.audio.length > 0) audio = data.audio;
-        } catch {
-          if (generation !== this.generation) return;
-          if (controller.signal.aborted) throw new Error('TTS_TIMEOUT');
-        } finally { clearTimeout(fetchTimeout); }
+        const cacheKey = `${voices[turn.speaker]}:${lang}:${turn.text}`;
+        let audio = this.audioCache.get(cacheKey) || null;
+        // Cached replay reaches audio.play() synchronously inside the user's click, with no new TTS await.
+        if (!audio && !this.nativeReplay.has(cacheKey)) {
+          const fetchTimeout = setTimeout(() => controller.abort(), 15000);
+          try {
+            const response = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ text: turn.text, lang, voiceName: voices[turn.speaker] }) });
+            const data: unknown = await response.json();
+            if (response.ok && typeof data === 'object' && data !== null && 'audio' in data && typeof data.audio === 'string' && data.audio.length > 0) {
+              audio = data.audio;
+              if (generation === this.generation) {
+                if (this.audioCache.size >= 8) { const oldest = this.audioCache.keys().next().value; if (oldest) this.audioCache.delete(oldest); }
+                this.audioCache.set(cacheKey, audio);
+              }
+            }
+          } catch {
+            if (generation !== this.generation) return;
+            if (controller.signal.aborted) throw new Error('TTS_TIMEOUT');
+          } finally { clearTimeout(fetchTimeout); }
+        }
         if (generation !== this.generation) return;
-        if (!audio) fallback();
+        if (!audio) {
+          if (this.nativeReplay.size >= 8) { const oldest = this.nativeReplay.values().next().value; if (oldest) this.nativeReplay.delete(oldest); }
+          this.nativeReplay.add(cacheKey);
+          fallback();
+        }
         await new Promise<void>((resolve, reject) => {
           let settled = false;
           const finish = (error?: Error) => {
