@@ -1,0 +1,7 @@
+export const SESSIONS_CONFIG = [
+  { id: 1, titleAr: 'التحية والتعريف', titleEn: 'Greetings and names', emoji: '👋', chalkTargetWords: ['Hello', 'My name is', 'What is your name?'], chalkRuleEn: 'Hello greets; My name is introduces; What is your name asks for a name.' },
+  { id: 2, titleAr: 'الألوان والأشياء', titleEn: 'Colors and objects', emoji: '🎨', chalkTargetWords: ['red', 'blue', 'yellow', 'green', 'book', 'pencil', 'bag'], chalkRuleEn: 'Color precedes object: a red book, a blue bag.' },
+  { id: 3, titleAr: 'الأعداد 1–10', titleEn: 'Numbers one to ten and quantities', emoji: '🔢', chalkTargetWords: ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'], chalkRuleEn: 'Count one through ten. One book, two books; add plural s for more than one.' },
+  { id: 4, titleAr: 'الجمل البسيطة', titleEn: 'Simple sentences', emoji: '📚', chalkTargetWords: ['This is a book', 'I like apples'], chalkRuleEn: 'This is a book identifies a nearby object. I like apples expresses a preference. Subject before verb.' },
+  { id: 5, titleAr: 'المراجعة وسؤالان', titleEn: 'Review and two teacher questions', emoji: '🌟', chalkTargetWords: ['Hello', 'a red book', 'two books', 'This is a book', 'I like apples'], chalkRuleEn: 'Review greetings, color before noun, numbers 1–10 and plural s, simple sentences. Abboud explains, answers a student, corrects one error, then asks two different review questions; Badr and Reem answer in turn.' }
+];
