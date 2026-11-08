@@ -17,6 +17,7 @@ import { SaraTracksHub } from './SaraTracksHub';
 import { TUTOR_FILL_BLANK_TRACKS } from '../data/fillBlankTracks';
 const FillBlankPlayer = lazy(() => import('./SaraFillBlankPlayer').then(m => ({ default: m.FillBlankPlayer })));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
+const AbboudTeacherActivity = lazy(() => import('./AbboudTeacherActivity'));
 import SaraVocabPlayer from './SaraVocabPlayer';
 import { VOCAB_LESSONS } from '../data/saraTracks/vocabulary';
 
@@ -26,7 +27,7 @@ const CLASS_PATH: [string, string, string, string[]][] = [
   ['2', 'اسمع وتعلّم', 'Listen & learn', ['curricula', 'listening', 'daily', 'worksheet', 'whiteboard']],
   ['3', 'انطق صح', 'Say it right', ['pronunciation', 'phonetic', 'voicecoach']],
   ['4', 'تكلّم', 'Speak', ['free', 'roleplay', 'live', 'call']],
-  ['5', 'تمرّن واختبر نفسك', 'Practise & test', ['grammar', 'speed', 'exam']],
+  ['5', 'تمرّن واختبر نفسك', 'Practise & test', ['abboud', 'grammar', 'speed', 'exam']],
   ['6', 'شوف تقدّمك', 'See your progress', ['achievements', 'notebook', 'memory', 'parent', 'archive-list', 'archive-now']],
 ];
 
@@ -97,6 +98,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
   const [toolsOpen, setToolsOpen] = useState(!!initialToolsOpen);
   const [fbOpen, setFbOpen] = useState(false);
   const [repeatOpen, setRepeatOpen] = useState(false); // «ردّد مع سارة» (pilot: Sara only)
+  const [abboudOpen, setAbboudOpen] = useState(false); // «عبود المعلّم» (teaching virtual AI students)
   // Practise the student's last passed Sara lesson; null → the built-in sentences (level pick).
   const [repeatLesson, setRepeatLesson] = useState<import('../lib/repeatPractice').RepeatLessonSource | null>(null);
   const openRepeat = () => {
@@ -167,11 +169,16 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
             {card}
             <button type="button" onClick={() => { voice.stop(); openRepeat(); }} data-testid="sara-repeat-open"
               className="w-full rounded-xl bg-[#C49E3A] hover:bg-[#d4ae4a] text-[#002147] border border-[#E8C766] px-1 py-1 text-[10px] sm:text-[11px] font-black leading-tight shadow-md active:scale-95 transition-transform">🎙️ ردّد مع سارة</button>
+            <button type="button" onClick={() => { voice.stop(); setAbboudOpen(true); }} data-testid="sara-abboud-teacher-open"
+              className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border border-emerald-400/50 px-1 py-1 text-[10px] sm:text-[11px] font-black leading-tight shadow-md active:scale-95 transition-transform flex items-center justify-center gap-1">
+              <span>👨‍🏫</span><span>{L("عبود المعلّم", "Teacher Abboud")}</span>
+            </button>
           </div>
         );
       })}
     </div>
     {repeatOpen && <Suspense fallback={null}><SaraRepeatPractice uid={uid} lesson={repeatLesson} onClose={() => setRepeatOpen(false)} /></Suspense>}
+    {abboudOpen && <Suspense fallback={null}><AbboudTeacherActivity uid={uid} onClose={() => setAbboudOpen(false)} /></Suspense>}
     <div data-testid="kids-teachers" className="shrink-0 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] p-2">
       <p className="text-[12px] font-black text-[#002147] mb-1.5">{L("🌱 من الصفر — للصغار والكبار", "🌱 From zero, for kids and adults")}</p>
       <div className="grid grid-cols-4 gap-1.5">
@@ -207,6 +214,14 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
         className="shrink-0 rounded-xl border border-amber-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
         <span className="text-[20px]">🔤</span>
         <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L("مفردات سارة", "Sara's Vocabulary")}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L(`${VOCAB_LESSONS.length} درس · بطاقات مصورة وتمرين بالصور`, `${VOCAB_LESSONS.length} lessons · picture cards & picture quiz`)}</span></span>
+      </button>
+    )}
+    {persona.id === 'sara' && (
+      <button onClick={() => { voice.stop(); setAbboudOpen(true); }} data-testid="sara-class-abboud-open"
+        className="shrink-0 rounded-xl border border-emerald-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">
+        <span className="text-[20px]">👨‍🏫</span>
+        <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-emerald-300">{L("عبود المعلّم", "Teacher Abboud")}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L("عبود يشرح لطالبين افتراضيين وسارة تشرف وتوجه", "Abboud teaches two virtual AI students; Sara supervises")}</span></span>
+        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">{L("نشاط صفي", "Class")}</span>
       </button>
     )}
     {persona.id === 'sara' && !!tools?.length && (

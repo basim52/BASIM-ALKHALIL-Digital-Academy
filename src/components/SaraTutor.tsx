@@ -1,6 +1,6 @@
 import type { SaraClassTool } from './SaraBoardTutor';
 import { setExplainLang } from '../lib/explainLang';
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, Suspense, lazy } from 'react';
 import { MessageCircle, 
   ArrowRight, 
   ArrowLeft, 
@@ -74,6 +74,7 @@ import { SaraAchievementsModal } from './SaraAchievementsModal';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { FREE_CALL_PRESET } from './SaraLessonCall';
 import { SaraCurriculumModal } from './SaraCurriculumModal';
+const AbboudTeacherActivity = lazy(() => import('./AbboudTeacherActivity'));
 import { SaraTracksHub } from './SaraTracksHub';
 import { SaraListeningPlayer } from './SaraListeningPlayer';
 import { SaraPronunciationPlayer } from './SaraPronunciationPlayer';
@@ -672,6 +673,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   const setIsWorksheetModalOpen = (v: boolean | ((p: boolean) => boolean)) => { _raw_setIsWorksheetModalOpen(false); if (v === true) setSaraTool('worksheet'); };
   const [isPhoneCallModalOpen, setIsPhoneCallModalOpen] = useState<boolean>(false);
   const [isFreeChatOpen, setIsFreeChatOpen] = useState<boolean>(false);
+  const [isAbboudTeacherOpen, setIsAbboudTeacherOpen] = useState<boolean>(false);
   useEffect(() => { if (initialAction === 'call') setIsPhoneCallModalOpen(true); }, [initialAction]);
   const [isContinuityBannerDismissed, setIsContinuityBannerDismissed] = useState<boolean>(false);
 
@@ -3128,6 +3130,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       { id: 'live', icon: isLiveMode ? '🔴' : '🎙️', labelAr: isLiveMode ? 'إيقاف اللايف' : 'محادثة لايف', labelEn: isLiveMode ? 'Stop live' : 'Live chat', group: 'practice', onClick: stay(toggleLiveVoiceMode) },
       { id: 'call', icon: '📞', labelAr: 'اتصال بسارة', labelEn: 'Call Sara', group: 'practice', onClick: go(() => setIsPhoneCallModalOpen(true)) },
       { id: 'roleplay', icon: '🎮', labelAr: 'لعب الأدوار', labelEn: 'Role-play', group: 'practice', onClick: go(() => setIsRolePlayModalOpen(true)) },
+      { id: 'abboud', icon: '👨‍🏫', labelAr: 'عبود المعلّم', labelEn: 'Teacher Abboud', group: 'practice', onClick: go(() => setIsAbboudTeacherOpen(true)) },
       { id: 'speed', icon: '⚡', labelAr: 'تحدي السرعة', labelEn: 'Speed challenge', group: 'practice', onClick: go(() => setIsSpeedDrillModalOpen(true)) },
       { id: 'phonetic', icon: '🔬', labelAr: 'مختبر النطق', labelEn: 'Pronunciation lab', group: 'practice', onClick: go(() => { setPhoneticTargetSentence(activeBoard?.sentence || 'Welcome to Basim Al-Khalil Digital Academy'); setIsPhoneticModalOpen(true); }) },
       { id: 'voicecoach', icon: '🎤', labelAr: 'مدرب الصوت', labelEn: 'Voice coach', group: 'practice', onClick: go(() => setIsVoiceCoachModalOpen(true)) },
@@ -3146,7 +3149,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
   })();
   const classActivityOpen = isExamOpen || isWorksheetModalOpen || isWhiteboardOpen || isFreeChatOpen || isPhoneCallModalOpen || isRolePlayModalOpen || isSpeedDrillModalOpen
     || isPhoneticModalOpen || isVoiceCoachModalOpen || isAdaptiveMemoryModalOpen || isAchievementsModalOpen || isNotebookModalOpen || isParentInsightsModalOpen
-    || isArchiveModalOpen || showArchiveConfirm || isListeningOpen || isPronOpen || isDailyOpen || isTrackOpen || isCurriculumModalOpen || (saraTool !== null && saraTool !== 'board');
+    || isArchiveModalOpen || showArchiveConfirm || isListeningOpen || isPronOpen || isDailyOpen || isTrackOpen || isCurriculumModalOpen || isAbboudTeacherOpen || (saraTool !== null && saraTool !== 'board');
   const classActivityWasOpen = useRef(false);
   useEffect(() => {
     if (classActivityOpen) { classActivityWasOpen.current = true; return; }
@@ -7055,6 +7058,23 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
         }}
       />
 
+
+      {/* 👨‍🏫 Abboud The Teacher Classroom Activity */}
+      {isAbboudTeacherOpen && (
+        <Suspense fallback={null}>
+          <AbboudTeacherActivity
+            uid={profile.uid}
+            onClose={() => setIsAbboudTeacherOpen(false)}
+            onSessionComplete={(sessionId, xp) => {
+              setStreak(prev => ({
+                ...prev,
+                totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
+              }));
+              syncMemoryToFirestore({ newNotes: [`Completed Teacher Abboud Session #${sessionId} (+${xp} XP)`] }, false, 'Abboud Teacher');
+            }}
+          />
+        </Suspense>
+      )}
 
       {/* Free open conversation (no targets, no scoring) */}
       {isFreeChatOpen && <SaraLivePhoneCallModal isOpen onClose={() => setIsFreeChatOpen(false)} studentName={profile.displayName || ''}

@@ -600,6 +600,10 @@ Looking forward to your reply. Tell me what we're tackling first!`;
       if (!anonIpOk(req)) return res.status(429).json({ error: "RATE_LIMITED", rateLimited: true });
       (req as any).authUid = "anon-lesson"; return next();
     }
+    if (req.path === "/api/sara/abboud-teacher" && !(req.headers.authorization || "").startsWith("Bearer ")) {
+      if (!anonIpOk(req)) return res.status(429).json({ error: "RATE_LIMITED", rateLimited: true });
+      (req as any).authUid = "anon-abboud"; return next();
+    }
     const h = req.headers.authorization || "";
     const idToken = h.startsWith("Bearer ") ? h.slice(7).trim() : "";
     if (!idToken) return res.status(401).json({ error: "UNAUTHORIZED", reason: "no-token", message: "Sign in required" });
@@ -2134,6 +2138,269 @@ ${JSON.stringify(texts)}`;
     }
     console.error("[board-note] all models failed:", String(lastErr?.message || lastErr).slice(0, 200));
     res.status(503).json({ error: "AI_FAILED", message: String(lastErr?.message || "").slice(0, 160) });
+  });
+
+  // 👨‍🏫 Abboud The Teacher Endpoint (Within Sara's Classroom)
+  // Dynamic miniature classroom simulation:
+  // - Abboud teaches as the classroom teacher.
+  // - Badr (curious AI student) asks questions based on Abboud's explanation.
+  // - Reem (friendly AI student) attempts application with deliberate pedagogical beginner errors.
+  // - Supervisor Sara evaluates accuracy, intervenes gently when needed, and avoids false praise.
+  const getAbboudSessionFallback = (sid: number, stage: string, teacherSpeech?: string, teacherCorrection?: string) => {
+    const s1 = {
+      explain: {
+        status: "accurate",
+        badrQuestionAr: "أستاذ عبود! هل أقول My name is بدر أو I am بدر؟ وما الفرق بينهما؟",
+        badrQuestionEn: "Teacher Abboud! Should I say 'My name is Badr' or 'I am Badr'?",
+        badrSpoken: "Teacher Abboud! Should I say My name is Badr, or I am Badr?",
+        saraIntervention: ""
+      },
+      answer_badr: {
+        badrReaction: "فهمت عليك يا أستاذي! كلاهما صحيح و My name is أكثر رسمية.",
+        badrSpoken: "Now I understand, thank you teacher!",
+        reemAttemptAr: "ريم تحاول التعريف بنفسها لكنها تخطئ في موضع الاسم وكلمة is",
+        reemAttemptEn: "Hello! My name is book! What you name?",
+        reemSpoken: "Hello! My name is book! What you name?",
+        reemMistakeDescription: "ريم وضعت كلمة book بدلاً من اسمها Reem، وحذفت فعل الكينونة is في السؤال (قالت What you name)."
+      },
+      correct_reem: {
+        isCorrectionAccurate: true,
+        reemReactionAr: "يا سلام! الآن فهمت يا أستاذ عبود: أقول اسمي الحقيقي وليس book، وأضيف is في السؤال: What is your name!",
+        reemReactionEn: "Now I get it! My name is Reem, and What is your name!",
+        reemSpoken: "Thank you Teacher Abboud! My name is Reem, and what is your name!",
+        saraSummaryAr: "خلاصة الحصة: تدرّبنا على التحية واستخدام My name is للتعريف بالاسم والسؤال بـ What is your name. أحسنت التدريس يا أستاذ عبود!",
+        saraSummaryEn: "Lesson summary: Greetings, introducing names, and asking What is your name.",
+        saraSpoken: "ممتاز يا عبود! حصة تدريبية ناجحة على التحية والتعريف بالاسم."
+      }
+    };
+
+    const s2 = {
+      explain: {
+        status: "accurate",
+        badrQuestionAr: "أستاذ عبود! بالعربي نقول «كتاب أحمر»، لماذا بالإنجليزية نعكس ونقول «red book»؟",
+        badrQuestionEn: "Teacher Abboud! In Arabic we say book red, why in English do we say red book?",
+        badrSpoken: "Teacher Abboud! Why do we put the color before the object in English?",
+        saraIntervention: ""
+      },
+      answer_badr: {
+        badrReaction: "أها! لأن الصفة تصف الشيء فتأتي قبله دائماً في الإنجليزية.",
+        badrSpoken: "Got it! The adjective always comes first in English.",
+        reemAttemptAr: "ريم تحاول وصف أدواتها لكنها تعكس الترتيب متأثرةً بالعربية",
+        reemAttemptEn: "Look! I have a book blue and a pencil yellow!",
+        reemSpoken: "Look! I have a book blue and a pencil yellow!",
+        reemMistakeDescription: "ريم وضعت الألوان بعد الأسماء (book blue و pencil yellow) بدلاً من (blue book و yellow pencil)."
+      },
+      correct_reem: {
+        isCorrectionAccurate: true,
+        reemReactionAr: "شكراً يا أستاذ عبود! حفظت القاعدة الآن: Color first! نقول a blue book و a yellow pencil!",
+        reemReactionEn: "Thank you Teacher Abboud! Color first: a blue book and a yellow pencil!",
+        reemSpoken: "Thank you! Now I remember: a blue book and a yellow pencil!",
+        saraSummaryAr: "خلاصة الحصة: تثبيت قاعدة تقديم اللون والصفة على الاسم (Color + Object) مثل a red book و a green bag.",
+        saraSummaryEn: "Lesson summary: Color before noun rule in English.",
+        saraSpoken: "أحسنت يا عبود! توضيحك لقاعدة تقديم اللون حَمَى الطلاب من الترجمة الحرفية."
+      }
+    };
+
+    const s3 = {
+      explain: {
+        status: "accurate",
+        badrQuestionAr: "أستاذ عبود! هل الرقم one يحتاج s؟ ومتى بالضبط نضيف حرف s للكلمة؟",
+        badrQuestionEn: "Teacher Abboud! Does the number 'one' take an s? When do we add s?",
+        badrSpoken: "Teacher Abboud! When exactly do we add the s for plural?",
+        saraIntervention: ""
+      },
+      answer_badr: {
+        badrReaction: "واضح جداً! واحد = مفرد بدون s، واثنان أو أكثر = جمع مع s.",
+        badrSpoken: "Very clear! One is singular with no s, two or more takes s.",
+        reemAttemptAr: "ريم تحاول العد لكنها تعكس حرف الـ s بين المفرد والجمع",
+        reemAttemptEn: "I have one pencils, and Badr has two book!",
+        reemSpoken: "I have one pencils, and Badr has two book!",
+        reemMistakeDescription: "ريم وضعت s مع المفرد (one pencils) وحذفتها من الجمع بعد الرقم two (two book)."
+      },
+      correct_reem: {
+        isCorrectionAccurate: true,
+        reemReactionAr: "فهمت الخطأ يا أستاذي! المفرد one pencil بدون s، والجمع two books مع حرف s الجمع!",
+        reemReactionEn: "I understand now: one pencil and two books!",
+        reemSpoken: "Thank you Teacher Abboud! One pencil and two books!",
+        saraSummaryAr: "خلاصة الحصة: التمييز العملي بين المفرد والجمع (one book مقابل two books) والعد من 1 إلى 10.",
+        saraSummaryEn: "Lesson summary: Singular vs plural counting with -s.",
+        saraSpoken: "شرح وتصحيح رائع لقاعدة الجمع والعد يا أستاذ عبود!"
+      }
+    };
+
+    const s4 = {
+      explain: {
+        status: "accurate",
+        badrQuestionAr: "أستاذ عبود! هل أقول I like apples أو I am like apples؟ ما هو الفرق؟",
+        badrQuestionEn: "Teacher Abboud! Should I say 'I like apples' or 'I am like apples'?",
+        badrSpoken: "Teacher Abboud! Is it I like apples, or I am like apples?",
+        saraIntervention: ""
+      },
+      answer_badr: {
+        badrReaction: "فهمت! like فعل أساسي فلا نحتاج am، ونقول: I like apples مباشرة.",
+        badrSpoken: "Understood! Like is the main verb, so we say I like apples.",
+        reemAttemptAr: "ريم تحاول تكوين جمل لكنها تضع الفعل في آخر الجملة",
+        reemAttemptEn: "I apples like! And this a bag is!",
+        reemSpoken: "I apples like! And this a bag is!",
+        reemMistakeDescription: "ريم وضعت الفعل like في آخر الجملة، ونقلت is إلى نهاية this a bag is."
+      },
+      correct_reem: {
+        isCorrectionAccurate: true,
+        reemReactionAr: "أها! في الإنجليزية نبدأ بالفاعل ثم الفعل: I like apples و This is a bag!",
+        reemReactionEn: "Subject then verb: I like apples and This is a bag!",
+        reemSpoken: "Thank you! I like apples, and this is a bag!",
+        saraSummaryAr: "خلاصة الحصة: تدريب الطلاب على بنية الجملة الإنجليزية البسيطة (فاعل ثم فعل ثم مفعول به).",
+        saraSummaryEn: "Lesson summary: Subject + Verb + Object word order.",
+        saraSpoken: "أداء متميز يا عبود في ترسيخ ترتيب الجمل الإنجليزية الأساسية."
+      }
+    };
+
+    const s5 = {
+      explain: {
+        status: "accurate",
+        badrQuestionAr: "أستاذ عبود! نحن جاهزون للمراجعة الشاملة! ما هو سؤالك الأول لنا؟",
+        badrQuestionEn: "Teacher Abboud! We are ready for the review! What is your question?",
+        badrSpoken: "Teacher Abboud! We are ready for the review questions!",
+        saraIntervention: ""
+      },
+      answer_badr: {
+        badrReaction: "أجبتُ سؤالك يا أستاذ عبود: My name is Badr and I like reading English books!",
+        badrSpoken: "My name is Badr, and I like reading English books!",
+        reemAttemptAr: "ريم تحاول الإجابة لكنها تخطئ في الجمع واللون معاً",
+        reemAttemptEn: "I have three pencil and a bag red!",
+        reemSpoken: "I have three pencil and a bag red!",
+        reemMistakeDescription: "ريم نسيت s الجمع في three pencil وعكست ترتيب اللون في bag red."
+      },
+      correct_reem: {
+        isCorrectionAccurate: true,
+        reemReactionAr: "شكراً يا أستاذ عبود! راجعنا كل شيء: three pencils و a red bag، واستفدنا منك كثيراً!",
+        reemReactionEn: "Thank you Teacher Abboud! Three pencils and a red bag!",
+        reemSpoken: "Thank you! Three pencils and a red bag! You are a great teacher!",
+        saraSummaryAr: "خلاصة الحصص الخمس: أتممت مراجعة التحية والألوان والأرقام والجمع وتركيب الجمل بأسلوب المعلم المتمكن. مبارك نيل وسام المعلّم الصغير!",
+        saraSummaryEn: "Review summary: Successfully reviewed greetings, colors, numbers, plurals and sentences.",
+        saraSpoken: "مبارك يا أستاذ عبود إتمام الحصص الخمس واكتساب مهارات الشرح والتصحيح!"
+      }
+    };
+
+    const sessions = [s1, s1, s2, s3, s4, s5];
+    const curSession = sessions[sid] || s1;
+    if (stage === 'explain') return { ...curSession.explain, isFallback: true };
+    if (stage === 'answer_badr') return { ...curSession.answer_badr, isFallback: true };
+    return { ...curSession.correct_reem, isFallback: true };
+  };
+
+  app.post("/api/sara/abboud-teacher", async (req: express.Request, res: express.Response) => {
+    try {
+      const speech = String(req.body?.teacherSpeech || req.body?.teacherExplanation || "").trim();
+      const correction = String(req.body?.teacherCorrection || "").trim();
+      const originalMistake = String(req.body?.originalMistake || "").trim();
+      const badrQuestion = String(req.body?.badrQuestion || "").trim();
+      const stage = String(req.body?.stage || "explain");
+      const sid = Number(req.body?.sessionId) || 1;
+
+      const fallbackData = getAbboudSessionFallback(sid, stage, speech, correction);
+
+      if (!initAI() || !aiLive) {
+        return res.json({ ...fallbackData, isFallback: true });
+      }
+
+      const sessionThemes: Record<number, string> = {
+        1: "Greetings & Self-Introductions (Hello, My name is..., What is your name?, Nice to meet you)",
+        2: "Colors & Objects (red, blue, yellow, green, book, pencil, bag; Color BEFORE noun rule: a red book)",
+        3: "Numbers 1-10 & Plurals (Counting, singular vs plural with -s: one pencil vs two pencils, How many...?)",
+        4: "Simple Sentences (Subject + Verb + Object order: This is a book, I like apples)",
+        5: "Comprehensive Review of prior 4 topics (Greetings, colors, numbers, plurals, sentences)"
+      };
+
+      const theme = sessionThemes[sid] || sessionThemes[1];
+
+      const systemInstruction = `You are the real-time AI classroom simulation engine for "Abboud The Teacher" (عبود المعلّم) inside Sara's English Classroom at Basim Alkhalil Academy.
+Characters:
+- "Abboud" (عبود): The child learner acting as the classroom teacher.
+- "Badr" (بدر): Virtual student #1. Curious, polite, asks concise realistic questions directly addressing what Abboud actually explained.
+- "Reem" (ريم): Virtual student #2. Friendly, motivated, tries to apply the concept but makes classic beginner pedagogical mistakes (e.g. Arabic word order transfer, missing -s for plural, missing copula 'is').
+- "Sara" (سارة): The pedagogical supervisor. She observes quietly and ONLY intervenes if Abboud gives inaccurate facts or goes completely off-topic, or to offer a warm 1-sentence closing summary.
+
+Session Topic: ${theme}.
+
+STRICT RULES:
+1. When Abboud explains (stage="explain"):
+   - Inspect what Abboud ACTUALLY said: "${speech}".
+   - If accurate: Badr asks a short, curious, realistic question based directly on what Abboud said. Sara does not intervene (saraIntervention="").
+   - If inaccurate: Badr asks confusedly or Sara offers a gentle 1-sentence hint (do NOT confirm false facts!).
+   - If off-topic: Sara gently reminds Abboud to return to today's topic.
+2. When Abboud answers Badr (stage="answer_badr"):
+   - Badr acknowledges Abboud's answer briefly.
+   - Reem attempts to use the concept in a short sentence, but makes an intentional, realistic beginner error.
+3. When Abboud corrects Reem (stage="correct_reem"):
+   - Inspect Abboud's correction: "${correction}".
+   - If Abboud corrected her correctly: Reem is happy, thanks Abboud, and repeats the correct phrase! Sara provides a short 1-2 sentence closing lesson summary.
+   - If Abboud gave a wrong correction: Sara steps in kindly to explain the rule so the incorrect answer is NOT validated.
+
+All responses must be child-friendly, concise (under 25 words per character), and culturally respectful.
+Output STRICT JSON ONLY.`;
+
+      let prompt = `Session ${sid} (${theme}), Stage: "${stage}".\n`;
+      if (stage === 'explain') {
+        prompt += `Teacher Abboud said: "${speech}".
+Generate JSON:
+{
+  "status": "accurate" | "inaccurate" | "off_topic",
+  "badrQuestionAr": "Short Arabic question from Badr relating to Abboud's speech",
+  "badrQuestionEn": "English version of Badr's question",
+  "badrSpoken": "What Badr speaks aloud (English or Arabic as natural for student)",
+  "saraIntervention": "Only if inaccurate or off-topic, gentle 1-sentence guidance. If accurate, leave empty string ''."
+}`;
+      } else if (stage === 'answer_badr') {
+        prompt += `Badr's Question was: "${badrQuestion}".
+Teacher Abboud answered: "${speech}".
+Generate JSON:
+{
+  "badrReaction": "Short 1-sentence Arabic reaction from Badr acknowledging Abboud's answer",
+  "badrSpoken": "What Badr says aloud",
+  "reemAttemptAr": "Brief Arabic context of Reem's attempt",
+  "reemAttemptEn": "Reem's short English sentence containing an intentional pedagogical mistake",
+  "reemSpoken": "What Reem speaks aloud",
+  "reemMistakeDescription": "1-sentence description of the pedagogical mistake Reem made"
+}`;
+      } else if (stage === 'correct_reem') {
+        prompt += `Reem's original sentence was: "${originalMistake}".
+Teacher Abboud's correction is: "${correction}".
+Generate JSON:
+{
+  "isCorrectionAccurate": boolean,
+  "reemReactionAr": "Reem's Arabic response",
+  "reemReactionEn": "Reem's English response using the correct sentence",
+  "reemSpoken": "What Reem says aloud",
+  "saraSummaryAr": "Sara's short 1-2 sentence pedagogical wrap-up of the lesson",
+  "saraSummaryEn": "English version of Sara's wrap-up",
+  "saraSpoken": "What Sara speaks aloud"
+}`;
+      }
+
+      try {
+        const result = await callAiWithRetry({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          config: {
+            systemInstruction,
+            responseMimeType: "application/json"
+          }
+        });
+
+        const parsed = JSON.parse(result.text || "{}");
+        return res.json({
+          ...fallbackData,
+          ...parsed,
+          isFallback: false
+        });
+      } catch (aiErr: any) {
+        logToFile(`[abboud-teacher] Gemini error: ${aiErr.message}; falling back safely`);
+        return res.json({ ...fallbackData, isFallback: true });
+      }
+    } catch (err: any) {
+      logToFile(`[abboud-teacher] Unexpected route error: ${err.message}`);
+      return res.status(500).json({ error: "INTERNAL_ERROR", isFallback: true });
+    }
   });
 
   // Modern AI Omnipresent Instant Tutor Endpoint
