@@ -218,3 +218,101 @@
 @media (pointer: coarse) {
   .academy-section button:not([role="tab"]):not([data-compact]) { min-height: 40px; }
 }
+
+/* Abboud's board-first classroom: scoped so Sara's own board is unchanged. */
+.abboud-dialog { padding: 12px; overflow: hidden; }
+.abboud-dialog .abboud-shell {
+  display: flex; flex-direction: column; width: 100%; max-width: 1440px;
+  height: calc(100vh - 24px); height: calc(100dvh - 24px);
+  min-width: 0; min-height: 0; overflow: hidden;
+}
+.abboud-header { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 12px 16px; flex-shrink: 0; }
+.abboud-expand-toggle { max-width: 170px; min-height: 44px; }
+.abboud-lessons { padding: 0 16px 8px; flex-shrink: 0; max-height: 90px; overflow-y: auto; }
+.abboud-workspace {
+  display: grid; grid-template-columns: minmax(0, 1fr) 190px; grid-template-areas: "board students";
+  flex: 1 1 0%; min-height: 0; min-width: 0; gap: 12px; padding: 0 16px 12px; overflow: hidden;
+}
+.abboud-board {
+  grid-area: board; display: flex; flex-direction: column; width: 100%; height: 100%;
+  min-height: 0; min-width: 0; padding: 16px; overflow: hidden; overflow-wrap: anywhere;
+}
+.abboud-board-title { flex-shrink: 0; font-size: 22px; padding-bottom: 10px; }
+.abboud-board-body { flex: 1 1 0%; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.abboud-board-source { min-height: clamp(160px, 28vh, 280px); max-width: 100%; font-size: clamp(20px, 2vw, 28px); line-height: 1.8; }
+.abboud-board-body button { min-height: 44px; max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+.abboud-board-body [aria-label="كلمات من شرح عبود"] button { font-size: 16px; }
+.abboud-students { grid-area: students; min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.abboud-student-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.abboud-student-card { min-width: 0; padding: 10px; overflow-wrap: anywhere; }
+.abboud-student-face { font-size: 36px; line-height: 1.2; }
+.abboud-student-status { font-size: 12px; }
+.abboud-student-reply { font-size: 13px; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.abboud-student-desk { height: 5px; margin-top: 6px; }
+.abboud-supervisor { margin-top: 10px; font-size: 12px; }
+.abboud-controls {
+  flex: 0 1 auto; min-height: 0; max-height: 42vh; max-height: 42dvh;
+  overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; border-top: 1px solid #cbd5e1;
+  background: #f1f5f9; padding: 0 16px 8px; overflow-wrap: anywhere;
+}
+.abboud-teacher-dock { position: sticky; top: 0; z-index: 2; background: #f1f5f9; padding: 8px 0; }
+.abboud-turn-status { margin: 0 0 6px; font-size: 14px; }
+.abboud-mic-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; min-width: 0; }
+.abboud-mic-row > button { min-width: 0; max-width: 100%; min-height: 44px; padding: 10px 20px; font-size: 18px; white-space: normal; }
+.abboud-mic-note { margin-top: 4px; }
+.abboud-voice-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 6px; }
+.abboud-voice-actions > button { min-width: 0; min-height: 36px; padding: 6px 12px; font-size: 13px; }
+.abboud-control-extras { min-width: 0; }
+.abboud-control-extras textarea, .abboud-control-extras form { min-width: 0; max-width: 100%; }
+.abboud-control-extras p, .abboud-control-extras span { overflow-wrap: anywhere; }
+.abboud-dialog-expanded { padding: 0; }
+.abboud-dialog-expanded .abboud-shell { max-width: none; height: 100vh; height: 100dvh; border-radius: 0; }
+.abboud-dialog-expanded .abboud-workspace { grid-template-columns: minmax(0, 1fr) 160px; }
+.abboud-dialog-expanded .abboud-board-source { min-height: clamp(200px, 34vh, 380px); }
+.abboud-dialog :focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+@media (max-width: 639px) {
+  .abboud-dialog { padding: 6px; }
+  .abboud-dialog .abboud-shell { height: calc(100vh - 12px); height: calc(100dvh - 12px); border-radius: 16px; }
+  .abboud-header { padding: 8px; gap: 4px; }
+  .abboud-header h2 { font-size: 16px; line-height: 1.4; }
+  .abboud-header > div > p { display: none; }
+  .abboud-header > button { padding: 8px; font-size: 12px; min-height: 44px; }
+  .abboud-expand-toggle { max-width: 112px; }
+  .abboud-lessons { padding: 0 8px 6px; max-height: 54px; }
+  .abboud-lessons label { display: flex; align-items: center; min-width: 0; font-size: 12px; }
+  .abboud-lessons select { flex: 1 1 0%; width: 0; min-width: 0; }
+  .abboud-workspace, .abboud-dialog-expanded .abboud-workspace {
+    grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "students" "board";
+    gap: 6px; padding: 0 8px 6px;
+  }
+  .abboud-students { overflow: hidden; }
+  .abboud-student-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .abboud-student-card { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 0 4px; padding: 4px 6px; text-align: start; }
+  .abboud-student-face { grid-row: span 2; font-size: 28px; }
+  .abboud-student-card h3 { font-size: 14px; }
+  .abboud-student-status { font-size: 10px; }
+  .abboud-student-reply { grid-column: 1 / -1; font-size: 11px; margin-top: 2px; -webkit-line-clamp: 1; }
+  .abboud-student-desk { display: none; }
+  .abboud-supervisor { margin-top: 2px; font-size: 10px; }
+  .abboud-board { padding: 10px; }
+  .abboud-board-title { font-size: 18px; padding-bottom: 6px; }
+  .abboud-board-source, .abboud-dialog-expanded .abboud-board-source { min-height: 160px; font-size: 20px; }
+  .abboud-controls { padding: 0 8px 6px; max-height: 42vh; max-height: 42dvh; }
+  .abboud-turn-status { font-size: 12px; line-height: 1.4; }
+  .abboud-mic-row { gap: 4px; }
+  .abboud-mic-row > button { padding: 8px 12px; font-size: 16px; }
+  .abboud-mic-row label { font-size: 11px; }
+  .abboud-mic-row select { padding: 4px; }
+  .abboud-mic-note { display: none; }
+  .abboud-voice-actions > button { flex: 1 1 0%; padding: 5px; font-size: 11px; }
+  .abboud-dialog-expanded { padding: 0; }
+  .abboud-dialog-expanded .abboud-shell { height: 100vh; height: 100dvh; border-radius: 0; }
+}
+/* Landscape / software keyboard: scroll the dialog rather than clip either student or the board. */
+@media (max-height: 500px) {
+  .abboud-dialog { overflow-y: auto; overscroll-behavior: contain; }
+  .abboud-dialog .abboud-shell { height: auto; overflow: visible; }
+  .abboud-header { padding-top: 4px; padding-bottom: 4px; }
+  .abboud-workspace { flex: none; height: 340px; }
+  .abboud-controls { max-height: none; overflow: visible; }
+}

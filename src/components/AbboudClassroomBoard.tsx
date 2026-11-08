@@ -10,13 +10,14 @@ export default function AbboudClassroomBoard({ source, checked, correction, resp
   useEffect(() => { setSelected(''); }, [source, correction?.incorrect]);
   const tokens = boardTokens(source);
   const calls = classroomBoard(source, correction);
-  return <section aria-label="السبورة التفاعلية" data-testid="abboud-interactive-board" className="mx-auto max-w-2xl rounded-xl border-4 border-amber-800 bg-emerald-950 p-3 text-white" dir="rtl">
-    <h3 className="text-center font-bold">سبورة عبود التفاعلية</h3>
+  return <section aria-label="السبورة التفاعلية" data-testid="abboud-interactive-board" data-board-size="large" className="abboud-board rounded-xl border-4 border-amber-800 bg-emerald-950 text-white" dir="rtl">
+    <h3 className="abboud-board-title text-center font-bold">سبورة عبود التفاعلية</h3>
+    <div className="abboud-board-body" tabIndex={0} aria-label="محتوى سبورة عبود">
     {!source && <p className="mt-2 text-center text-sm text-emerald-100">اشرح بصوتك؛ هنا تظهر كلماتك وألوانك وأعدادك، ثم اضغط ما تريد مناقشته مع الطالبين.</p>}
     {source && <>
       <p className="mt-2 text-xs text-emerald-100">كلام عبود كما ورد · {checked ? 'ناقشه الطالبان' : 'لم يتحقق منه الطالبان بعد'}</p>
       {calls.map((call, i) => {
-        if (call.tool === 'drawBoardText') return <button key={i} type="button" dir="auto" onClick={() => setSelected(source.slice(0, 200))} aria-pressed={selected === source.slice(0, 200)} className="mt-2 w-full rounded-lg border border-white/30 max-h-32 overflow-auto break-words p-3 text-start text-lg focus:outline-amber-300">{call.payload.content}</button>;
+        if (call.tool === 'drawBoardText') return <button key={i} type="button" dir="auto" onClick={() => setSelected(source.slice(0, 200))} aria-pressed={selected === source.slice(0, 200)} className="abboud-board-source mt-2 w-full rounded-lg border border-white/30 break-words p-3 text-start focus:outline-amber-300">{call.payload.content}</button>;
         if (call.tool === 'highlightError') return <div key={i} className="mt-3 rounded-lg bg-white/10 p-3"><p className="text-xs">التصحيح الذي تحقّقنا منه بعد شرح عبود:</p><del dir="auto" className="text-rose-200">{call.payload.incorrectSnippet}</del><span aria-hidden="true"> ← </span><ins dir="auto" className="text-emerald-200">{call.payload.correctedSnippet}</ins></div>;
         if (call.tool === 'addNote') return <div key={i} className="mt-3 rounded-lg border border-amber-300 p-2"><p className="text-xs text-amber-100">محاولة ريم — بانتظار تصحيح عبود، وليست إجابة صحيحة:</p><p dir="auto">{call.payload.content}</p></div>;
         return null;
@@ -38,5 +39,6 @@ export default function AbboudClassroomBoard({ source, checked, correction, resp
       </div>}
     </>}
     {responses.length > 0 && <div role="log" aria-label="إجابات السبورة" className="mt-3 space-y-2"><p className="text-xs text-emerald-100">آخر إجابة عن: <span dir="auto">{responseFocus}</span></p>{responses.map((m, i) => <p key={i} dir="auto" className="rounded-lg bg-white/10 p-2 text-sm"><b>{m.speaker === 'badr' ? 'بدر' : m.speaker === 'reem' ? 'ريم' : 'سارة'}: </b>{m.text}</p>)}</div>}
+    </div>
   </section>;
 }

@@ -1,5 +1,6 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import React, { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -240,5 +241,88 @@ test('late board replies after switching student cannot render, speak or persist
     await act(async () => { root.render(<AbboudTeacherActivity uid="another-student" onClose={() => {}} />); });
     await act(async () => { resolve(new Response(JSON.stringify(accurate('reem', 'Late board reply')))); await new Promise(r => setImmediate(r)); });
     assert.equal(text().includes('Late board reply'), false); assert.equal(text().includes('red book'), false); assert.equal(localStorage.length, 0);
+  } finally { await unmount(); }
+});
+
+test('board starts large with a full workspace, compact student panel and reachable teaching dock', async () => {
+  await mount();
+  try {
+    const classroom = host.querySelector('[data-testid="abboud-classroom"]'); assert.ok(classroom);
+    assert.equal(classroom.getAttribute('data-board-mode'), 'large');
+    const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
+    assert.equal(board.getAttribute('data-board-size'), 'large'); assert.equal(board.className.includes('max-w-2xl'), false);
+    assert.ok(board.querySelector('.abboud-board-body[tabindex="0"]'));
+    const students = host.querySelector('[data-testid="abboud-students"]'); assert.ok(students);
+    assert.ok(students.querySelector('[data-testid="student-badr"]')); assert.ok(students.querySelector('[data-testid="student-reem"]'));
+    const controls = host.querySelector('[data-testid="abboud-teacher-controls"]'); assert.ok(controls);
+    assert.ok(controls.querySelector('.abboud-teacher-dock [data-testid="abboud-microphone"]'));
+    assert.equal(host.querySelector('[data-testid="abboud-board-expand"]')?.getAttribute('aria-expanded'), 'false');
+  } finally { await unmount(); }
+});
+test('scoped layout contract covers 360/390 widths, bounded scrolling and the expanded viewport', () => {
+  // jsdom does not measure geometry: guard the actual stylesheet hooks, not pretend pixel screenshots.
+  const all = readFileSync('src/index.css', 'utf8');
+  const css = all.slice(all.indexOf("/* Abboud's board-first classroom:"));
+  assert.match(css, /max-width: 1440px/); assert.match(css, /height: calc\(100dvh - 24px\)/);
+  assert.match(css, /grid-template-columns: minmax\(0, 1fr\) 190px/);
+  assert.match(css, /\.abboud-board-body \{[^}]*overflow-y: auto; overflow-x: hidden/);
+  assert.match(css, /\.abboud-teacher-dock \{[^}]*position: sticky; top: 0/);
+  assert.match(css, /\.abboud-dialog-expanded \.abboud-shell \{[^}]*max-width: none;[^}]*height: 100dvh/);
+  const mobile = css.split('@media (max-width: 639px) {')[1]; assert.ok(mobile);
+  for (const width of [360, 390]) {
+    assert.ok(width <= 639);
+    assert.match(mobile, /grid-template-areas: "students" "board"/);
+    assert.match(mobile, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+    assert.match(mobile, /\.abboud-lessons select \{[^}]*width: 0; min-width: 0/);
+  }
+  assert.equal(css.includes('100vw'), false);
+  const shortViewport = css.split('@media (max-height: 500px) {')[1]; assert.ok(shortViewport);
+  assert.match(shortViewport, /\.abboud-dialog \{ overflow-y: auto/);
+  assert.match(shortViewport, /\.abboud-workspace \{ flex: none; height: 340px/);
+  assert.match(shortViewport, /\.abboud-controls \{ max-height: none; overflow: visible/);
+});
+test('expansion and return preserve board selection, typed draft, student responses and pending lesson stage', async () => {
+  const { requests } = service([accurate('badr', 'Which color is the book?'), accurate('badr', 'The book is red.')]);
+  await mount();
+  try {
+    await say('This is a red book'); await selectBoardWord('red'); await click('الكتابة كبديل'); await write('My answer is still being prepared');
+    const board = host.querySelector('[data-testid="abboud-interactive-board"]'); const textarea = host.querySelector('textarea');
+    await click('توسعة السبورة');
+    assert.equal(host.querySelector('[data-testid="abboud-classroom"]')?.getAttribute('data-board-mode'), 'expanded');
+    assert.equal(host.querySelector('[data-testid="abboud-interactive-board"]'), board); assert.equal(host.querySelector('textarea'), textarea);
+    assert.equal(textarea?.value, 'My answer is still being prepared');
+    assert.ok(host.querySelector('[aria-label="كلمات من شرح عبود"] button[aria-pressed="true"]'));
+    assert.equal(requests.length, 1); assert.equal(localStorage.length, 0);
+    await click('بدر، طبّق هذا'); assert.match(text(), /The book is red/); assert.equal(requests[1].stage, 'board');
+    await click('رجوع لحجم الفصل');
+    assert.equal(host.querySelector('[data-testid="abboud-interactive-board"]'), board);
+    assert.equal(textarea?.value, 'My answer is still being prepared'); assert.match(text(), /بدر عنده سؤال/);
+    assert.match(text(), /The book is red/); assert.equal(localStorage.length, 0);
+  } finally { await unmount(); }
+});
+test('Escape exits expansion before closing, and focus returns to its trigger then the external opener', async () => {
+  const opener = document.createElement('button'); document.body.append(opener); opener.focus();
+  let closed = 0;
+  await mount();
+  try {
+    await act(async () => { root.render(<AbboudTeacherActivity uid="student-a" onClose={() => { closed++; }} />); });
+    await click('توسعة السبورة');
+    assert.equal(document.activeElement, host.querySelector('[data-testid="abboud-workspace"]'));
+    await act(async () => { window.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })); });
+    assert.equal(closed, 0); assert.equal(document.activeElement, host.querySelector('[data-testid="abboud-board-expand"]'));
+    assert.equal(host.querySelector('[data-testid="abboud-classroom"]')?.getAttribute('data-board-mode'), 'large');
+    await act(async () => { window.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })); });
+    assert.equal(closed, 1);
+  } finally { await unmount(); assert.equal(document.activeElement, opener); opener.remove(); }
+});
+test('resizing the classroom does not restart or abort the active microphone', async () => {
+  service([accurate('badr', 'A real question')]); await mount();
+  try {
+    await click('اضغط وتحدّث'); const mic = FakeRecognition.latest;
+    await click('توسعة السبورة'); assert.equal(mic.aborted, false); assert.equal(FakeRecognition.latest, mic);
+    assert.match(button('إنهاء الشرح').textContent || '', /إنهاء الشرح/);
+    await click('رجوع لحجم الفصل'); assert.equal(mic.aborted, false);
+    await act(async () => { mic.say('Hello students'); await new Promise(resolve => setImmediate(resolve)); });
+    assert.match(text(), /A real question/);
   } finally { await unmount(); }
 });

@@ -21,6 +21,10 @@ const tasks: Record<Stage | 'complete', string> = {
 
 export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClose }) => {
   const [lessonId, setLessonId] = useState(1);
+  const [boardExpanded, setBoardExpanded] = useState(false);
+  const expandTrigger = useRef<HTMLButtonElement | null>(null);
+  const workspace = useRef<HTMLElement | null>(null);
+  const wasExpanded = useRef(false);
   const [stage, setStage] = useState<Stage | 'complete'>('explain');
   const [phase, setPhase] = useState<Phase>('ready');
   const [active, setActive] = useState<Speaker | 'abboud' | null>(null);
@@ -76,10 +80,20 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     return () => { if (previousFocus instanceof HTMLElement) previousFocus.focus(); };
   }, []);
   useEffect(() => {
-    const key = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
+    const key = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      if (boardExpanded) setBoardExpanded(false);
+      else onClose();
+    };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [onClose]);
+  }, [onClose, boardExpanded]);
+  useEffect(() => {
+    if (boardExpanded) workspace.current?.focus({ preventScroll: true });
+    else if (wasExpanded.current) expandTrigger.current?.focus({ preventScroll: true });
+    wasExpanded.current = boardExpanded;
+  }, [boardExpanded]);
 
   async function play(turns: VoiceTurn[], id: number) {
     if (mutedRef.current || !voice.current) return;
@@ -212,44 +226,47 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   }
   const disabled = phase !== 'ready' || stage === 'complete';
   return (
-    <div ref={dialog} tabIndex={-1} onKeyDown={trapFocus} className="fixed inset-0 z-[300] overflow-y-auto bg-slate-950/95 p-3 sm:p-6" dir="rtl" role="dialog" aria-modal="true" aria-labelledby="abboud-title" data-testid="abboud-classroom">
-      <div className="mx-auto max-w-4xl rounded-3xl bg-slate-100 text-slate-900 shadow-2xl">
-        <header className="flex flex-wrap items-center justify-between gap-3 p-5">
+    <div ref={dialog} tabIndex={-1} onKeyDown={trapFocus} className={`abboud-dialog fixed inset-0 z-[300] bg-slate-950/95 ${boardExpanded ? 'abboud-dialog-expanded' : ''}`} data-board-mode={boardExpanded ? 'expanded' : 'large'} dir="rtl" role="dialog" aria-modal="true" aria-labelledby="abboud-title" data-testid="abboud-classroom">
+      <div className="abboud-shell mx-auto rounded-3xl bg-slate-100 text-slate-900 shadow-2xl">
+        <header className="abboud-header">
           <div className="min-w-0 flex-1"><h2 id="abboud-title" className="text-xl font-bold sm:text-2xl">فصل عبود المعلّم</h2><p className="text-sm">أنت تشرح، بدر وريم يتعلّمان، وسارة تشرف بلطف.</p></div>
+          <button ref={expandTrigger} type="button" data-testid="abboud-board-expand" aria-expanded={boardExpanded} aria-controls="abboud-workspace" onClick={() => setBoardExpanded(value => !value)} className="abboud-expand-toggle rounded-xl bg-indigo-700 px-3 py-3 font-bold text-white">{boardExpanded ? '↩ رجوع لحجم الفصل' : '⛶ توسعة السبورة'}</button>
           <button type="button" onClick={() => { stop(); onClose(); }} aria-label="إغلاق الفصل" className="shrink-0 rounded-xl bg-white px-3 py-3 font-bold">إغلاق</button>
         </header>
-        <nav aria-label="الدروس القصيرة" className="px-5 pb-4">
-          <label className="block text-sm sm:hidden">الدرس القصير <select aria-label="اختر الدرس القصير" value={lessonId} onChange={e => reset(Number(e.target.value))} className="mr-2 max-w-full rounded-xl border bg-white p-2">{SESSIONS_CONFIG.map(s => <option key={s.id} value={s.id}>{s.emoji} {s.titleAr} {completed.includes(s.id) ? '✓' : ''}</option>)}</select></label>
+        <nav aria-label="الدروس القصيرة" className="abboud-lessons">
+          <label className="block text-sm sm:hidden">الدرس القصير <select aria-label="اختر الدرس القصير" value={lessonId} onChange={e => reset(Number(e.target.value))} className="mr-2 min-w-0 max-w-full rounded-xl border bg-white p-2">{SESSIONS_CONFIG.map(s => <option key={s.id} value={s.id}>{s.emoji} {s.titleAr} {completed.includes(s.id) ? '✓' : ''}</option>)}</select></label>
           <div className="hidden flex-wrap gap-2 sm:flex">
           {SESSIONS_CONFIG.map(s => <button type="button" key={s.id} onClick={() => reset(s.id)} aria-pressed={lessonId === s.id} className={`rounded-xl px-3 py-2 text-sm ${lessonId === s.id ? 'bg-indigo-700 text-white' : 'bg-white'}`}>{s.emoji} {s.titleAr} {completed.includes(s.id) ? '✓' : ''}</button>)}
           </div>
         </nav>
-        <section aria-label="الفصل الصغير" className="relative mx-3 rounded-2xl border-8 border-amber-200 bg-amber-50 p-4 sm:mx-5">
-          <div className="mx-auto mb-4 grid max-w-xl grid-cols-2 gap-5">
-            {(['badr', 'reem'] satisfies Speaker[]).map(speaker => <div key={speaker} data-testid={`student-${speaker}`} className={`rounded-3xl border-4 p-3 text-center transition-colors ${active === speaker ? 'border-indigo-500 bg-indigo-100' : 'border-amber-300 bg-white'}`}>
-              <div aria-hidden="true" className="text-6xl">{speaker === 'badr' ? '👦🏻' : '👧🏻'}</div>
-              <h3 className="mt-2 text-xl font-bold">{names[speaker]}</h3>
-              <p className="text-sm">{active === speaker ? 'يتحدث الآن 🔊' : phase === 'listening' ? 'يستمع لشرحك' : 'طالب في فصلك'}</p>
-              {lastTurns.find(t => t.speaker === speaker) && <p dir="auto" className="mt-2 text-sm">{lastTurns.find(t => t.speaker === speaker)?.text}</p>}
-              <div aria-hidden="true" className="mt-3 h-4 rounded bg-amber-700" />
-            </div>)}
-          </div>
-          <p className={`mt-4 text-center text-sm ${active === 'sara' ? 'font-bold text-indigo-700' : 'text-slate-600'}`}>👩🏻‍🏫 سارة · {active === 'sara' ? 'تتحدث الآن' : 'مشرفة، والمعلّم هو عبود'}</p>
+        <section ref={workspace} id="abboud-workspace" tabIndex={-1} aria-label="الفصل الصغير" data-testid="abboud-workspace" className="abboud-workspace">
           <AbboudClassroomBoard source={boardSource} checked={boardChecked} correction={boardCorrection}
             responses={boardResponses} responseFocus={boardResponseFocus} busy={phase !== 'ready'} onAsk={focus => void askBoard(focus)} onRead={readBoard} />
+          <aside className="abboud-students" aria-label="بدر وريم في الفصل" data-testid="abboud-students"><div className="abboud-student-list">
+            {(['badr', 'reem'] satisfies Speaker[]).map(speaker => <div key={speaker} data-testid={`student-${speaker}`} className={`abboud-student-card rounded-2xl border-2 text-center transition-colors ${active === speaker ? 'border-indigo-500 bg-indigo-100' : 'border-amber-300 bg-white'}`}>
+              <div aria-hidden="true" className="abboud-student-face">{speaker === 'badr' ? '👦🏻' : '👧🏻'}</div>
+              <h3 className="font-bold">{names[speaker]}</h3>
+              <p className="abboud-student-status">{active === speaker ? 'يتحدث الآن 🔊' : phase === 'listening' ? 'يستمع لشرحك' : 'طالب في فصلك'}</p>
+              {lastTurns.find(t => t.speaker === speaker) && <p dir="auto" className="abboud-student-reply">{lastTurns.find(t => t.speaker === speaker)?.text}</p>}
+              <div aria-hidden="true" className="abboud-student-desk rounded bg-amber-700" />
+            </div>)}
+          </div>
+          <p className={`abboud-supervisor text-center ${active === 'sara' ? 'font-bold text-indigo-700' : 'text-slate-600'}`}>👩🏻‍🏫 سارة · {active === 'sara' ? 'تتحدث الآن' : 'مشرفة، والمعلّم هو عبود'}</p></aside>
+
         </section>
-        <section className="p-5 text-center">
-          <p className="mb-4 font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…' : phase === 'listening' ? '🎙️ عبود يتحدث — اضغط إنهاء الشرح عندما تنتهي' : tasks[stage]}</p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button type="button" disabled={phase === 'thinking' || stage === 'complete'} onClick={() => phase === 'listening' ? recognition.current?.stop() : startMic()} className="rounded-full bg-indigo-700 px-8 py-5 text-xl font-bold text-white disabled:opacity-40">{phase === 'listening' ? '⏹ إنهاء الشرح وإرساله' : '🎙️ اضغط وتحدّث يا عبود'}</button>
+        <section aria-label="أدوات عبود التعليمية" data-testid="abboud-teacher-controls" className="abboud-controls text-center"><div className="abboud-teacher-dock">
+          <p className="abboud-turn-status font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…' : phase === 'listening' ? '🎙️ عبود يتحدث — اضغط إنهاء الشرح عندما تنتهي' : tasks[stage]}</p>
+          <div className="abboud-mic-row">
+            <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} onClick={() => phase === 'listening' ? recognition.current?.stop() : startMic()} className="rounded-full bg-indigo-700 px-8 py-5 text-xl font-bold text-white disabled:opacity-40">{phase === 'listening' ? '⏹ إنهاء الشرح وإرساله' : '🎙️ اضغط وتحدّث يا عبود'}</button>
             <label className="text-sm">لغة كلامك <select aria-label="لغة التعرف الصوتي" value={language} disabled={phase !== 'ready'} onChange={e => setLanguage(e.target.value)} className="rounded-lg border p-2"><option value="ar-SA">العربية</option><option value="en-US">English</option></select></label>
           </div>
-          <p className="mt-2 text-xs text-slate-600">يحوّل المتصفح كلامك إلى نص ليفهمه الطالبان. لا مؤقّت ولا حاجة للحفظ.</p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <p className="abboud-mic-note text-xs text-slate-600">يحوّل المتصفح كلامك إلى نص ليفهمه الطالبان. لا مؤقّت ولا حاجة للحفظ.</p>
+          <div className="abboud-voice-actions">
             <button type="button" onClick={stop} className="rounded-lg border px-4 py-2">إيقاف الصوت والميكروفون</button>
             <button type="button" aria-pressed={muted} onClick={() => { const next = !muted; mutedRef.current = next; setMuted(next); if (next) { voice.current?.stop(); if (phase === 'speaking') { setActive(null); setPhase('ready'); } } }} className="rounded-lg border px-4 py-2">{muted ? '🔇 إلغاء الكتم' : '🔊 كتم الردود'}</button>
             <button type="button" disabled={!lastTurns.length || muted || phase === 'listening' || phase === 'thinking'} onClick={() => { stop(); voice.current?.unlock(); void play(lastTurns, generation.current); }} className="rounded-lg border px-4 py-2 disabled:opacity-40">إعادة الصوت</button>
           </div>
+          </div><div className="abboud-control-extras" tabIndex={0} aria-label="الكتابة الاختيارية وتفاصيل الفصل">
           {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-red-800">{error}</p>}
           {audioNotice && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-amber-900">{audioNotice}</p>}
           {draft && !typing && <div className="mt-3 rounded-xl bg-white p-3"><p className="text-xs text-slate-500">ما التقطناه / كلامك المحفوظ:</p><p>{draft}</p>{phase === 'ready' && <button type="button" disabled={stage === 'complete'} onClick={() => void submit(draft)} className="mt-2 rounded-lg bg-indigo-700 px-4 py-2 text-white">إرسال الكلام المحفوظ مجدداً</button>}</div>}
@@ -260,9 +277,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
             <button type="submit" disabled={disabled || !draft.trim()} className="rounded-xl bg-indigo-700 px-5 py-2 text-white disabled:opacity-40">إرسال كلامي للطالبين</button>
           </form>}
           {stage === 'complete' && <button type="button" onClick={() => reset(lessonId)} className="m-3 rounded-xl bg-emerald-700 px-5 py-3 text-white">إعادة الدرس بلا نقاط</button>}
-        </section>
         {messages.length > 0 && <section aria-label="حوار الفصل" aria-live="polite" className="mx-5 space-y-2 border-t py-4">{messages.map((message, i) => <p key={i} className="rounded-xl bg-white p-3"><strong>{names[message.speaker]}: </strong><span dir="auto">{message.text}</span></p>)}</section>}
         <footer className="p-4 text-center text-xs text-slate-500">نشاط اختياري منفصل عن تقدّم سارة وXP والشهادات. {uid ? 'إنجاز الدروس محفوظ لهذا الطالب على هذا الجهاز فقط.' : 'وضع ضيف: لا يُحفظ التقدّم.'}</footer>
+          </div></section>
       </div>
     </div>
   );
