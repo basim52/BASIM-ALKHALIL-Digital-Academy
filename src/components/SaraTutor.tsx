@@ -7065,13 +7065,6 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
           <AbboudTeacherActivity
             uid={profile.uid}
             onClose={() => setIsAbboudTeacherOpen(false)}
-            onSessionComplete={(sessionId, xp) => {
-              setStreak(prev => ({
-                ...prev,
-                totalXP: (prev as any).totalXP ? (prev as any).totalXP + xp : xp
-              }));
-              syncMemoryToFirestore({ newNotes: [`Completed Teacher Abboud Session #${sessionId} (+${xp} XP)`] }, false, 'Abboud Teacher');
-            }}
           />
         </Suspense>
       )}
