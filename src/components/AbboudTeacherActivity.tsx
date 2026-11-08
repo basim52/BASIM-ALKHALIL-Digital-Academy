@@ -1,6 +1,8 @@
+import AbboudClassroomBoard from './AbboudClassroomBoard';
+import { interactionError, type BoardCorrection } from '../lib/abboud/board';
 import React, { useEffect, useRef, useState } from 'react';
 import { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
-import { completeLesson, nextStage, parseReply, readCompleted, type Message, type Speaker, type Stage } from '../lib/abboud/protocol';
+import { completeLesson, nextStage, parseReply, readCompleted, type BoardFocus, type Message, type Speaker, type Stage } from '../lib/abboud/protocol';
 import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
 import { disposeRecognition, microphoneError, type Recognition } from '../lib/abboud/recognition';
 
@@ -25,6 +27,11 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const [messages, setMessages] = useState<Message[]>([]);
   const [lastTurns, setLastTurns] = useState<VoiceTurn[]>([]);
   const [draft, setDraft] = useState('');
+  const [boardSource, setBoardSource] = useState('');
+  const [boardChecked, setBoardChecked] = useState(false);
+  const [boardCorrection, setBoardCorrection] = useState<BoardCorrection | null>(null);
+  const [boardResponses, setBoardResponses] = useState<Message[]>([]);
+  const [boardResponseFocus, setBoardResponseFocus] = useState('');
   const [error, setError] = useState('');
   const [audioNotice, setAudioNotice] = useState('');
   const [typing, setTyping] = useState(false);
@@ -50,6 +57,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   }
   function reset(id: number) {
     stop(); setLessonId(id); setStage('explain'); setMessages([]); setLastTurns([]); setDraft(''); setError(''); setAudioNotice(''); setTyping(false);
+    setBoardSource(''); setBoardChecked(false); setBoardCorrection(null); setBoardResponses([]); setBoardResponseFocus('');
   }
   useEffect(() => {
     mounted.current = true;
@@ -88,7 +96,8 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       if (mounted.current && id === generation.current) { setPhase('ready'); setActive(null); }
     }
   }
-  async function submit(text: string) {
+  async function submit(rawText: string) {
+    const text = rawText.trim();
     if (busy.current || stage === 'complete' || !text.trim()) return;
     if (messages.length > 26) { setError('وصلنا لنهاية مساحة الحوار. أعد هذا الدرس لنبدأ حواراً جديداً.'); return; }
     stop(); voice.current?.unlock();
@@ -96,14 +105,21 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     const id = generation.current;
     const controller = new AbortController(); request.current = controller;
     const timeout = setTimeout(() => controller.abort(), 45000);
+    let failureStatus = 0;
+    if (stage === 'explain') { setBoardSource(text); setBoardChecked(false); setBoardCorrection(null); setBoardResponses([]); }
     try {
       const response = await fetch('/api/sara/abboud-teacher', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
         body: JSON.stringify({ sessionId: lessonId, stage, teacherSpeech: text, history: messages })
       });
-      if (!response.ok) throw new Error(`HTTP_${response.status}`);
+      if (!response.ok) { failureStatus = response.status; throw new Error('CLASSROOM_REQUEST_FAILED'); }
+      failureStatus = 502;
       const reply = parseReply(await response.json(), stage);
+      failureStatus = 0;
       if (!mounted.current || id !== generation.current) return;
+      if (stage === 'explain') setBoardChecked(reply.verdict === 'accurate');
+      if (reply.misconception) setBoardCorrection({ ...reply.misconception, accepted: false });
+      if (stage === 'correct' && reply.verdict === 'accurate') setBoardCorrection(previous => previous ? { ...previous, accepted: true } : null);
       const following = nextStage(stage, lessonId, reply.verdict);
       setMessages(prev => [...prev, { speaker: 'abboud', text }, ...reply.turns]);
       setLastTurns(reply.turns); setDraft(''); setStage(following);
@@ -113,11 +129,48 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       await play(reply.turns, id);
     } catch {
       if (!mounted.current || id !== generation.current) return;
-      setError('تعذّر اتصال الذكاء الاصطناعي أو لم يصل رد صالح. لم يتقدّم الدرس ولم نعتبر الشرح صحيحاً. كلامك محفوظ للمحاولة مجدداً.');
+      setError(interactionError(failureStatus));
     } finally {
       clearTimeout(timeout);
       if (mounted.current && id === generation.current) { busy.current = false; request.current = null; setPhase('ready'); setActive(null); }
     }
+  }
+  async function askBoard(boardFocus: BoardFocus) {
+    if (busy.current || phase !== 'ready' || !boardSource || messages.length > 26) return;
+    stop(); voice.current?.unlock(); busy.current = true;
+    setPhase('thinking'); setError(''); setAudioNotice(''); setBoardResponses([]);
+    const id = generation.current;
+    const controller = new AbortController(); request.current = controller;
+    const timeout = setTimeout(() => controller.abort(), 45000);
+    let failureStatus = 0;
+    const history = messages.some(m => m.speaker === 'abboud' && m.text === boardSource)
+      ? messages : [...messages, { speaker: 'abboud', text: boardSource } satisfies Message];
+    try {
+      const response = await fetch('/api/sara/abboud-teacher', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
+        body: JSON.stringify({ sessionId: lessonId, stage: 'board', teacherSpeech: boardSource, history, boardFocus })
+      });
+      if (!response.ok) { failureStatus = response.status; throw new Error('CLASSROOM_REQUEST_FAILED'); }
+      failureStatus = 502;
+      const reply = parseReply(await response.json(), 'board', boardFocus.speaker);
+      failureStatus = 0;
+      if (!mounted.current || id !== generation.current) return;
+      // Board exploration must not replace Badr's pending question, advance stages or earn progress.
+      setBoardResponses(reply.turns); setBoardResponseFocus(boardFocus.text); setLastTurns(reply.turns);
+      clearTimeout(timeout); request.current = null; busy.current = false;
+      await play(reply.turns, id);
+    } catch {
+      if (mounted.current && id === generation.current) setError(interactionError(failureStatus));
+    } finally {
+      clearTimeout(timeout);
+      if (mounted.current && id === generation.current) { busy.current = false; request.current = null; setPhase('ready'); setActive(null); }
+    }
+  }
+  function readBoard(text: string) {
+    if (phase !== 'ready') return;
+    stop(); voice.current?.unlock(); setAudioNotice('');
+    const turns = [{ speaker: 'sara', text } satisfies VoiceTurn];
+    setLastTurns(turns); void play(turns, generation.current);
   }
   function startMic() {
     if (busy.current || stage === 'complete') return;
@@ -172,12 +225,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           </div>
         </nav>
         <section aria-label="الفصل الصغير" className="relative mx-3 rounded-2xl border-8 border-amber-200 bg-amber-50 p-4 sm:mx-5">
-          <div className="mx-auto min-h-28 max-w-xl rounded-xl border-4 border-amber-800 bg-emerald-950 p-4 text-center text-white" aria-label="السبورة">
-            <h3 className="text-xl font-bold">{lesson.emoji} {lesson.titleAr}</h3>
-            <p className="mt-2 text-emerald-100">{stage === 'explain' ? 'السبورة لك يا أستاذ عبود' : tasks[stage]}</p>
-            {stage !== 'explain' && <p className="mt-2 text-sm" dir="ltr">{lesson.chalkTargetWords.join(' · ')}</p>}
-          </div>
-          <div className="mx-auto mt-6 grid max-w-xl grid-cols-2 gap-5">
+          <div className="mx-auto mb-4 grid max-w-xl grid-cols-2 gap-5">
             {(['badr', 'reem'] satisfies Speaker[]).map(speaker => <div key={speaker} data-testid={`student-${speaker}`} className={`rounded-3xl border-4 p-3 text-center transition-colors ${active === speaker ? 'border-indigo-500 bg-indigo-100' : 'border-amber-300 bg-white'}`}>
               <div aria-hidden="true" className="text-6xl">{speaker === 'badr' ? '👦🏻' : '👧🏻'}</div>
               <h3 className="mt-2 text-xl font-bold">{names[speaker]}</h3>
@@ -187,6 +235,8 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
             </div>)}
           </div>
           <p className={`mt-4 text-center text-sm ${active === 'sara' ? 'font-bold text-indigo-700' : 'text-slate-600'}`}>👩🏻‍🏫 سارة · {active === 'sara' ? 'تتحدث الآن' : 'مشرفة، والمعلّم هو عبود'}</p>
+          <AbboudClassroomBoard source={boardSource} checked={boardChecked} correction={boardCorrection}
+            responses={boardResponses} responseFocus={boardResponseFocus} busy={phase !== 'ready'} onAsk={focus => void askBoard(focus)} onRead={readBoard} />
         </section>
         <section className="p-5 text-center">
           <p className="mb-4 font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…' : phase === 'listening' ? '🎙️ عبود يتحدث — اضغط إنهاء الشرح عندما تنتهي' : tasks[stage]}</p>

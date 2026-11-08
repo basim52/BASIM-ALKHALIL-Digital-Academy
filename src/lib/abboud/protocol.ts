@@ -6,7 +6,11 @@ export type Reply = {
   turns: { speaker: Speaker; text: string }[];
   misconception?: { incorrect: string; correct: string; reason: string };
 };
-export type TeacherRequest = { sessionId: number; stage: Stage; teacherSpeech: string; history: Message[] };
+export type BoardFocus = { text: string; speaker: 'badr' | 'reem' };
+export type TeacherRequest = { sessionId: number; teacherSpeech: string; history: Message[] } & (
+  | { stage: Stage }
+  | { stage: 'board'; boardFocus: BoardFocus }
+);
 const stages: Stage[] = ['explain', 'answer', 'correct', 'review_one', 'review_two'];
 function object(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -17,16 +21,22 @@ function shortText(value: unknown, max = 1200): value is string {
 export function isStage(value: unknown): value is Stage { return stages.some(stage => stage === value); }
 function isSpeaker(value: unknown): value is Speaker { return value === 'badr' || value === 'reem' || value === 'sara'; }
 export function parseRequest(value: unknown): TeacherRequest {
-  if (!object(value) || typeof value.sessionId !== 'number' || !Number.isInteger(value.sessionId) || value.sessionId < 1 || value.sessionId > 5 || !isStage(value.stage) || !shortText(value.teacherSpeech) || !Array.isArray(value.history) || value.history.length > 30) throw new Error('INVALID_REQUEST');
+  if (!object(value) || typeof value.sessionId !== 'number' || !Number.isInteger(value.sessionId) || value.sessionId < 1 || value.sessionId > 5 || !(isStage(value.stage) || value.stage === 'board') || !shortText(value.teacherSpeech) || !Array.isArray(value.history) || value.history.length > 30) throw new Error('INVALID_REQUEST');
   if (value.sessionId !== 5 && (value.stage === 'review_one' || value.stage === 'review_two')) throw new Error('INVALID_REVIEW_STAGE');
   const history: Message[] = value.history.map(item => {
     if (!object(item) || !(isSpeaker(item.speaker) || item.speaker === 'abboud') || !shortText(item.text)) throw new Error('INVALID_HISTORY');
     return { speaker: item.speaker, text: item.text };
   });
   if (value.stage !== 'explain' && history.length === 0) throw new Error('MISSING_CONTEXT');
-  return { sessionId: value.sessionId, stage: value.stage, teacherSpeech: value.teacherSpeech.trim(), history };
+  const common = { sessionId: value.sessionId, teacherSpeech: value.teacherSpeech.trim(), history };
+  if (value.stage === 'board') {
+    const focus = value.boardFocus;
+    if (!object(focus) || !shortText(focus.text, 200) || (focus.speaker !== 'badr' && focus.speaker !== 'reem') || !value.teacherSpeech.includes(focus.text) || !history.some(m => m.speaker === 'abboud' && m.text === common.teacherSpeech)) throw new Error('INVALID_BOARD_FOCUS');
+    return { ...common, stage: 'board', boardFocus: { text: focus.text, speaker: focus.speaker } };
+  }
+  return { ...common, stage: value.stage };
 }
-export function parseReply(value: unknown, stage: Stage): Reply {
+export function parseReply(value: unknown, stage: Stage | 'board', boardSpeaker?: BoardFocus['speaker']): Reply {
   if (!object(value) || !['accurate', 'inaccurate', 'off_topic'].includes(String(value.verdict)) || !Array.isArray(value.turns) || value.turns.length < 1 || value.turns.length > 3) throw new Error('INVALID_AI_RESPONSE');
   const verdict = value.verdict;
   if (verdict !== 'accurate' && verdict !== 'inaccurate' && verdict !== 'off_topic') throw new Error('INVALID_VERDICT');
@@ -35,7 +45,7 @@ export function parseReply(value: unknown, stage: Stage): Reply {
     return { speaker: item.speaker, text: item.text.trim() };
   });
   const expected: Record<Stage, Speaker[]> = { explain: ['badr'], answer: ['badr', 'reem'], correct: ['reem', 'sara'], review_one: ['badr'], review_two: ['reem', 'sara'] };
-  const speakers = verdict === 'accurate' ? expected[stage] : ['sara'];
+  const speakers = verdict === 'accurate' ? (stage === 'board' ? [boardSpeaker] : expected[stage]) : ['sara'];
   if (turns.length !== speakers.length || turns.some((turn, i) => turn.speaker !== speakers[i])) throw new Error('INVALID_SPEAKER_SEQUENCE');
   if (stage === 'answer' && verdict === 'accurate') {
     const m = value.misconception;

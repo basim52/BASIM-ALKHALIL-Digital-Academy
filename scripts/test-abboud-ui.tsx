@@ -63,7 +63,7 @@ test('first entry shows both students, board and mic; no writing wizard or scrip
   try {
     assert.ok(host.querySelector('[data-testid="student-badr"]'));
     assert.ok(host.querySelector('[data-testid="student-reem"]'));
-    assert.ok(host.querySelector('[aria-label="السبورة"]'));
+    assert.ok(host.querySelector('[aria-label="السبورة التفاعلية"]'));
     assert.ok(button('اضغط وتحدّث')); assert.equal(host.querySelector('textarea'), null);
     assert.equal(text().includes('My name is'), false);
     assert.equal(host.querySelectorAll('nav button').length, 5);
@@ -173,5 +173,72 @@ test('review is incomplete until Abboud asks both review questions', async () =>
     await say('What is your name?'); assert.equal(localStorage.length, 0); assert.match(text(), /ثانياً مختلفاً/);
     await say('What fruit do you like?'); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), '[5]');
     assert.deepEqual(requests.map(r => r.stage), ['explain', 'answer', 'correct', 'review_one', 'review_two']);
+  } finally { await unmount(); }
+});
+async function selectBoardWord(word: string) {
+  const found = Array.from(host.querySelectorAll('[aria-label="كلمات من شرح عبود"] button')).find(b => b.querySelector('span')?.textContent === word);
+  assert.ok(found, `Missing actual board word: ${word}`);
+  await act(async () => { if (found instanceof HTMLElement) found.click(); });
+}
+test('interactive board contains actual explanation, colors and counts; taps get student replies without stage/progress effects', async () => {
+  const { requests, voice } = service([
+    accurate('badr', 'What color are the books?'),
+    accurate('badr', 'The books are red.'),
+    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Understood' }, { speaker: 'reem', text: 'three book' }], misconception: { incorrect: 'three book', correct: 'three books', reason: 'plural' } }
+  ]);
+  await mount();
+  try {
+    await click('الألوان والأشياء'); await say('I have three red books');
+    const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
+    assert.match(board.textContent || '', /I have three red books/);
+    assert.ok(board.querySelector('[aria-label="لون red"]')); assert.ok(board.querySelector('[aria-label="عدد 3"]'));
+    assert.equal(board.textContent?.includes('blue'), false);
+    await selectBoardWord('red'); await click('بدر، طبّق هذا');
+    assert.match(board.textContent || '', /The books are red/); assert.equal(requests[1].stage, 'board');
+    assert.equal(localStorage.length, 0); assert.equal(voice.mock.callCount(), 2);
+    await click('اقرأ المحدّد'); assert.equal(requests.length, 2); assert.equal(voice.mock.callCount(), 3);
+    await say('The books are red');
+    assert.equal(requests[2].stage, 'answer');
+    assert.equal(JSON.stringify(requests[2].history).includes('The books are red.'), false);
+    assert.equal(localStorage.length, 0);
+  } finally { await unmount(); }
+});
+test('board does not reveal the controlled correction before a verified teacher correction', async () => {
+  service([
+    accurate('badr', 'How do we say two?'),
+    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Understood' }, { speaker: 'reem', text: 'two book' }], misconception: { incorrect: 'two book', correct: 'two books', reason: 'plural' } },
+    { verdict: 'inaccurate', turns: [{ speaker: 'sara', text: 'راجع الجمع' }] },
+    { verdict: 'accurate', turns: [{ speaker: 'reem', text: 'two books' }, { speaker: 'sara', text: 'صححت الجمع.' }] }
+  ]);
+  await mount();
+  try {
+    await click('الأعداد 1–10'); await say('two means اثنين'); await say('two');
+    const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
+    assert.match(board.textContent || '', /بانتظار تصحيح عبود/); assert.equal(board.querySelector('ins'), null);
+    await say('two book is correct'); assert.equal(board.querySelector('ins'), null); assert.equal(localStorage.length, 0);
+    await say('two books, add s for plural'); assert.equal(board.querySelector('ins')?.textContent, 'two books'); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), '[3]');
+  } finally { await unmount(); }
+});
+test('startup failure preserves transcript and unverified board without pretending hearing or success', async () => {
+  mock.method(globalThis, 'fetch', async () => new Response('FUNCTION_INVOCATION_FAILED', { status: 500 }));
+  const voice = mock.method(ClassroomVoice.prototype, 'play', async () => {});
+  await mount();
+  try {
+    await say('هلو بدر اند ريم'); assert.match(text(), /خادم الفصل تعذّر تشغيله/);
+    const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
+    assert.match(board.textContent || '', /هلو بدر اند ريم/); assert.match(board.textContent || '', /لم يتحقق منه الطالبان/);
+    assert.equal(voice.mock.callCount(), 0); assert.equal(localStorage.length, 0); assert.ok(button('إرسال الكلام المحفوظ'));
+  } finally { await unmount(); }
+});
+test('late board replies after switching student cannot render, speak or persist', async () => {
+  service([accurate('badr', 'Question about red')]); await mount();
+  try {
+    await say('red book'); await selectBoardWord('red');
+    let resolve!: (value: Response) => void;
+    mock.method(globalThis, 'fetch', () => new Promise<Response>(r => { resolve = r; }));
+    await click('ريم، طبّقي هذا');
+    await act(async () => { root.render(<AbboudTeacherActivity uid="another-student" onClose={() => {}} />); });
+    await act(async () => { resolve(new Response(JSON.stringify(accurate('reem', 'Late board reply')))); await new Promise(r => setImmediate(r)); });
+    assert.equal(text().includes('Late board reply'), false); assert.equal(text().includes('red book'), false); assert.equal(localStorage.length, 0);
   } finally { await unmount(); }
 });

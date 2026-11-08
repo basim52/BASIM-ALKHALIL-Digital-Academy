@@ -56,6 +56,42 @@ test('HTTP handler forwards real dialogue, validates model output, and fails hon
   try {
     const ok = await post(explanation); assert.equal(ok.status, 200); assert.deepEqual(await ok.json(), reply); assert.match(received, /Hello is a greeting/); assert.equal(ok.headers.get('cache-control'), 'no-store');
     const invalid = await post({ ...explanation, teacherSpeech: '' }); assert.equal(invalid.status, 400);
-    for (const fail of ['unavailable', 'malformed']) { mode = fail; const r = await post(explanation); assert.equal(r.status, 503); const body = await r.json(); assert.equal(body.error, 'AI_UNAVAILABLE'); assert.equal(body.verdict, undefined); }
+    for (const fail of ['unavailable', 'malformed']) { mode = fail; const r = await post(explanation); assert.equal(r.status, fail === 'unavailable' ? 503 : 502); const body = await r.json(); assert.equal(body.error, fail === 'unavailable' ? 'AI_UNAVAILABLE' : 'AI_INVALID_RESPONSE'); assert.equal(body.verdict, undefined); }
+  } finally { await new Promise<void>(resolve => server.close(() => resolve())); }
+});
+test('board focus is anchored to actual teacher dialogue and cannot spoof another student', () => {
+  const source = 'This is a red book and three pencils';
+  const board = { sessionId: 2, stage: 'board', teacherSpeech: source, history: [{ speaker: 'abboud', text: source }], boardFocus: { text: 'red', speaker: 'reem' } };
+  assert.equal(parseRequest(board).stage, 'board');
+  assert.throws(() => parseRequest({ ...board, boardFocus: { text: 'blue', speaker: 'reem' } }));
+  assert.throws(() => parseRequest({ ...board, boardFocus: { text: 'red', speaker: 'sara' } }));
+  assert.throws(() => parseRequest({ ...board, history: [{ speaker: 'badr', text: source }] }));
+  assert.equal(parseReply({ verdict: 'accurate', turns: [{ speaker: 'reem', text: 'red is the color of the book' }] }, 'board', 'reem').turns.length, 1);
+  assert.throws(() => parseReply({ verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Wrong speaker' }] }, 'board', 'reem'));
+});
+test('board reuses Sara actions and extracts only actual words, colors and quantities', async () => {
+  const { boardTokens, classroomBoard, interactionError } = await import('../src/lib/abboud/board');
+  assert.deepEqual(boardTokens('red three ٢ خمسة apples').map(t => [t.text, t.color || null, t.count || null]), [
+    ['red', '#ef4444', null], ['three', null, 3], ['٢', null, 2], ['خمسة', null, 5], ['apples', null, null]
+  ]);
+  assert.deepEqual(classroomBoard('', null), []);
+  const c = { incorrect: 'two book', correct: 'two books', reason: 'plural', accepted: false };
+  assert.equal(classroomBoard('two books', c).some(a => a.tool === 'highlightError'), false);
+  assert.equal(classroomBoard('two books', { ...c, accepted: true }).some(a => a.tool === 'highlightError'), true);
+  assert.match(interactionError(500), /تعذّر تشغيله/); assert.match(interactionError(401), /سجّل الدخول/); assert.match(interactionError(429), /حد المؤقت/); assert.match(interactionError(502), /غير صالح/);
+});
+test('board HTTP interaction forwards focus only as user data and enforces the selected student', async () => {
+  const app = express(); app.use(express.json());
+  app.post('/api/sara/abboud-teacher', abboudTeacherHandler(async (prompt, instruction, schema) => {
+    const input = JSON.parse(prompt);
+    assert.equal(input.boardFocus.text, 'papaya'); assert.equal(instruction.includes('papaya'), false);
+    assert.ok(schema.required?.includes('verdict'));
+    return JSON.stringify({ verdict: 'accurate', turns: [{ speaker: 'reem', text: 'You like papaya.' }] });
+  }));
+  const server = app.listen(0, '127.0.0.1'); await once(server, 'listening');
+  const address = server.address(); assert.ok(address && typeof address !== 'string');
+  try {
+    const response = await fetch(`http://127.0.0.1:${address.port}/api/sara/abboud-teacher`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: 4, stage: 'board', teacherSpeech: 'I like papaya', history: [{ speaker: 'abboud', text: 'I like papaya' }], boardFocus: { text: 'papaya', speaker: 'reem' } }) });
+    assert.equal(response.status, 200); assert.equal((await response.json()).turns[0].speaker, 'reem');
   } finally { await new Promise<void>(resolve => server.close(() => resolve())); }
 });
