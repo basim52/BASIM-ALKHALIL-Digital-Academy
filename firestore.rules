@@ -482,6 +482,80 @@ service cloud.firestore {
         allow write: if isOwner(uid) || isAdmin();
       }
     }
+    // --- «فصل عبود المباشر» (additive; new collection only — nothing above changes) ---
+    // The admin alone decides which registered students may join a host's class. The host (the student who opens
+    // «عبود المعلّم») publishes the live lesson state; allowed students join, raise a hand, and may post ONLY while
+    // the host has made them the current speaker of an active session. No XP/progress/certificate fields exist here.
+    match /abboudClasses/{hostUid} {
+      function abboudConfigPath() { return /databases/$(database)/documents/abboudClasses/$(hostUid); }
+      function abboudLivePath() { return /databases/$(database)/documents/abboudClasses/$(hostUid)/live/state; }
+      function isAbboudHost() { return isOwner(hostUid) && exists(abboudConfigPath()); }
+      function isAbboudGuest() {
+        return isSignedIn() && exists(abboudConfigPath()) && request.auth.uid in get(abboudConfigPath()).data.allowed;
+      }
+      function isValidAbboudConfig() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['hostUid', 'hostName', 'allowed', 'names', 'updatedAt']) &&
+          d.hostUid == hostUid && isValidId(hostUid) &&
+          d.hostName is string && d.hostName.size() <= 40 &&
+          d.allowed is list && d.allowed.size() >= 1 && d.allowed.size() <= 30 && !(hostUid in d.allowed) &&
+          d.names is map && d.names.size() <= 30 &&
+          d.updatedAt == request.time;
+      }
+
+      allow get: if isAdmin() || isOwner(hostUid) || (isSignedIn() && request.auth.uid in resource.data.allowed);
+      // Students list only classes that name them (query: allowed array-contains <own uid>).
+      allow list: if isAdmin() || (isSignedIn() && request.auth.uid in resource.data.allowed);
+      allow create, update: if isAdmin() && isValidAbboudConfig();
+      allow delete: if isAdmin();
+
+      match /live/{docId} {
+        allow read: if isAdmin() || isAbboudHost() || isAbboudGuest();
+        allow create, update: if docId == 'state' && isAbboudHost() &&
+          request.resource.data.keys().hasOnly(['active', 'sessionId', 'lessonId', 'lessonTitle', 'source', 'draft', 'explained', 'speaker', 'updatedAt']) &&
+          request.resource.data.active is bool &&
+          request.resource.data.sessionId is string && request.resource.data.sessionId.size() <= 40 &&
+          request.resource.data.lessonId is int && request.resource.data.lessonId >= 1 && request.resource.data.lessonId <= 16 &&
+          request.resource.data.lessonTitle is string && request.resource.data.lessonTitle.size() <= 80 &&
+          request.resource.data.source is string && request.resource.data.source.size() <= 1200 &&
+          request.resource.data.draft is string && request.resource.data.draft.size() <= 600 &&
+          request.resource.data.explained is list && request.resource.data.explained.size() <= 40 &&
+          request.resource.data.speaker is string &&
+          (request.resource.data.speaker == '' || request.resource.data.speaker in get(abboudConfigPath()).data.allowed) &&
+          request.resource.data.updatedAt == request.time;
+        allow delete: if isAbboudHost() || isAdmin();
+      }
+
+      match /participants/{uid} {
+        allow read: if isAdmin() || isAbboudHost() || isAbboudGuest();
+        // A student joins / heartbeats / raises or lowers their own hand.
+        allow create, update: if isOwner(uid) && isAbboudGuest() &&
+          request.resource.data.keys().hasOnly(['sessionId', 'hand', 'lastSeen']) &&
+          request.resource.data.sessionId is string && request.resource.data.sessionId.size() <= 40 &&
+          request.resource.data.hand is bool &&
+          (request.resource.data.lastSeen == request.time || (resource != null && request.resource.data.lastSeen == resource.data.lastSeen));
+        // The host may only lower a hand (decline a request).
+        allow update: if isAbboudHost() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hand']) && request.resource.data.hand == false;
+        allow delete: if isOwner(uid) || isAbboudHost() || isAdmin();
+      }
+
+      match /messages/{messageId} {
+        allow read: if isAdmin() || isAbboudHost() || isAbboudGuest();
+        // Talking needs Abboud's permission: only the current speaker of the active session may post.
+        allow create: if isAbboudGuest() && exists(abboudLivePath()) &&
+          get(abboudLivePath()).data.active == true &&
+          get(abboudLivePath()).data.speaker == request.auth.uid &&
+          request.resource.data.keys().hasOnly(['senderId', 'text', 'via', 'sessionId', 'createdAt']) &&
+          request.resource.data.senderId == request.auth.uid &&
+          request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 300 &&
+          request.resource.data.via in ['mic', 'text'] &&
+          request.resource.data.sessionId == get(abboudLivePath()).data.sessionId &&
+          request.resource.data.createdAt == request.time;
+        allow update: if false;
+        allow delete: if isAbboudHost() || isAdmin();
+      }
+    }
   }
 }
 

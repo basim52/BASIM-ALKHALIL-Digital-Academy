@@ -18,6 +18,8 @@ import { TUTOR_FILL_BLANK_TRACKS } from '../data/fillBlankTracks';
 const FillBlankPlayer = lazy(() => import('./SaraFillBlankPlayer').then(m => ({ default: m.FillBlankPlayer })));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 const AbboudTeacherActivity = lazy(() => import('./AbboudTeacherActivity'));
+// «فصل عبود المباشر» entry: renders nothing unless the admin allowed this student and that class is live now.
+const AbboudLiveJoin = lazy(() => import('./AbboudLiveJoin'));
 import SaraVocabPlayer from './SaraVocabPlayer';
 import { VOCAB_LESSONS } from '../data/saraTracks/vocabulary';
 
@@ -216,6 +218,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
         <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-amber-300">{L("مفردات سارة", "Sara's Vocabulary")}</span><span className="block text-[11px] font-bold text-white/75 truncate">{L(`${VOCAB_LESSONS.length} درس · بطاقات مصورة وتمرين بالصور`, `${VOCAB_LESSONS.length} lessons · picture cards & picture quiz`)}</span></span>
       </button>
     )}
+    {persona.id === 'sara' && !mock && <Suspense fallback={null}><AbboudLiveJoin uid={uid} /></Suspense>}
     {persona.id === 'sara' && (
       <button onClick={() => { voice.stop(); setAbboudOpen(true); }} data-testid="sara-class-abboud-open"
         className="shrink-0 rounded-xl border border-emerald-400/60 bg-[#0a2d5c] px-3 py-2 text-start flex items-center gap-2">

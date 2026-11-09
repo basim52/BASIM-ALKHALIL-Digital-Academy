@@ -17,7 +17,7 @@
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "test:abboud": "tsx --import ./scripts/test-stubs/register.mjs --test scripts/test-abboud-protocol.ts scripts/test-abboud-awards.ts scripts/test-abboud-ui.tsx scripts/test-abboud-voice.ts scripts/test-abboud-dictation.ts scripts/test-abboud-serverless.ts"
+    "test:abboud": "tsx --import ./scripts/test-stubs/register.mjs --test scripts/test-abboud-protocol.ts scripts/test-abboud-awards.ts scripts/test-abboud-ui.tsx scripts/test-abboud-voice.ts scripts/test-abboud-dictation.ts scripts/test-abboud-serverless.ts scripts/test-abboud-live.tsx"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",

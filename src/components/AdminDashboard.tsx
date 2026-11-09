@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+// «فصل عبود المباشر»: admin picks which registered students may join a host's class (lazy, admin-only tab).
+const AbboudLiveClassAdmin = lazy(() => import('./AbboudLiveClassAdmin'));
 import { motion } from 'motion/react';
 import { translations, Language } from '../lib/translations';
 import { 
@@ -67,7 +69,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   // Expanded tab and student detailed state
-  const [activeTab, setActiveTab] = useState<'overview' | 'students_logbook' | 'curriculum_designer' | 'voucher_system'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'students_logbook' | 'curriculum_designer' | 'voucher_system' | 'abboud_live'>('overview');
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
   const [selectedStudentResults, setSelectedStudentResults] = useState<any[]>([]);
   const [loadingStudentResults, setLoadingStudentResults] = useState(false);
@@ -625,7 +627,19 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
           <Hash size={15} className="text-amber-500" />
           {isRtl ? 'أكواد الاشتراك والكوبونات' : 'Coupons & Vouchers'}
         </button>
+        <button
+          onClick={() => setActiveTab('abboud_live')}
+          data-testid="admin-tab-abboud-live"
+          className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${activeTab === 'abboud_live' ? 'bg-white text-[#002147] shadow-sm' : 'text-slate-500 hover:text-[#002147]'}`}
+        >
+          <span aria-hidden="true">👨‍🏫</span>
+          {isRtl ? 'فصل عبود المباشر' : "Abboud's live class"}
+        </button>
       </div>
+
+      {activeTab === 'abboud_live' && (
+        <Suspense fallback={null}><AbboudLiveClassAdmin students={allStudents} /></Suspense>
+      )}
 
       {activeTab === 'students_logbook' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
