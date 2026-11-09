@@ -1,6 +1,6 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
 import React, { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -12,6 +12,9 @@ const dom = new JSDOM('<html><body><div id="root"></div></body></html>', { url: 
 Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, HTMLButtonElement: dom.window.HTMLButtonElement, localStorage: dom.window.localStorage, IS_REACT_ACT_ENVIRONMENT: true });
 // Sara's board write-on animation uses window.setTimeout; run it immediately so tests read the drawn board.
 Object.assign(dom.window, { setTimeout: (run: () => void) => { run(); return 0; }, clearTimeout: () => {} });
+// Media/animation APIs jsdom lacks, used by the shared teacher face (TutorVideoFace).
+Object.assign(dom.window.HTMLMediaElement.prototype, { play() { return Promise.resolve(); }, pause() {}, load() {} });
+Object.assign(globalThis, { requestAnimationFrame: (run: FrameRequestCallback) => setTimeout(() => run(Date.now()), 16), cancelAnimationFrame: (id: ReturnType<typeof setTimeout>) => clearTimeout(id) });
 const { createRoot } = await import('react-dom/client');
 // Resolve the lazily loaded Sara board up front (tldraw/WebGL/CSS leaves are stubbed by scripts/test-stubs).
 const { default: TutorTldrawBoard } = await import('../src/components/TutorTldrawBoard');
@@ -456,4 +459,71 @@ test("Escape inside Sara's canvas stays with the board instead of closing the cl
     await act(async () => { canvas.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); });
     assert.equal(closed, 0); assert.ok(host.querySelector('[data-testid="abboud-classroom"]'));
   } finally { await unmount(); }
+});
+
+const face = (id: string) => host.querySelector(`[data-face="${id}"]`);
+const clipOf = (id: string) => face(id)?.querySelector('.tutor-video-face')?.getAttribute('data-clip');
+test('Badr and Reem use the teachers\' face system: portrait + idle loop from /tutors, only the speaker talks, no laugh clip', async () => {
+  service([accurate('badr', 'What is hello?')]);
+  let finish!: () => void;
+  mock.method(ClassroomVoice.prototype, 'play', async (_turns: unknown, onSpeaker: (s: string) => void) => { onSpeaker('badr'); await new Promise<void>(r => { finish = r; }); });
+  await mount();
+  try {
+    for (const id of ['student-badr', 'student-reem']) {
+      assert.equal(face(id)?.querySelector('img.tutor-video-poster')?.getAttribute('src'), `/tutors/${id}.webp`);
+      assert.deepEqual(Array.from(face(id)!.querySelectorAll('source')).map(s => s.getAttribute('src')), [`/tutors/video/${id}-idle.webm`, `/tutors/video/${id}-idle.mp4`]);
+      assert.equal(clipOf(id), 'idle');
+    }
+    await click('اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('Hello is a greeting'); }); await click('خلصت');
+    await act(async () => { await new Promise(r => setImmediate(r)); });
+    assert.equal(clipOf('student-badr'), 'talk'); assert.equal(face('student-badr')?.getAttribute('data-speaking'), 'true');
+    assert.equal(clipOf('student-reem'), 'idle', 'the other student keeps listening');
+    assert.equal(host.querySelector('[data-testid="tutor-avatar"]')?.getAttribute('data-speaking'), 'false', 'Sara does not talk when Badr does');
+    assert.equal(host.querySelector('[data-testid="tutor-avatar"]')?.getAttribute('data-follow-playback'), 'false');
+    await act(async () => { await new Promise(r => setTimeout(r, 1300)); });
+    assert.equal(host.querySelectorAll('source[src*="student-"][src*="laugh"]').length, 0);
+    assert.ok(host.querySelector('source[src="/tutors/video/student-badr-talk.webm"]'), 'talk clip lazily loaded like the teachers');
+    await act(async () => { finish(); await new Promise(r => setImmediate(r)); });
+    assert.equal(clipOf('student-badr'), 'idle');
+  } finally { await unmount(); }
+});
+test('student face falls back to the still portrait, then the emoji, and phones play only the speaker', async () => {
+  const original = window.matchMedia;
+  window.matchMedia = ((query: string) => ({ matches: query === '(max-width: 639px)', addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
+  await mount();
+  try {
+    assert.equal(face('student-reem')?.querySelector('video'), null, 'phone: idle students show the still, no video');
+    assert.equal(face('student-reem')?.querySelector('img')?.getAttribute('src'), '/tutors/student-reem.webp');
+  } finally { await unmount(); window.matchMedia = original; }
+  await mount();
+  try {
+    const video = face('student-badr')?.querySelector('video'); assert.ok(video);
+    await act(async () => { video.dispatchEvent(new dom.window.Event('error')); });
+    assert.equal(face('student-badr')?.querySelector('video'), null); assert.ok(face('student-badr')?.querySelector('img'));
+    await act(async () => { face('student-badr')!.querySelector('img')!.dispatchEvent(new dom.window.Event('error')); });
+    assert.match(face('student-badr')?.textContent || '', /👦🏻/);
+  } finally { await unmount(); }
+});
+test('teacher faces are unchanged by default: follow real playback (not the prop) and keep the laugh clip', async () => {
+  const { TutorVideoFace } = await import('../src/components/tutor3d/TutorVideoFace');
+  const { markBufferSpeech } = await import('../src/lib/speechLevel');
+  root = createRoot(host);
+  try {
+    await act(async () => { root.render(<TutorVideoFace id="sara" alt="سارة" isSpeaking={true} onFail={() => {}} />); });
+    await act(async () => { await new Promise(r => setTimeout(r, 40)); });
+    assert.equal(host.querySelector('.tutor-video-face')?.getAttribute('data-clip'), 'idle', 'prop alone does not animate a teacher');
+    markBufferSpeech(true);
+    await act(async () => { await new Promise(r => setTimeout(r, 40)); });
+    assert.equal(host.querySelector('.tutor-video-face')?.getAttribute('data-clip'), 'talk');
+    markBufferSpeech(false);
+    await act(async () => { await new Promise(r => setTimeout(r, 1300)); });
+    assert.ok(host.querySelector('source[src="/tutors/video/sara-laugh.webm"]'));
+  } finally { await unmount(); }
+});
+test('student assets exist next to the teachers\' assets with the same formats and light sizes', () => {
+  for (const id of ['student-badr', 'student-reem']) {
+    assert.ok(statSync(`public/tutors/${id}.webp`).size < 40_000);
+    for (const clip of ['idle', 'talk']) for (const ext of ['webm', 'mp4']) assert.ok(statSync(`public/tutors/video/${id}-${clip}.${ext}`).size < 120_000);
+  }
+  for (const teacher of ['sara', 'business', 'exams', 'grammar', 'lama', 'reem', 'haya', 'jana']) assert.ok(statSync(`public/tutors/${teacher}.webp`).size > 0, 'teacher assets untouched');
 });

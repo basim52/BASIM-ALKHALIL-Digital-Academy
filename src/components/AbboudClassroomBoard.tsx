@@ -32,7 +32,7 @@ export default function AbboudClassroomBoard({ lessonTitle, source, checked, cor
       <BoardLoadBoundary>
         <Suspense fallback={<div className="abboud-board-fallback">جاري فتح السبورة…</div>}>
           <SaraBoard calls={calls} personaId="sara" lessonTitle={lessonTitle} speaking={saraSpeaking} replayKey={boardReplayKey(calls)}
-            expanded={expanded} onExpandedChange={onExpandedChange} onSpeak={source ? () => onRead(source) : undefined} />
+            expanded={expanded} onExpandedChange={onExpandedChange} avatarFollowsPlayback={false} onSpeak={source ? () => onRead(source) : undefined} />
         </Suspense>
       </BoardLoadBoundary>
     </div>

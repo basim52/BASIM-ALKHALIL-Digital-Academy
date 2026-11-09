@@ -8,8 +8,12 @@ export const hasLaughCue = (t: string) => LAUGH_RE.test(t || "");
 const COOLDOWN_MS = 12000;
 type Clip = "idle" | "talk" | "laugh";
 
-/** Looping video face: idle by default, talk while TTS plays, laugh once on cues. Crossfades between 3 stacked <video>s. */
-export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boolean; onFail: () => void }> = ({ id, alt, isSpeaking, onFail }) => {
+/**
+ * Looping video face: idle by default, talk while TTS plays, laugh once on cues. Crossfades between 3 stacked <video>s.
+ * Defaults (teachers): talk follows whatever speech is playing. With several faces on screen (Abboud's classroom),
+ * `followPlayback={false}` makes `isSpeaking` decide, so only the speaker talks; `laugh={false}` skips the laugh clip.
+ */
+export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boolean; onFail: () => void; followPlayback?: boolean; laugh?: boolean }> = ({ id, alt, isSpeaking, onFail, followPlayback = true, laugh = true }) => {
   const root = useRef<HTMLDivElement | null>(null);
   const refs = { idle: useRef<HTMLVideoElement | null>(null), talk: useRef<HTMLVideoElement | null>(null), laugh: useRef<HTMLVideoElement | null>(null) };
   const [clip, setClip] = useState<Clip>("idle");
@@ -25,7 +29,7 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
   useEffect(() => { setClip("idle"); setLoaded({ idle: true, talk: false, laugh: false }); setBad({ idle: false, talk: false, laugh: false }); laughing.current = false; }, [id]);
 
   // preload talk/laugh after idle is ready (lazy, active tutor only)
-  useEffect(() => { if (reduced) return; const t = setTimeout(() => setLoaded({ idle: true, talk: true, laugh: true }), 1200); return () => clearTimeout(t); }, [id, reduced]);
+  useEffect(() => { if (reduced) return; const t = setTimeout(() => setLoaded({ idle: true, talk: true, laugh }), 1200); return () => clearTimeout(t); }, [id, reduced, laugh]);
 
   // pause offscreen
   useEffect(() => {
@@ -36,16 +40,21 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
 
   // laugh cue from spoken text
   useEffect(() => {
+    if (!laugh) return;
     const h = (e: Event) => {
       const text = (e as CustomEvent).detail?.text || "";
       if (!hasLaughCue(text) || Date.now() - lastLaugh.current < COOLDOWN_MS) return;
       pendingLaugh.current = true;
     };
     window.addEventListener("tutor-speech-text", h); return () => window.removeEventListener("tutor-speech-text", h);
-  }, []);
+  }, [laugh]);
+
+  // prop-driven faces: no per-frame polling, the owner says who is speaking
+  useEffect(() => { if (!followPlayback) setClip(isSpeaking ? "talk" : "idle"); }, [followPlayback, isSpeaking]);
 
   // decide clip
   useEffect(() => {
+    if (!followPlayback) return;
     let raf = 0;
     const tick = () => {
       raf = requestAnimationFrame(tick);
@@ -58,7 +67,7 @@ export const TutorVideoFace: React.FC<{ id: string; alt: string; isSpeaking: boo
       setClip(c => (c === "laugh" ? c : speaking ? "talk" : "idle"));
     };
     tick(); return () => cancelAnimationFrame(raf);
-  }, [reduced]);
+  }, [reduced, followPlayback]);
 
   // play/pause
   useEffect(() => {

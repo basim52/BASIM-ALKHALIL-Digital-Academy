@@ -19,10 +19,12 @@ export interface Tutor3DAvatarProps {
   onTriggerVoicePreview?: () => void;
   /** When set, the header button just hides the avatar and shows this label (no dock/pop-out wording). */
   hideLabel?: string;
+  /** Default true (teachers). False: the face talks only when `isSpeaking` (several voices share one page). */
+  followPlayback?: boolean;
 }
 
 export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
-  agentId, isArabic, isSpeaking, isListening = false, isThinking = false, compact = false, mode = "docked", onToggleFloating, onTriggerVoicePreview, hideLabel,
+  agentId, isArabic, isSpeaking, isListening = false, isThinking = false, compact = false, mode = "docked", onToggleFloating, onTriggerVoicePreview, hideLabel, followPlayback = true,
 }) => {
   const [videoFailed, setVideoFailed] = useState(false);
   useEffect(() => setVideoFailed(false), [agentId]);
@@ -88,7 +90,7 @@ export const Tutor3DAvatar: React.FC<Tutor3DAvatarProps> = ({
           <div className="tutor-photo-glow" />
           <div className="tutor-photo-head">
             {!videoFailed ? (
-              <TutorVideoFace id={agent.id} alt={alt} isSpeaking={isSpeaking} onFail={() => setVideoFailed(true)} />
+              <TutorVideoFace id={agent.id} alt={alt} isSpeaking={isSpeaking} followPlayback={followPlayback} onFail={() => setVideoFailed(true)} />
             ) : (
               <img className="tutor-video-poster" src={`/tutors/${agent.id}.webp`} alt={alt} draggable={false} />
             )}

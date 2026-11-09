@@ -1,4 +1,5 @@
 import AbboudClassroomBoard from './AbboudClassroomBoard';
+import AbboudStudentFace from './AbboudStudentFace';
 import { interactionError, type BoardCorrection } from '../lib/abboud/board';
 import React, { useEffect, useRef, useState } from 'react';
 import { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
@@ -259,7 +260,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
             expanded={boardExpanded} onExpandedChange={toggleBoard} onAsk={focus => void askBoard(focus)} onRead={readBoard} />
           <aside className="abboud-students" aria-label="بدر وريم في الفصل" data-testid="abboud-students"><div className="abboud-student-list">
             {(['badr', 'reem'] satisfies Speaker[]).map(speaker => <div key={speaker} data-testid={`student-${speaker}`} className={`abboud-student-card rounded-2xl border-2 text-center transition-colors ${active === speaker ? 'border-indigo-500 bg-indigo-100' : 'border-amber-300 bg-white'}`}>
-              <div aria-hidden="true" className="abboud-student-face">{speaker === 'badr' ? '👦🏻' : '👧🏻'}</div>
+              <AbboudStudentFace id={speaker} speaking={active === speaker} />
               <h3 className="font-bold">{names[speaker]}</h3>
               <p className="abboud-student-status">{active === speaker ? 'يتحدث الآن 🔊' : phase === 'listening' ? 'يستمع لشرحك' : 'طالب في فصلك'}</p>
               {lastTurns.find(t => t.speaker === speaker) && <p dir="auto" className="abboud-student-reply">{lastTurns.find(t => t.speaker === speaker)?.text}</p>}
