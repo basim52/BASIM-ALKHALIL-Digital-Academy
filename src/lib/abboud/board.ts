@@ -1,5 +1,7 @@
 import { toToolCalls, type BoardAction } from '../boardActions.js';
 import type { Misconception } from './protocol.js';
+import type { Lesson } from './curriculum.js';
+import { lessonBoardActions } from './lessonBoard.js';
 
 const COLORS: Record<string, string> = { red: '#ef4444', blue: '#3b82f6', yellow: '#facc15', green: '#22c55e', أحمر: '#ef4444', أزرق: '#3b82f6', أصفر: '#facc15', أخضر: '#22c55e', احمر: '#ef4444', ازرق: '#3b82f6', اصفر: '#facc15', اخضر: '#22c55e' };
 const ARABIC_NUMBERS: Record<string, number> = { واحد: 1, اثنان: 2, اثنين: 2, ثلاثة: 3, ثلاثه: 3, أربعة: 4, اربعة: 4, خمسة: 5, خمسه: 5, ستة: 6, سته: 6, سبعة: 7, سبعه: 7, ثمانية: 8, ثمانيه: 8, تسعة: 9, تسعه: 9, عشرة: 10, عشره: 10 };
@@ -21,17 +23,22 @@ const NAMES: Record<string, string> = { badr: 'بدر', reem: 'ريم', sara: '�
 export interface AbboudBoardContent {
   lessonTitle: string; source: string; checked: boolean; correction: BoardCorrection | null;
   responses: readonly { speaker: string; text: string }[];
+  /** When given, the full lesson reference is written first (top), with the items Abboud has said marked ✅. */
+  lesson?: Lesson; explained?: readonly string[]; abboudSpeech?: readonly string[];
 }
 /**
  * Turns Abboud's actual explanation into Sara's board actions, drawn by Sara's own board.
  * Only what was said appears: the spoken text, the colours/numbers it contained, the student's attempt
  * (Badr's or Reem's controlled error, marked unverified) or the verified correction, and the latest student replies from the board.
  */
-export function abboudBoardActions({ lessonTitle, source, checked, correction, responses }: AbboudBoardContent): BoardAction[] {
-  const actions: BoardAction[] = lessonTitle ? [{ kind: 'title', text: lessonTitle.slice(0, 60) }] : [];
+export function abboudBoardActions({ lessonTitle, source, checked, correction, responses, lesson, explained = [], abboudSpeech = [] }: AbboudBoardContent): BoardAction[] {
+  // Lesson reference first (top), the live dialogue below it, so the talk never crowds out the lesson.
+  const actions: BoardAction[] = lesson ? lessonBoardActions(lesson, lessonTitle, explained, abboudSpeech)
+    : lessonTitle ? [{ kind: 'title', text: lessonTitle.slice(0, 60) }] : [];
   if (!source) return actions;
+  if (lesson) actions.push({ kind: 'text', text: '💬 من الحصة' });
   actions.push({ kind: 'text', text: `🎙️ عبود: ${source.slice(0, 1200)}`, ar: checked ? 'ناقشه الطالبان' : 'لم يتحقق منه الطالبان بعد' });
-  for (const token of boardTokens(source).filter(t => t.color || t.count).slice(0, 4)) {
+  for (const token of boardTokens(source).filter(t => t.color || t.count).slice(0, lesson ? 3 : 4)) {
     actions.push({ kind: 'arrow', from: token.text, to: token.color ? COLOR_MARK[token.color] || token.text : '●'.repeat(token.count || 0) });
   }
   if (correction) actions.push(correction.accepted

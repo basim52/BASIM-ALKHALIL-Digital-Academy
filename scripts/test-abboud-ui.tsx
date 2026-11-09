@@ -7,6 +7,7 @@ import type { Root } from 'react-dom/client';
 import { AbboudTeacherActivity } from '../src/components/AbboudTeacherActivity';
 import { ClassroomVoice } from '../src/lib/abboud/voice';
 import type { Recognition, RecognitionEvent } from '../src/lib/abboud/recognition';
+import type { BoardToolCall } from '../src/lib/boardActions';
 
 const dom = new JSDOM('<html><body><div id="root"></div></body></html>', { url: 'http://localhost' });
 Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, HTMLButtonElement: dom.window.HTMLButtonElement, localStorage: dom.window.localStorage, IS_REACT_ACT_ENVIRONMENT: true });
@@ -21,6 +22,10 @@ const { default: TutorTldrawBoard } = await import('../src/components/TutorTldra
 let root: Root;
 const host = document.getElementById('root')!;
 const text = () => host.textContent || '';
+/** Text on Sara's board below the lesson reference: only what happened in the class (Abboud, students, corrections). */
+const dialogueOf = (canvasText: string) => canvasText.split('💬 من الحصة')[1] ?? '';
+/** Everything on screen except the board itself (scripted hints must not appear in the classroom UI). */
+const textOutsideBoard = () => { const copy = host.cloneNode(true) as HTMLElement; copy.querySelector('[data-testid="tldraw-canvas"]')?.remove(); return copy.textContent || ''; };
 function button(label: string) {
   const found = Array.from(host.querySelectorAll('button')).find(b => b.textContent?.includes(label));
   assert.ok(found, `Missing button ${label}`); return found;
@@ -82,7 +87,9 @@ test('first entry shows both students, board and mic; no writing wizard or scrip
     assert.ok(host.querySelector('[data-testid="student-reem"]'));
     assert.ok(host.querySelector('[aria-label="السبورة التفاعلية"]'));
     assert.ok(button('اضغط وتحدّث')); assert.equal(host.querySelector('textarea'), null);
-    assert.equal(text().includes('My name is'), false);
+    assert.equal(textOutsideBoard().includes('My name is'), false, 'no scripted hints in the classroom UI');
+    const canvas = host.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
+    assert.match(canvas, /My name is — اسمي/); assert.match(canvas, /📊 شرحت 0 من 5/, 'the full lesson is on the board, nothing marked yet');
     assert.equal(host.querySelectorAll('nav [aria-label="اختيار الدرس"] button').length, 16, '15 lessons + «درس من اختياري»');
   } finally { await unmount(); }
 });
@@ -211,7 +218,7 @@ test('interactive board contains actual explanation, colors and counts; taps get
     const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
     assert.match(board.textContent || '', /I have three red books/);
     assert.ok(board.querySelector('[aria-label="لون red"]')); assert.ok(board.querySelector('[aria-label="عدد 3"]'));
-    assert.equal(board.textContent?.includes('blue'), false);
+    assert.equal(dialogueOf(board.textContent || '').includes('blue'), false, 'only the lesson reference lists blue, not the dialogue');
     await selectBoardWord('red'); await click('بدر، طبّق هذا');
     assert.match(board.textContent || '', /The books are red/); assert.equal(requests[1].stage, 'board');
     assert.equal(localStorage.length, 0); assert.equal(voice.mock.callCount(), 2);
@@ -234,8 +241,8 @@ test('board does not reveal the controlled correction before a verified teacher 
     await click('الأعداد 1–10'); await say('two means اثنين'); await say('two');
     const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
     const canvas = () => board.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
-    assert.match(canvas(), /بانتظار تصحيح عبود/); assert.equal(canvas().includes('✅'), false);
-    await say('two book is correct'); assert.equal(canvas().includes('✅'), false); assert.equal(localStorage.length, 0);
+    assert.match(canvas(), /بانتظار تصحيح عبود/); assert.equal(dialogueOf(canvas()).includes('✅'), false);
+    await say('two book is correct'); assert.equal(dialogueOf(canvas()).includes('✅'), false); assert.equal(localStorage.length, 0);
     await say('two books, add s for plural'); assert.match(canvas(), /❌ two book\n✅ two books/); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), '[3]');
   } finally { await unmount(); }
 });
@@ -418,6 +425,55 @@ test("Sara's class keeps her board unchanged: self-expanding overlay, avatar and
     assert.match(host.querySelector('[data-testid="board-expand"]')?.textContent || '', /تصغير/);
   } finally { await unmount(); }
 });
+test("Sara's board still writes every replay step by step by default (her lessons unchanged)", async () => {
+  const delays: number[] = []; const original = dom.window.setTimeout;
+  Object.assign(dom.window, { setTimeout: (run: () => void, ms = 0) => { delays.push(ms); run(); return 0; } });
+  const call = (content: string, fontSize: string) => ({ tool: 'drawBoardText', payload: { content, fontSize, color: 'white' } }) as unknown as BoardToolCall;
+  const calls = [call('Past Simple', 'l'), call('I played', 'm')];
+  root = createRoot(host);
+  try {
+    await act(async () => { root.render(<TutorTldrawBoard calls={calls} personaId="sara" lessonTitle="Past Simple" speaking={false} replayKey={0} onSpeak={() => {}} />); });
+    assert.deepEqual(delays.filter(d => d >= 400), [400, 1500], 'mount writes each call on its own step');
+    delays.length = 0;
+    await act(async () => { root.render(<TutorTldrawBoard calls={[...calls, call('She walked', 'm')]} personaId="sara" lessonTitle="Past Simple" speaking={false} replayKey={1} onSpeak={() => {}} />); });
+    assert.deepEqual(delays.filter(d => d >= 400), [400, 1500, 2600], 'a new replay is animated again, exactly as before');
+    assert.match(host.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '', /She walked/);
+  } finally { Object.assign(dom.window, { setTimeout: original }); await unmount(); }
+});
+test('Abboud board: the lesson is written step by step when it starts; his live updates redraw at once', async () => {
+  service([accurate('badr', 'Is it red?')]);
+  const delays: number[] = []; const original = dom.window.setTimeout;
+  Object.assign(dom.window, { setTimeout: (run: () => void, ms = 0) => { delays.push(ms); run(); return 0; } });
+  // Board write-on steps are 400 + i·1100 ms; other timers (face clips, audio) never fall on that grid.
+  const steps = () => delays.filter(d => d >= 400 && (d - 400) % 1100 === 0).length;
+  try {
+    await mount(); await click('الألوان والأشياء');
+    assert.ok(steps() >= 6, 'a new lesson is written on like Sara\'s lessons');
+    delays.length = 0; await say('This is red');
+    assert.equal(steps(), 0, 'marking ✅ does not rewrite the whole lesson');
+    assert.match(host.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '', /✅ 🔴 red — أحمر/);
+  } finally { Object.assign(dom.window, { setTimeout: original }); await unmount(); }
+});
+test("only Abboud's own words mark the lesson on the board; marks stay after the mic text clears; students never mark", async () => {
+  service([accurate('badr', 'red blue yellow green book pencil bag, a blue bag'), accurate('reem', 'a yellow pencil, two books')]); await mount();
+  try {
+    await click('الألوان والأشياء');
+    const canvas = () => host.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
+    assert.match(canvas(), /📊 شرحت 0 من 10/); assert.match(canvas(), /▫️ 🔴 red — أحمر/); assert.match(canvas(), /✏️ a red book\nكتاب أحمر/);
+    await say('Red means أحمر');
+    assert.match(canvas(), /📊 شرحت 1 من 10/); assert.match(canvas(), /✅ 🔴 red — أحمر/);
+    assert.match(canvas(), /▫️ 🔵 blue — أزرق/, 'Badr said blue — not marked'); assert.equal(canvas().includes('✅ a blue bag'), false);
+    await say('We say a red book');
+    assert.match(canvas(), /📊 شرحت 3 من 10/); assert.match(canvas(), /✅ a red book/); assert.match(canvas(), /✅ 📕 book — كتاب/);
+    assert.equal(canvas().includes('✅ a yellow pencil'), false, 'Reem said it — not marked');
+    await click('اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('a yellow pencil'); });
+    assert.match(canvas(), /✅ a yellow pencil/, 'live mic text of Abboud marks immediately');
+    await click('إيقاف الصوت والميكروفون'); assert.match(canvas(), /✅ a yellow pencil/, 'a mark is never taken back');
+    await click('الكتابة كبديل'); await write('green'); assert.match(canvas(), /✅ 🟢 green — أخضر/);
+    await write(''); assert.match(canvas(), /✅ 🟢 green — أخضر/, 'erasing the typed draft keeps what he already said');
+    await click('التحية والتعريف'); assert.match(canvas(), /📊 شرحت 0 من 5/, 'a new lesson starts unmarked');
+  } finally { await unmount(); }
+});
 test("Abboud's classroom renders Sara's very board with the explanation drawn on it, students and mic beside it", async () => {
   service([accurate('badr', 'What colour is the apple?')]); await mount();
   try {
@@ -426,9 +482,10 @@ test("Abboud's classroom renders Sara's very board with the explanation drawn on
       ['🖥️توسيع السبورة', '📋قالب الدرس', '📝ملاحظة لاصقة', '🙋اسأل سارة', '📷اشرح الصورة', '🧽مسح']);
     assert.equal(board.querySelector('[data-testid="tutor-avatar"]')?.getAttribute('data-agent'), 'sara');
     const canvas = () => board.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
-    assert.match(canvas(), /التحية والتعريف/); assert.equal(canvas().includes('My name is'), false, 'no scripted content before Abboud speaks');
+    assert.match(canvas(), /التحية والتعريف/); assert.match(canvas(), /▫️ 👋 Hello — مرحباً/, 'the lesson reference is written before Abboud speaks');
+    assert.equal(canvas().includes('عبود:'), false, 'no invented dialogue before Abboud speaks');
     await say('I like three red apples');
-    assert.match(canvas(), /عبود: I like three red apples/); assert.match(canvas(), /three/); assert.match(canvas(), /●●●/); assert.match(canvas(), /🔴/);
+    assert.match(dialogueOf(canvas()), /عبود: I like three red apples/); assert.match(canvas(), /three/); assert.match(canvas(), /●●●/); assert.match(canvas(), /🔴/);
     await selectBoardWord('red'); await click('بدر، طبّق هذا');
     assert.ok(host.querySelector('[data-testid="student-badr"]')); assert.ok(host.querySelector('[data-testid="abboud-microphone"]'));
   } finally { await unmount(); }
@@ -637,7 +694,7 @@ test('Badr makes the controlled error in even lessons: unverified attempt on the
   try {
     await click('الألوان والأشياء'); await say('Color first: a red book'); await say('We say a red book');
     const canvas = () => host.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
-    assert.match(canvas(), /محاولة بدر \(غير مؤكدة\) — بانتظار تصحيح عبود: a book red/); assert.equal(canvas().includes('✅'), false);
+    assert.match(canvas(), /محاولة بدر \(غير مؤكدة\) — بانتظار تصحيح عبود: a book red/); assert.equal(dialogueOf(canvas()).includes('✅'), false);
     assert.match(text(), /بدر يحاول وفي عبارته خطأ واحد صغير/);
     await say('Not a book red: the color comes first, a red book');
     assert.match(canvas(), /❌ a book red\n✅ a red book/); assert.match(text(), /اكتشفت خطأ بدر وصحّحته/);
@@ -692,6 +749,7 @@ test('parent summary after each lesson: explanation, English words and turns, st
     const card = host.querySelector('[data-testid="abboud-report-current"]')?.textContent || '';
     assert.match(card, /ماذا شرح: Hello greets people/);
     assert.match(card, /hello, greets, people, we, say, when, meet, use, is, my, name, reem/);
+    assert.match(card, /عناصر السبورة التي ذكرها: \d من 5/);
     assert.match(card, /تكلّم بالإنجليزي: 3 من 3/); assert.match(card, /نجوم الحصة: 2/); assert.match(card, /نصيحة سارة: اسأل سؤالاً قصيراً/);
     const saved = JSON.parse(localStorage.getItem('abboud-teacher-reports:v1:student-a') || '[]'); assert.equal(saved.length, 1); assert.equal(saved[0].stars, 2);
     const copied: string[] = [];

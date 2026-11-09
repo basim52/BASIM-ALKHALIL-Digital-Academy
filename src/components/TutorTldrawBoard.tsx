@@ -30,6 +30,9 @@ type Props = {
   expanded?: boolean; onExpandedChange?: (next: boolean) => void;
   /** Default true. Abboud's classroom passes false so Sara's face talks only when Sara (not a student) speaks. */
   avatarFollowsPlayback?: boolean;
+  /** Default true: every replayKey change re-writes the board step by step (Sara's lessons, unchanged).
+   *  Abboud's classroom passes false for live updates of the same lesson (✅ marks), so they redraw instantly. */
+  animateReplay?: boolean;
 };
 const T = { tutor: true };
 const NOTE_GAP_MS = 8000, NOTE_MAX = 12, NOTE_IDLE_MS = 3500;
@@ -54,7 +57,7 @@ async function imageToJpeg(src: string): Promise<string> {
 /** Smallest board zoom when fitting the lesson to width (keeps text readable on phones; taller lessons scroll/pan). */
 const FIT_MIN = 0.5;
 
-const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '', expanded: hostExpanded, onExpandedChange, avatarFollowsPlayback = true }) => {
+const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '', expanded: hostExpanded, onExpandedChange, avatarFollowsPlayback = true, animateReplay = true }) => {
   const persona = personaById(personaId);
   const t = useT(); const NM = t(persona.nameAr, persona.nameEn);
   const ed = useRef<Editor | null>(null);
@@ -148,7 +151,7 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
     if (!animate) fit(editor);
   }, [calls]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { if (replayKey) draw(true); }, [replayKey, draw]);
+  useEffect(() => { if (replayKey) draw(animateReplay); }, [replayKey, draw]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => timers.current.forEach(t => clearTimeout(t)), []);
 
   /** Student notes/questions (text or sticky shapes the student made) -> the tutor answers in lesson context, speaks, writes a reply beside it. */

@@ -1,6 +1,7 @@
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { abboudBoardCalls, boardReplayKey, boardTokens, type BoardCorrection } from '../lib/abboud/board';
 import type { BoardFocus, Message } from '../lib/abboud/protocol';
+import type { Lesson } from '../lib/abboud/curriculum';
 
 /** Sara's own interactive board (same chunk Sara's class already loads); Abboud only feeds it actions. */
 const SaraBoard = lazy(() => import('./TutorTldrawBoard'));
@@ -18,7 +19,8 @@ class BoardLoadBoundary extends React.Component<{ children: React.ReactNode }, {
   }
 }
 
-export default function AbboudClassroomBoard({ lessonTitle, source, checked, correction, responses, responseFocus, busy, saraSpeaking, expanded, onExpandedChange, onAsk, onRead }: {
+export default function AbboudClassroomBoard({ lesson, explained, abboudSpeech, lessonTitle, source, checked, correction, responses, responseFocus, busy, saraSpeaking, expanded, onExpandedChange, onAsk, onRead }: {
+  lesson: Lesson; explained: readonly string[]; abboudSpeech: readonly string[];
   lessonTitle: string; source: string; checked: boolean; correction: BoardCorrection | null; responses: Message[]; responseFocus: string; busy: boolean;
   saraSpeaking: boolean; expanded: boolean; onExpandedChange: (next: boolean) => void;
   onAsk: (focus: BoardFocus) => void; onRead: (text: string) => void;
@@ -26,12 +28,16 @@ export default function AbboudClassroomBoard({ lessonTitle, source, checked, cor
   const [selected, setSelected] = useState('');
   useEffect(() => { setSelected(''); }, [source, correction?.incorrect]);
   const tokens = boardTokens(source);
-  const calls = useMemo(() => abboudBoardCalls({ lessonTitle, source, checked, correction, responses }), [lessonTitle, source, checked, correction, responses]);
+  const calls = useMemo(() => abboudBoardCalls({ lesson, explained, abboudSpeech, lessonTitle, source, checked, correction, responses }), [lesson, explained, abboudSpeech, lessonTitle, source, checked, correction, responses]);
+  // A new lesson is written step by step like Sara's lessons; live updates of the same lesson (✅ marks, replies) appear at once.
+  const shownLesson = useRef(lessonTitle);
+  const animate = shownLesson.current !== lessonTitle;
+  useEffect(() => { shownLesson.current = lessonTitle; }, [lessonTitle]);
   return <section aria-label="السبورة التفاعلية" data-testid="abboud-interactive-board" data-board="sara" className="abboud-board" dir="rtl">
     <div className="abboud-board-surface">
       <BoardLoadBoundary>
         <Suspense fallback={<div className="abboud-board-fallback">جاري فتح السبورة…</div>}>
-          <SaraBoard calls={calls} personaId="sara" lessonTitle={lessonTitle} speaking={saraSpeaking} replayKey={boardReplayKey(calls)}
+          <SaraBoard calls={calls} personaId="sara" lessonTitle={lessonTitle} speaking={saraSpeaking} replayKey={boardReplayKey(calls)} animateReplay={animate}
             expanded={expanded} onExpandedChange={onExpandedChange} avatarFollowsPlayback={false} onSpeak={source ? () => onRead(source) : undefined} />
         </Suspense>
       </BoardLoadBoundary>
