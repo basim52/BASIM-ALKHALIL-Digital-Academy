@@ -36,14 +36,19 @@ class FakeRecognition implements Recognition {
   lang = ''; continuous = false; interimResults = false;
   onstart: Recognition['onstart'] = null; onresult: Recognition['onresult'] = null;
   onerror: Recognition['onerror'] = null; onend: Recognition['onend'] = null;
-  aborted = false;
-  start() { this.onstart?.(); }
-  stop() { this.onend?.(); }
+  aborted = false; started = 0; stopped = 0;
+  results: { isFinal: boolean; 0: { transcript: string } }[] = [];
+  start() { this.started++; this.onstart?.(); }
+  stop() { this.stopped++; this.onend?.(); }
   abort() { this.aborted = true; }
-  say(transcript: string) {
-    const event: RecognitionEvent = { resultIndex: 0, results: [{ isFinal: true, 0: { transcript } }] };
-    this.onresult?.(event); this.onend?.();
+  /** A recognised phrase; like real continuous sessions the result list accumulates. */
+  say(transcript: string, isFinal = true) {
+    this.results = [...this.results.filter(r => r.isFinal), { isFinal, 0: { transcript } }];
+    const event: RecognitionEvent = { resultIndex: this.results.length - 1, results: this.results };
+    this.onresult?.(event);
   }
+  /** The browser ends its session on its own (short silence / end of sentence). */
+  silence() { this.onend?.(); }
 }
 window.SpeechRecognition = FakeRecognition;
 const accurate = (speaker: string, message: string) => ({ verdict: 'accurate', turns: [{ speaker, text: message }] });
@@ -57,7 +62,10 @@ function service(responses: unknown[]) {
   const voice = mock.method(ClassroomVoice.prototype, 'play', async () => {});
   return { requests, voice };
 }
-async function say(value: string) { await click('اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say(value); await new Promise(resolve => setImmediate(resolve)); }); }
+async function say(value: string) {
+  await click('اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say(value); });
+  await click('خلصت'); await act(async () => { await new Promise(resolve => setImmediate(resolve)); });
+}
 
 test('first entry shows both students, board and mic; no writing wizard or scripted hints', async () => {
   await mount();
@@ -108,7 +116,9 @@ test('mic denied/no speech never calls AI; cleanup aborts mic on lesson change a
     await click('الألوان والأشياء'); assert.equal(second.aborted, true); assert.equal(second.onresult, null);
     await click('اضغط وتحدّث'); const third = FakeRecognition.latest;
     await act(async () => { third.onerror?.({ error: 'no-speech' }); third.onend?.(); });
-    assert.match(text(), /لم يُلتقط/); assert.equal(requests.length, 0);
+    // Silence is not an error any more: the browser session is quietly replaced and Abboud keeps the floor.
+    assert.notEqual(FakeRecognition.latest, third); assert.equal(text().includes('لم يُلتقط'), false); assert.equal(requests.length, 0);
+    await click('خلصت'); assert.match(text(), /لم يُلتقط/); assert.equal(requests.length, 0);
     await click('اضغط وتحدّث'); const fourth = FakeRecognition.latest;
     await act(async () => root.unmount()); assert.equal(fourth.aborted, true); assert.equal(fourth.onend, null);
   } finally { mock.restoreAll(); localStorage.clear(); }
@@ -129,7 +139,7 @@ test('stale AI reply after lesson switch cannot play, advance, or persist', asyn
   const voice = mock.method(ClassroomVoice.prototype, 'play', async () => {});
   await mount();
   try {
-    await click('اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('My explanation'); });
+    await click('اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('My explanation'); }); await click('خلصت');
     await click('الألوان والأشياء');
     await act(async () => { resolve(new Response(JSON.stringify(accurate('badr', 'Stale reply')))); await new Promise(r => setImmediate(r)); });
     assert.equal(text().includes('Stale reply'), false); assert.equal(voice.mock.callCount(), 0); assert.equal(localStorage.length, 0);
@@ -320,9 +330,60 @@ test('resizing the classroom does not restart or abort the active microphone', a
   try {
     await click('اضغط وتحدّث'); const mic = FakeRecognition.latest;
     await click('توسعة السبورة'); assert.equal(mic.aborted, false); assert.equal(FakeRecognition.latest, mic);
-    assert.match(button('إنهاء الشرح').textContent || '', /إنهاء الشرح/);
+    assert.match(button('خلصت').textContent || '', /خلصت/);
     await click('رجوع لحجم الفصل'); assert.equal(mic.aborted, false);
-    await act(async () => { mic.say('Hello students'); await new Promise(resolve => setImmediate(resolve)); });
+    await act(async () => { mic.say('Hello students'); }); await click('خلصت');
+    await act(async () => { await new Promise(resolve => setImmediate(resolve)); });
     assert.match(text(), /A real question/);
+  } finally { await unmount(); }
+});
+
+test('mic stays open through browser pauses; live text accumulates and is sent once only on «خلصت»', async () => {
+  const { requests } = service([accurate('badr', 'Is red a colour?')]); await mount();
+  try {
+    await click('اضغط وتحدّث'); const first = FakeRecognition.latest;
+    assert.equal(first.continuous, true); assert.equal(first.interimResults, true);
+    await act(async () => { first.say('This is', false); });
+    assert.match(host.querySelector('[data-testid="abboud-live-transcript"]')?.textContent || '', /This is/);
+    assert.match(text(), /لن يُرسل شيء قبل/);
+    await act(async () => { first.say('This is a red book'); first.silence(); });
+    assert.equal(requests.length, 0, 'browser end-of-sentence must not send');
+    const second = FakeRecognition.latest; assert.notEqual(second, first); assert.equal(second.started, 1);
+    assert.ok(button('خلصت'), 'still listening after the automatic browser stop');
+    await act(async () => { second.say('This is a red book'); second.say('and I like apples'); second.silence(); });
+    const third = FakeRecognition.latest;
+    await act(async () => { third.say('three apples'); });
+    assert.equal(host.querySelector('[data-testid="abboud-live-transcript"]')?.textContent, 'This is a red book and I like apples three apples');
+    await click('خلصت'); await act(async () => { await new Promise(resolve => setImmediate(resolve)); });
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].teacherSpeech, 'This is a red book and I like apples three apples');
+    assert.match(text(), /Is red a colour/);
+    await act(async () => { third.silence(); }); assert.equal(requests.length, 1, 'late browser events cannot resend');
+  } finally { await unmount(); }
+});
+test('permission loss mid-dictation stops without looping, keeps text unsent and lets Abboud continue it', async () => {
+  const { requests } = service([accurate('badr', 'Understood')]); await mount();
+  try {
+    await click('اضغط وتحدّث'); const mic = FakeRecognition.latest;
+    await act(async () => { mic.say('Hello means marhaba'); mic.onerror?.({ error: 'not-allowed' }); mic.onend?.(); });
+    assert.equal(FakeRecognition.latest, mic, 'no restart after a permission error'); assert.equal(mic.aborted, true);
+    assert.match(text(), /لم يُسمح/); assert.equal(requests.length, 0); assert.match(text(), /Hello means marhaba/);
+    await click('أكمل الكلام'); const resumed = FakeRecognition.latest; assert.notEqual(resumed, mic);
+    await act(async () => { resumed.say('and we say it to greet'); }); await click('خلصت');
+    await act(async () => { await new Promise(resolve => setImmediate(resolve)); });
+    assert.equal(requests[0]?.teacherSpeech, 'Hello means marhaba and we say it to greet');
+  } finally { await unmount(); }
+});
+test('stop and lesson change release a restarted mic without sending the collected speech', async () => {
+  const { requests } = service([]); await mount();
+  try {
+    await click('اضغط وتحدّث'); const first = FakeRecognition.latest;
+    await act(async () => { first.say('Colours are'); first.silence(); });
+    const restarted = FakeRecognition.latest; assert.notEqual(restarted, first);
+    await click('إيقاف الصوت والميكروفون'); assert.equal(restarted.aborted, true); assert.equal(restarted.onend, null);
+    assert.equal(requests.length, 0); assert.ok(button('اضغط وتحدّث'));
+    await click('اضغط وتحدّث'); const next = FakeRecognition.latest; await act(async () => { next.say('One two'); next.silence(); });
+    const after = FakeRecognition.latest; await click('الألوان والأشياء');
+    assert.equal(after.aborted, true); assert.equal(requests.length, 0);
   } finally { await unmount(); }
 });

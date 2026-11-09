@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
 import { completeLesson, nextStage, parseReply, readCompleted, type BoardFocus, type Message, type Speaker, type Stage } from '../lib/abboud/protocol';
 import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
-import { disposeRecognition, microphoneError, type Recognition } from '../lib/abboud/recognition';
+import { ContinuousDictation, microphoneError, type DictationPause } from '../lib/abboud/recognition';
 
 export { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
 export interface AbboudTeacherProps { uid?: string; onClose: () => void }
@@ -46,7 +46,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const generation = useRef(0);
   const mounted = useRef(false);
   const request = useRef<AbortController | null>(null);
-  const recognition = useRef<Recognition | null>(null);
+  const recognition = useRef<ContinuousDictation | null>(null);
+  /** Speech kept after a paused dictation so Abboud can continue it instead of starting over. */
+  const [resumeText, setResumeText] = useState('');
   const voice = useRef<ClassroomVoice | null>(null);
   const busy = useRef(false);
   const mutedRef = useRef(muted);
@@ -55,7 +57,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   function stop() {
     generation.current++;
     request.current?.abort(); request.current = null;
-    disposeRecognition(recognition.current); recognition.current = null;
+    recognition.current?.cancel(); recognition.current = null; setResumeText('');
     voice.current?.stop(); busy.current = false;
     setPhase('ready'); setActive(null);
   }
@@ -70,7 +72,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     reset(1);
     return () => {
       mounted.current = false; generation.current++;
-      request.current?.abort(); disposeRecognition(recognition.current); recognition.current = null;
+      request.current?.abort(); recognition.current?.cancel(); recognition.current = null;
       voice.current?.stop(); busy.current = false;
     };
   }, [uid]);
@@ -188,33 +190,36 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   }
   function startMic() {
     if (busy.current || stage === 'complete') return;
-    stop(); voice.current?.unlock(); setError(''); setAudioNotice(''); setDraft('');
+    const carried = resumeText;
+    stop(); voice.current?.unlock(); setError(''); setAudioNotice(''); setDraft(carried);
     const Constructor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Constructor) { setError('هذا المتصفح لا يدعم التعرّف الصوتي. جرّب متصفحاً يدعمه أو افتح الكتابة الاختيارية.'); return; }
-    const mic = new Constructor(); recognition.current = mic;
     const id = generation.current;
-    let transcript = ''; let failed = false;
-    mic.lang = language; mic.interimResults = true; mic.continuous = false;
-    const current = () => mounted.current && id === generation.current && recognition.current === mic;
-    mic.onstart = () => { if (current()) { setPhase('listening'); setActive('abboud'); } };
-    mic.onresult = event => {
-      if (!current()) return;
-      let interim = ''; transcript = '';
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) transcript += result[0].transcript + ' ';
-        else interim += result[0].transcript;
+    const current = () => mounted.current && id === generation.current && recognition.current === dictation;
+    const release = () => { recognition.current = null; setPhase('ready'); setActive(null); };
+    // The mic keeps listening through pauses; only «خلصت» (finish) sends the whole explanation.
+    const dictation: ContinuousDictation = new ContinuousDictation(() => new Constructor(), language, {
+      onListening: () => { if (current()) { setPhase('listening'); setActive('abboud'); } },
+      onText: text => { if (current()) setDraft(text); },
+      onFinished: text => {
+        if (!current()) return;
+        release();
+        if (text) void submit(text); else setError(microphoneError('no-speech'));
+      },
+      onError: (code, text) => {
+        if (!current()) return;
+        release(); setResumeText(text); setDraft(text); setError(microphoneError(code));
+      },
+      onPaused: (reason: DictationPause, text) => {
+        if (!current()) return;
+        release(); setResumeText(text); setDraft(text);
+        setAudioNotice(reason === 'limit'
+          ? 'مرّت ٣ دقائق فأوقفنا الميكروفون مؤقتاً. كلامك محفوظ ولم يُرسل: اضغط «أكمل الكلام» للمتابعة أو «إرسال الكلام المحفوظ» إذا خلصت.'
+          : 'توقّف المتصفح عن الاستماع. كلامك محفوظ ولم يُرسل: اضغط «أكمل الكلام» للمتابعة أو «إرسال الكلام المحفوظ» إذا خلصت.');
       }
-      setDraft((transcript + interim).trim());
-    };
-    mic.onerror = event => { if (current()) { failed = true; setError(microphoneError(event.error)); setPhase('ready'); setActive(null); } };
-    mic.onend = () => {
-      if (!current()) return;
-      recognition.current = null; setPhase('ready'); setActive(null);
-      if (!failed && transcript.trim()) void submit(transcript.trim());
-      else if (!failed) setError(microphoneError('no-speech'));
-    };
-    try { setPhase('listening'); mic.start(); } catch { disposeRecognition(mic); recognition.current = null; setPhase('ready'); setError(microphoneError('start-failed')); }
+    }, carried);
+    recognition.current = dictation;
+    try { setPhase('listening'); dictation.start(); } catch { release(); setResumeText(carried); setError(microphoneError('start-failed')); }
   }
   function trapFocus(event: React.KeyboardEvent<HTMLDivElement>) {
     if (event.key !== 'Tab') return;
@@ -255,9 +260,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
 
         </section>
         <section aria-label="أدوات عبود التعليمية" data-testid="abboud-teacher-controls" className="abboud-controls text-center"><div className="abboud-teacher-dock">
-          <p className="abboud-turn-status font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…' : phase === 'listening' ? '🎙️ عبود يتحدث — اضغط إنهاء الشرح عندما تنتهي' : tasks[stage]}</p>
+          <p className="abboud-turn-status font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…' : phase === 'listening' ? '🎙️ تكلّم براحتك يا عبود؛ الميكروفون يبقى مفتوحاً حتى تضغط «خلصت»' : tasks[stage]}</p>
           <div className="abboud-mic-row">
-            <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} onClick={() => phase === 'listening' ? recognition.current?.stop() : startMic()} className="rounded-full bg-indigo-700 px-8 py-5 text-xl font-bold text-white disabled:opacity-40">{phase === 'listening' ? '⏹ إنهاء الشرح وإرساله' : '🎙️ اضغط وتحدّث يا عبود'}</button>
+            <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} aria-label={phase === 'listening' ? 'خلصت، أرسل كلامي للطالبين' : undefined} onClick={() => phase === 'listening' ? recognition.current?.finish() : startMic()} className="rounded-full bg-indigo-700 px-8 py-5 text-xl font-bold text-white disabled:opacity-40">{phase === 'listening' ? '✅ خلصت — أرسل كلامي' : resumeText ? '🎙️ أكمل الكلام' : '🎙️ اضغط وتحدّث يا عبود'}</button>
             <label className="text-sm">لغة كلامك <select aria-label="لغة التعرف الصوتي" value={language} disabled={phase !== 'ready'} onChange={e => setLanguage(e.target.value)} className="rounded-lg border p-2"><option value="ar-SA">العربية</option><option value="en-US">English</option></select></label>
           </div>
           <p className="abboud-mic-note text-xs text-slate-600">يحوّل المتصفح كلامك إلى نص ليفهمه الطالبان. لا مؤقّت ولا حاجة للحفظ.</p>
@@ -269,7 +274,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           </div><div className="abboud-control-extras" tabIndex={0} aria-label="الكتابة الاختيارية وتفاصيل الفصل">
           {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-red-800">{error}</p>}
           {audioNotice && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-amber-900">{audioNotice}</p>}
-          {draft && !typing && <div className="mt-3 rounded-xl bg-white p-3"><p className="text-xs text-slate-500">ما التقطناه / كلامك المحفوظ:</p><p>{draft}</p>{phase === 'ready' && <button type="button" disabled={stage === 'complete'} onClick={() => void submit(draft)} className="mt-2 rounded-lg bg-indigo-700 px-4 py-2 text-white">إرسال الكلام المحفوظ مجدداً</button>}</div>}
+          {draft && !typing && <div className="mt-3 rounded-xl bg-white p-3"><p className="text-xs text-slate-500">{phase === 'listening' ? '🎙️ أسمعك الآن — لن يُرسل شيء قبل «خلصت»:' : 'ما التقطناه / كلامك المحفوظ:'}</p><p dir="auto" data-testid="abboud-live-transcript">{draft}</p>{phase === 'ready' && <button type="button" disabled={stage === 'complete'} onClick={() => void submit(draft)} className="mt-2 rounded-lg bg-indigo-700 px-4 py-2 text-white">إرسال الكلام المحفوظ مجدداً</button>}</div>}
           <button type="button" aria-expanded={typing} onClick={() => setTyping(!typing)} className="mt-5 text-sm underline">{typing ? 'إخفاء الكتابة' : 'الكتابة كبديل اختياري فقط'}</button>
           {typing && <form onSubmit={e => { e.preventDefault(); voice.current?.unlock(); void submit(draft); }} className="mx-auto mt-3 max-w-xl">
             <label htmlFor="abboud-fallback" className="block text-sm">كلام عبود (بديل الميكروفون)</label>
