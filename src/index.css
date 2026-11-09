@@ -228,7 +228,27 @@
 }
 .abboud-header { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 12px 16px; flex-shrink: 0; }
 .abboud-expand-toggle { max-width: 170px; min-height: 44px; }
-.abboud-lessons { padding: 0 16px 8px; flex-shrink: 0; max-height: 90px; overflow-y: auto; }
+.abboud-lessons { padding: 0 16px 8px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* 15 lessons + «درس من اختياري» in one horizontally scrolling row, so the board keeps its height. */
+.abboud-lesson-chips { flex: 1 1 0%; min-width: 0; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; padding-bottom: 4px; scrollbar-width: thin; }
+.abboud-lesson-chips > button { flex: none; white-space: nowrap; }
+.abboud-lesson-progress { flex: none; display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.abboud-topic-picker { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 0 0 6px; }
+.abboud-topic-ideas { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.abboud-star-notice { margin: 4px auto; max-width: 36rem; border-radius: 12px; background: #fef3c7; border: 1px solid #f59e0b; padding: 4px 10px; font-size: 13px; font-weight: 700; }
+.abboud-certificate-backdrop { position: fixed; inset: 0; z-index: 320; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 16px; background: rgba(2, 6, 23, 0.9); overflow-y: auto; }
+.abboud-certificate { width: min(720px, 100%); aspect-ratio: 1200 / 850; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 24px;
+  background: #002147; color: #fff; text-align: center; border: 8px solid #C49E3A; outline: 2px solid #C49E3A; outline-offset: -18px; border-radius: 12px; overflow-wrap: anywhere; }
+.abboud-certificate-title { font-size: clamp(20px, 5vw, 36px); font-weight: 800; color: #E6C36A; }
+.abboud-certificate-name { font-size: clamp(24px, 7vw, 48px); font-weight: 800; color: #E6C36A; }
+.abboud-certificate-stars { font-weight: 700; color: #E6C36A; }
+.abboud-certificate-small { font-size: 12px; color: #cbd5e1; }
+.abboud-certificate-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; color: #fff; }
+@media print {
+  body.abboud-print-certificate * { visibility: hidden !important; }
+  body.abboud-print-certificate .abboud-certificate, body.abboud-print-certificate .abboud-certificate * { visibility: visible !important; }
+  body.abboud-print-certificate .abboud-certificate { position: fixed; inset: 0; width: 100%; height: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 .abboud-workspace {
   display: grid; grid-template-columns: minmax(0, 1fr) 190px; grid-template-areas: "board students";
   flex: 1 1 0%; min-height: 0; min-width: 0; gap: 12px; padding: 0 16px 12px; overflow: hidden;
@@ -284,7 +304,13 @@
   .abboud-header > div > p { display: none; }
   .abboud-header > button { padding: 8px; font-size: 12px; min-height: 44px; }
   .abboud-expand-toggle { max-width: 112px; }
-  .abboud-lessons { padding: 0 8px 6px; max-height: 54px; }
+  .abboud-lessons { padding: 0 8px 6px; max-height: 54px; gap: 4px; }
+  .abboud-lesson-select { flex: 1 1 0%; min-width: 0; }
+  .abboud-lesson-progress { font-size: 11px; gap: 4px; }
+  .abboud-lesson-progress button { padding: 2px 6px; }
+  .abboud-topic-picker input { width: 9rem; }
+  .abboud-star-notice { font-size: 11px; }
+  .abboud-certificate { padding: 12px; border-width: 4px; outline-offset: -10px; }
   .abboud-lessons label { display: flex; align-items: center; min-width: 0; font-size: 12px; }
   .abboud-lessons select { flex: 1 1 0%; width: 0; min-width: 0; }
   .abboud-workspace, .abboud-dialog-expanded .abboud-workspace {

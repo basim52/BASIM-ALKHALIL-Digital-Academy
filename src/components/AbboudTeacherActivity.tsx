@@ -1,9 +1,14 @@
 import AbboudClassroomBoard from './AbboudClassroomBoard';
 import AbboudStudentFace from './AbboudStudentFace';
+import AbboudLessonPicker from './AbboudLessonPicker';
+import AbboudSessionReport from './AbboudSessionReport';
+import AbboudCertificate from './AbboudCertificate';
 import { interactionError, type BoardCorrection } from '../lib/abboud/board';
 import React, { useEffect, useRef, useState } from 'react';
-import { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
-import { completeLesson, nextStage, parseReply, readCompleted, type BoardFocus, type Message, type Speaker, type Stage } from '../lib/abboud/protocol';
+import { CUSTOM_LESSON_ID, SESSIONS_CONFIG, customLesson } from '../lib/abboud/curriculum';
+import { completeLesson, mistakeSpeaker, nextStage, parseReply, readCompleted, type BoardFocus, type Message, type Speaker, type Stage } from '../lib/abboud/protocol';
+import { awardStar, buildReport, correctionStar, earnedCertificate, explanationStar, lessonKey, readAwards, readReports, saveName, saveReport, starCount, type SessionReport, type StarKind } from '../lib/abboud/awards';
+import { TOPIC_IDEAS, sanitizeTopic, topicMessage } from '../lib/abboud/topic';
 import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
 import { ContinuousDictation, microphoneError, type DictationPause } from '../lib/abboud/recognition';
 
@@ -14,11 +19,16 @@ const names = { badr: 'بدر', reem: 'ريم', sara: 'سارة', abboud: 'عب�
 const tasks: Record<Stage | 'complete', string> = {
   explain: 'أنت المعلّم يا عبود. اضغط الميكروفون واشرح بطريقتك؛ بدر وريم ينتظرانك.',
   answer: 'بدر عنده سؤال عن شرحك. جاوبه بصوتك.',
-  correct: 'ريم تحاول وفي عبارتها خطأ واحد. اشرح لها التصحيح وسببه.',
+  correct: '',
   review_one: 'دورك تسأل: اطرح سؤال المراجعة الأول على بدر.',
   review_two: 'اطرح سؤال مراجعة ثانياً مختلفاً على ريم.',
-  complete: 'اكتمل تفاعل هذا الدرس. يمكنك إعادة الشرح أو اختيار درس آخر، بلا نقاط أو مؤقّت.'
+  complete: 'اكتمل تفاعل هذا الدرس. يمكنك إعادة الشرح أو اختيار درس آخر، بلا مؤقّت.'
 };
+/** The lesson's controlled error alternates between Reem (odd lessons) and Badr (even lessons). */
+const correctTask = (lessonId: number) => mistakeSpeaker(lessonId) === 'reem'
+  ? 'ريم تحاول وفي عبارتها خطأ واحد صغير. اكتشفه وصحّحه بصوتك وقل السبب.'
+  : 'بدر يحاول وفي عبارته خطأ واحد صغير. اكتشفه وصحّحه بصوتك وقل السبب.';
+const starText: Record<StarKind, string> = { explain: 'نجمة شرح', correction: 'نجمة تصحيح' };
 
 export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClose }) => {
   const [lessonId, setLessonId] = useState(1);
@@ -45,6 +55,17 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const [muted, setMuted] = useState(false);
   const [language, setLanguage] = useState('ar-SA');
   const [completed, setCompleted] = useState<number[]>(() => readCompleted(localStorage, uid));
+  const [awards, setAwards] = useState(() => readAwards(localStorage, uid));
+  const [reports, setReports] = useState<SessionReport[]>(() => readReports(localStorage, uid));
+  const [report, setReport] = useState<SessionReport | null>(null);
+  /** Stars earned during this run of the lesson (for the parent's summary); best-per-lesson lives in `awards`. */
+  const [runStars, setRunStars] = useState<StarKind[]>([]);
+  const [starNotice, setStarNotice] = useState('');
+  const [certificateOpen, setCertificateOpen] = useState(false);
+  /** «درس من اختياري»: the cleaned topic Abboud picked (empty until chosen). */
+  const [customTopic, setCustomTopic] = useState('');
+  const [topicDraft, setTopicDraft] = useState('');
+  const [topicNotice, setTopicNotice] = useState('');
   const dialog = useRef<HTMLDivElement | null>(null);
   const generation = useRef(0);
   const mounted = useRef(false);
@@ -55,7 +76,11 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const voice = useRef<ClassroomVoice | null>(null);
   const busy = useRef(false);
   const mutedRef = useRef(muted);
-  const lesson = SESSIONS_CONFIG.find(s => s.id === lessonId) || SESSIONS_CONFIG[0];
+  const custom = lessonId === CUSTOM_LESSON_ID;
+  const choosingTopic = custom && !customTopic;
+  const lesson = custom ? customLesson(customTopic || 'درس من اختياري') : SESSIONS_CONFIG.find(s => s.id === lessonId) || SESSIONS_CONFIG[0];
+  const lessonTitle = `${lesson.emoji} ${lesson.titleAr}`;
+  const currentKey = lessonKey(lessonId, custom ? customTopic : '');
 
   function stop() {
     generation.current++;
@@ -64,15 +89,22 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     voice.current?.stop(); busy.current = false;
     setPhase('ready'); setActive(null);
   }
-  function reset(id: number) {
+  function reset(id: number, keepTopic = false) {
     stop(); setLessonId(id); setStage('explain'); setMessages([]); setLastTurns([]); setDraft(''); setError(''); setAudioNotice(''); setTyping(false);
     setBoardSource(''); setBoardChecked(false); setBoardCorrection(null); setBoardResponses([]); setBoardResponseFocus('');
+    setRunStars([]); setStarNotice(''); setReport(null); setTopicNotice('');
+    if (!keepTopic) { setCustomTopic(''); setTopicDraft(''); }
+  }
+  function chooseTopic(raw: string) {
+    const checked = sanitizeTopic(raw);
+    if (checked.ok === false) { setTopicNotice(topicMessage(checked.reason)); return; }
+    reset(CUSTOM_LESSON_ID); setCustomTopic(checked.topic); setTopicDraft(checked.topic);
   }
   useEffect(() => {
     mounted.current = true;
     voice.current = new ClassroomVoice();
-    setCompleted(readCompleted(localStorage, uid));
-    reset(1);
+    setCompleted(readCompleted(localStorage, uid)); setAwards(readAwards(localStorage, uid)); setReports(readReports(localStorage, uid));
+    setCertificateOpen(false); reset(1);
     return () => {
       mounted.current = false; generation.current++;
       request.current?.abort(); recognition.current?.cancel(); recognition.current = null;
@@ -90,12 +122,13 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       // Escape inside Sara's drawing canvas belongs to the board (cancel editing / deselect).
       if ((event.target as Partial<Element> | null)?.closest?.('.tl-container')) return;
       event.preventDefault();
-      if (boardExpanded) setBoardExpanded(false);
+      if (certificateOpen) setCertificateOpen(false);
+      else if (boardExpanded) setBoardExpanded(false);
       else onClose();
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [onClose, boardExpanded]);
+  }, [onClose, boardExpanded, certificateOpen]);
   useEffect(() => {
     if (boardExpanded) workspace.current?.focus({ preventScroll: true });
     else if (wasExpanded.current) (expandOrigin.current?.isConnected ? expandOrigin.current : expandTrigger.current)?.focus({ preventScroll: true });
@@ -119,7 +152,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   }
   async function submit(rawText: string) {
     const text = rawText.trim();
-    if (busy.current || stage === 'complete' || !text.trim()) return;
+    if (busy.current || stage === 'complete' || choosingTopic || !text.trim()) return;
     if (messages.length > 26) { setError('وصلنا لنهاية مساحة الحوار. أعد هذا الدرس لنبدأ حواراً جديداً.'); return; }
     stop(); voice.current?.unlock();
     busy.current = true; setPhase('thinking'); setError(''); setAudioNotice(''); setDraft(text);
@@ -131,20 +164,40 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     try {
       const response = await fetch('/api/sara/abboud-teacher', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
-        body: JSON.stringify({ sessionId: lessonId, stage, teacherSpeech: text, history: messages })
+        body: JSON.stringify({ sessionId: lessonId, stage, teacherSpeech: text, history: messages, ...(custom ? { customTopic } : {}) })
       });
       if (!response.ok) { failureStatus = response.status; throw new Error('CLASSROOM_REQUEST_FAILED'); }
       failureStatus = 502;
-      const reply = parseReply(await response.json(), stage);
+      const abboudSpeech = [...messages.filter(m => m.speaker === 'abboud').map(m => m.text), text];
+      const reply = parseReply(await response.json(), stage, { sessionId: lessonId, abboudSpeech });
       failureStatus = 0;
       if (!mounted.current || id !== generation.current) return;
       if (stage === 'explain') setBoardChecked(reply.verdict === 'accurate');
       if (reply.misconception) setBoardCorrection({ ...reply.misconception, accepted: false });
       if (stage === 'correct' && reply.verdict === 'accurate') setBoardCorrection(previous => previous ? { ...previous, accepted: true } : null);
+      // Stars only for evidence the validator accepted: Badr's grounded understanding, or a verified real correction.
+      const earned: StarKind[] = [];
+      if (explanationStar(stage, reply)) earned.push('explain');
+      if (correctionStar(stage, reply, boardCorrection)) earned.push('correction');
+      let nextAwards = awards;
+      for (const kind of earned) nextAwards = awardStar(localStorage, uid, nextAwards, currentKey, kind);
+      const lessonStars = [...new Set([...runStars, ...earned])];
+      if (earned.length) {
+        setAwards(nextAwards); setRunStars(lessonStars);
+        setStarNotice(earned.map(kind => kind === 'explain'
+          ? `⭐ ${starText.explain}! بدر فهم «${reply.understood?.concept}» من شرحك.`
+          : `⭐ ${starText.correction}! اكتشفت خطأ ${names[boardCorrection?.speaker || 'reem']} وصحّحته: «${boardCorrection?.correct}».`).join(' ')
+          + (earned.every(kind => awards.stars[currentKey]?.[kind]) ? ' (محسوبة لهذا الدرس من قبل)' : ''));
+      }
       const following = nextStage(stage, lessonId, reply.verdict);
-      setMessages(prev => [...prev, { speaker: 'abboud', text }, ...reply.turns]);
+      const dialogue: Message[] = [...messages, { speaker: 'abboud', text }, ...reply.turns];
+      setMessages(dialogue);
       setLastTurns(reply.turns); setDraft(''); setStage(following);
-      if (following === 'complete') setCompleted(completeLesson(localStorage, uid, lessonId));
+      if (following === 'complete') {
+        setCompleted(completeLesson(localStorage, uid, lessonId));
+        const summary = buildReport(dialogue, lessonTitle, lessonStars.length, reply.praise);
+        setReport(summary); setReports(saveReport(localStorage, uid, summary));
+      }
       busy.current = false; setPhase('ready');
       clearTimeout(timeout); request.current = null;
       await play(reply.turns, id);
@@ -174,11 +227,11 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     try {
       const response = await fetch('/api/sara/abboud-teacher', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
-        body: JSON.stringify({ sessionId: lessonId, stage: 'board', teacherSpeech: boardSource, history, boardFocus })
+        body: JSON.stringify({ sessionId: lessonId, stage: 'board', teacherSpeech: boardSource, history, boardFocus, ...(custom ? { customTopic } : {}) })
       });
       if (!response.ok) { failureStatus = response.status; throw new Error('CLASSROOM_REQUEST_FAILED'); }
       failureStatus = 502;
-      const reply = parseReply(await response.json(), 'board', boardFocus.speaker);
+      const reply = parseReply(await response.json(), 'board', { sessionId: lessonId, boardSpeaker: boardFocus.speaker });
       failureStatus = 0;
       if (!mounted.current || id !== generation.current) return;
       // Board exploration must not replace Badr's pending question, advance stages or earn progress.
@@ -200,6 +253,8 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   }
   function startMic() {
     if (busy.current || stage === 'complete') return;
+    // While picking «درس من اختياري», the same continuous mic captures the topic; nothing goes to the AI.
+    const topicMode = choosingTopic;
     const carried = resumeText;
     stop(); voice.current?.unlock(); setError(''); setAudioNotice(''); setDraft(carried);
     const Constructor = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -214,7 +269,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       onFinished: text => {
         if (!current()) return;
         release();
-        if (text) void submit(text); else setError(microphoneError('no-speech'));
+        if (!text) setError(microphoneError('no-speech'));
+        else if (topicMode) { setDraft(''); chooseTopic(text); }
+        else void submit(text);
       },
       onError: (code, text) => {
         if (!current()) return;
@@ -248,14 +305,10 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           <button ref={expandTrigger} type="button" data-testid="abboud-board-expand" aria-expanded={boardExpanded} aria-controls="abboud-workspace" onClick={() => toggleBoard(!boardExpanded)} className="abboud-expand-toggle rounded-xl bg-indigo-700 px-3 py-3 font-bold text-white">{boardExpanded ? '↩ رجوع لحجم الفصل' : '⛶ توسعة السبورة'}</button>
           <button type="button" onClick={() => { stop(); onClose(); }} aria-label="إغلاق الفصل" className="shrink-0 rounded-xl bg-white px-3 py-3 font-bold">إغلاق</button>
         </header>
-        <nav aria-label="الدروس القصيرة" className="abboud-lessons">
-          <label className="block text-sm sm:hidden">الدرس القصير <select aria-label="اختر الدرس القصير" value={lessonId} onChange={e => reset(Number(e.target.value))} className="mr-2 min-w-0 max-w-full rounded-xl border bg-white p-2">{SESSIONS_CONFIG.map(s => <option key={s.id} value={s.id}>{s.emoji} {s.titleAr} {completed.includes(s.id) ? '✓' : ''}</option>)}</select></label>
-          <div className="hidden flex-wrap gap-2 sm:flex">
-          {SESSIONS_CONFIG.map(s => <button type="button" key={s.id} onClick={() => reset(s.id)} aria-pressed={lessonId === s.id} className={`rounded-xl px-3 py-2 text-sm ${lessonId === s.id ? 'bg-indigo-700 text-white' : 'bg-white'}`}>{s.emoji} {s.titleAr} {completed.includes(s.id) ? '✓' : ''}</button>)}
-          </div>
-        </nav>
+        <AbboudLessonPicker lessonId={lessonId} completed={completed} stars={starCount(awards)} certificate={earnedCertificate(completed)}
+          onPick={id => reset(id)} onCertificate={() => setCertificateOpen(true)} />
         <section ref={workspace} id="abboud-workspace" tabIndex={-1} aria-label="الفصل الصغير" data-testid="abboud-workspace" className="abboud-workspace">
-          <AbboudClassroomBoard lessonTitle={`${lesson.emoji} ${lesson.titleAr}`} source={boardSource} checked={boardChecked} correction={boardCorrection}
+          <AbboudClassroomBoard lessonTitle={lessonTitle} source={boardSource} checked={boardChecked} correction={boardCorrection}
             responses={boardResponses} responseFocus={boardResponseFocus} busy={phase !== 'ready'} saraSpeaking={active === 'sara'}
             expanded={boardExpanded} onExpandedChange={toggleBoard} onAsk={focus => void askBoard(focus)} onRead={readBoard} />
           <aside className="abboud-students" aria-label="بدر وريم في الفصل" data-testid="abboud-students"><div className="abboud-student-list">
@@ -271,11 +324,22 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
 
         </section>
         <section aria-label="أدوات عبود التعليمية" data-testid="abboud-teacher-controls" className="abboud-controls text-center"><div className="abboud-teacher-dock">
-          <p className="abboud-turn-status font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…' : phase === 'listening' ? '🎙️ تكلّم براحتك يا عبود؛ الميكروفون يبقى مفتوحاً حتى تضغط «خلصت»' : tasks[stage]}</p>
+          <p className="abboud-turn-status font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…'
+            : phase === 'listening' ? (choosingTopic ? '🎙️ قل الموضوع الذي تحبه، ثم اضغط «خلصت»' : '🎙️ تكلّم براحتك يا عبود؛ الميكروفون يبقى مفتوحاً حتى تضغط «خلصت»')
+            : choosingTopic ? '✨ درس من اختيارك: قل أو اكتب موضوعاً تحبه، وسيصير درس اليوم.'
+            : stage === 'correct' ? correctTask(lessonId) : tasks[stage]}</p>
+          {choosingTopic && <form data-testid="abboud-topic-picker" className="abboud-topic-picker" onSubmit={e => { e.preventDefault(); chooseTopic(topicDraft); }}>
+            <label className="text-sm">موضوعي <input value={topicDraft} maxLength={60} disabled={phase !== 'ready'} onChange={e => { setTopicDraft(e.target.value); setTopicNotice(''); }} placeholder="مثل: كرة القدم" className="mr-1 min-w-0 rounded-lg border p-2" /></label>
+            <button type="submit" disabled={phase !== 'ready' || !topicDraft.trim()} className="rounded-lg bg-amber-400 px-3 py-2 font-bold text-slate-900 disabled:opacity-40">اعتمد الموضوع</button>
+            <span className="abboud-topic-ideas" aria-label="أفكار مواضيع">{TOPIC_IDEAS.map(idea => <button type="button" key={idea} disabled={phase !== 'ready'} onClick={() => chooseTopic(idea)} className="rounded-full border bg-white px-2 py-1 text-xs">{idea}</button>)}</span>
+            {topicNotice && <p role="status" className="w-full text-sm text-amber-800">{topicNotice}</p>}
+          </form>}
+          {custom && customTopic && <p className="text-xs">✨ موضوعك: <b dir="auto">{customTopic}</b> <button type="button" disabled={phase !== 'ready'} onClick={() => reset(CUSTOM_LESSON_ID)} className="underline disabled:opacity-40">تغيير الموضوع</button></p>}
+          {starNotice && <p role="status" data-testid="abboud-star-notice" className="abboud-star-notice">{starNotice}</p>}
           <div className="abboud-mic-row">
             {/* Abboud is the teacher: his face talks from the mic press until «خلصت», and listens otherwise. */}
             <AbboudStudentFace id="abboud" speaking={phase === 'listening'} className="abboud-teacher-face" />
-            <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} aria-label={phase === 'listening' ? 'خلصت، أرسل كلامي للطالبين' : undefined} onClick={() => phase === 'listening' ? recognition.current?.finish() : startMic()} className="rounded-full bg-indigo-700 px-8 py-5 text-xl font-bold text-white disabled:opacity-40">{phase === 'listening' ? '✅ خلصت — أرسل كلامي' : resumeText ? '🎙️ أكمل الكلام' : '🎙️ اضغط وتحدّث يا عبود'}</button>
+            <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} aria-label={phase === 'listening' ? (choosingTopic ? 'خلصت، هذا موضوعي' : 'خلصت، أرسل كلامي للطالبين') : undefined} onClick={() => phase === 'listening' ? recognition.current?.finish() : startMic()} className="rounded-full bg-indigo-700 px-8 py-5 text-xl font-bold text-white disabled:opacity-40">{phase === 'listening' ? (choosingTopic ? '✅ خلصت — هذا موضوعي' : '✅ خلصت — أرسل كلامي') : choosingTopic ? '🎙️ قل موضوعك' : resumeText ? '🎙️ أكمل الكلام' : '🎙️ اضغط وتحدّث يا عبود'}</button>
             <label className="text-sm">لغة كلامك <select aria-label="لغة التعرف الصوتي" value={language} disabled={phase !== 'ready'} onChange={e => setLanguage(e.target.value)} className="rounded-lg border p-2"><option value="ar-SA">العربية</option><option value="en-US">English</option></select></label>
           </div>
           <p className="abboud-mic-note text-xs text-slate-600">يحوّل المتصفح كلامك إلى نص ليفهمه الطالبان. لا مؤقّت ولا حاجة للحفظ.</p>
@@ -294,11 +358,14 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
             <textarea id="abboud-fallback" maxLength={1200} value={draft} disabled={disabled} onChange={e => setDraft(e.target.value)} className="mt-2 w-full rounded-xl border bg-white p-3" />
             <button type="submit" disabled={disabled || !draft.trim()} className="rounded-xl bg-indigo-700 px-5 py-2 text-white disabled:opacity-40">إرسال كلامي للطالبين</button>
           </form>}
-          {stage === 'complete' && <button type="button" onClick={() => reset(lessonId)} className="m-3 rounded-xl bg-emerald-700 px-5 py-3 text-white">إعادة الدرس بلا نقاط</button>}
+          {stage === 'complete' && <button type="button" onClick={() => reset(lessonId, true)} className="m-3 rounded-xl bg-emerald-700 px-5 py-3 text-white">إعادة الدرس (النجوم لا تتكرر)</button>}
+          {stage === 'complete' && earnedCertificate(completed) && !custom && <button type="button" onClick={() => setCertificateOpen(true)} className="m-3 rounded-xl bg-amber-400 px-5 py-3 font-bold text-slate-900">🎓 أكملت الدروس الـ15! افتح شهادة «معلّم صغير»</button>}
+          <AbboudSessionReport report={stage === 'complete' ? report : null} history={reports} name={awards.name} guest={!uid} />
         {messages.length > 0 && <section aria-label="حوار الفصل" aria-live="polite" className="mx-5 space-y-2 border-t py-4">{messages.map((message, i) => <p key={i} className="rounded-xl bg-white p-3"><strong>{names[message.speaker]}: </strong><span dir="auto">{message.text}</span></p>)}</section>}
-        <footer className="p-4 text-center text-xs text-slate-500">نشاط اختياري منفصل عن تقدّم سارة وXP والشهادات. {uid ? 'إنجاز الدروس محفوظ لهذا الطالب على هذا الجهاز فقط.' : 'وضع ضيف: لا يُحفظ التقدّم.'}</footer>
+        <footer className="p-4 text-center text-xs text-slate-500">نشاط اختياري منفصل عن تقدّم سارة وXP وشهادات الأكاديمية. {uid ? 'إنجاز الدروس ونجوم المعلّم وشهادة «معلّم صغير» وملخصات الحصص محفوظة لهذا الطالب على هذا الجهاز فقط.' : 'وضع ضيف: لا يُحفظ التقدّم ولا النجوم.'}</footer>
           </div></section>
       </div>
+      {certificateOpen && <AbboudCertificate name={awards.name} stars={starCount(awards)} onName={name => setAwards(current => saveName(localStorage, uid, current, name))} onClose={() => setCertificateOpen(false)} />}
     </div>
   );
 };
