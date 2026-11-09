@@ -16,13 +16,36 @@ export function boardTokens(text: string): BoardToken[] {
     return { text, ...(color ? { color } : {}), ...(Number.isInteger(number) && number >= 1 && number <= 10 ? { count: number } : {}) };
   });
 }
-/** Reuse Sara's small structured board-action vocabulary, not its heavy drawing/editor bundle. */
-export function classroomBoard(source: string, correction: BoardCorrection | null) {
-  const actions: BoardAction[] = source ? [{ kind: 'text', text: source.slice(0, 1200) }] : [];
+const COLOR_MARK: Record<string, string> = { '#ef4444': '🔴', '#3b82f6': '🔵', '#facc15': '🟡', '#22c55e': '🟢' };
+const NAMES: Record<string, string> = { badr: 'بدر', reem: 'ريم', sara: 'سارة', abboud: 'عبود' };
+export interface AbboudBoardContent {
+  lessonTitle: string; source: string; checked: boolean; correction: BoardCorrection | null;
+  responses: readonly { speaker: string; text: string }[];
+}
+/**
+ * Turns Abboud's actual explanation into Sara's board actions, drawn by Sara's own board.
+ * Only what was said appears: the spoken text, the colours/numbers it contained, Reem's attempt
+ * (marked unverified) or the verified correction, and the latest student replies from the board.
+ */
+export function abboudBoardActions({ lessonTitle, source, checked, correction, responses }: AbboudBoardContent): BoardAction[] {
+  const actions: BoardAction[] = lessonTitle ? [{ kind: 'title', text: lessonTitle.slice(0, 60) }] : [];
+  if (!source) return actions;
+  actions.push({ kind: 'text', text: `🎙️ عبود: ${source.slice(0, 1200)}`, ar: checked ? 'ناقشه الطالبان' : 'لم يتحقق منه الطالبان بعد' });
+  for (const token of boardTokens(source).filter(t => t.color || t.count).slice(0, 4)) {
+    actions.push({ kind: 'arrow', from: token.text, to: token.color ? COLOR_MARK[token.color] || token.text : '●'.repeat(token.count || 0) });
+  }
   if (correction) actions.push(correction.accepted
     ? { kind: 'fix', wrong: correction.incorrect, right: correction.correct }
-    : { kind: 'highlight', text: correction.incorrect });
-  return toToolCalls(actions);
+    : { kind: 'highlight', text: `محاولة ريم — بانتظار تصحيح عبود: ${correction.incorrect}` });
+  for (const reply of responses.slice(-2)) actions.push({ kind: 'highlight', text: `${NAMES[reply.speaker] || reply.speaker}: ${reply.text}`.slice(0, 300) });
+  return actions;
+}
+export const abboudBoardCalls = (content: AbboudBoardContent) => toToolCalls(abboudBoardActions(content));
+/** Stable numeric key so Sara's board redraws (write-on) exactly when the content changes. */
+export function boardReplayKey(calls: unknown[]) {
+  const text = JSON.stringify(calls); let hash = 7;
+  for (let i = 0; i < text.length; i++) hash = (hash * 31 + text.charCodeAt(i)) | 0;
+  return (hash >>> 0) || 1;
 }
 export function interactionError(status: number) {
   if (status === 401 || status === 403) return 'تعذّر السماح بطلب الفصل. سجّل الدخول مجدداً ثم حاول؛ كلامك محفوظ ولم يتقدّم الدرس.';

@@ -69,15 +69,24 @@ test('board focus is anchored to actual teacher dialogue and cannot spoof anothe
   assert.equal(parseReply({ verdict: 'accurate', turns: [{ speaker: 'reem', text: 'red is the color of the book' }] }, 'board', 'reem').turns.length, 1);
   assert.throws(() => parseReply({ verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Wrong speaker' }] }, 'board', 'reem'));
 });
-test('board reuses Sara actions and extracts only actual words, colors and quantities', async () => {
-  const { boardTokens, classroomBoard, interactionError } = await import('../src/lib/abboud/board');
+test('Abboud content becomes Sara board actions: only actual words, colours, quantities, gated correction', async () => {
+  const { boardTokens, abboudBoardActions, abboudBoardCalls, interactionError } = await import('../src/lib/abboud/board');
   assert.deepEqual(boardTokens('red three ٢ خمسة apples').map(t => [t.text, t.color || null, t.count || null]), [
     ['red', '#ef4444', null], ['three', null, 3], ['٢', null, 2], ['خمسة', null, 5], ['apples', null, null]
   ]);
-  assert.deepEqual(classroomBoard('', null), []);
+  const base = { lessonTitle: '🎨 الألوان', source: '', checked: false, correction: null, responses: [] };
+  assert.deepEqual(abboudBoardActions(base), [{ kind: 'title', text: '🎨 الألوان' }], 'empty board: lesson title only, no scripted content');
+  const said = abboudBoardActions({ ...base, source: 'three red books' });
+  assert.deepEqual(said.filter(a => a.kind === 'arrow'), [{ kind: 'arrow', from: 'three', to: '●●●' }, { kind: 'arrow', from: 'red', to: '🔴' }]);
+  assert.ok(said.some(a => a.kind === 'text' && a.text.includes('three red books')));
+  assert.equal(JSON.stringify(said).includes('blue'), false);
   const c = { incorrect: 'two book', correct: 'two books', reason: 'plural', accepted: false };
-  assert.equal(classroomBoard('two books', c).some(a => a.tool === 'highlightError'), false);
-  assert.equal(classroomBoard('two books', { ...c, accepted: true }).some(a => a.tool === 'highlightError'), true);
+  const pending = abboudBoardCalls({ ...base, source: 'two books', correction: c });
+  assert.equal(pending.some(a => a.tool === 'highlightError'), false, 'correct answer stays hidden until Abboud corrects');
+  assert.ok(pending.some(a => a.tool === 'addNote' && a.payload.content.includes('بانتظار تصحيح عبود')));
+  assert.ok(abboudBoardCalls({ ...base, source: 'two books', correction: { ...c, accepted: true } }).some(a => a.tool === 'highlightError' && a.payload.correctedSnippet === 'two books'));
+  const replies = abboudBoardCalls({ ...base, source: 'red', responses: [{ speaker: 'badr', text: 'one' }, { speaker: 'reem', text: 'two' }, { speaker: 'badr', text: 'three' }] });
+  assert.deepEqual(replies.filter(a => a.tool === 'addNote').map(a => a.tool === 'addNote' && a.payload.content), ['ريم: two', 'بدر: three']);
   assert.match(interactionError(500), /تعذّر تشغيله/); assert.match(interactionError(401), /سجّل الدخول/); assert.match(interactionError(429), /حد المؤقت/); assert.match(interactionError(502), /غير صالح/);
 });
 test('board HTTP interaction forwards focus only as user data and enforces the selected student', async () => {
