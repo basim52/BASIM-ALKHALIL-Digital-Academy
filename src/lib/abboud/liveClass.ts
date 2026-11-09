@@ -13,6 +13,11 @@ export const MAX_TITLE = 80;
 export const MAX_EXPLAINED = 40;
 export const PRESENCE_MS = 120_000;
 export const HEARTBEAT_MS = 45_000;
+/** Shared transcript (Abboud's finished sentences, Badr/Reem/Sara replies) kept in live/feed. */
+export const MAX_FEED = 30;
+export const MAX_FEED_TEXT = 300;
+/** One full (non-trickle) SDP for an audio-only peer connection is a few KB. */
+export const MAX_SDP = 16000;
 
 export type LiveClassConfig = { hostUid: string; hostName: string; allowed: string[]; names: Record<string, string> };
 export type LiveState = {
@@ -22,6 +27,12 @@ export type LiveState = {
 export type Participant = { uid: string; sessionId: string; hand: boolean; lastSeen: number };
 export type LiveMessage = { id: string; senderId: string; text: string; via: 'mic' | 'text'; sessionId: string; createdAt: number };
 export type NewLiveMessage = Omit<LiveMessage, 'id' | 'createdAt'>;
+export type FeedWho = 'abboud' | 'badr' | 'reem' | 'sara';
+/** One finished utterance shown (and voiced) on every device: never interim recognition. */
+export type FeedItem = { id: string; who: FeedWho; text: string; at: number };
+export type LiveFeed = { sessionId: string; items: FeedItem[] };
+/** WebRTC signaling between the host (hub) and one guest: full SDPs, no trickle. `answer` may be 'restart:<n>' (guest asks for a new offer). */
+export type RtcSignal = { guestUid: string; sessionId: string; offer: string; answer: string };
 export type Unsubscribe = () => void;
 export type OnError = (error: unknown) => void;
 
@@ -45,6 +56,15 @@ export interface LiveClassStore {
   leave(hostUid: string, uid: string): Promise<void>;
   watchMessages(hostUid: string, sessionId: string, cb: (messages: LiveMessage[]) => void, onError?: OnError): Unsubscribe;
   postMessage(hostUid: string, message: NewLiveMessage): Promise<void>;
+  /** live/feed: host writes; host, guests and admin read. */
+  watchFeed(hostUid: string, cb: (feed: LiveFeed | null) => void, onError?: OnError): Unsubscribe;
+  publishFeed(hostUid: string, feed: LiveFeed): Promise<void>;
+  /** rtc/{guest}: the host and that guest only. */
+  watchSignal(hostUid: string, guestUid: string, cb: (signal: RtcSignal | null) => void, onError?: OnError): Unsubscribe;
+  watchSignals(hostUid: string, cb: (signals: RtcSignal[]) => void, onError?: OnError): Unsubscribe;
+  sendOffer(hostUid: string, guestUid: string, sessionId: string, offer: string): Promise<void>;
+  sendAnswer(hostUid: string, guestUid: string, answer: string): Promise<void>;
+  clearSignal(hostUid: string, guestUid: string): Promise<void>;
 }
 
 export const isValidUid = (id: unknown): id is string => typeof id === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(id);
@@ -87,6 +107,11 @@ export function liveState(input: Omit<LiveState, 'updatedAt'>): LiveState {
     explained: input.explained.filter(k => /^[we]\d{1,2}$/.test(k)).slice(0, MAX_EXPLAINED), speaker: input.active && isValidUid(input.speaker) ? input.speaker : ''
   };
 }
+const FEED_WHO: readonly FeedWho[] = ['abboud', 'badr', 'reem', 'sara'];
+/** Host's feed, bounded to what the rules accept: last MAX_FEED items, clean one-line texts. */
+export function liveFeed(sessionId: string, items: readonly FeedItem[]): LiveFeed {
+  return { sessionId: sessionId.slice(0, 40), items: items.filter(i => FEED_WHO.includes(i.who)).map(i => ({ id: String(i.id).slice(0, 24), who: i.who, text: cleanText(i.text, MAX_FEED_TEXT), at: Number(i.at) || 0 })).filter(i => i.text).slice(-MAX_FEED) };
+}
 export const nameOf = (config: LiveClassConfig | null | undefined, uid: string) => config?.names[uid] || 'طالب';
 
 /* ---------- In-memory store: the same permission model as firestore.rules, per signed-in actor (tests). ---------- */
@@ -105,6 +130,8 @@ export function createMemoryLiveBackend(now: () => number = Date.now) {
   const states = new Map<string, LiveState>();
   const participants = new Map<string, Map<string, Participant>>();
   const messages = new Map<string, LiveMessage[]>();
+  const feeds = new Map<string, LiveFeed>();
+  const signals = new Map<string, Map<string, RtcSignal>>();
   const listeners = new Set<Listener>();
   let seq = 0;
   const notify = () => { for (const l of Array.from(listeners)) l(); };
@@ -150,8 +177,23 @@ export function createMemoryLiveBackend(now: () => number = Date.now) {
         if (message.senderId !== actor || !canPost(configs.get(hostUid), state, actor) || message.sessionId !== state!.sessionId || !text || !['mic', 'text'].includes(message.via)) deny();
         const list = messages.get(hostUid) || []; messages.set(hostUid, list);
         list.push({ ...message, text, id: `m${++seq}`, createdAt: now() }); notify();
-      }
+      },
+      watchFeed: (hostUid, cb, onError) => guarded(hostUid, () => feeds.get(hostUid) || null, cb, onError),
+      async publishFeed(hostUid, feed) { if (!host(hostUid)) deny(); feeds.set(hostUid, structuredClone(liveFeed(feed.sessionId, feed.items))); notify(); },
+      watchSignal: (hostUid, guestUid, cb, onError) => watch(() => (host(hostUid) || (actor === guestUid && guest(hostUid)) || admin) ? cb(signals.get(hostUid)?.get(guestUid) || null) : onError?.(new PermissionDenied())),
+      watchSignals: (hostUid, cb, onError) => watch(() => (host(hostUid) || admin) ? cb(Array.from(signals.get(hostUid)?.values() || [])) : onError?.(new PermissionDenied())),
+      async sendOffer(hostUid, guestUid, sessionId, offer) {
+        if (!host(hostUid) || !isGuest(configs.get(hostUid), guestUid) || !offer || offer.length > MAX_SDP) deny();
+        const room = signals.get(hostUid) || new Map(); signals.set(hostUid, room);
+        room.set(guestUid, { guestUid, sessionId, offer, answer: '' }); notify();
+      },
+      async sendAnswer(hostUid, guestUid, answer) {
+        const current = signals.get(hostUid)?.get(guestUid);
+        if (actor !== guestUid || !guest(hostUid) || !current || answer.length > MAX_SDP) deny();
+        signals.get(hostUid)!.set(guestUid, { ...current!, answer }); notify();
+      },
+      async clearSignal(hostUid, guestUid) { if (!(host(hostUid) || actor === guestUid || admin)) deny(); signals.get(hostUid)?.delete(guestUid); notify(); }
     };
   }
-  return { as, configs, states, participants, messages };
+  return { as, configs, states, participants, messages, feeds, signals };
 }

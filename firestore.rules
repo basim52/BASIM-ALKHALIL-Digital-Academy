@@ -523,7 +523,29 @@ service cloud.firestore {
           request.resource.data.speaker is string &&
           (request.resource.data.speaker == '' || request.resource.data.speaker in get(abboudConfigPath()).data.allowed) &&
           request.resource.data.updatedAt == request.time;
+        // live/feed: the shared clean transcript (Abboud's finished sentences + Badr/Reem/Sara replies), host only.
+        allow create, update: if docId == 'feed' && isAbboudHost() &&
+          request.resource.data.keys().hasOnly(['sessionId', 'items', 'updatedAt']) &&
+          request.resource.data.sessionId is string && request.resource.data.sessionId.size() <= 40 &&
+          request.resource.data.items is list && request.resource.data.items.size() <= 30 &&
+          request.resource.data.updatedAt == request.time;
         allow delete: if isAbboudHost() || isAdmin();
+      }
+
+      // WebRTC signaling for live audio (host = hub). Only the host and that one listed guest can see their SDPs.
+      match /rtc/{guestUid} {
+        allow get: if isAdmin() || isAbboudHost() || (isOwner(guestUid) && isAbboudGuest());
+        allow list: if isAdmin() || isAbboudHost();
+        allow create, update: if isAbboudHost() && guestUid in get(abboudConfigPath()).data.allowed &&
+          request.resource.data.keys().hasOnly(['sessionId', 'offer', 'answer', 'updatedAt']) &&
+          request.resource.data.sessionId is string && request.resource.data.sessionId.size() <= 40 &&
+          request.resource.data.offer is string && request.resource.data.offer.size() >= 1 && request.resource.data.offer.size() <= 16000 &&
+          request.resource.data.answer == '' && request.resource.data.updatedAt == request.time;
+        allow update: if isOwner(guestUid) && isAbboudGuest() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer', 'updatedAt']) &&
+          request.resource.data.answer is string && request.resource.data.answer.size() <= 16000 &&
+          request.resource.data.updatedAt == request.time;
+        allow delete: if isOwner(guestUid) || isAbboudHost() || isAdmin();
       }
 
       match /participants/{uid} {

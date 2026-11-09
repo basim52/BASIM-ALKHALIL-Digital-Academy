@@ -155,3 +155,50 @@ Built on `main` at `9c57a5b` (PR #12 merged). Badr and Reem stay as they are: th
   - Now they see «📡 الفصل المباشر يبدأه عبود من حسابه، وأنت تنضم من هنا عندما يبدأ» and a waiting entry. That entry opens a waiting room («⏳ بانتظار عبود يبدأ الدرس»), which turns into the board and Abboud's live words as soon as he starts, without reloading.
 - **Errors:** every live-class listener now shows a specific, honest message (permission-denied / unavailable / failed-precondition, with the code) instead of an empty view. Before, the class-list query failed silently and the teacher's own class read mapped permission-denied to "no class".
 - **Rules:** no change.
+
+### Live voice, a clean transcript, and Badr/Reem in the live class (follow-up)
+
+The owner's report: «الفصل المباشر مافيه صوت مش مرتب … ولا كان فيه بدر وريم».
+
+**Causes**
+- Abboud's *interim* speech recognition was published as `live/state.draft` every 700 ms. Students saw a growing, repeated sentence.
+- Badr, Reem and Sara replies only existed on Abboud's device.
+- There was no audio path at all.
+
+**Transcript**
+- `live/state.draft` is now always `''`. Only finished sentences are published.
+- Each sentence is tidied (`tidyUtterance`: immediate word-run repeats removed, one bubble per sentence), and Badr/Reem/Sara replies go into one host-only doc, `live/feed`.
+- The student's top strip shows the latest clean line, and the timeline merges the feed with the students' messages.
+- No AI rewrite: that would need a server change.
+
+**Badr and Reem**
+- Their replies are still generated only on Abboud's device, by the existing flow; nothing changed on the server.
+- They are broadcast in the feed. Each student's device shows their faces and voices them with their own voices.
+- The solo class is unchanged: `say()` does nothing when no live class is running.
+
+**Live voice (WebRTC, `src/lib/abboud/liveAudio.ts`)**
+- *Topology.* A star with Abboud's device as the hub: one `RTCPeerConnection` per joined student.
+  - Transceiver 0 carries Abboud's mic to the student.
+  - Transceiver 1 (sendrecv) carries the permitted speaker's mic to Abboud. Abboud's device relays that track to the other students with `replaceTrack`, so changing the speaker needs no renegotiation.
+- *Signaling.* `abboudClasses/{host}/rtc/{student}` holds `{sessionId, offer, answer, updatedAt}`. Full SDPs, no trickle ICE. A student may write `answer: 'restart:<n>'` to ask for a fresh offer.
+- *ICE.* Only Google's public STUN, no TURN. On strict networks (some mobile carriers, school firewalls) a connection cannot form, and that student's device then reads Abboud's finished sentences by TTS (Charon), clearly labelled «🔊 صوت آلي».
+- *Muting.* Abboud's mic is muted while Badr/Reem/Sara play on his device, so students don't hear them twice, and whenever he turns «صوتك المباشر» off. Students have their own mute.
+- *Size.* Abboud's device uploads one stream per student, which is fine for small classes. Around 30 students needs a media server (SFU).
+
+**Firebase rules (needs owner approval and deployment; not deployed)**
+- Additive only. `live/feed` may be written only by the host, with `sessionId`, at most 30 items, and `updatedAt == request.time`.
+- `rtc/{guest}`:
+  - The host writes the offer, only for listed students and with `answer == ''`.
+  - The student updates only `answer` and `updatedAt` on its own doc.
+  - The student reads only its own doc. Only the host or the admin can list.
+- Deploy them to the **named** database (`firebase-applet-config.json` → `firestoreDatabaseId`), not `(default)`.
+- Until they are deployed, the class works as before, without the feed (a note is shown) and without live voice.
+
+**Checks**
+- `npm run test:abboud`: interim text is never published, Badr/Reem are broadcast, and the relay and fallback work (a fake RTC stand-in), plus the host mute.
+- `scripts/rules/abboud-live.rules.test.ts`: the Firestore emulator, now including the feed and rtc rules.
+- `scripts/live-audio.wrtc.test.ts`: the real native WebRTC stack (`@roamhq/wrtc`), three peers on one machine with tone "mics", measuring received audio:
+  - the teacher reaches both students;
+  - the speaker reaches the teacher and is relayed to the other student;
+  - the mute and the end of a turn silence it.
+- Not verified: real phones and microphones; Android/iOS running speech recognition and `getUserMedia` at the same time; networks that need TURN; Enterprise Firestore realtime listeners in production.

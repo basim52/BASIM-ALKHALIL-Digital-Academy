@@ -129,7 +129,8 @@ test('live class end to end: allowed students join from their devices, raise a h
     assert.match(host.el.querySelector('[data-testid="abboud-live-here"]')?.textContent || '', /الحاضرون \(2\): (سلمى، حصة|حصة، سلمى)/);
     // Abboud's own words reach students live (while he is still talking), then the sent explanation.
     await press(host.el, 'اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('Hello means مرحبا'); }); await settle(PUBLISH);
-    assert.match(guest(salma).querySelector('[data-testid="abboud-live-words"]')?.textContent || '', /Hello means مرحبا/);
+    assert.doesNotMatch(guest(salma).textContent || '', /Hello means/, 'interim recognition never leaves Abboud\'s device');
+    assert.equal(backend.states.get('abood')?.draft, '', 'interim text is not even published to the class doc');
     await press(host.el, 'خلصت'); await settle(PUBLISH);
     assert.match(guest(hessa).querySelector('[data-testid="abboud-live-board"]')?.textContent || '', /✅ 👋 Hello — مرحباً/, 'board marks follow too');
     // Talking needs permission.
@@ -264,7 +265,10 @@ test('invited non-teacher (the admin) opening «عبود المعلّم»: hint 
     assert.match(room().querySelector('[data-testid="abboud-live-board"]')?.textContent || '', /التحية والتعريف/, 'the same board appears without reopening');
     assert.match(host.el.querySelector('[data-testid="abboud-live-here"]')?.textContent || '', /الحاضرون \(1\): B K/, 'the teacher sees who joined');
     await press(host.el, 'اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('Hello everyone'); }); await settle(PUBLISH);
-    assert.match(room().querySelector('[data-testid="abboud-live-words"]')?.textContent || '', /Hello everyone/, "Abboud's live words");
+    assert.doesNotMatch(room().textContent || '', /Hello everyone/, 'not while he is still talking (interim)');
+    await press(host.el, 'خلصت'); await settle(PUBLISH);
+    assert.match(room().querySelector('[data-testid="abboud-live-words"]')?.textContent || '', /عبود:.*Hello everyone|بدر:/, "Abboud's finished sentence (then Badr) in the top strip");
+    assert.match(room().querySelector('[data-testid="abboud-live-timeline"]')?.textContent || '', /عبود: Hello everyone/, 'one bubble for his sentence');
   } finally { for (const s of [viewer, host, outsider]) { await act(async () => s.root.unmount()); s.el.remove(); } localStorage.clear(); }
 });
 
@@ -285,4 +289,105 @@ test('permission errors are shown honestly (never an empty class): join list, wa
     assert.doesNotMatch(guestSeat.el.querySelector('[data-testid="abboud-live-guest"]')?.textContent || '', /بانتظار عبود يبدأ الدرس/, 'an error is not dressed up as «waiting»');
     assert.match(teacher.el.querySelector('[data-testid="abboud-live-viewer"] [role="alert"]')?.textContent || '', /permission-denied/, 'the teacher sees why 📡 is missing');
   } finally { for (const s of [joinSeat, guestSeat, teacher]) { await act(async () => s.root.unmount()); s.el.remove(); } localStorage.clear(); }
+});
+
+const { tidyUtterance } = await import('../src/lib/abboud/liveTranscript');
+const { default: AbboudLiveGuest } = await import('../src/components/AbboudLiveGuest');
+const { HostAudio } = await import('../src/lib/abboud/liveAudio');
+
+test('transcript cleanup: repeated runs from the speech engine are kept once; real words are untouched', () => {
+  assert.equal(tidyUtterance('ما اسمك ما اسمك اسمي عبد الله'), 'ما اسمك اسمي عبد الله');
+  assert.equal(tidyUtterance('Hello hello everyone everyone, my name is my name is Abood'), 'Hello everyone, my name is Abood');
+  assert.equal(tidyUtterance('  red   means أحمر\u200f '), 'red means أحمر');
+  assert.equal(tidyUtterance('ما اسمك ما هو اسمك'), 'ما اسمك ما هو اسمك', 'no guessing beyond exact repeats');
+});
+
+// Minimal WebRTC stand-in: SDP strings name the peers; tracks flow sender → the remote transceiver at the same index.
+type FakeTrack = { id: string; kind: 'audio'; enabled: boolean; stop(): void };
+const fakeTrack = (id: string): FakeTrack => ({ id, kind: 'audio', enabled: true, stop() {} });
+const fakeMic = (id: string) => async () => { const t = fakeTrack(id); return { getAudioTracks: () => [t], getTracks: () => [t] } as unknown as MediaStream; };
+class FakePeer {
+  static registry = new Map<string, FakePeer>(); static seq = 0;
+  id = ++FakePeer.seq; transceivers: { mid: string; index: number; direction: string; sender: { track: FakeTrack | null; replaceTrack(t: FakeTrack | null): Promise<void> } }[] = [];
+  remote: FakePeer | null = null; signalingState = 'stable'; connectionState = 'new'; iceGatheringState = 'complete';
+  localDescription: { type: string; sdp: string } | null = null;
+  ontrack: ((e: { track: FakeTrack; transceiver: unknown }) => void) | null = null; onconnectionstatechange: (() => void) | null = null;
+  addTransceiver(_kind: string, { direction }: { direction: string }) { return this.add(direction); }
+  private add(direction: string) {
+    const index = this.transceivers.length, peer = this;
+    const t = { mid: String(index), index, direction, sender: { track: null as FakeTrack | null, async replaceTrack(track: FakeTrack | null) { this.track = track; peer.deliver(index, track); } } };
+    this.transceivers.push(t); return t;
+  }
+  getTransceivers() { return this.transceivers; }
+  async createOffer() { return { type: 'offer', sdp: `fake-offer:${this.id}:${this.transceivers.length}` }; }
+  async createAnswer() { return { type: 'answer', sdp: `fake-answer:${this.id}` }; }
+  async setLocalDescription(d: { type: string; sdp: string }) { this.localDescription = d; if (d.type === 'offer') { this.signalingState = 'have-local-offer'; FakePeer.registry.set(d.sdp, this); } else this.signalingState = 'stable'; }
+  async setRemoteDescription(d: { type: string; sdp: string }) {
+    if (d.type === 'offer') { const host = FakePeer.registry.get(d.sdp)!; this.remote = host; host.remote = this; for (let i = 0; i < Number(d.sdp.split(':')[2]); i++) this.add('recvonly'); this.signalingState = 'have-remote-offer'; }
+    else { this.signalingState = 'stable'; this.connect(); this.remote!.connect(); }
+  }
+  connect() { this.connectionState = 'connected'; this.onconnectionstatechange?.(); this.transceivers.forEach(t => this.deliver(t.index, t.sender.track)); }
+  deliver(index: number, track: FakeTrack | null) { if (this.connectionState !== 'connected' || !this.remote || !track) return; const rt = this.remote.transceivers[index]; queueMicrotask(() => this.remote?.ontrack?.({ track, transceiver: rt })); }
+  close() { this.connectionState = 'closed'; }
+  addEventListener() {} removeEventListener() {}
+}
+const rtc = (mic: string) => ({ createPeer: () => new FakePeer() as unknown as RTCPeerConnection, getMic: fakeMic(mic), gatherMs: 0 });
+
+test('live voice: Abboud\'s real mic reaches every joined student; the allowed speaker is heard by Abboud and relayed to others; Badr/Reem are voiced on each device', async () => {
+  const backend = live.createMemoryLiveBackend();
+  backend.configs.set('abood', { hostUid: 'abood', hostName: 'عبود', allowed: ['salma', 'hessa', 'omar'], names: { salma: 'سلمى', hessa: 'حصة', omar: 'عمر' } });
+  mock.method(globalThis, 'fetch', async (url: unknown) => String(url).includes('abboud-teacher')
+    ? new Response(JSON.stringify({ verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Is hello a greeting?' }] }), { status: 200 })
+    : new Response('{}', { status: 503 }));
+  mock.method(ClassroomVoice.prototype, 'play', async () => {});
+  const spoken: Record<string, string[]> = { salma: [], hessa: [], omar: [] };
+  const host = seat(), salma = seat(), hessa = seat(), omar = seat();
+  const guest = (s: { el: Element }) => s.el.querySelector('[data-testid="abboud-live-guest"]') as HTMLElement;
+  try {
+    await act(async () => { host.root.render(<AbboudTeacherActivity uid="abood" onClose={() => {}} liveStore={backend.as('abood')} liveAudio={rtc('abood-mic')} />); }); await settle(); await settle();
+    await pressIn(host.el, 'abboud-live-header'); await settle(20);
+    for (const [s, id, audio] of [[salma, 'salma', rtc('salma-mic')], [hessa, 'hessa', rtc('hessa-mic')], [omar, 'omar', false]] as const)
+      await act(async () => { s.root.render(<AbboudLiveGuest store={backend.as(id)} uid={id} config={backend.configs.get('abood')!} onClose={() => {}} audio={audio} speak={async e => { spoken[id].push(`${e.who}:${e.text}`); }} />); });
+    await settle(50); await settle(50);
+    assert.match(guest(salma).querySelector('[data-testid="abboud-live-voice-status"]')?.textContent || '', /🎧 تسمع صوت عبود مباشرة/);
+    assert.equal(salma.el.querySelectorAll('[data-testid="abboud-live-remote-audio"]').length, 1, "Abboud's mic track is playing");
+    assert.match(guest(omar).querySelector('[data-testid="abboud-live-voice-status"]')?.textContent || '', /🔊 صوت آلي يقرأ جمل عبود/, 'no live voice: clearly marked automatic voice');
+    assert.match(host.el.querySelector('[data-testid="abboud-live-voice"]')?.textContent || '', /🎧 2 من 3 يسمعونك مباشرة/);
+    // Abboud explains: only the finished sentence, then Badr and Reem (generated once, on his device) reach everyone.
+    await press(host.el, 'اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('Hello hello means مرحبا'); }); await settle();
+    await press(host.el, 'خلصت'); await settle(30);
+    for (const s of [salma, hessa, omar]) {
+      assert.match(guest(s).querySelector('[data-testid="abboud-live-timeline"]')?.textContent || '', /عبود: Hello means مرحبا[\s\S]*بدر: Is hello a greeting\?/);
+      assert.ok(guest(s).querySelector('[data-testid="abboud-live-reem"]'), 'Reem sits in the live class too');
+      assert.match(guest(s).querySelector('[data-testid="abboud-live-badr"]')?.textContent || '', /Is hello a greeting\?/, 'Badr sits in the live class too');
+    }
+    assert.deepEqual(spoken.salma, ['badr:Is hello a greeting?'], 'heard Abboud live, so only Badr/Reem are voiced locally');
+    assert.deepEqual(spoken.omar, ['abboud:Hello means مرحبا', 'badr:Is hello a greeting?'], 'fallback voice reads Abboud\'s finished sentence');
+    // The allowed speaker: Abboud hears her live, and Hessa gets her voice relayed through Abboud's device.
+    await press(guest(salma), 'أبغى أتكلم'); await press(host.el, 'اسمح لـسلمى'); await settle(PUBLISH);
+    await press(guest(salma), 'تكلّم'); await settle(30);
+    assert.equal(host.el.querySelector('[data-testid="abboud-live-audio"]')?.getAttribute('data-track'), 'salma-mic', 'Abboud hears Salma');
+    assert.equal(hessa.el.querySelectorAll('[data-testid="abboud-live-remote-audio"]').length, 2, 'Hessa hears Abboud and the relayed speaker');
+    await act(async () => { FakeRecognition.latest.say('Is hello for the morning'); }); await settle();
+    await press(guest(salma), 'خلصت — أرسل كلامي'); await settle(30);
+    assert.deepEqual(spoken.hessa, ['badr:Is hello a greeting?'], 'heard Salma live (relayed): no extra TTS');
+    assert.ok(spoken.omar.includes('student:Is hello for the morning'), 'without live voice, the speaker\'s sentence is read out');
+    await press(host.el, 'إنهاء دوره'); await settle(PUBLISH);
+    assert.equal(host.el.querySelector('[data-testid="abboud-live-audio"]')?.getAttribute('data-track'), '', 'turn over: relay stops');
+    await act(async () => { (guest(hessa).querySelector('[data-testid="abboud-live-mute"]') as HTMLButtonElement).click(); }); await settle();
+    assert.match(guest(hessa).querySelector('[data-testid="abboud-live-voice-status"]')?.textContent || '', /🔇 الصوت مكتوم/);
+    assert.equal((hessa.el.querySelector('[data-testid="abboud-live-remote-audio"]') as HTMLAudioElement).muted, true);
+  } finally { for (const s of [host, salma, hessa, omar]) { await act(async () => s.root.unmount()); s.el.remove(); } mock.restoreAll(); localStorage.clear(); }
+});
+
+test('the teacher\'s mic is silenced while Badr/Reem/Sara play on his device (no echo to students), and when he turns live voice off', async () => {
+  const backend = live.createMemoryLiveBackend();
+  backend.configs.set('abood', CONFIG);
+  const track = fakeTrack('abood-mic');
+  const a = new HostAudio(backend.as('abood'), 'abood', 'S1', { createPeer: () => new FakePeer() as unknown as RTCPeerConnection, getMic: async () => ({ getAudioTracks: () => [track], getTracks: () => [track] }) as unknown as MediaStream, gatherMs: 0 });
+  await a.startMic();
+  assert.equal(track.enabled, true);
+  a.setMuted(true); assert.equal(track.enabled, false);
+  a.setMuted(false); assert.equal(track.enabled, true);
+  a.close();
 });

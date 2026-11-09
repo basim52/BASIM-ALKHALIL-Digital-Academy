@@ -399,3 +399,12 @@
   .abboud-live-header-short { display: inline; }
   .abboud-live-viewer { padding: 0 8px 4px; }
 }
+/* «فصل عبود المباشر»: Badr and Reem in the student view, voice status. */
+.abboud-live-classmates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.abboud-live-mate { display: flex; align-items: flex-start; gap: 8px; min-width: 0; border-radius: 14px; border: 2px solid #fcd34d; background: #fff; padding: 6px; }
+.abboud-live-mate.is-speaking { border-color: #6366f1; background: #e0e7ff; }
+.abboud-live-mate-face { flex: none; width: 44px; height: 44px; }
+.abboud-live-mate-text { margin: 2px 0 0; font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.abboud-live-voice { margin: 0; padding: 2px 12px 4px; font-size: 12px; flex: none; }
+.abboud-live-guest-chat li.abboud-live-line-badr, .abboud-live-guest-chat li.abboud-live-line-reem { background: #fffbeb; }
+.abboud-live-guest-chat li.abboud-live-line-abboud { background: #eef2ff; }

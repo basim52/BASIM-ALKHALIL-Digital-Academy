@@ -1,6 +1,6 @@
 import type { Firestore } from 'firebase/firestore';
 import * as firestore from 'firebase/firestore';
-import { cleanText, MAX_MESSAGE, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState, type Participant } from './liveClass';
+import { cleanText, liveFeed, MAX_MESSAGE, type FeedItem, type LiveFeed, type RtcSignal, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState, type Participant } from './liveClass';
 
 /**
  * Firestore backend for «فصل عبود المباشر» (collection `abboudClasses`, see firestore.rules).
@@ -18,6 +18,9 @@ function toState(d: Record<string, unknown> | undefined): LiveState | null {
   if (!d) return null;
   return { active: d.active === true, sessionId: String(d.sessionId || ''), lessonId: Number(d.lessonId) || 1, lessonTitle: String(d.lessonTitle || ''),
     source: String(d.source || ''), draft: String(d.draft || ''), explained: Array.isArray(d.explained) ? d.explained.map(String) : [], speaker: String(d.speaker || ''), updatedAt: millis(d.updatedAt) };
+}
+function toSignal(guestUid: string, d: Record<string, unknown>): RtcSignal {
+  return { guestUid, sessionId: String(d.sessionId || ''), offer: String(d.offer || ''), answer: String(d.answer || '') };
 }
 export function createFirestoreLiveStore(db: Firestore, f: Fs = firestore): LiveClassStore {
   const classDoc = (hostUid: string) => f.doc(db, 'abboudClasses', hostUid);
@@ -45,6 +48,16 @@ export function createFirestoreLiveStore(db: Firestore, f: Fs = firestore): Live
     watchMessages: (hostUid, sessionId, cb, onError) => f.onSnapshot(f.query(f.collection(db, 'abboudClasses', hostUid, 'messages'), f.where('sessionId', '==', sessionId), f.limit(200)),
       snap => cb(snap.docs.map(d => { const m = d.data(ESTIMATE); return { id: d.id, senderId: String(m.senderId), text: String(m.text), via: m.via === 'mic' ? 'mic' : 'text', sessionId: String(m.sessionId), createdAt: millis(m.createdAt) } satisfies LiveMessage; })
         .sort((a, b) => a.createdAt - b.createdAt)), onError),
+    watchFeed: (hostUid, cb, onError) => f.onSnapshot(f.doc(db, 'abboudClasses', hostUid, 'live', 'feed'), snap => {
+      const d = snap.exists() ? snap.data() : undefined;
+      cb(d ? liveFeed(String(d.sessionId || ''), Array.isArray(d.items) ? d.items as FeedItem[] : []) : null);
+    }, onError),
+    publishFeed: (hostUid, feed: LiveFeed) => { const clean = liveFeed(feed.sessionId, feed.items); return f.setDoc(f.doc(db, 'abboudClasses', hostUid, 'live', 'feed'), { sessionId: clean.sessionId, items: clean.items, updatedAt: f.serverTimestamp() }); },
+    watchSignal: (hostUid, guestUid, cb, onError) => f.onSnapshot(f.doc(db, 'abboudClasses', hostUid, 'rtc', guestUid), snap => cb(snap.exists() ? toSignal(snap.id, snap.data()) : null), onError),
+    watchSignals: (hostUid, cb, onError) => f.onSnapshot(f.collection(db, 'abboudClasses', hostUid, 'rtc'), snap => cb(snap.docs.map(d => toSignal(d.id, d.data()))), onError),
+    sendOffer: (hostUid, guestUid, sessionId, offer) => f.setDoc(f.doc(db, 'abboudClasses', hostUid, 'rtc', guestUid), { sessionId, offer, answer: '', updatedAt: f.serverTimestamp() }),
+    sendAnswer: (hostUid, guestUid, answer) => f.updateDoc(f.doc(db, 'abboudClasses', hostUid, 'rtc', guestUid), { answer, updatedAt: f.serverTimestamp() }),
+    clearSignal: (hostUid, guestUid) => f.deleteDoc(f.doc(db, 'abboudClasses', hostUid, 'rtc', guestUid)),
     postMessage: async (hostUid, m) => { await f.addDoc(f.collection(db, 'abboudClasses', hostUid, 'messages'), { senderId: m.senderId, text: cleanText(m.text, MAX_MESSAGE), via: m.via, sessionId: m.sessionId, createdAt: f.serverTimestamp() }); }
   };
 }
