@@ -233,15 +233,13 @@
   display: grid; grid-template-columns: minmax(0, 1fr) 190px; grid-template-areas: "board students";
   flex: 1 1 0%; min-height: 0; min-width: 0; gap: 12px; padding: 0 16px 12px; overflow: hidden;
 }
-.abboud-board {
-  grid-area: board; display: flex; flex-direction: column; width: 100%; height: 100%;
-  min-height: 0; min-width: 0; padding: 16px; overflow: hidden; overflow-wrap: anywhere;
-}
-.abboud-board-title { flex-shrink: 0; font-size: 22px; padding-bottom: 10px; }
-.abboud-board-body { flex: 1 1 0%; min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-gutter: stable; }
-.abboud-board-source { min-height: clamp(160px, 28vh, 280px); max-width: 100%; font-size: clamp(20px, 2vw, 28px); line-height: 1.8; }
-.abboud-board-body button { min-height: 44px; max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
-.abboud-board-body [aria-label="كلمات من شرح عبود"] button { font-size: 16px; }
+/* Sara's own board (TutorTldrawBoard) fills the board area; a slim pick strip below drives Badr and Reem. */
+.abboud-board { grid-area: board; display: flex; flex-direction: column; gap: 8px; width: 100%; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
+.abboud-board-surface { flex: 1 1 0%; min-height: 280px; min-width: 0; display: flex; }
+.abboud-board-surface > * { flex: 1 1 0%; min-width: 0; min-height: 0; }
+.abboud-board-fallback { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; text-align: center; border-radius: 16px; border: 2px solid rgba(251, 191, 36, 0.6); background: #0a2d5c; color: #fde68a; font-weight: 700; }
+.abboud-board-picks { flex: 0 1 auto; max-height: 30%; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; padding: 8px; border-radius: 12px; background: #fffbeb; border: 1px solid #fcd34d; overflow-wrap: anywhere; }
+.abboud-board-picks button { min-height: 44px; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .abboud-students { grid-area: students; min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .abboud-student-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .abboud-student-card { min-width: 0; padding: 10px; overflow-wrap: anywhere; }
@@ -268,7 +266,7 @@
 .abboud-dialog-expanded { padding: 0; }
 .abboud-dialog-expanded .abboud-shell { max-width: none; height: 100vh; height: 100dvh; border-radius: 0; }
 .abboud-dialog-expanded .abboud-workspace { grid-template-columns: minmax(0, 1fr) 160px; }
-.abboud-dialog-expanded .abboud-board-source { min-height: clamp(200px, 34vh, 380px); }
+.abboud-dialog-expanded .abboud-board-picks { max-height: 22%; }
 .abboud-dialog :focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
 @media (max-width: 639px) {
   .abboud-dialog { padding: 6px; }
@@ -294,9 +292,14 @@
   .abboud-student-reply { grid-column: 1 / -1; font-size: 11px; margin-top: 2px; -webkit-line-clamp: 1; }
   .abboud-student-desk { display: none; }
   .abboud-supervisor { margin-top: 2px; font-size: 10px; }
-  .abboud-board { padding: 10px; }
-  .abboud-board-title { font-size: 18px; padding-bottom: 6px; }
-  .abboud-board-source, .abboud-dialog-expanded .abboud-board-source { min-height: 160px; font-size: 20px; }
+  /* Phones: the shell scrolls (vertically only) and Sara's canvas gets a definite height; the teaching dock sticks to the bottom. */
+  .abboud-dialog .abboud-shell { overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+  .abboud-workspace, .abboud-dialog-expanded .abboud-workspace { flex: none; grid-template-rows: auto auto; overflow: visible; }
+  .abboud-board { height: auto; overflow: visible; gap: 6px; }
+  .abboud-board-surface { flex: none; height: clamp(300px, 58dvh, 520px); min-height: 0; }
+  .abboud-dialog-expanded .abboud-board-surface { height: clamp(320px, 70dvh, 640px); }
+  .abboud-board-picks, .abboud-dialog-expanded .abboud-board-picks { max-height: none; padding: 6px; }
+  .abboud-controls { position: sticky; bottom: 0; z-index: 3; box-shadow: 0 -6px 12px rgba(15, 23, 42, 0.12); }
   .abboud-controls { padding: 0 8px 6px; max-height: 42vh; max-height: 42dvh; }
   .abboud-turn-status { font-size: 12px; line-height: 1.4; }
   .abboud-mic-row { gap: 4px; }

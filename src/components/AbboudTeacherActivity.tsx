@@ -25,6 +25,8 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const expandTrigger = useRef<HTMLButtonElement | null>(null);
   const workspace = useRef<HTMLElement | null>(null);
   const wasExpanded = useRef(false);
+  /** Whichever control expanded the board (header or Sara's toolbar) gets focus back on return. */
+  const expandOrigin = useRef<HTMLElement | null>(null);
   const [stage, setStage] = useState<Stage | 'complete'>('explain');
   const [phase, setPhase] = useState<Phase>('ready');
   const [active, setActive] = useState<Speaker | 'abboud' | null>(null);
@@ -84,6 +86,8 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   useEffect(() => {
     const key = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
+      // Escape inside Sara's drawing canvas belongs to the board (cancel editing / deselect).
+      if ((event.target as Partial<Element> | null)?.closest?.('.tl-container')) return;
       event.preventDefault();
       if (boardExpanded) setBoardExpanded(false);
       else onClose();
@@ -93,7 +97,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   }, [onClose, boardExpanded]);
   useEffect(() => {
     if (boardExpanded) workspace.current?.focus({ preventScroll: true });
-    else if (wasExpanded.current) expandTrigger.current?.focus({ preventScroll: true });
+    else if (wasExpanded.current) (expandOrigin.current?.isConnected ? expandOrigin.current : expandTrigger.current)?.focus({ preventScroll: true });
     wasExpanded.current = boardExpanded;
   }, [boardExpanded]);
 
@@ -150,6 +154,11 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       clearTimeout(timeout);
       if (mounted.current && id === generation.current) { busy.current = false; request.current = null; setPhase('ready'); setActive(null); }
     }
+  }
+  function toggleBoard(next: boolean) {
+    // Only a focused button counts (Safari does not focus buttons on click); otherwise return to the header toggle.
+    if (next) expandOrigin.current = document.activeElement instanceof HTMLButtonElement ? document.activeElement : null;
+    setBoardExpanded(next);
   }
   async function askBoard(boardFocus: BoardFocus) {
     if (busy.current || phase !== 'ready' || !boardSource || messages.length > 26) return;
@@ -235,7 +244,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       <div className="abboud-shell mx-auto rounded-3xl bg-slate-100 text-slate-900 shadow-2xl">
         <header className="abboud-header">
           <div className="min-w-0 flex-1"><h2 id="abboud-title" className="text-xl font-bold sm:text-2xl">فصل عبود المعلّم</h2><p className="text-sm">أنت تشرح، بدر وريم يتعلّمان، وسارة تشرف بلطف.</p></div>
-          <button ref={expandTrigger} type="button" data-testid="abboud-board-expand" aria-expanded={boardExpanded} aria-controls="abboud-workspace" onClick={() => setBoardExpanded(value => !value)} className="abboud-expand-toggle rounded-xl bg-indigo-700 px-3 py-3 font-bold text-white">{boardExpanded ? '↩ رجوع لحجم الفصل' : '⛶ توسعة السبورة'}</button>
+          <button ref={expandTrigger} type="button" data-testid="abboud-board-expand" aria-expanded={boardExpanded} aria-controls="abboud-workspace" onClick={() => toggleBoard(!boardExpanded)} className="abboud-expand-toggle rounded-xl bg-indigo-700 px-3 py-3 font-bold text-white">{boardExpanded ? '↩ رجوع لحجم الفصل' : '⛶ توسعة السبورة'}</button>
           <button type="button" onClick={() => { stop(); onClose(); }} aria-label="إغلاق الفصل" className="shrink-0 rounded-xl bg-white px-3 py-3 font-bold">إغلاق</button>
         </header>
         <nav aria-label="الدروس القصيرة" className="abboud-lessons">
@@ -245,8 +254,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           </div>
         </nav>
         <section ref={workspace} id="abboud-workspace" tabIndex={-1} aria-label="الفصل الصغير" data-testid="abboud-workspace" className="abboud-workspace">
-          <AbboudClassroomBoard source={boardSource} checked={boardChecked} correction={boardCorrection}
-            responses={boardResponses} responseFocus={boardResponseFocus} busy={phase !== 'ready'} onAsk={focus => void askBoard(focus)} onRead={readBoard} />
+          <AbboudClassroomBoard lessonTitle={`${lesson.emoji} ${lesson.titleAr}`} source={boardSource} checked={boardChecked} correction={boardCorrection}
+            responses={boardResponses} responseFocus={boardResponseFocus} busy={phase !== 'ready'} saraSpeaking={active === 'sara'}
+            expanded={boardExpanded} onExpandedChange={toggleBoard} onAsk={focus => void askBoard(focus)} onRead={readBoard} />
           <aside className="abboud-students" aria-label="بدر وريم في الفصل" data-testid="abboud-students"><div className="abboud-student-list">
             {(['badr', 'reem'] satisfies Speaker[]).map(speaker => <div key={speaker} data-testid={`student-${speaker}`} className={`abboud-student-card rounded-2xl border-2 text-center transition-colors ${active === speaker ? 'border-indigo-500 bg-indigo-100' : 'border-amber-300 bg-white'}`}>
               <div aria-hidden="true" className="abboud-student-face">{speaker === 'badr' ? '👦🏻' : '👧🏻'}</div>

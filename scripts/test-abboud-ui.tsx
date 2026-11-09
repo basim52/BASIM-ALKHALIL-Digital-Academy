@@ -9,8 +9,12 @@ import { ClassroomVoice } from '../src/lib/abboud/voice';
 import type { Recognition, RecognitionEvent } from '../src/lib/abboud/recognition';
 
 const dom = new JSDOM('<html><body><div id="root"></div></body></html>', { url: 'http://localhost' });
-Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, localStorage: dom.window.localStorage, IS_REACT_ACT_ENVIRONMENT: true });
+Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, HTMLButtonElement: dom.window.HTMLButtonElement, localStorage: dom.window.localStorage, IS_REACT_ACT_ENVIRONMENT: true });
+// Sara's board write-on animation uses window.setTimeout; run it immediately so tests read the drawn board.
+Object.assign(dom.window, { setTimeout: (run: () => void) => { run(); return 0; }, clearTimeout: () => {} });
 const { createRoot } = await import('react-dom/client');
+// Resolve the lazily loaded Sara board up front (tldraw/WebGL/CSS leaves are stubbed by scripts/test-stubs).
+const { default: TutorTldrawBoard } = await import('../src/components/TutorTldrawBoard');
 let root: Root;
 const host = document.getElementById('root')!;
 const text = () => host.textContent || '';
@@ -22,6 +26,7 @@ async function click(label: string) { await act(async () => { button(label).clic
 async function mount(uid = 'student-a') {
   root = createRoot(host);
   await act(async () => { root.render(<AbboudTeacherActivity uid={uid} onClose={() => {}} />); });
+  await act(async () => { await new Promise(resolve => setImmediate(resolve)); });
 }
 async function unmount() { await act(async () => root.unmount()); mock.restoreAll(); localStorage.clear(); }
 async function write(value: string) {
@@ -225,9 +230,10 @@ test('board does not reveal the controlled correction before a verified teacher 
   try {
     await click('الأعداد 1–10'); await say('two means اثنين'); await say('two');
     const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
-    assert.match(board.textContent || '', /بانتظار تصحيح عبود/); assert.equal(board.querySelector('ins'), null);
-    await say('two book is correct'); assert.equal(board.querySelector('ins'), null); assert.equal(localStorage.length, 0);
-    await say('two books, add s for plural'); assert.equal(board.querySelector('ins')?.textContent, 'two books'); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), '[3]');
+    const canvas = () => board.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
+    assert.match(canvas(), /بانتظار تصحيح عبود/); assert.equal(canvas().includes('✅'), false);
+    await say('two book is correct'); assert.equal(canvas().includes('✅'), false); assert.equal(localStorage.length, 0);
+    await say('two books, add s for plural'); assert.match(canvas(), /❌ two book\n✅ two books/); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), '[3]');
   } finally { await unmount(); }
 });
 test('startup failure preserves transcript and unverified board without pretending hearing or success', async () => {
@@ -260,8 +266,8 @@ test('board starts large with a full workspace, compact student panel and reacha
     const classroom = host.querySelector('[data-testid="abboud-classroom"]'); assert.ok(classroom);
     assert.equal(classroom.getAttribute('data-board-mode'), 'large');
     const board = host.querySelector('[data-testid="abboud-interactive-board"]'); assert.ok(board);
-    assert.equal(board.getAttribute('data-board-size'), 'large'); assert.equal(board.className.includes('max-w-2xl'), false);
-    assert.ok(board.querySelector('.abboud-board-body[tabindex="0"]'));
+    assert.equal(board.getAttribute('data-board'), 'sara'); assert.ok(board.querySelector('[data-testid="tldraw-board"] [data-testid="tldraw-canvas"]'));
+    assert.ok(board.querySelector('.abboud-board-picks[tabindex="0"]'));
     const students = host.querySelector('[data-testid="abboud-students"]'); assert.ok(students);
     assert.ok(students.querySelector('[data-testid="student-badr"]')); assert.ok(students.querySelector('[data-testid="student-reem"]'));
     const controls = host.querySelector('[data-testid="abboud-teacher-controls"]'); assert.ok(controls);
@@ -275,7 +281,9 @@ test('scoped layout contract covers 360/390 widths, bounded scrolling and the ex
   const css = all.slice(all.indexOf("/* Abboud's board-first classroom:"));
   assert.match(css, /max-width: 1440px/); assert.match(css, /height: calc\(100dvh - 24px\)/);
   assert.match(css, /grid-template-columns: minmax\(0, 1fr\) 190px/);
-  assert.match(css, /\.abboud-board-body \{[^}]*overflow-y: auto; overflow-x: hidden/);
+  assert.match(css, /\.abboud-board-surface \{ flex: 1 1 0%; min-height: 280px/);
+  assert.match(css, /\.abboud-board-picks \{[^}]*overflow-y: auto; overflow-x: hidden/);
+  assert.equal(/abboud-board-(body|source|title)/.test(css), false, 'old custom board styles removed');
   assert.match(css, /\.abboud-teacher-dock \{[^}]*position: sticky; top: 0/);
   assert.match(css, /\.abboud-dialog-expanded \.abboud-shell \{[^}]*max-width: none;[^}]*height: 100dvh/);
   const mobile = css.split('@media (max-width: 639px) {')[1]; assert.ok(mobile);
@@ -284,6 +292,9 @@ test('scoped layout contract covers 360/390 widths, bounded scrolling and the ex
     assert.match(mobile, /grid-template-areas: "students" "board"/);
     assert.match(mobile, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
     assert.match(mobile, /\.abboud-lessons select \{[^}]*width: 0; min-width: 0/);
+    assert.match(mobile, /\.abboud-board-surface \{ flex: none; height: clamp\(300px, 58dvh, 520px\)/);
+    assert.match(mobile, /\.abboud-dialog \.abboud-shell \{ overflow-y: auto; overflow-x: hidden/);
+    assert.match(mobile, /\.abboud-controls \{ position: sticky; bottom: 0/);
   }
   assert.equal(css.includes('100vw'), false);
   const shortViewport = css.split('@media (max-height: 500px) {')[1]; assert.ok(shortViewport);
@@ -385,5 +396,64 @@ test('stop and lesson change release a restarted mic without sending the collect
     await click('اضغط وتحدّث'); const next = FakeRecognition.latest; await act(async () => { next.say('One two'); next.silence(); });
     const after = FakeRecognition.latest; await click('الألوان والأشياء');
     assert.equal(after.aborted, true); assert.equal(requests.length, 0);
+  } finally { await unmount(); }
+});
+
+test("Sara's class keeps her board unchanged: self-expanding overlay, avatar and the same tools", async () => {
+  const calls = [{ tool: 'drawBoardText', payload: { content: 'Past Simple', fontSize: 'l', color: 'yellow' } }] as const;
+  root = createRoot(host);
+  try {
+    // Exactly the props SaraBoardTutor passes (no host expansion).
+    await act(async () => { root.render(<TutorTldrawBoard calls={[...calls]} personaId="sara" lessonTitle="Past Simple" speaking={false} replayKey={0} onSpeak={() => {}} />); });
+    const board = host.querySelector('[data-testid="tldraw-board"]'); assert.ok(board);
+    assert.equal(board.className.includes('fixed inset-0 z-[400]'), false); assert.ok(board.className.includes('w-full h-full'));
+    assert.deepEqual(Array.from(board.querySelectorAll('.board-tool-action-btn')).map(b => b.textContent),
+      ['🖥️توسيع السبورة', '📋قالب الدرس', '📝ملاحظة لاصقة', '🙋اسأل سارة', '📷اشرح الصورة', '🧽مسح']);
+    assert.match(board.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '', /Past Simple/);
+    await act(async () => { (host.querySelector('[data-testid="board-expand"]') as HTMLElement).click(); });
+    assert.ok(board.className.includes('fixed inset-0 z-[400]'), 'Sara board still expands itself full-screen');
+    assert.match(host.querySelector('[data-testid="board-expand"]')?.textContent || '', /تصغير/);
+  } finally { await unmount(); }
+});
+test("Abboud's classroom renders Sara's very board with the explanation drawn on it, students and mic beside it", async () => {
+  service([accurate('badr', 'What colour is the apple?')]); await mount();
+  try {
+    const board = host.querySelector('[data-testid="abboud-interactive-board"] [data-testid="tldraw-board"]'); assert.ok(board, 'Sara board component');
+    assert.deepEqual(Array.from(board.querySelectorAll('.board-tool-action-btn')).map(b => b.textContent),
+      ['🖥️توسيع السبورة', '📋قالب الدرس', '📝ملاحظة لاصقة', '🙋اسأل سارة', '📷اشرح الصورة', '🧽مسح']);
+    assert.equal(board.querySelector('[data-testid="tutor-avatar"]')?.getAttribute('data-agent'), 'sara');
+    const canvas = () => board.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
+    assert.match(canvas(), /التحية والتعريف/); assert.equal(canvas().includes('My name is'), false, 'no scripted content before Abboud speaks');
+    await say('I like three red apples');
+    assert.match(canvas(), /عبود: I like three red apples/); assert.match(canvas(), /three/); assert.match(canvas(), /●●●/); assert.match(canvas(), /🔴/);
+    await selectBoardWord('red'); await click('بدر، طبّق هذا');
+    assert.ok(host.querySelector('[data-testid="student-badr"]')); assert.ok(host.querySelector('[data-testid="abboud-microphone"]'));
+  } finally { await unmount(); }
+});
+test("Sara's toolbar expand drives Abboud's expansion: no full-screen overlay hiding students or mic; state kept", async () => {
+  service([accurate('badr', 'Is it red?')]); await mount();
+  try {
+    await say('A red book'); await selectBoardWord('red');
+    const saraBoard = host.querySelector('[data-testid="tldraw-board"]'); const canvas = host.querySelector('[data-testid="tldraw-canvas"]');
+    await act(async () => { (host.querySelector('[data-testid="board-expand"]') as HTMLElement).focus(); (host.querySelector('[data-testid="board-expand"]') as HTMLElement).click(); });
+    assert.equal(host.querySelector('[data-testid="abboud-classroom"]')?.getAttribute('data-board-mode'), 'expanded');
+    assert.equal(saraBoard?.className.includes('fixed inset-0'), false, 'board stays inside the classroom layout');
+    assert.equal(host.querySelector('[data-testid="tldraw-board"]'), saraBoard); assert.equal(host.querySelector('[data-testid="tldraw-canvas"]'), canvas);
+    assert.match(host.querySelector('[data-testid="board-expand"]')?.textContent || '', /تصغير/);
+    assert.ok(host.querySelector('[data-testid="abboud-students"] [data-testid="student-reem"]')); assert.ok(host.querySelector('[data-testid="abboud-microphone"]'));
+    assert.ok(host.querySelector('[aria-label="كلمات من شرح عبود"] button[aria-pressed="true"]'));
+    await act(async () => { window.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); });
+    assert.equal(host.querySelector('[data-testid="abboud-classroom"]')?.getAttribute('data-board-mode'), 'large');
+    assert.equal(document.activeElement, host.querySelector('[data-testid="board-expand"]'), 'focus returns to the control that expanded');
+  } finally { await unmount(); }
+});
+test("Escape inside Sara's canvas stays with the board instead of closing the classroom", async () => {
+  let closed = 0; root = createRoot(host);
+  try {
+    await act(async () => { root.render(<AbboudTeacherActivity uid="student-a" onClose={() => { closed++; }} />); });
+    await act(async () => { await new Promise(resolve => setImmediate(resolve)); });
+    const canvas = host.querySelector('[data-testid="tldraw-canvas"]') as HTMLElement; assert.ok(canvas);
+    await act(async () => { canvas.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); });
+    assert.equal(closed, 0); assert.ok(host.querySelector('[data-testid="abboud-classroom"]'));
   } finally { await unmount(); }
 });

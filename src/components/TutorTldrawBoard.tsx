@@ -23,7 +23,12 @@ class AvatarBoundary extends React.Component<{ children: React.ReactNode; name: 
   componentDidCatch(e: unknown) { console.warn('[tutor-avatar] disabled:', e); }
   render() { return this.state.failed ? <div className="w-full h-full rounded-xl bg-[#001a38] text-amber-300 flex items-center justify-center text-[12px] font-black p-2 text-center">{this.props.name}</div> : this.props.children; }
 }
-type Props = { calls: BoardToolCall[]; personaId: string; speaking?: boolean; onSpeak?: () => void; replayKey?: number; lessonTitle?: string };
+type Props = {
+  calls: BoardToolCall[]; personaId: string; speaking?: boolean; onSpeak?: () => void; replayKey?: number; lessonTitle?: string;
+  /** Optional host-controlled expansion (Abboud's classroom keeps its students and mic visible).
+   *  When omitted (Sara's class), the board expands itself to a full-screen overlay exactly as before. */
+  expanded?: boolean; onExpandedChange?: (next: boolean) => void;
+};
 const T = { tutor: true };
 const NOTE_GAP_MS = 8000, NOTE_MAX = 12, NOTE_IDLE_MS = 3500;
 const IMG_MAX_SIDE = 1280, IMG_MAX_B64 = 1_500_000;
@@ -47,14 +52,17 @@ async function imageToJpeg(src: string): Promise<string> {
 /** Smallest board zoom when fitting the lesson to width (keeps text readable on phones; taller lessons scroll/pan). */
 const FIT_MIN = 0.5;
 
-const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '' }) => {
+const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false, onSpeak, replayKey = 0, lessonTitle = '', expanded: hostExpanded, onExpandedChange }) => {
   const persona = personaById(personaId);
   const t = useT(); const NM = t(persona.nameAr, persona.nameEn);
   const ed = useRef<Editor | null>(null);
   const timers = useRef<number[]>([]);
   const [wide, setWide] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 900);
   const [showAvatar, setShowAvatar] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 900);
-  const [expanded, setExpanded] = useState(false);
+  const [ownExpanded, setOwnExpanded] = useState(false);
+  const hosted = onExpandedChange !== undefined;
+  const expanded = hosted ? !!hostExpanded : ownExpanded;
+  const toggleExpanded = () => { if (hosted) onExpandedChange(!expanded); else setOwnExpanded(v => !v); };
   const rootRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLDivElement | null>(null);
   // Docked avatar only when the BOARD itself is wide (not the window): narrow lesson pages on desktop keep the floating avatar.
@@ -263,14 +271,14 @@ const TutorTldrawBoard: React.FC<Props> = ({ calls, personaId, speaking = false,
   );
 
   return (
-    <div ref={rootRef} data-testid="tldraw-board" className={`${expanded ? 'fixed inset-0 z-[400]' : 'w-full h-full'} flex ${wide ? 'flex-row' : 'flex-col'} gap-2 bg-white rounded-2xl border-2 border-amber-400/70 overflow-hidden`} dir={t("rtl", "ltr")}>
+    <div ref={rootRef} data-testid="tldraw-board" className={`${expanded && !hosted ? 'fixed inset-0 z-[400]' : 'w-full h-full'} flex ${wide ? 'flex-row' : 'flex-col'} gap-2 bg-white rounded-2xl border-2 border-amber-400/70 overflow-hidden`} dir={t("rtl", "ltr")}>
       {wide && showAvatar && <div className="w-[260px] xl:w-[320px] shrink-0 min-h-0 overflow-hidden p-2">{avatar}</div>}
       <div className="flex-1 min-w-0 min-h-0 flex flex-col">
         <div className="magic-board-toolbar tutor-board-toolbar-fluid">
           <div className="board-title-group shrink-0"><span className="board-title-badge">📋 {t("السبورة التفاعلية", "Interactive board")}</span><span className="board-coach-tag">{persona.emoji} {NM}</span></div>
           <div className="board-actions-group" dir={t("rtl", "ltr")}>
             <ExplainLangToggle />
-            <button className="board-tool-action-btn" onClick={() => { setExpanded(v => !v); setTimeout(() => ed.current && fit(ed.current), 80); }}><span>🖥️</span><span>{expanded ? t('تصغير', 'Shrink') : t('توسيع السبورة', 'Expand board')}</span></button>
+            <button className="board-tool-action-btn" data-testid="board-expand" onClick={() => { toggleExpanded(); setTimeout(() => ed.current && fit(ed.current), 80); }}><span>🖥️</span><span>{expanded ? t('تصغير', 'Shrink') : t('توسيع السبورة', 'Expand board')}</span></button>
             <button className="board-tool-action-btn tool-inspect" onClick={() => draw(true)} data-testid="board-replay"><span>📋</span><span>{t("قالب الدرس", "Lesson template")}</span></button>
             <button className="board-tool-action-btn tool-note" onClick={addNote}><span>📝</span><span>{t("ملاحظة لاصقة", "Sticky note")}</span></button>
             <button className="board-tool-action-btn" onClick={() => void askTutor(true)} disabled={asking} data-testid="board-ask-tutor"><span>🙋</span><span>{asking ? t(`${persona.nameAr} ${persona.gender === 'female' ? 'ترد' : 'يرد'}…`, `${persona.nameEn} is answering…`) : t(`اسأل ${persona.nameAr}`, `Ask ${persona.nameEn}`)}</span></button>
