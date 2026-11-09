@@ -527,3 +527,64 @@ test('student assets exist next to the teachers\' assets with the same formats a
   }
   for (const teacher of ['sara', 'business', 'exams', 'grammar', 'lama', 'reem', 'haya', 'jana']) assert.ok(statSync(`public/tutors/${teacher}.webp`).size > 0, 'teacher assets untouched');
 });
+test('Abboud the teacher has his own face beside the mic: idle, talks from the mic press until «خلصت», never on student audio', async () => {
+  service([accurate('badr', 'What is hello?')]);
+  let finish!: () => void;
+  mock.method(ClassroomVoice.prototype, 'play', async (_turns: unknown, onSpeaker: (s: string) => void) => { onSpeaker('badr'); await new Promise<void>(r => { finish = r; }); });
+  await mount();
+  try {
+    const teacher = face('teacher-abboud'); assert.ok(teacher);
+    assert.ok(teacher.closest('.abboud-teacher-dock .abboud-mic-row')?.querySelector('[data-testid="abboud-microphone"]'), 'sits next to the mic in the teaching dock');
+    assert.ok(teacher.classList.contains('abboud-teacher-face'));
+    assert.equal(teacher.querySelector('img.tutor-video-poster')?.getAttribute('src'), '/tutors/teacher-abboud.webp');
+    assert.deepEqual(Array.from(teacher.querySelectorAll('source')).map(s => s.getAttribute('src')), ['/tutors/video/teacher-abboud-idle.webm', '/tutors/video/teacher-abboud-idle.mp4']);
+    assert.equal(clipOf('teacher-abboud'), 'idle'); assert.equal(teacher.getAttribute('data-speaking'), 'false');
+    await click('اضغط وتحدّث');
+    assert.equal(clipOf('teacher-abboud'), 'talk'); assert.ok(face('teacher-abboud')?.classList.contains('is-speaking'), 'gold ring glows');
+    assert.equal(clipOf('student-badr'), 'idle'); assert.equal(clipOf('student-reem'), 'idle');
+    await act(async () => { FakeRecognition.latest.say('Hello is'); FakeRecognition.latest.silence(); });
+    assert.equal(clipOf('teacher-abboud'), 'talk', 'keeps talking through browser pauses');
+    await act(async () => { await new Promise(r => setTimeout(r, 1300)); });
+    assert.ok(host.querySelector('source[src="/tutors/video/teacher-abboud-talk.webm"]'), 'talk clip lazily loaded like the teachers');
+    await act(async () => { FakeRecognition.latest.say('a greeting'); }); await click('خلصت');
+    await act(async () => { await new Promise(r => setImmediate(r)); });
+    assert.equal(clipOf('student-badr'), 'talk');
+    assert.equal(clipOf('teacher-abboud'), 'idle', 'student audio does not move Abboud\'s mouth');
+    assert.equal(face('teacher-abboud')?.getAttribute('data-speaking'), 'false');
+    await act(async () => { await new Promise(r => setTimeout(r, 1300)); });
+    assert.equal(host.querySelectorAll('source[src*="teacher-abboud-laugh"]').length, 0);
+    await act(async () => { finish(); await new Promise(r => setImmediate(r)); });
+    await click('اضغط وتحدّث'); assert.equal(clipOf('teacher-abboud'), 'talk');
+    await click('إيقاف الصوت والميكروفون'); assert.equal(clipOf('teacher-abboud'), 'idle', 'stopping the mic returns him to idle');
+  } finally { await unmount(); }
+});
+test('phones show Abboud as a still until he speaks; his face falls back to the still, then the emoji', async () => {
+  const original = window.matchMedia;
+  window.matchMedia = ((query: string) => ({ matches: query === '(max-width: 639px)', addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
+  service([]); await mount();
+  try {
+    assert.equal(face('teacher-abboud')?.querySelector('video'), null);
+    assert.equal(face('teacher-abboud')?.querySelector('img')?.getAttribute('src'), '/tutors/teacher-abboud.webp');
+    await click('اضغط وتحدّث');
+    assert.ok(face('teacher-abboud')?.querySelector('video'), 'phone plays only while Abboud speaks');
+    await click('إيقاف الصوت والميكروفون'); assert.equal(face('teacher-abboud')?.querySelector('video'), null);
+  } finally { await unmount(); window.matchMedia = original; }
+  await mount();
+  try {
+    const video = face('teacher-abboud')?.querySelector('video'); assert.ok(video);
+    await act(async () => { video.dispatchEvent(new dom.window.Event('error')); });
+    assert.equal(face('teacher-abboud')?.querySelector('video'), null); assert.ok(face('teacher-abboud')?.querySelector('img'));
+    await act(async () => { face('teacher-abboud')!.querySelector('img')!.dispatchEvent(new dom.window.Event('error')); });
+    assert.match(face('teacher-abboud')?.textContent || '', /👦🏽/);
+  } finally { await unmount(); }
+});
+test('Abboud\'s cartoon assets: same formats as the students, light, and the portrait carries no EXIF/XMP/ICC metadata', () => {
+  const portrait = readFileSync('public/tutors/teacher-abboud.webp');
+  assert.equal(portrait.subarray(0, 4).toString('latin1'), 'RIFF'); assert.equal(portrait.subarray(8, 12).toString('latin1'), 'WEBP');
+  assert.ok(portrait.length < 40_000);
+  for (const chunk of ['EXIF', 'XMP ', 'ICCP']) assert.equal(portrait.includes(Buffer.from(chunk, 'latin1')), false, `no ${chunk} chunk`);
+  for (const clip of ['idle', 'talk']) for (const ext of ['webm', 'mp4']) assert.ok(statSync(`public/tutors/video/teacher-abboud-${clip}.${ext}`).size < 120_000);
+  const css = readFileSync('src/index.css', 'utf8');
+  assert.match(css, /\.abboud-teacher-face \{ flex: none; width: 64px;/);
+  assert.match(css.split('@media (max-width: 639px) {')[1], /\.abboud-teacher-face \{ width: 40px;/);
+});
