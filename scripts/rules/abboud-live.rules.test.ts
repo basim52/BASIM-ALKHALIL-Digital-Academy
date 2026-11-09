@@ -137,3 +137,53 @@ test('watchConfig: a missing class is "no class" without an error; a denied read
   const found = await new Promise(res => { const stop = store('abood').watchConfig('abood', v => { if (v) { stop(); res(v); } }); });
   assert.equal((found as { hostUid: string }).hostUid, 'abood', 'host lookup is by the signed-in uid == class doc id (users/{uid} doc id chosen by the admin)');
 });
+
+test('live/feed: only the host publishes the clean transcript; listed students read it; others cannot', async () => {
+  await env.clearFirestore();
+  await admin().saveConfig(config);
+  const feed = { sessionId: 'S1', items: [{ id: 'f1', who: 'abboud' as const, text: 'Hello means مرحبا', at: 1 }, { id: 'f2', who: 'badr' as const, text: 'Is hello a greeting?', at: 2 }] };
+  await assertSucceeds(store('abood').publishFeed('abood', feed));
+  await assertFails(store('salma').publishFeed('abood', feed));
+  await assertFails(store('omar').publishFeed('abood', feed));
+  await assertFails(admin().publishFeed('abood', feed));
+  const seen = await firstValue(store('hessa').watchFeed.bind(null, 'abood') as never) as { items: { who: string }[] };
+  assert.deepEqual(seen.items.map(i => i.who), ['abboud', 'badr'], 'listed students read the shared feed');
+  await assertFails(fs.getDoc(fs.doc(db('omar'), 'abboudClasses/abood/live/feed')));
+  const raw = (extra: Record<string, unknown>) => fs.setDoc(fs.doc(db('abood'), 'abboudClasses/abood/live/feed'), { sessionId: 'S1', items: [], updatedAt: fs.serverTimestamp(), ...extra });
+  await assertFails(raw({ items: Array.from({ length: 31 }, (_, i) => ({ id: `f${i}`, who: 'abboud', text: 'x', at: i })) }));
+  await assertFails(raw({ secret: 'x' }));
+  await assertFails(raw({ updatedAt: 5 }));
+  await assertSucceeds(raw({}));
+  // Only `state` and `feed` are writable under live/.
+  await assertFails(fs.setDoc(fs.doc(db('abood'), 'abboudClasses/abood/live/other'), { sessionId: 'S1', items: [], updatedAt: fs.serverTimestamp() }));
+});
+
+test('rtc signaling: host offers to listed guests only; a guest answers only its own doc and only the answer', async () => {
+  await env.clearFirestore();
+  await admin().saveConfig(config);
+  const offer = 'v=0\r\no=- 1 2 IN IP4 127.0.0.1\r\n';
+  await assertFails(store('abood').sendOffer('abood', 'omar', 'S1', offer), 'not listed');
+  await assertFails(store('salma').sendOffer('abood', 'salma', 'S1', offer), 'guests cannot offer');
+  await assertFails(store('abood').sendOffer('abood', 'salma', 'S1', 'x'.repeat(16001)));
+  await assertSucceeds(store('abood').sendOffer('abood', 'salma', 'S1', offer));
+  await assertSucceeds(store('abood').sendOffer('abood', 'hessa', 'S1', offer));
+  await assertFails(fs.setDoc(fs.doc(db('abood'), 'abboudClasses/abood/rtc/salma'), { sessionId: 'S1', offer, answer: 'forged', updatedAt: fs.serverTimestamp() }), 'host cannot write the answer');
+  // Reads: own doc only.
+  const mine = await firstValue(store('salma').watchSignal.bind(null, 'abood', 'salma') as never) as { offer: string };
+  assert.equal(mine.offer, offer);
+  await assertFails(fs.getDoc(fs.doc(db('salma'), 'abboudClasses/abood/rtc/hessa')), 'cannot read a classmate\'s SDP');
+  await assertFails(fs.getDocs(fs.collection(db('salma'), 'abboudClasses/abood/rtc')), 'guests cannot list');
+  await assertFails(fs.getDoc(fs.doc(db('omar'), 'abboudClasses/abood/rtc/salma')));
+  const all = await firstValue(store('abood').watchSignals.bind(null, 'abood') as never) as { guestUid: string }[];
+  assert.deepEqual(all.map(s => s.guestUid).sort(), ['hessa', 'salma'], 'host lists all signals');
+  // Answers.
+  await assertSucceeds(store('salma').sendAnswer('abood', 'salma', 'v=0 answer'));
+  await assertFails(store('salma').sendAnswer('abood', 'hessa', 'v=0 answer'), 'cannot answer for a classmate');
+  await assertFails(store('salma').sendAnswer('abood', 'salma', 'x'.repeat(16001)));
+  await assertFails(fs.updateDoc(fs.doc(db('salma'), 'abboudClasses/abood/rtc/salma'), { offer: 'evil', updatedAt: fs.serverTimestamp() }), 'cannot change the host offer');
+  await assertFails(store('omar').sendAnswer('abood', 'omar', 'v=0'), 'no doc / not listed');
+  // Cleanup.
+  await assertFails(store('hessa').clearSignal('abood', 'salma'));
+  await assertSucceeds(store('salma').clearSignal('abood', 'salma'));
+  await assertSucceeds(store('abood').clearSignal('abood', 'hessa'));
+});

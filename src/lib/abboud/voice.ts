@@ -1,6 +1,7 @@
 import { createManagedAudio, managedSpeak, unlockAudioForMobile } from '../audio';
 import type { Speaker } from './protocol';
-export type VoiceTurn = { speaker: Speaker; text: string };
+/** `voiceName` (optional, live class only) overrides the speaker's own voice, e.g. Abboud's TTS fallback. */
+export type VoiceTurn = { speaker: Speaker; text: string; voiceName?: string };
 /**
  * Each speaker's own Gemini voice. They must be in the server's ALLOWED_VOICES (src/server/routes.ts):
  * any other name is silently replaced by Sara's «Kore», which is how Badr («Puck») used to speak in Sara's voice.
@@ -40,13 +41,13 @@ export class ClassroomVoice {
       for (const turn of turns) {
         if (generation !== this.generation) return;
         const lang = /[\u0600-\u06ff]/.test(turn.text) ? 'ar' : 'en';
-        const cacheKey = `${voices[turn.speaker]}:${lang}:${turn.text}`;
+        const cacheKey = `${(turn.voiceName || voices[turn.speaker])}:${lang}:${turn.text}`;
         let audio = this.audioCache.get(cacheKey) || null;
         // Cached replay reaches audio.play() synchronously inside the user's click, with no new TTS await.
         if (!audio && !this.nativeReplay.has(cacheKey)) {
           const fetchTimeout = setTimeout(() => controller.abort(), 15000);
           try {
-            const response = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ text: turn.text, lang, voiceName: voices[turn.speaker] }) });
+            const response = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal, body: JSON.stringify({ text: turn.text, lang, voiceName: (turn.voiceName || voices[turn.speaker]) }) });
             const data: unknown = await response.json();
             if (response.ok && typeof data === 'object' && data !== null && 'audio' in data && typeof data.audio === 'string' && data.audio.length > 0) {
               audio = data.audio;

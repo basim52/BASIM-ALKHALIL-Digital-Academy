@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { liveErrorText, liveState, nameOf, newSessionId, present, raisedHands, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState, type Participant } from '../lib/abboud/liveClass';
+import { HostAudio, liveAudioSupported, type AudioDeps } from '../lib/abboud/liveAudio';
+import { tidyUtterance } from '../lib/abboud/liveTranscript';
+import { liveErrorText, liveFeed, liveState, nameOf, type FeedItem, type FeedWho, newSessionId, present, raisedHands, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState, type Participant } from '../lib/abboud/liveClass';
 
 /** What Abboud's activity shares with joined students (no AI, stage, star or progress data). */
 export type LiveSnapshot = { lessonId: number; lessonTitle: string; source: string; draft: string; explained: string[] };
 const PUBLISH_DEBOUNCE_MS = 700;
 
 /** Host side of «فصل عبود المباشر». Inert (config null) unless the admin created a class for this uid. */
-export function useLiveHost(store: LiveClassStore | null, uid: string | undefined, snapshot: LiveSnapshot) {
+export function useLiveHost(store: LiveClassStore | null, uid: string | undefined, snapshot: LiveSnapshot, options: { aiSpeaking?: boolean; audio?: AudioDeps | false } = {}) {
   const [config, setConfig] = useState<LiveClassConfig | null>(null);
   const [state, setState] = useState<LiveState | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -24,6 +26,38 @@ export function useLiveHost(store: LiveClassStore | null, uid: string | undefine
   useEffect(() => { if (!store || !uid || !sessionId) { setMessages([]); return; } return store.watchMessages(uid, sessionId, setMessages, fail); }, [store, uid, sessionId]);
   useEffect(() => { if (!sessionId) return; const t = setInterval(() => setNow(Date.now()), 15_000); return () => clearInterval(t); }, [sessionId]);
   const latest = useRef({ state, snapshot }); latest.current = { state, snapshot };
+  // Shared clean transcript: one item per finished utterance (never interim words).
+  const feed = useRef<FeedItem[]>([]); const feedSeq = useRef(0);
+  const [feedError, setFeedError] = useState('');
+  async function say(who: FeedWho, raw: string) {
+    const s = latest.current.state;
+    if (!store || !uid || !s?.active) return;
+    const text = who === 'abboud' ? tidyUtterance(raw) : raw;
+    if (!text.trim()) return;
+    feed.current = liveFeed(s.sessionId, [...feed.current, { id: `${who[0]}${Date.now().toString(36)}${++feedSeq.current}`, who, text, at: Date.now() }]).items;
+    try { await store.publishFeed(uid, { sessionId: s.sessionId, items: feed.current }); setFeedError(''); }
+    catch (e) { setFeedError(`${liveErrorText(e, 'نشر كلام الفصل وبدر وريم')} (يحتاج نشر قواعد live/feed الجديدة).`); }
+  }
+  // Live voice (WebRTC, this device is the hub).
+  const audio = useRef<HostAudio | null>(null);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const [audioNote, setAudioNote] = useState('');
+  const [peerStates, setPeerStates] = useState<Record<string, RTCPeerConnectionState>>({});
+  const [speakerTrack, setSpeakerTrack] = useState<MediaStreamTrack | null>(null);
+  const audioDeps = options.audio;
+  function openAudio(sessionId: string) {
+    audio.current?.close(); audio.current = null; setPeerStates({}); setSpeakerTrack(null);
+    if (!store || !uid || audioDeps === false || (!audioDeps && !liveAudioSupported())) { setAudioNote('🔇 الصوت المباشر غير مدعوم في هذا المتصفح؛ الطلاب يسمعون نسخة آلية من جملك.'); return; }
+    const a = new HostAudio(store, uid, sessionId, audioDeps || {}, { onPeers: setPeerStates, onSpeakerTrack: setSpeakerTrack, onError: () => setAudioNote('تعذّر توصيل الصوت لأحد الطلاب؛ يسمع نسخة آلية من جملك وسنعيد المحاولة.') });
+    audio.current = a;
+    // Called inside the tap so the browser can ask for the microphone.
+    a.startMic().then(() => setAudioNote(''), () => setAudioNote('🎤 لم يُسمح بالميكروفون للبث المباشر. الطلاب يسمعون نسخة آلية من جملك؛ اسمح بالميكروفون ثم أعد بدء الفصل.'));
+  }
+  useEffect(() => { if (!sessionId) { audio.current?.close(); audio.current = null; setPeerStates({}); setSpeakerTrack(null); } }, [sessionId]);
+  useEffect(() => () => { audio.current?.close(); }, []);
+  useEffect(() => { if (!store || !uid || !sessionId) return; return store.watchSignals(uid, list => void audio.current?.onSignals(list), () => {}); }, [store, uid, sessionId]);
+  useEffect(() => { audio.current?.setSpeaker(state?.active ? state.speaker : ''); }, [state?.speaker, state?.active, peerStates]);
+  useEffect(() => { audio.current?.setMuted(!voiceOn || !!options.aiSpeaking); }, [voiceOn, options.aiSpeaking, peerStates]);
   async function publish(patch: Partial<LiveState>) {
     if (!store || !uid) return;
     const base = latest.current.state;
@@ -42,11 +76,20 @@ export function useLiveHost(store: LiveClassStore | null, uid: string | undefine
   // Closing the activity ends the live class so students are not left waiting.
   useEffect(() => () => { if (latest.current.state?.active) void publish({ active: false, speaker: '' }); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const here = useMemo(() => state?.active ? present(participants, state.sessionId, now) : [], [participants, state, now]);
+  const hereKey = here.map(p => p.uid).sort().join(',');
+  useEffect(() => { audio.current?.sync(hereKey ? hereKey.split(',') : []); }, [hereKey, sessionId]);
   const hands = useMemo(() => raisedHands(participants, state, now), [participants, state, now]);
   return {
-    config, state, here, hands, messages, error, live: !!state?.active,
-    start: () => publish({ active: true, sessionId: newSessionId(), speaker: '' }),
-    end: () => publish({ active: false, speaker: '' }),
+    config, state, here, hands, messages, error: error || feedError, live: !!state?.active,
+    say, voiceOn, audioNote, peerStates, speakerTrack,
+    toggleVoice: () => setVoiceOn(v => !v),
+    start: () => {
+      const id = newSessionId(); feed.current = [];
+      openAudio(id);
+      if (store && uid) void store.publishFeed(uid, { sessionId: id, items: [] }).then(() => setFeedError(''), e => setFeedError(`${liveErrorText(e, 'نشر كلام الفصل وبدر وريم')} (يحتاج نشر قواعد live/feed الجديدة).`));
+      return publish({ active: true, sessionId: id, speaker: '' });
+    },
+    end: () => { audio.current?.close(); audio.current = null; return publish({ active: false, speaker: '' }); },
     allow: async (student: string) => { await publish({ speaker: student }); try { await store?.setHand(uid!, student, false); } catch { /* the hand doc may be gone */ } },
     decline: async (student: string) => { try { await store?.setHand(uid!, student, false); } catch (e) { fail(e); } },
     endTurn: () => publish({ speaker: '' })
@@ -90,6 +133,17 @@ export function AbboudLiveHostNotice({ host }: { host: LiveHost }) {
   </p>;
 }
 
+/** Plays one remote WebRTC track (hidden element). */
+export function LiveTrackAudio({ track, muted = false }: { track: MediaStreamTrack | null; muted?: boolean }) {
+  const el = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    const a = el.current; if (!a) return;
+    a.srcObject = track && typeof MediaStream !== 'undefined' ? new MediaStream([track]) : null;
+    if (track) void a.play?.()?.catch?.(() => {});
+  }, [track]);
+  return <audio ref={el} autoPlay muted={muted} data-testid="abboud-live-audio" data-track={track ? track.id : ''} hidden />;
+}
+
 export function AbboudLiveHostPanel({ host }: { host: LiveHost }) {
   const { config, state } = host;
   if (!config) return null;
@@ -105,6 +159,12 @@ export function AbboudLiveHostPanel({ host }: { host: LiveHost }) {
         <span className="text-sm" data-testid="abboud-live-here">👥 الحاضرون ({host.here.length}): {host.here.length ? host.here.map(p => nameOf(config, p.uid)).join('، ') : 'لا أحد بعد'}</span>
         <button type="button" onClick={() => void host.end()} className="rounded-lg border bg-white px-3 py-1 text-sm">إنهاء الفصل المباشر</button>
       </div>
+      <div className="abboud-live-row text-sm" data-testid="abboud-live-voice">
+        <button type="button" aria-pressed={host.voiceOn} onClick={host.toggleVoice} className="rounded-lg border bg-white px-3 py-1">{host.voiceOn ? '🎤 صوتك المباشر يعمل — إيقاف' : '🔇 صوتك المباشر متوقف — تشغيل'}</button>
+        <span>🎧 {host.here.filter(p => host.peerStates[p.uid] === 'connected').length} من {host.here.length} يسمعونك مباشرة</span>
+      </div>
+      {host.audioNote && <p role="status" className="abboud-dock-notice bg-amber-50 text-amber-900">{host.audioNote}</p>}
+
       {speaker && <div className="abboud-live-row" data-testid="abboud-live-speaker"><span>🎙️ <b>{nameOf(config, speaker)}</b> يتكلم الآن</span>
         <button type="button" onClick={() => void host.endTurn()} className="rounded-lg bg-slate-700 px-3 py-1 text-sm text-white">إنهاء دوره</button></div>}
       {host.hands.length > 0 && <ul className="abboud-live-hands" aria-label="طلبات الكلام">{host.hands.map(p => <li key={p.uid} className="abboud-live-row">

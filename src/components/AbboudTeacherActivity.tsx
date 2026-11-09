@@ -14,7 +14,8 @@ import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
 import { ContinuousDictation, microphoneError, type DictationPause } from '../lib/abboud/recognition';
 import type { LiveClassStore } from '../lib/abboud/liveClass';
 import { useLiveStore, useLiveUid } from '../lib/abboud/useLiveStore';
-import { AbboudLiveHostHeaderButton, AbboudLiveHostButton, AbboudLiveHostNotice, AbboudLiveHostPanel, useLiveHost } from './AbboudLiveHost';
+import type { AudioDeps } from '../lib/abboud/liveAudio';
+import { LiveTrackAudio, AbboudLiveHostHeaderButton, AbboudLiveHostButton, AbboudLiveHostNotice, AbboudLiveHostPanel, useLiveHost } from './AbboudLiveHost';
 const AbboudLiveJoin = lazy(() => import('./AbboudLiveJoin'));
 /** For accounts that are not this class's teacher: who starts the live class, and the join entry if they are invited. */
 function AbboudLiveViewer({ uid, liveStore, error }: { uid?: string; liveStore?: LiveClassStore | null; error: string }) {
@@ -29,6 +30,8 @@ export interface AbboudTeacherProps {
   uid?: string; onClose: () => void;
   /** Tests inject an in-memory store; the app lazily uses Firestore. Live class UI appears only if the admin set one up. */
   liveStore?: LiveClassStore | null;
+  /** Live voice (WebRTC) dependencies for tests; false disables live voice. */
+  liveAudio?: AudioDeps | false;
 }
 type Phase = 'ready' | 'listening' | 'thinking' | 'speaking';
 const names = { badr: 'بدر', reem: 'ريم', sara: 'سارة', abboud: 'عبود' };
@@ -46,7 +49,7 @@ const correctTask = (lessonId: number) => mistakeSpeaker(lessonId) === 'reem'
   : 'بدر يحاول وفي عبارته خطأ واحد صغير. اكتشفه وصحّحه بصوتك وقل السبب.';
 const starText: Record<StarKind, string> = { explain: 'نجمة شرح', correction: 'نجمة تصحيح' };
 
-export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClose, liveStore }) => {
+export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClose, liveStore, liveAudio }) => {
   const [lessonId, setLessonId] = useState(1);
   const [boardExpanded, setBoardExpanded] = useState(false);
   const expandTrigger = useRef<HTMLButtonElement | null>(null);
@@ -108,7 +111,8 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const store = useLiveStore(liveStore);
   const liveUid = useLiveUid(uid, liveStore);
   // Real academy students (admin-allowlisted) can follow live; Badr and Reem are not involved in any of this.
-  const host = useLiveHost(store, liveUid, { lessonId, lessonTitle, source: boardSource, draft, explained });
+  // Live class: only finished sentences are shared (never the interim mic text); Badr/Reem/Sara replies go to the feed.
+  const host = useLiveHost(store, liveUid, { lessonId, lessonTitle, source: boardSource, draft: '', explained }, { aiSpeaking: active === 'badr' || active === 'reem' || active === 'sara', audio: liveAudio });
   useEffect(() => {
     const found = coveredItems(lesson, abboudSpeech);
     setExplained(previous => found.every(key => previous.includes(key)) ? previous : [...new Set([...previous, ...found])]);
@@ -195,6 +199,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     const timeout = setTimeout(() => controller.abort(), 45000);
     let failureStatus = 0;
     if (stage === 'explain') { setBoardSource(text); setBoardChecked(false); setBoardCorrection(null); setBoardResponses([]); }
+    void host.say('abboud', text);
     try {
       const response = await fetch('/api/sara/abboud-teacher', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
@@ -237,6 +242,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       }
       busy.current = false; setPhase('ready');
       clearTimeout(timeout); request.current = null;
+      for (const turn of reply.turns) void host.say(turn.speaker, turn.text);
       await play(reply.turns, id);
     } catch {
       if (!mounted.current || id !== generation.current) return;
@@ -274,6 +280,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       // Board exploration must not replace Badr's pending question, advance stages or earn progress.
       setBoardResponses(reply.turns); setBoardResponseFocus(boardFocus.text); setLastTurns(reply.turns);
       clearTimeout(timeout); request.current = null; busy.current = false;
+      for (const turn of reply.turns) void host.say(turn.speaker, turn.text);
       await play(reply.turns, id);
     } catch {
       if (mounted.current && id === generation.current) setError(interactionError(failureStatus));
@@ -286,7 +293,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
     if (phase !== 'ready') return;
     stop(); voice.current?.unlock(); setAudioNotice('');
     const turns = [{ speaker: 'sara', text } satisfies VoiceTurn];
-    setLastTurns(turns); void play(turns, generation.current);
+    setLastTurns(turns); void host.say('sara', text); void play(turns, generation.current);
   }
   function startMic() {
     if (busy.current || stage === 'complete') return;
@@ -379,6 +386,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           </div>
           {draft && !typing && <div className="abboud-live-line" data-testid="abboud-live-line"><span className="abboud-live-label">{phase === 'listening' ? '🎙️ أسمعك الآن — لن يُرسل شيء قبل «خلصت»:' : 'كلامك المحفوظ:'}</span> <span dir="auto" data-testid="abboud-live-transcript" className="abboud-live-text">{draft}</span>{phase === 'ready' && <button type="button" disabled={stage === 'complete'} onClick={() => void submit(draft)} className="abboud-live-resend rounded-lg bg-indigo-700 text-white">إرسال الكلام المحفوظ مجدداً</button>}</div>}
           <AbboudLiveHostNotice host={host} />
+          <LiveTrackAudio track={host.speakerTrack} />
           {liveOpen && <AbboudLiveHostPanel host={host} />}
           {starNotice && <p role="status" data-testid="abboud-star-notice" className="abboud-star-notice">{starNotice}</p>}
           {error && <p role="alert" className="abboud-dock-notice bg-red-50 text-red-800">{error}</p>}
