@@ -12,6 +12,8 @@ export type Awards = { stars: Record<string, LessonStars>; name: string };
 export type SessionReport = {
   at: string; lesson: string; explained: string; englishWords: string[];
   englishTurns: number; abboudTurns: number; stars: number; strength?: string; tip?: string;
+  /** Lesson board items he said, e.g. «4 من 9» (fixed lessons only; mention, not a grade). */
+  covered?: string;
 };
 type Store = Pick<Storage, 'getItem' | 'setItem'>;
 export const awardsKey = (uid: string) => `abboud-teacher-awards:v1:${uid}`;
@@ -102,6 +104,7 @@ export function reportText(report: SessionReport, name: string) {
     `🎙️ ماذا شرح: ${report.explained || '—'}`,
     `🔤 كلمات إنجليزية استخدمها: ${report.englishWords.length ? report.englishWords.join('، ') : 'لا توجد'}`,
     `🗣️ تكلّم بالإنجليزي في ${report.englishTurns} من ${report.abboudTurns} مرات كلامه`,
+    ...(typeof report.covered === 'string' ? [`📋 عناصر السبورة التي ذكرها: ${report.covered}`] : []),
     `⭐ نجوم الحصة: ${report.stars}`,
     ...(report.strength ? [`👩🏻‍🏫 سارة: ${report.strength}`] : []),
     `💡 نصيحة سارة: ${report.tip || 'لا توجد هذه المرة'}`

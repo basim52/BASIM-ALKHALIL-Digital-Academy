@@ -4,11 +4,12 @@ import AbboudLessonPicker from './AbboudLessonPicker';
 import AbboudSessionReport from './AbboudSessionReport';
 import AbboudCertificate from './AbboudCertificate';
 import { interactionError, type BoardCorrection } from '../lib/abboud/board';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CUSTOM_LESSON_ID, SESSIONS_CONFIG, customLesson } from '../lib/abboud/curriculum';
 import { completeLesson, mistakeSpeaker, nextStage, parseReply, readCompleted, type BoardFocus, type Message, type Speaker, type Stage } from '../lib/abboud/protocol';
 import { awardStar, buildReport, correctionStar, earnedCertificate, explanationStar, lessonKey, readAwards, readReports, saveName, saveReport, starCount, type SessionReport, type StarKind } from '../lib/abboud/awards';
 import { TOPIC_IDEAS, sanitizeTopic, topicMessage } from '../lib/abboud/topic';
+import { coveredItems, lessonItems } from '../lib/abboud/lessonBoard';
 import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
 import { ContinuousDictation, microphoneError, type DictationPause } from '../lib/abboud/recognition';
 
@@ -78,9 +79,17 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const mutedRef = useRef(muted);
   const custom = lessonId === CUSTOM_LESSON_ID;
   const choosingTopic = custom && !customTopic;
-  const lesson = custom ? customLesson(customTopic || 'درس من اختياري') : SESSIONS_CONFIG.find(s => s.id === lessonId) || SESSIONS_CONFIG[0];
+  const lesson = useMemo(() => custom ? customLesson(customTopic || 'درس من اختياري') : SESSIONS_CONFIG.find(s => s.id === lessonId) || SESSIONS_CONFIG[0], [custom, customTopic, lessonId]);
   const lessonTitle = `${lesson.emoji} ${lesson.titleAr}`;
   const currentKey = lessonKey(lessonId, custom ? customTopic : '');
+  /** Only Abboud's own words (sent turns + what the mic is hearing now) can mark the board's lesson items. */
+  const abboudSpeech = useMemo(() => [...messages.filter(m => m.speaker === 'abboud').map(m => m.text), ...(draft ? [draft] : [])], [messages, draft]);
+  /** Lesson items he has said, kept for the whole lesson run (a cleared draft never un-marks them). */
+  const [explained, setExplained] = useState<string[]>([]);
+  useEffect(() => {
+    const found = coveredItems(lesson, abboudSpeech);
+    setExplained(previous => found.every(key => previous.includes(key)) ? previous : [...new Set([...previous, ...found])]);
+  }, [lesson, abboudSpeech]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function stop() {
     generation.current++;
@@ -92,7 +101,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   function reset(id: number, keepTopic = false) {
     stop(); setLessonId(id); setStage('explain'); setMessages([]); setLastTurns([]); setDraft(''); setError(''); setAudioNotice(''); setTyping(false);
     setBoardSource(''); setBoardChecked(false); setBoardCorrection(null); setBoardResponses([]); setBoardResponseFocus('');
-    setRunStars([]); setStarNotice(''); setReport(null); setTopicNotice('');
+    setRunStars([]); setStarNotice(''); setReport(null); setTopicNotice(''); setExplained([]);
     if (!keepTopic) { setCustomTopic(''); setTopicDraft(''); }
   }
   function chooseTopic(raw: string) {
@@ -195,7 +204,10 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       setLastTurns(reply.turns); setDraft(''); setStage(following);
       if (following === 'complete') {
         setCompleted(completeLesson(localStorage, uid, lessonId));
-        const summary = buildReport(dialogue, lessonTitle, lessonStars.length, reply.praise);
+        const items = lessonItems(lesson).length;
+        const said = coveredItems(lesson, dialogue.filter(m => m.speaker === 'abboud').map(m => m.text));
+        const covered = items ? [...new Set([...explained, ...said])].length : 0;
+        const summary = { ...buildReport(dialogue, lessonTitle, lessonStars.length, reply.praise), ...(items ? { covered: `${covered} من ${items}` } : {}) };
         setReport(summary); setReports(saveReport(localStorage, uid, summary));
       }
       busy.current = false; setPhase('ready');
@@ -308,7 +320,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
         <AbboudLessonPicker lessonId={lessonId} completed={completed} stars={starCount(awards)} certificate={earnedCertificate(completed)}
           onPick={id => reset(id)} onCertificate={() => setCertificateOpen(true)} />
         <section ref={workspace} id="abboud-workspace" tabIndex={-1} aria-label="الفصل الصغير" data-testid="abboud-workspace" className="abboud-workspace">
-          <AbboudClassroomBoard lessonTitle={lessonTitle} source={boardSource} checked={boardChecked} correction={boardCorrection}
+          <AbboudClassroomBoard lesson={lesson} explained={explained} abboudSpeech={abboudSpeech} lessonTitle={lessonTitle} source={boardSource} checked={boardChecked} correction={boardCorrection}
             responses={boardResponses} responseFocus={boardResponseFocus} busy={phase !== 'ready'} saraSpeaking={active === 'sara'}
             expanded={boardExpanded} onExpandedChange={toggleBoard} onAsk={focus => void askBoard(focus)} onRead={readBoard} />
           <aside className="abboud-students" aria-label="بدر وريم في الفصل" data-testid="abboud-students"><div className="abboud-student-list">

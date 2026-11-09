@@ -23,6 +23,7 @@ export default function AbboudSessionReport({ report, history, name, guest }: { 
         <li>🎙️ <b>ماذا شرح:</b> <span dir="auto">{report.explained || '—'}</span></li>
         <li>🔤 <b>كلمات إنجليزية استخدمها:</b> {report.englishWords.length ? <span dir="ltr">{report.englishWords.join(', ')}</span> : 'لا توجد'}</li>
         <li>🗣️ <b>تكلّم بالإنجليزي:</b> {report.englishTurns} من {report.abboudTurns} مرات كلامه</li>
+        {typeof report.covered === 'string' && <li>📋 <b>عناصر السبورة التي ذكرها:</b> {report.covered}</li>}
         <li>⭐ <b>نجوم الحصة:</b> {report.stars}</li>
         <li>💡 <b>نصيحة سارة:</b> {report.tip || 'لا توجد هذه المرة'}</li>
       </ul>

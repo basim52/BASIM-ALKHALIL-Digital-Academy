@@ -106,3 +106,72 @@ test('board HTTP interaction forwards focus only as user data and enforces the s
     assert.equal(response.status, 200); assert.equal((await response.json()).turns[0].speaker, 'reem');
   } finally { await new Promise<void>(resolve => server.close(() => resolve())); }
 });
+
+test('curriculum: every fixed lesson has reviewed words (English, Arabic meaning, emoji), an Arabic rule and Arabic-glossed examples', async () => {
+  const { SESSIONS_CONFIG, customLesson } = await import('../src/lib/abboud/curriculum');
+  assert.equal(SESSIONS_CONFIG.length, 15);
+  for (const lesson of SESSIONS_CONFIG) {
+    assert.ok(lesson.words.length >= 2, `L${lesson.id} words`);
+    for (const w of lesson.words) {
+      assert.match(w.en, /^[A-Za-z][A-Za-z ?!',]*$/, `L${lesson.id} English word ${w.en}`);
+      assert.match(w.ar, /[\u0600-\u06FF]/, `L${lesson.id} Arabic meaning of ${w.en}`); assert.ok(w.emoji.trim(), `L${lesson.id} emoji of ${w.en}`);
+    }
+    assert.deepEqual(lesson.chalkTargetWords, lesson.words.map(w => w.en), 'board words are exactly the lesson targets the AI checks');
+    assert.match(lesson.ruleAr, /[\u0600-\u06FF]/); assert.ok(lesson.examples.length >= 2, `L${lesson.id} examples`);
+    for (const e of lesson.examples) { assert.match(e.en, /^[A-Za-z]/); assert.match(e.ar, /[\u0600-\u06FF]/); }
+  }
+  const custom = customLesson('الفضاء');
+  assert.deepEqual([custom.words, custom.examples, custom.ruleAr], [[], [], ''], 'a chosen topic gets no invented content');
+});
+
+test('lesson items are marked only by whole words Abboud says, with a small speech-recognition tolerance', async () => {
+  const { saysItem, coveredItems, englishTokens } = await import('../src/lib/abboud/lessonBoard');
+  const { SESSIONS_CONFIG } = await import('../src/lib/abboud/curriculum');
+  assert.deepEqual(englishTokens("What's 2 + ٣?"), ['what', 'is', 'two', 'three']);
+  assert.equal(saysItem('I have two books', 'two books'), true);
+  assert.equal(saysItem('I have 2 books', 'two books'), true, 'digits count as the number word');
+  assert.equal(saysItem('the apples are red', 'apple'), true, 'plural of the item');
+  assert.equal(saysItem('this is yelow', 'yellow'), true, 'one letter off in a long word (recognition slip)');
+  assert.equal(saysItem("what's your name", 'What is your name?'), true);
+  assert.equal(saysItem('I am bored', 'red'), false, 'no substring matches');
+  assert.equal(saysItem('tennis is fun', 'ten'), false);
+  assert.equal(saysItem('rad', 'red'), false, 'short words must be exact');
+  assert.equal(saysItem('book red', 'a red book'), false, 'words must be in order');
+  assert.equal(saysItem('هلو ماي نيم', 'Hello'), false, 'Arabic-letter transliteration is not counted');
+  assert.equal(saysItem('On Friday I visits my grandmother', 'On Friday I visit my grandmother.'), true);
+  assert.equal(saysItem('Friday grandmother', 'On Friday I visit my grandmother.'), false);
+  const colours = SESSIONS_CONFIG[1];
+  assert.deepEqual(coveredItems(colours, ['Red means أحمر', 'and this is a red book']), ['w0', 'w4', 'e0']);
+  assert.deepEqual(coveredItems(colours, []), []);
+});
+
+test('board writes the full lesson on top (title, words + meanings, rule, examples), progress counts, dialogue below', async () => {
+  const { abboudBoardActions, abboudBoardCalls } = await import('../src/lib/abboud/board');
+  const { SESSIONS_CONFIG, customLesson } = await import('../src/lib/abboud/curriculum');
+  const empty = { source: '', checked: false, correction: null, responses: [] };
+  for (const lesson of SESSIONS_CONFIG) {
+    const written = JSON.stringify(abboudBoardCalls({ ...empty, lesson, lessonTitle: `${lesson.emoji} ${lesson.titleAr}` }));
+    for (const w of lesson.words) { assert.ok(written.includes(w.en), `L${lesson.id} ${w.en}`); assert.ok(written.includes(w.ar), `L${lesson.id} ${w.ar}`); }
+    for (const e of lesson.examples) { assert.ok(written.includes(e.en)); assert.ok(written.includes(e.ar)); }
+    assert.ok(written.includes(lesson.ruleAr)); assert.ok(written.includes(`شرحت 0 من ${lesson.words.length + lesson.examples.length}`));
+    assert.equal(/(\\n|")✅ /.test(written), false, `L${lesson.id}: nothing marked before Abboud speaks (only the ✅ legend)`);
+    assert.ok(written.includes('✅ = تم شرحها'));
+    assert.equal(written.includes('عبود:'), false);
+  }
+  const colours = SESSIONS_CONFIG[1];
+  const actions = abboudBoardActions({ ...empty, lesson: colours, lessonTitle: '🎨 الألوان', explained: ['w0', 'e0'], source: 'Red. A red book.', checked: false,
+    responses: [{ speaker: 'reem', text: 'Is it blue?' }] });
+  const texts = actions.map(a => JSON.stringify(a));
+  assert.deepEqual(actions[0], { kind: 'title', text: '🎨 الألوان' });
+  assert.match(texts[1], /شرحت 2 من 10/);
+  assert.match(texts[2], /✅ 🔴 red — أحمر/); assert.match(texts[2], /▫️ 🔵 blue — أزرق/);
+  assert.ok(texts.some(t => t.includes('✅ a red book')) && texts.some(t => t.includes('"a blue bag"')));
+  const divider = texts.findIndex(t => t.includes('💬 من الحصة'));
+  const lastLesson = texts.findIndex(t => t.includes('a yellow pencil'));
+  assert.ok(lastLesson > 0 && divider > lastLesson, 'lesson reference first, the dialogue below it');
+  assert.ok(texts.findIndex(t => t.includes('عبود: Red. A red book.')) > divider && texts.findIndex(t => t.includes('Is it blue?')) > divider);
+  const custom = abboudBoardActions({ ...empty, lesson: customLesson('الفضاء'), lessonTitle: '✨ الفضاء', abboudSpeech: ['The moon and the stars', 'القمر'] });
+  const customText = JSON.stringify(custom);
+  assert.match(customText, /لا يوجد محتوى جاهز مُراجَع/); assert.match(customText, /كلمات إنجليزية قلتها: the, moon, and, stars/);
+  assert.equal(customText.includes('شرحت'), false, 'no fake progress for a chosen topic');
+});
