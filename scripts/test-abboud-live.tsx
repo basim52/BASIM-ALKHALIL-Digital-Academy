@@ -220,3 +220,69 @@ test('the admin is offered even when his account has no users/ document', async 
     assert.equal(el.querySelector('input[type="checkbox"]')?.parentElement?.textContent, 'أنا (المدير)');
   } finally { await act(async () => root.unmount()); el.remove(); }
 });
+
+const CONFIG = { hostUid: 'abood', hostName: 'Abood B', allowed: ['fatimah', 'boss'], names: { fatimah: 'FATIMAH', boss: 'B K' } };
+const pressIn = async (el: Element, testid: string) => { const b = el.querySelector(`[data-testid="${testid}"]`) as HTMLButtonElement | null; assert.ok(b, `missing ${testid}`); await act(async () => { b.click(); }); await settle(); };
+
+test('root cause: the teacher is found by the signed-in uid even when the profile object has no uid; prominent start button in the top bar', async () => {
+  const backend = live.createMemoryLiveBackend();
+  backend.configs.set('abood', CONFIG);
+  const g = globalThis as { __abboudLiveStore?: unknown; __abboudLiveUid?: string };
+  g.__abboudLiveStore = backend.as('abood'); g.__abboudLiveUid = 'abood';
+  const host = seat();
+  try {
+    // Exactly the app path: no liveStore override, and Sara passes profile.uid — undefined when users/{uid} lacks a uid field.
+    await act(async () => { host.root.render(<AbboudTeacherActivity uid={undefined} onClose={() => {}} />); }); await settle(); await settle();
+    const header = host.el.querySelector('.abboud-header [data-testid="abboud-live-header"]') as HTMLButtonElement;
+    assert.ok(header, 'start button is in the top bar');
+    assert.match(header.textContent || '', /📡 ابدأ الفصل المباشر/);
+    assert.equal(header.nextElementSibling?.getAttribute('data-testid'), 'abboud-board-expand', 'next to «توسعة السبورة» and «إغلاق»');
+    await act(async () => { header.click(); }); await settle();
+    assert.equal(backend.states.get('abood')?.active, true, 'one tap starts the live class');
+    assert.ok(host.el.querySelector('[data-testid="abboud-live-panel"]'), 'and opens the panel with the joined list');
+    assert.match(header.textContent || '', /🔴 مباشر الآن · 👥 0/);
+    assert.equal(host.el.querySelector('[data-testid="abboud-live-viewer"]'), null, 'the teacher does not get the viewer hint');
+  } finally { await act(async () => host.root.unmount()); host.el.remove(); delete g.__abboudLiveStore; delete g.__abboudLiveUid; localStorage.clear(); }
+});
+
+test('invited non-teacher (the admin) opening «عبود المعلّم»: hint + waiting entry, then join when live; waiting room turns into the board', async () => {
+  const backend = live.createMemoryLiveBackend();
+  backend.configs.set('abood', CONFIG);
+  const viewer = seat(), host = seat(), outsider = seat();
+  try {
+    await act(async () => { viewer.root.render(<AbboudTeacherActivity uid="boss" onClose={() => {}} liveStore={backend.as('boss', { admin: true })} />); });
+    await act(async () => { outsider.root.render(<AbboudTeacherActivity uid="omar" onClose={() => {}} liveStore={backend.as('omar')} />); }); await settle(); await settle();
+    assert.equal(viewer.el.querySelector('[data-testid="abboud-live-header"]'), null, 'not the teacher: no start button');
+    assert.match(viewer.el.querySelector('[data-testid="abboud-live-hint"]')?.textContent || '', /الفصل المباشر يبدأه عبود من حسابه، وأنت تنضم من هنا عندما يبدأ/);
+    assert.match(viewer.el.querySelector('[data-testid="abboud-live-waiting"]')?.textContent || '', /فصل Abood B — بانتظار عبود يبدأ الدرس/);
+    assert.equal(outsider.el.querySelector('[data-testid="abboud-live-hint"]'), null, 'accounts not invited see nothing new');
+    await pressIn(viewer.el, 'abboud-live-waiting'); await settle(20);
+    const room = () => viewer.el.querySelector('[data-testid="abboud-live-guest"]') as HTMLElement;
+    assert.match(room().textContent || '', /⏳ بانتظار عبود يبدأ الدرس/, 'clear waiting state, not an empty screen');
+    await act(async () => { host.root.render(<AbboudTeacherActivity uid="abood" onClose={() => {}} liveStore={backend.as('abood')} />); }); await settle(); await settle();
+    await pressIn(host.el, 'abboud-live-header'); await settle(20);
+    assert.match(room().querySelector('[data-testid="abboud-live-board"]')?.textContent || '', /التحية والتعريف/, 'the same board appears without reopening');
+    assert.match(host.el.querySelector('[data-testid="abboud-live-here"]')?.textContent || '', /الحاضرون \(1\): B K/, 'the teacher sees who joined');
+    await press(host.el, 'اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('Hello everyone'); }); await settle(PUBLISH);
+    assert.match(room().querySelector('[data-testid="abboud-live-words"]')?.textContent || '', /Hello everyone/, "Abboud's live words");
+  } finally { for (const s of [viewer, host, outsider]) { await act(async () => s.root.unmount()); s.el.remove(); } localStorage.clear(); }
+});
+
+test('permission errors are shown honestly (never an empty class): join list, waiting room and the teacher', async () => {
+  const backend = live.createMemoryLiveBackend();
+  backend.configs.set('abood', CONFIG);
+  const denied = (_: unknown, __: unknown, onError?: (e: unknown) => void) => { queueMicrotask(() => onError?.({ code: 'permission-denied' })); return () => {}; };
+  const broken = { ...backend.as("boss", { admin: true }), watchState: denied as never };
+  const joinSeat = seat(), guestSeat = seat(), teacher = seat();
+  try {
+    await act(async () => { joinSeat.root.render(<AbboudLiveJoin uid="boss" liveStore={{ ...broken, watchClassesFor: denied as never }} />); });
+    await act(async () => { guestSeat.root.render(<AbboudLiveJoin uid="boss" liveStore={broken} />); });
+    await act(async () => { teacher.root.render(<AbboudTeacherActivity uid="abood" onClose={() => {}} liveStore={{ ...backend.as('abood'), watchConfig: denied as never }} />); }); await settle(); await settle();
+    assert.match(joinSeat.el.querySelector('[role="alert"]')?.textContent || '', /قائمة فصول عبود: الصلاحيات رفضت الوصول \(permission-denied\)/);
+    assert.match(guestSeat.el.querySelector('[role="alert"]')?.textContent || '', /فصل Abood B: الصلاحيات رفضت الوصول/);
+    await pressIn(guestSeat.el, 'abboud-live-waiting'); await settle(20);
+    assert.match(guestSeat.el.querySelector('[data-testid="abboud-live-error"]')?.textContent || '', /حالة الفصل: الصلاحيات رفضت الوصول/);
+    assert.doesNotMatch(guestSeat.el.querySelector('[data-testid="abboud-live-guest"]')?.textContent || '', /بانتظار عبود يبدأ الدرس/, 'an error is not dressed up as «waiting»');
+    assert.match(teacher.el.querySelector('[data-testid="abboud-live-viewer"] [role="alert"]')?.textContent || '', /permission-denied/, 'the teacher sees why 📡 is missing');
+  } finally { for (const s of [joinSeat, guestSeat, teacher]) { await act(async () => s.root.unmount()); s.el.remove(); } localStorage.clear(); }
+});

@@ -125,3 +125,15 @@ test('a parent account listed by the admin can attend too', async () => {
   await assertSucceeds(store('mama').join('abood', 'mama', 'S1', true));
   await assertSucceeds(fs.getDoc(fs.doc(db('mama'), 'abboudClasses/abood/live/state')));
 });
+
+test('watchConfig: a missing class is "no class" without an error; a denied read reports permission-denied', async () => {
+  await env.clearFirestore();
+  const errors: unknown[] = [];
+  const value = await new Promise(res => { const stop = store('abood').watchConfig('abood', v => { stop(); res(v); }, e => errors.push(e)); });
+  assert.equal(value, null); assert.equal(errors.length, 0, 'the teacher can read his own (absent) class doc');
+  await admin().saveConfig(config);
+  const denied = await new Promise<unknown>(res => { store('omar').watchConfig('abood', () => {}, e => res(e)); });
+  assert.equal((denied as { code?: string }).code, 'permission-denied', 'reported, not hidden');
+  const found = await new Promise(res => { const stop = store('abood').watchConfig('abood', v => { if (v) { stop(); res(v); } }); });
+  assert.equal((found as { hostUid: string }).hostUid, 'abood', 'host lookup is by the signed-in uid == class doc id (users/{uid} doc id chosen by the admin)');
+});

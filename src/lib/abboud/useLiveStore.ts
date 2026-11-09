@@ -11,3 +11,17 @@ export function useLiveStore(override?: LiveClassStore | null) {
   }, [override]);
   return store;
 }
+/**
+ * Who this device is in the live class. With the app's Firestore store it is the signed-in auth uid — the same id the
+ * rules compare with the class doc — because a profile object may lack its `uid` field. Tests (override) use the prop.
+ */
+export function useLiveUid(fallback: string | undefined, override?: LiveClassStore | null) {
+  const [authUid, setAuthUid] = useState<string | null>(null);
+  useEffect(() => {
+    if (override !== undefined) return;
+    let stop: (() => void) | undefined, alive = true;
+    import('./liveFirestoreApp').then(m => { if (alive) stop = m.watchLiveUid(setAuthUid); }).catch(() => {});
+    return () => { alive = false; stop?.(); };
+  }, [override]);
+  return override !== undefined ? fallback : (authUid ?? fallback);
+}

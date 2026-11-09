@@ -143,3 +143,15 @@ Built on `main` at `9c57a5b` (PR #12 merged). Badr and Reem stay as they are: th
 - **Joining:** the join entry «🔴 فصل … مباشر الآن — انضم» also appears inside this admin tab, so the admin can join without opening فصل سارة.
 - **Rules:** no change needed. The `abboudClasses` rules only check "uid is in `allowed`", whatever the role, and the emulator test now covers an admin and a parent attending.
 - **Deploying rules:** the academy uses the named Firestore database `ai-studio-0623389a-4ed7-49ee-9ff7-03c4842030d0`, while `firebase.json` targets `(default)`. Any future rules deploy must target the named database.
+
+### "The class is empty" (follow-up)
+- **Teacher side (the root cause):**
+  - The teacher's 📡 sat only in the mic dock, and the activity found the teacher by `profile.uid`.
+  - That profile is `users/{uid}.data()`, which doesn't include the doc id. If the doc lacks a `uid` field, the activity got `undefined` and showed no live controls at all.
+  - The live class now identifies people by the signed-in auth uid. That's the same id the rules compare (`request.auth.uid == hostUid`) and the `users/` doc id the admin picks.
+  - The teacher gets a prominent **«📡 ابدأ الفصل المباشر»** in the top bar next to «إغلاق». One tap starts the class and opens the panel, and it then shows «🔴 مباشر الآن · 👥 N».
+- **Invited accounts that aren't the teacher (e.g. the admin):**
+  - Before, nothing appeared until the class went live, so opening «عبود المعلّم» or Sara's class showed nothing.
+  - Now they see «📡 الفصل المباشر يبدأه عبود من حسابه، وأنت تنضم من هنا عندما يبدأ» and a waiting entry. That entry opens a waiting room («⏳ بانتظار عبود يبدأ الدرس»), which turns into the board and Abboud's live words as soon as he starts, without reloading.
+- **Errors:** every live-class listener now shows a specific, honest message (permission-denied / unavailable / failed-precondition, with the code) instead of an empty view. Before, the class-list query failed silently and the teacher's own class read mapped permission-denied to "no class".
+- **Rules:** no change.
