@@ -135,3 +135,11 @@ Built on `main` at `9c57a5b` (PR #12 merged). Badr and Reem stay as they are: th
 - A real session on several physical devices.
 - Real microphones and speech recognition on each browser (iOS Safari has limited Web Speech support; typing always works).
 - The rules in production.
+
+### Admin and parents as attendees (follow-up)
+- **Cause:** the picker was fed the admin dashboard's student list (`users where role == 'student'`), so the admin's own account (`role: 'admin'`) and parents never appeared.
+- **Attendees:** the «👨‍🏫 فصل عبود المباشر» tab now loads every registered account (only while the tab is open). It lists the signed-in admin first as «أنا (المدير)», even if he has no `users/` doc, and tags parents «(ولي أمر)». The class stores his real display name, not «أنا».
+- **Teachers:** the teacher choice stays students only.
+- **Joining:** the join entry «🔴 فصل … مباشر الآن — انضم» also appears inside this admin tab, so the admin can join without opening فصل سارة.
+- **Rules:** no change needed. The `abboudClasses` rules only check "uid is in `allowed`", whatever the role, and the emulator test now covers an admin and a parent attending.
+- **Deploying rules:** the academy uses the named Firestore database `ai-studio-0623389a-4ed7-49ee-9ff7-03c4842030d0`, while `firebase.json` targets `(default)`. Any future rules deploy must target the named database.

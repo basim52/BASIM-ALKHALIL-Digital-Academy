@@ -102,3 +102,26 @@ test('existing collections are unaffected: a student still cannot read other use
   await env.withSecurityRulesDisabled(async ctx => { await fs.setDoc(fs.doc(ctx.firestore() as never, 'users/hessa'), { role: 'student', email: 'hessa@x.com' }); });
   await assertFails(fs.getDoc(fs.doc(db('salma'), 'users/hessa')));
 });
+
+test('the admin can attend: listed admin joins, raises a hand, and posts only when given the turn', async () => {
+  await env.clearFirestore();
+  const bossToken = { email: 'basim5252@gmail.com' };
+  await assertSucceeds(admin().saveConfig({ ...config, allowed: ['salma', 'boss'], names: { salma: 'سلمى', boss: 'بسام' } }));
+  await store('abood').publishState('abood', state);
+  await assertSucceeds(store('boss', bossToken).join('abood', 'boss', 'S1', true));
+  await assertSucceeds(store('boss', bossToken).setHand('abood', 'boss', false));
+  await assertFails(store('boss', bossToken).postMessage('abood', { ...msg, senderId: 'boss' }));
+  await assertSucceeds(store('abood').publishState('abood', { ...state, speaker: 'boss' }));
+  await assertSucceeds(store('boss', bossToken).postMessage('abood', { ...msg, senderId: 'boss' }));
+  const mine = await firstValue(store('boss', bossToken).watchClassesFor.bind(null, 'boss') as never) as { hostUid: string }[];
+  assert.deepEqual(mine.map(c => c.hostUid), ['abood']);
+});
+
+test('a parent account listed by the admin can attend too', async () => {
+  await env.clearFirestore();
+  await env.withSecurityRulesDisabled(async ctx => { await fs.setDoc(fs.doc(ctx.firestore() as never, 'users/mama'), { role: 'parent' }); });
+  await admin().saveConfig({ ...config, allowed: ['mama'], names: { mama: 'أم سلمى' } });
+  await store('abood').publishState('abood', state);
+  await assertSucceeds(store('mama').join('abood', 'mama', 'S1', true));
+  await assertSucceeds(fs.getDoc(fs.doc(db('mama'), 'abboudClasses/abood/live/state')));
+});

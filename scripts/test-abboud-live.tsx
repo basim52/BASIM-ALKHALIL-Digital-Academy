@@ -180,3 +180,43 @@ test('without an admin-created class nothing appears: Abboud\'s dock and Sara\'s
     assert.equal(student.el.innerHTML, '');
   } finally { for (const s of [host, student]) { await act(async () => s.root.unmount()); s.el.remove(); } localStorage.clear(); }
 });
+
+test('the admin (and parents) can be added as attendees and join from the admin tab; the teacher list stays students only', async () => {
+  const backend = live.createMemoryLiveBackend();
+  const users = [...STUDENTS, { id: 'boss', displayName: 'بسام', email: 'basim5252@gmail.com', role: 'admin' }, { id: 'mama', displayName: 'أم سلمى', email: 'm@x.com', role: 'parent' }];
+  const admin = seat(), host = seat();
+  try {
+    await act(async () => { admin.root.render(<AbboudLiveClassAdmin students={users} selfUid="boss" selfName="بسام" liveStore={backend.as('boss', { admin: true })} />); }); await settle();
+    const select = admin.el.querySelector('select') as HTMLSelectElement;
+    assert.deepEqual(Array.from(select.options).map(o => o.textContent), ['— اختر —', 'حصة', 'سلمى', 'عبود', 'عمر'], 'teachers: students only');
+    await act(async () => { Object.getOwnPropertyDescriptor(dom.window.HTMLSelectElement.prototype, 'value')!.set!.call(select, 'abood'); select.dispatchEvent(new dom.window.Event('change', { bubbles: true })); });
+    const boxes = () => Array.from(admin.el.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
+    assert.deepEqual(boxes().map(b => b.parentElement?.textContent), ['أنا (المدير)', 'أم سلمى (ولي أمر)', 'حصة', 'سلمى', 'عمر'], 'the admin is listed first and parents are included');
+    await act(async () => { boxes()[0].click(); boxes()[1].click(); boxes()[3].click(); });
+    await press(admin.el, 'حفظ قائمة الفصل');
+    assert.deepEqual(backend.configs.get('abood')?.names, { boss: 'بسام', mama: 'أم سلمى', salma: 'سلمى' }, 'others see his real name, not «أنا»');
+    assert.match(admin.el.textContent || '', /\(منهم أنت\)/);
+    assert.equal(admin.el.querySelector('[data-testid="abboud-live-join"]'), null, 'no entry until Abboud goes live');
+    await act(async () => { host.root.render(<AbboudTeacherActivity uid="abood" onClose={() => {}} liveStore={backend.as('abood')} />); }); await settle();
+    await act(async () => { (host.el.querySelector('[data-testid="abboud-live-toggle"]') as HTMLButtonElement).click(); }); await press(host.el, 'ابدأ الفصل المباشر');
+    const join = admin.el.querySelector('[data-testid="abboud-live-admin-join"] [data-testid="abboud-live-join"]');
+    assert.ok(join, 'the join entry is inside the admin tab');
+    await press(admin.el, 'مباشر الآن — انضم'); await settle(20);
+    assert.ok(admin.el.querySelector('[data-testid="abboud-live-guest"]'));
+    assert.match(host.el.querySelector('[data-testid="abboud-live-here"]')?.textContent || '', /الحاضرون \(1\): بسام/);
+    await press(admin.el.querySelector('[data-testid="abboud-live-guest"]')!, 'أبغى أتكلم');
+    await press(host.el, 'اسمح لـبسام'); await settle(PUBLISH);
+    assert.match(admin.el.textContent || '', /دورك الآن يا بسام/);
+  } finally { for (const s of [admin, host]) { await act(async () => s.root.unmount()); s.el.remove(); } localStorage.clear(); }
+});
+
+test('the admin is offered even when his account has no users/ document', async () => {
+  const { el, root } = seat();
+  try {
+    await act(async () => { root.render(<AbboudLiveClassAdmin students={STUDENTS} selfUid="boss" selfName="بسام" liveStore={live.createMemoryLiveBackend().as('boss', { admin: true })} />); }); await settle();
+    const select = el.querySelector('select') as HTMLSelectElement;
+    assert.equal(Array.from(select.options).some(o => o.value === 'boss'), false, 'not offered as a teacher');
+    await act(async () => { Object.getOwnPropertyDescriptor(dom.window.HTMLSelectElement.prototype, 'value')!.set!.call(select, 'abood'); select.dispatchEvent(new dom.window.Event('change', { bubbles: true })); });
+    assert.equal(el.querySelector('input[type="checkbox"]')?.parentElement?.textContent, 'أنا (المدير)');
+  } finally { await act(async () => root.unmount()); el.remove(); }
+});
