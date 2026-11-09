@@ -243,7 +243,14 @@
 .abboud-students { grid-area: students; min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .abboud-student-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .abboud-student-card { min-width: 0; padding: 10px; overflow-wrap: anywhere; }
-.abboud-student-face { font-size: 36px; line-height: 1.2; }
+.abboud-student-face {
+  /* Teachers' face system: round portrait/video inside the gold ring; ring glows while that student speaks. */
+  position: relative; width: min(120px, 100%); aspect-ratio: 1; margin: 0 auto 6px; border-radius: 50%; overflow: hidden;
+  border: 3px solid #C49E3A; background: #002147; display: flex; align-items: center; justify-content: center;
+}
+.abboud-student-face.is-speaking { border-color: #E6C36A; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.55), 0 0 16px rgba(196, 158, 58, 0.7); }
+.abboud-student-face > .tutor-video-face, .abboud-student-face > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.abboud-student-emoji { font-size: 36px; line-height: 1; }
 .abboud-student-status { font-size: 12px; }
 .abboud-student-reply { font-size: 13px; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .abboud-student-desk { height: 5px; margin-top: 6px; }
@@ -285,8 +292,9 @@
   }
   .abboud-students { overflow: hidden; }
   .abboud-student-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-  .abboud-student-card { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 0 4px; padding: 4px 6px; text-align: start; }
-  .abboud-student-face { grid-row: span 2; font-size: 28px; }
+  .abboud-student-card { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: center; gap: 0 4px; padding: 4px 6px; text-align: start; }
+  .abboud-student-face { grid-row: span 2; width: 40px; margin: 0; border-width: 2px; }
+  .abboud-student-emoji { font-size: 24px; }
   .abboud-student-card h3 { font-size: 14px; }
   .abboud-student-status { font-size: 10px; }
   .abboud-student-reply { grid-column: 1 / -1; font-size: 11px; margin-top: 2px; -webkit-line-clamp: 1; }
