@@ -53,6 +53,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const [error, setError] = useState('');
   const [audioNotice, setAudioNotice] = useState('');
   const [typing, setTyping] = useState(false);
+  /** The dock's «⋯» menu (language, stop/mute/replay, typing, class log). Closed by default so the board keeps the screen. */
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuToggle = useRef<HTMLButtonElement | null>(null);
   const [muted, setMuted] = useState(false);
   const [language, setLanguage] = useState('ar-SA');
   const [completed, setCompleted] = useState<number[]>(() => readCompleted(localStorage, uid));
@@ -132,12 +135,13 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       if ((event.target as Partial<Element> | null)?.closest?.('.tl-container')) return;
       event.preventDefault();
       if (certificateOpen) setCertificateOpen(false);
+      else if (menuOpen) { setMenuOpen(false); menuToggle.current?.focus({ preventScroll: true }); }
       else if (boardExpanded) setBoardExpanded(false);
       else onClose();
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [onClose, boardExpanded, certificateOpen]);
+  }, [onClose, boardExpanded, certificateOpen, menuOpen]);
   useEffect(() => {
     if (boardExpanded) workspace.current?.focus({ preventScroll: true });
     else if (wasExpanded.current) (expandOrigin.current?.isConnected ? expandOrigin.current : expandTrigger.current)?.focus({ preventScroll: true });
@@ -302,13 +306,18 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   }
   function trapFocus(event: React.KeyboardEvent<HTMLDivElement>) {
     if (event.key !== 'Tab') return;
-    const controls = dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]');
-    if (!controls?.length) return;
+    // Controls inside the closed «⋯» menu are not focusable, so they cannot be the trap's first/last stop.
+    const controls = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]') || []).filter(el => !el.closest('[hidden]'));
+    if (!controls.length) return;
     const first = controls[0], last = controls[controls.length - 1];
     if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog.current)) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
   const disabled = phase !== 'ready' || stage === 'complete';
+  const status = phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…'
+    : phase === 'listening' ? (choosingTopic ? '🎙️ قل الموضوع الذي تحبه، ثم اضغط «خلصت»' : '🎙️ تكلّم براحتك يا عبود؛ الميكروفون يبقى مفتوحاً حتى تضغط «خلصت»')
+    : choosingTopic ? '✨ درس من اختيارك: قل أو اكتب موضوعاً تحبه، وسيصير درس اليوم.'
+    : stage === 'correct' ? correctTask(lessonId) : tasks[stage];
   return (
     <div ref={dialog} tabIndex={-1} onKeyDown={trapFocus} className={`abboud-dialog fixed inset-0 z-[300] bg-slate-950/95 ${boardExpanded ? 'abboud-dialog-expanded' : ''}`} data-board-mode={boardExpanded ? 'expanded' : 'large'} dir="rtl" role="dialog" aria-modal="true" aria-labelledby="abboud-title" data-testid="abboud-classroom">
       <div className="abboud-shell mx-auto rounded-3xl bg-slate-100 text-slate-900 shadow-2xl">
@@ -335,47 +344,52 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           <p className={`abboud-supervisor text-center ${active === 'sara' ? 'font-bold text-indigo-700' : 'text-slate-600'}`}>👩🏻‍🏫 سارة · {active === 'sara' ? 'تتحدث الآن' : 'مشرفة، والمعلّم هو عبود'}</p></aside>
 
         </section>
-        <section aria-label="أدوات عبود التعليمية" data-testid="abboud-teacher-controls" className="abboud-controls text-center"><div className="abboud-teacher-dock">
-          <p className="abboud-turn-status font-bold" aria-live="polite">{phase === 'thinking' ? 'الطالبان يفكّران في كلامك الفعلي…'
-            : phase === 'listening' ? (choosingTopic ? '🎙️ قل الموضوع الذي تحبه، ثم اضغط «خلصت»' : '🎙️ تكلّم براحتك يا عبود؛ الميكروفون يبقى مفتوحاً حتى تضغط «خلصت»')
-            : choosingTopic ? '✨ درس من اختيارك: قل أو اكتب موضوعاً تحبه، وسيصير درس اليوم.'
-            : stage === 'correct' ? correctTask(lessonId) : tasks[stage]}</p>
+        <section aria-label="أدوات عبود التعليمية" data-testid="abboud-teacher-controls" className="abboud-controls"><div className="abboud-teacher-dock">
+          {/* One slim row in the layout flow (never sticky over the board): face, mic/«خلصت», short hint, ⋯ menu. */}
+          <div className="abboud-dock-row" data-testid="abboud-dock-row">
+            {/* Abboud is the teacher: his face talks from the mic press until «خلصت», and listens otherwise. */}
+            <AbboudStudentFace id="abboud" speaking={phase === 'listening'} className="abboud-teacher-face" />
+            <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} aria-label={phase === 'listening' ? (choosingTopic ? 'خلصت، هذا موضوعي' : 'خلصت، أرسل كلامي للطالبين') : undefined} onClick={() => phase === 'listening' ? recognition.current?.finish() : startMic()} className={`abboud-mic-button rounded-full font-bold text-white disabled:opacity-40 ${phase === 'listening' ? 'bg-emerald-700' : 'bg-indigo-700'}`}>{phase === 'listening' ? (choosingTopic ? '✅ خلصت — هذا موضوعي' : '✅ خلصت — أرسل كلامي') : choosingTopic ? '🎙️ قل موضوعك' : resumeText ? '🎙️ أكمل الكلام' : '🎙️ اضغط وتحدّث يا عبود'}</button>
+            <p className="abboud-turn-status font-bold" aria-live="polite" title={status}>{status}</p>
+            <button ref={menuToggle} type="button" data-testid="abboud-dock-menu-toggle" aria-expanded={menuOpen} aria-controls="abboud-dock-menu" aria-label="المزيد: لغة الكلام، الصوت، الكتابة والحوار" title="المزيد" onClick={() => setMenuOpen(!menuOpen)} className="abboud-dock-more rounded-full border bg-white font-bold">⋯</button>
+          </div>
+          {draft && !typing && <div className="abboud-live-line" data-testid="abboud-live-line"><span className="abboud-live-label">{phase === 'listening' ? '🎙️ أسمعك الآن — لن يُرسل شيء قبل «خلصت»:' : 'كلامك المحفوظ:'}</span> <span dir="auto" data-testid="abboud-live-transcript" className="abboud-live-text">{draft}</span>{phase === 'ready' && <button type="button" disabled={stage === 'complete'} onClick={() => void submit(draft)} className="abboud-live-resend rounded-lg bg-indigo-700 text-white">إرسال الكلام المحفوظ مجدداً</button>}</div>}
+          {starNotice && <p role="status" data-testid="abboud-star-notice" className="abboud-star-notice">{starNotice}</p>}
+          {error && <p role="alert" className="abboud-dock-notice bg-red-50 text-red-800">{error}</p>}
+          {audioNotice && <p role="status" className="abboud-dock-notice bg-amber-50 text-amber-900">{audioNotice}</p>}
           {choosingTopic && <form data-testid="abboud-topic-picker" className="abboud-topic-picker" onSubmit={e => { e.preventDefault(); chooseTopic(topicDraft); }}>
             <label className="text-sm">موضوعي <input value={topicDraft} maxLength={60} disabled={phase !== 'ready'} onChange={e => { setTopicDraft(e.target.value); setTopicNotice(''); }} placeholder="مثل: كرة القدم" className="mr-1 min-w-0 rounded-lg border p-2" /></label>
             <button type="submit" disabled={phase !== 'ready' || !topicDraft.trim()} className="rounded-lg bg-amber-400 px-3 py-2 font-bold text-slate-900 disabled:opacity-40">اعتمد الموضوع</button>
             <span className="abboud-topic-ideas" aria-label="أفكار مواضيع">{TOPIC_IDEAS.map(idea => <button type="button" key={idea} disabled={phase !== 'ready'} onClick={() => chooseTopic(idea)} className="rounded-full border bg-white px-2 py-1 text-xs">{idea}</button>)}</span>
             {topicNotice && <p role="status" className="w-full text-sm text-amber-800">{topicNotice}</p>}
           </form>}
-          {custom && customTopic && <p className="text-xs">✨ موضوعك: <b dir="auto">{customTopic}</b> <button type="button" disabled={phase !== 'ready'} onClick={() => reset(CUSTOM_LESSON_ID)} className="underline disabled:opacity-40">تغيير الموضوع</button></p>}
-          {starNotice && <p role="status" data-testid="abboud-star-notice" className="abboud-star-notice">{starNotice}</p>}
-          <div className="abboud-mic-row">
-            {/* Abboud is the teacher: his face talks from the mic press until «خلصت», and listens otherwise. */}
-            <AbboudStudentFace id="abboud" speaking={phase === 'listening'} className="abboud-teacher-face" />
-            <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} aria-label={phase === 'listening' ? (choosingTopic ? 'خلصت، هذا موضوعي' : 'خلصت، أرسل كلامي للطالبين') : undefined} onClick={() => phase === 'listening' ? recognition.current?.finish() : startMic()} className="rounded-full bg-indigo-700 px-8 py-5 text-xl font-bold text-white disabled:opacity-40">{phase === 'listening' ? (choosingTopic ? '✅ خلصت — هذا موضوعي' : '✅ خلصت — أرسل كلامي') : choosingTopic ? '🎙️ قل موضوعك' : resumeText ? '🎙️ أكمل الكلام' : '🎙️ اضغط وتحدّث يا عبود'}</button>
+          {custom && customTopic && <p className="abboud-topic-line text-xs">✨ موضوعك: <b dir="auto">{customTopic}</b> <button type="button" disabled={phase !== 'ready'} onClick={() => reset(CUSTOM_LESSON_ID)} className="underline disabled:opacity-40">تغيير الموضوع</button></p>}
+          </div>
+          {/* «⋯»: secondary voice/typing controls, the class log and the privacy note — one tap (or Enter) away, never on the board. */}
+          <div id="abboud-dock-menu" data-testid="abboud-dock-menu" hidden={!menuOpen} role="group" aria-label="خيارات الصوت والكتابة والحوار" className="abboud-dock-menu">
             <label className="text-sm">لغة كلامك <select aria-label="لغة التعرف الصوتي" value={language} disabled={phase !== 'ready'} onChange={e => setLanguage(e.target.value)} className="rounded-lg border p-2"><option value="ar-SA">العربية</option><option value="en-US">English</option></select></label>
+            <p className="abboud-mic-note text-xs text-slate-600">يحوّل المتصفح كلامك إلى نص ليفهمه الطالبان. لا مؤقّت ولا حاجة للحفظ.</p>
+            <div className="abboud-voice-actions">
+              <button type="button" onClick={stop} className="rounded-lg border bg-white px-4 py-2">إيقاف الصوت والميكروفون</button>
+              <button type="button" aria-pressed={muted} onClick={() => { const next = !muted; mutedRef.current = next; setMuted(next); if (next) { voice.current?.stop(); if (phase === 'speaking') { setActive(null); setPhase('ready'); } } }} className="rounded-lg border bg-white px-4 py-2">{muted ? '🔇 إلغاء الكتم' : '🔊 كتم الردود'}</button>
+              <button type="button" disabled={!lastTurns.length || muted || phase === 'listening' || phase === 'thinking'} onClick={() => { stop(); voice.current?.unlock(); void play(lastTurns, generation.current); }} className="rounded-lg border bg-white px-4 py-2 disabled:opacity-40">إعادة الصوت</button>
+              <button type="button" aria-expanded={typing} onClick={() => { if (!typing) setMenuOpen(false); setTyping(!typing); }} className="rounded-lg border bg-white px-4 py-2 underline">{typing ? 'إخفاء الكتابة' : 'الكتابة كبديل اختياري فقط'}</button>
+            </div>
+            {stage !== 'complete' && <AbboudSessionReport report={null} history={reports} name={awards.name} guest={!uid} />}
+            {messages.length > 0 && <section aria-label="حوار الفصل" className="abboud-class-log space-y-2 border-t pt-2">{messages.map((message, i) => <p key={i} className="rounded-xl bg-white p-2"><strong>{names[message.speaker]}: </strong><span dir="auto">{message.text}</span></p>)}</section>}
+            <p className="abboud-privacy-note text-xs text-slate-500">نشاط اختياري منفصل عن تقدّم سارة وXP وشهادات الأكاديمية. {uid ? 'إنجاز الدروس ونجوم المعلّم وشهادة «معلّم صغير» وملخصات الحصص محفوظة لهذا الطالب على هذا الجهاز فقط.' : 'وضع ضيف: لا يُحفظ التقدّم ولا النجوم.'}</p>
           </div>
-          <p className="abboud-mic-note text-xs text-slate-600">يحوّل المتصفح كلامك إلى نص ليفهمه الطالبان. لا مؤقّت ولا حاجة للحفظ.</p>
-          <div className="abboud-voice-actions">
-            <button type="button" onClick={stop} className="rounded-lg border px-4 py-2">إيقاف الصوت والميكروفون</button>
-            <button type="button" aria-pressed={muted} onClick={() => { const next = !muted; mutedRef.current = next; setMuted(next); if (next) { voice.current?.stop(); if (phase === 'speaking') { setActive(null); setPhase('ready'); } } }} className="rounded-lg border px-4 py-2">{muted ? '🔇 إلغاء الكتم' : '🔊 كتم الردود'}</button>
-            <button type="button" disabled={!lastTurns.length || muted || phase === 'listening' || phase === 'thinking'} onClick={() => { stop(); voice.current?.unlock(); void play(lastTurns, generation.current); }} className="rounded-lg border px-4 py-2 disabled:opacity-40">إعادة الصوت</button>
-          </div>
-          </div><div className="abboud-control-extras" tabIndex={0} aria-label="الكتابة الاختيارية وتفاصيل الفصل">
-          {error && <p role="alert" className="mt-4 rounded-xl bg-red-50 p-3 text-red-800">{error}</p>}
-          {audioNotice && <p role="status" className="mt-3 rounded-xl bg-amber-50 p-3 text-amber-900">{audioNotice}</p>}
-          {draft && !typing && <div className="mt-3 rounded-xl bg-white p-3"><p className="text-xs text-slate-500">{phase === 'listening' ? '🎙️ أسمعك الآن — لن يُرسل شيء قبل «خلصت»:' : 'ما التقطناه / كلامك المحفوظ:'}</p><p dir="auto" data-testid="abboud-live-transcript">{draft}</p>{phase === 'ready' && <button type="button" disabled={stage === 'complete'} onClick={() => void submit(draft)} className="mt-2 rounded-lg bg-indigo-700 px-4 py-2 text-white">إرسال الكلام المحفوظ مجدداً</button>}</div>}
-          <button type="button" aria-expanded={typing} onClick={() => setTyping(!typing)} className="mt-5 text-sm underline">{typing ? 'إخفاء الكتابة' : 'الكتابة كبديل اختياري فقط'}</button>
-          {typing && <form onSubmit={e => { e.preventDefault(); voice.current?.unlock(); void submit(draft); }} className="mx-auto mt-3 max-w-xl">
+          {(typing || stage === 'complete') && <div className="abboud-control-extras" data-testid="abboud-control-extras">
+          {typing && <form onSubmit={e => { e.preventDefault(); voice.current?.unlock(); void submit(draft); }} className="abboud-typing mx-auto max-w-xl">
             <label htmlFor="abboud-fallback" className="block text-sm">كلام عبود (بديل الميكروفون)</label>
-            <textarea id="abboud-fallback" maxLength={1200} value={draft} disabled={disabled} onChange={e => setDraft(e.target.value)} className="mt-2 w-full rounded-xl border bg-white p-3" />
+            <textarea id="abboud-fallback" maxLength={1200} value={draft} disabled={disabled} onChange={e => setDraft(e.target.value)} className="mt-1 w-full rounded-xl border bg-white p-2" />
             <button type="submit" disabled={disabled || !draft.trim()} className="rounded-xl bg-indigo-700 px-5 py-2 text-white disabled:opacity-40">إرسال كلامي للطالبين</button>
           </form>}
-          {stage === 'complete' && <button type="button" onClick={() => reset(lessonId, true)} className="m-3 rounded-xl bg-emerald-700 px-5 py-3 text-white">إعادة الدرس (النجوم لا تتكرر)</button>}
-          {stage === 'complete' && earnedCertificate(completed) && !custom && <button type="button" onClick={() => setCertificateOpen(true)} className="m-3 rounded-xl bg-amber-400 px-5 py-3 font-bold text-slate-900">🎓 أكملت الدروس الـ15! افتح شهادة «معلّم صغير»</button>}
-          <AbboudSessionReport report={stage === 'complete' ? report : null} history={reports} name={awards.name} guest={!uid} />
-        {messages.length > 0 && <section aria-label="حوار الفصل" aria-live="polite" className="mx-5 space-y-2 border-t py-4">{messages.map((message, i) => <p key={i} className="rounded-xl bg-white p-3"><strong>{names[message.speaker]}: </strong><span dir="auto">{message.text}</span></p>)}</section>}
-        <footer className="p-4 text-center text-xs text-slate-500">نشاط اختياري منفصل عن تقدّم سارة وXP وشهادات الأكاديمية. {uid ? 'إنجاز الدروس ونجوم المعلّم وشهادة «معلّم صغير» وملخصات الحصص محفوظة لهذا الطالب على هذا الجهاز فقط.' : 'وضع ضيف: لا يُحفظ التقدّم ولا النجوم.'}</footer>
-          </div></section>
+          {stage === 'complete' && <button type="button" onClick={() => reset(lessonId, true)} className="m-2 rounded-xl bg-emerald-700 px-5 py-3 text-white">إعادة الدرس (النجوم لا تتكرر)</button>}
+          {stage === 'complete' && earnedCertificate(completed) && !custom && <button type="button" onClick={() => setCertificateOpen(true)} className="m-2 rounded-xl bg-amber-400 px-5 py-3 font-bold text-slate-900">🎓 أكملت الدروس الـ15! افتح شهادة «معلّم صغير»</button>}
+          {stage === 'complete' && <AbboudSessionReport report={report} history={reports} name={awards.name} guest={!uid} />}
+          </div>}
+        </section>
       </div>
       {certificateOpen && <AbboudCertificate name={awards.name} stars={starCount(awards)} onName={name => setAwards(current => saveName(localStorage, uid, current, name))} onClose={() => setCertificateOpen(false)} />}
     </div>
