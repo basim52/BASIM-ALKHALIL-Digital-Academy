@@ -25,10 +25,8 @@ export function createFirestoreLiveStore(db: Firestore, f: Fs = firestore): Live
   const participant = (hostUid: string, uid: string) => f.doc(db, 'abboudClasses', hostUid, 'participants', uid);
   return {
     watchAllConfigs: (cb, onError) => f.onSnapshot(f.collection(db, 'abboudClasses'), snap => cb(snap.docs.map(d => toConfig(d.id, d.data())).filter((c): c is LiveClassConfig => !!c)), onError),
-    watchConfig: (hostUid, cb, onError) => f.onSnapshot(classDoc(hostUid), snap => cb(snap.exists() ? toConfig(snap.id, snap.data()) : null), error => {
-      // Not created by the admin yet (or not allowed): behave as «no live class» instead of surfacing an error.
-      if ((error as { code?: string }).code === 'permission-denied') cb(null); else onError?.(error);
-    }),
+    // A missing class is a normal «no class» (exists() false). Errors — including permission-denied — are reported, never hidden.
+    watchConfig: (hostUid, cb, onError) => f.onSnapshot(classDoc(hostUid), snap => cb(snap.exists() ? toConfig(snap.id, snap.data()) : null), error => { cb(null); onError?.(error); }),
     watchClassesFor: (uid, cb, onError) => f.onSnapshot(f.query(f.collection(db, 'abboudClasses'), f.where('allowed', 'array-contains', uid), f.limit(10)),
       snap => cb(snap.docs.map(d => toConfig(d.id, d.data())).filter((c): c is LiveClassConfig => !!c)), onError),
     saveConfig: config => f.setDoc(classDoc(config.hostUid), { hostUid: config.hostUid, hostName: config.hostName, allowed: config.allowed, names: config.names, updatedAt: f.serverTimestamp() }),

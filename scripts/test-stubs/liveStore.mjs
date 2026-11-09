@@ -8,3 +8,4 @@ const none = {
   saveConfig: denied, deleteConfig: denied, publishState: denied, join: denied, setHand: denied, leave: denied, postMessage: denied
 };
 export const liveStore = new Proxy({}, { get: (_t, key) => (globalThis.__abboudLiveStore ?? none)[key] });
+export const watchLiveUid = cb => { queueMicrotask(() => cb(globalThis.__abboudLiveUid ?? null)); return () => {}; };

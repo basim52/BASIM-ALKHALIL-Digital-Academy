@@ -4,7 +4,7 @@ import AbboudLessonPicker from './AbboudLessonPicker';
 import AbboudSessionReport from './AbboudSessionReport';
 import AbboudCertificate from './AbboudCertificate';
 import { interactionError, type BoardCorrection } from '../lib/abboud/board';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { CUSTOM_LESSON_ID, SESSIONS_CONFIG, customLesson } from '../lib/abboud/curriculum';
 import { completeLesson, mistakeSpeaker, nextStage, parseReply, readCompleted, type BoardFocus, type Message, type Speaker, type Stage } from '../lib/abboud/protocol';
 import { awardStar, buildReport, correctionStar, earnedCertificate, explanationStar, lessonKey, readAwards, readReports, saveName, saveReport, starCount, type SessionReport, type StarKind } from '../lib/abboud/awards';
@@ -13,8 +13,16 @@ import { coveredItems, lessonItems } from '../lib/abboud/lessonBoard';
 import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
 import { ContinuousDictation, microphoneError, type DictationPause } from '../lib/abboud/recognition';
 import type { LiveClassStore } from '../lib/abboud/liveClass';
-import { useLiveStore } from '../lib/abboud/useLiveStore';
-import { AbboudLiveHostButton, AbboudLiveHostNotice, AbboudLiveHostPanel, useLiveHost } from './AbboudLiveHost';
+import { useLiveStore, useLiveUid } from '../lib/abboud/useLiveStore';
+import { AbboudLiveHostHeaderButton, AbboudLiveHostButton, AbboudLiveHostNotice, AbboudLiveHostPanel, useLiveHost } from './AbboudLiveHost';
+const AbboudLiveJoin = lazy(() => import('./AbboudLiveJoin'));
+/** For accounts that are not this class's teacher: who starts the live class, and the join entry if they are invited. */
+function AbboudLiveViewer({ uid, liveStore, error }: { uid?: string; liveStore?: LiveClassStore | null; error: string }) {
+  return <div className="abboud-live-viewer" data-testid="abboud-live-viewer">
+    {error && <p role="alert" className="abboud-dock-notice bg-red-50 text-red-800">{error}</p>}
+    <Suspense fallback={null}><AbboudLiveJoin uid={uid} liveStore={liveStore} variant="light" hint /></Suspense>
+  </div>;
+}
 
 export { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
 export interface AbboudTeacherProps {
@@ -98,8 +106,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   /** Lesson items he has said, kept for the whole lesson run (a cleared draft never un-marks them). */
   const [explained, setExplained] = useState<string[]>([]);
   const store = useLiveStore(liveStore);
+  const liveUid = useLiveUid(uid, liveStore);
   // Real academy students (admin-allowlisted) can follow live; Badr and Reem are not involved in any of this.
-  const host = useLiveHost(store, uid, { lessonId, lessonTitle, source: boardSource, draft, explained });
+  const host = useLiveHost(store, liveUid, { lessonId, lessonTitle, source: boardSource, draft, explained });
   useEffect(() => {
     const found = coveredItems(lesson, abboudSpeech);
     setExplained(previous => found.every(key => previous.includes(key)) ? previous : [...new Set([...previous, ...found])]);
@@ -335,9 +344,11 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       <div className="abboud-shell mx-auto rounded-3xl bg-slate-100 text-slate-900 shadow-2xl">
         <header className="abboud-header">
           <div className="min-w-0 flex-1"><h2 id="abboud-title" className="text-xl font-bold sm:text-2xl">فصل عبود المعلّم</h2><p className="text-sm">أنت تشرح، بدر وريم يتعلّمان، وسارة تشرف بلطف.</p></div>
+          <AbboudLiveHostHeaderButton host={host} open={liveOpen} onOpen={setLiveOpen} />
           <button ref={expandTrigger} type="button" data-testid="abboud-board-expand" aria-expanded={boardExpanded} aria-controls="abboud-workspace" onClick={() => toggleBoard(!boardExpanded)} className="abboud-expand-toggle rounded-xl bg-indigo-700 px-3 py-3 font-bold text-white">{boardExpanded ? '↩ رجوع لحجم الفصل' : '⛶ توسعة السبورة'}</button>
           <button type="button" onClick={() => { stop(); onClose(); }} aria-label="إغلاق الفصل" className="shrink-0 rounded-xl bg-white px-3 py-3 font-bold">إغلاق</button>
         </header>
+        {!host.config && <AbboudLiveViewer uid={liveUid} liveStore={liveStore} error={host.error} />}
         <AbboudLessonPicker lessonId={lessonId} completed={completed} stars={starCount(awards)} certificate={earnedCertificate(completed)}
           onPick={id => reset(id)} onCertificate={() => setCertificateOpen(true)} />
         <section ref={workspace} id="abboud-workspace" tabIndex={-1} aria-label="الفصل الصغير" data-testid="abboud-workspace" className="abboud-workspace">

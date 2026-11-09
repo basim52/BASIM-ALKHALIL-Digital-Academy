@@ -91,6 +91,14 @@ export const nameOf = (config: LiveClassConfig | null | undefined, uid: string) 
 
 /* ---------- In-memory store: the same permission model as firestore.rules, per signed-in actor (tests). ---------- */
 type Listener = () => void;
+/** Honest, specific text for a failed live-class read/write (never shown as an empty class). */
+export function liveErrorText(error: unknown, what = 'الفصل المباشر'): string {
+  const code = String((error as { code?: string } | null)?.code || '').replace(/^firestore\//, '');
+  if (code === 'permission-denied') return `${what}: الصلاحيات رفضت الوصول (permission-denied). تأكّد أن المسؤول أضاف هذا الحساب، وأن قواعد Firestore الخاصة بـ abboudClasses منشورة على قاعدة بيانات الأكاديمية.`;
+  if (code === 'unavailable' || code === 'deadline-exceeded') return `${what}: تعذّر الاتصال بالخادم (${code}). تحقّق من الإنترنت؛ سيعاد الاتصال تلقائياً.`;
+  if (code === 'failed-precondition') return `${what}: قاعدة البيانات رفضت الاستعلام (failed-precondition). قد تكون التحديثات الفورية معطّلة أو يلزم فهرس.`;
+  return `${what}: حدث خطأ${code ? ` (${code})` : ''}. حاول مجدداً.`;
+}
 export class PermissionDenied extends Error { code = 'permission-denied'; constructor() { super('permission-denied'); } }
 export function createMemoryLiveBackend(now: () => number = Date.now) {
   const configs = new Map<string, LiveClassConfig>();

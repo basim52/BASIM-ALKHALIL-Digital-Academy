@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { BoardAction } from '../lib/boardActions';
 import { abboudBoardActions } from '../lib/abboud/board';
 import { lessonFor } from '../lib/abboud/curriculum';
-import { canPost, cleanText, HEARTBEAT_MS, MAX_MESSAGE, nameOf, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState } from '../lib/abboud/liveClass';
+import { canPost, cleanText, liveErrorText, HEARTBEAT_MS, MAX_MESSAGE, nameOf, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState } from '../lib/abboud/liveClass';
 import { ContinuousDictation, microphoneError } from '../lib/abboud/recognition';
 
 /** Light HTML rendering of the very board Abboud's class draws (same BoardActions), for phones and old devices. */
@@ -26,6 +26,9 @@ export function LiveBoard({ actions }: { actions: BoardAction[] }) {
 export default function AbboudLiveGuest({ store, uid, config, onClose }: { store: LiveClassStore; uid: string; config: LiveClassConfig; onClose: () => void }) {
   const hostUid = config.hostUid;
   const [state, setState] = useState<LiveState | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [wasLive, setWasLive] = useState(false);
+  const [readError, setReadError] = useState('');
   const [messages, setMessages] = useState<LiveMessage[]>([]);
   const [hand, setHand] = useState(false);
   const [text, setText] = useState('');
@@ -37,15 +40,15 @@ export default function AbboudLiveGuest({ store, uid, config, onClose }: { store
   const sessionId = state?.active ? state.sessionId : '';
   const myTurn = canPost(config, state, uid);
   const handRef = useRef(hand); handRef.current = hand;
-  useEffect(() => store.watchState(hostUid, setState, () => setNotice('تعذّر الاتصال بفصل عبود. تحقّق من الإنترنت.')), [store, hostUid]);
-  useEffect(() => { if (!sessionId) { setMessages([]); return; } return store.watchMessages(hostUid, sessionId, setMessages, () => {}); }, [store, hostUid, sessionId]);
+  useEffect(() => store.watchState(hostUid, s => { setState(s); setLoaded(true); setReadError(''); if (s?.active) setWasLive(true); }, e => { setLoaded(true); setReadError(liveErrorText(e, 'حالة الفصل')); }), [store, hostUid]);
+  useEffect(() => { if (!sessionId) { setMessages([]); return; } return store.watchMessages(hostUid, sessionId, setMessages, e => setReadError(liveErrorText(e, 'نقاش الفصل'))); }, [store, hostUid, sessionId]);
   // The hand's truth is the participant doc: Abboud declining (or allowing) lowers it there, and the heartbeat must not re-raise it.
-  useEffect(() => store.watchParticipants(hostUid, list => { const mine = list.find(p => p.uid === uid); if (mine) setHand(mine.hand); }, () => {}), [store, hostUid, uid]);
+  useEffect(() => store.watchParticipants(hostUid, list => { const mine = list.find(p => p.uid === uid); if (mine) setHand(mine.hand); }, e => setReadError(liveErrorText(e, 'قائمة الحاضرين'))), [store, hostUid, uid]);
   // Presence: join the current session and refresh lastSeen while open; leave on close.
   useEffect(() => {
     if (!sessionId) return;
     setHand(false);
-    const beat = () => store.join(hostUid, uid, sessionId, handRef.current).catch(() => setNotice('تعذّر الانضمام للفصل. ربما أزال المسؤول اسمك من القائمة.'));
+    const beat = () => store.join(hostUid, uid, sessionId, handRef.current).catch(e => setNotice(liveErrorText(e, 'الانضمام للفصل')));
     void beat();
     const t = setInterval(beat, HEARTBEAT_MS);
     return () => { clearInterval(t); void store.leave(hostUid, uid).catch(() => {}); };
@@ -95,7 +98,17 @@ export default function AbboudLiveGuest({ store, uid, config, onClose }: { store
         <h2 id="abboud-live-title" className="font-bold">👨‍🏫 فصل {config.hostName} المباشر</h2>
         <button type="button" onClick={onClose} className="rounded-xl bg-white px-3 py-2 font-bold">خروج</button>
       </header>
-      {!state?.active ? <p className="abboud-live-guest-status" role="status">انتهى الفصل المباشر أو لم يبدأ بعد. يظهر هنا تلقائياً عندما يبدأ {config.hostName}.</p> : <>
+      {readError && <p role="alert" data-testid="abboud-live-error" className="abboud-live-guest-status bg-red-50 font-bold text-red-800">{readError}</p>}
+      {!state?.active ? <div className="abboud-live-guest-main" data-testid="abboud-live-waiting-room">
+        <div className="abboud-live-board" role="status">
+          {!loaded ? <p className="abboud-live-board-text">⏳ جاري الاتصال بفصل {config.hostName}…</p>
+            : readError ? <p className="abboud-live-board-text">لا يمكن عرض الفصل الآن بسبب الخطأ أعلاه.</p>
+            : <>
+              <h3 className="abboud-live-board-title">{wasLive ? '✅ انتهى الفصل المباشر' : '⏳ بانتظار عبود يبدأ الدرس'}</h3>
+              <p className="abboud-live-board-text">{wasLive ? `شكراً لحضورك. إذا بدأ ${config.hostName} فصلاً جديداً سيظهر هنا تلقائياً.` : `المعلّم: ${config.hostName}. يبدأ الدرس من حسابه بالضغط على «📡 ابدأ الفصل المباشر»، وعندها تظهر هنا السبورة وكلامه مباشرة — لا تحتاج لتحديث الصفحة.`}</p>
+            </>}
+        </div>
+      </div> : <>
         <p className="abboud-live-guest-status" aria-live="polite" data-testid="abboud-live-words">🎙️ <b>{config.hostName}:</b> <span dir="auto">{state.draft || state.source || 'يستعد للشرح…'}</span></p>
         <main className="abboud-live-guest-main">
           <LiveBoard actions={actions} />

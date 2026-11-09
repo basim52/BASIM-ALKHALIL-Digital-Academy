@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { liveState, nameOf, newSessionId, present, raisedHands, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState, type Participant } from '../lib/abboud/liveClass';
+import { liveErrorText, liveState, nameOf, newSessionId, present, raisedHands, type LiveClassConfig, type LiveClassStore, type LiveMessage, type LiveState, type Participant } from '../lib/abboud/liveClass';
 
 /** What Abboud's activity shares with joined students (no AI, stage, star or progress data). */
 export type LiveSnapshot = { lessonId: number; lessonTitle: string; source: string; draft: string; explained: string[] };
@@ -13,7 +13,7 @@ export function useLiveHost(store: LiveClassStore | null, uid: string | undefine
   const [messages, setMessages] = useState<LiveMessage[]>([]);
   const [error, setError] = useState('');
   const [now, setNow] = useState(() => Date.now());
-  const fail = () => setError('تعذّر الاتصال بالفصل المباشر. تحقّق من الإنترنت وحاول مجدداً.');
+  const fail = (e?: unknown) => setError(liveErrorText(e));
   useEffect(() => { if (!store || !uid) return; return store.watchConfig(uid, setConfig, fail); }, [store, uid]);
   useEffect(() => {
     if (!store || !uid || !config) { setState(null); setParticipants([]); return; }
@@ -30,7 +30,7 @@ export function useLiveHost(store: LiveClassStore | null, uid: string | undefine
     try {
       setError('');
       await store.publishState(uid, liveState({ active: false, sessionId: '', speaker: '', ...base, ...latest.current.snapshot, ...patch } as LiveState));
-    } catch { fail(); }
+    } catch (e) { fail(e); }
   }
   // While live, Abboud's lesson, board marks and words (including the mic text he is saying now) reach students shortly after.
   const key = JSON.stringify(snapshot);
@@ -48,7 +48,7 @@ export function useLiveHost(store: LiveClassStore | null, uid: string | undefine
     start: () => publish({ active: true, sessionId: newSessionId(), speaker: '' }),
     end: () => publish({ active: false, speaker: '' }),
     allow: async (student: string) => { await publish({ speaker: student }); try { await store?.setHand(uid!, student, false); } catch { /* the hand doc may be gone */ } },
-    decline: async (student: string) => { try { await store?.setHand(uid!, student, false); } catch { fail(); } },
+    decline: async (student: string) => { try { await store?.setHand(uid!, student, false); } catch (e) { fail(e); } },
     endTurn: () => publish({ speaker: '' })
   };
 }
@@ -61,6 +61,21 @@ export function AbboudLiveHostButton({ host, open, onToggle }: { host: LiveHost;
   return <button type="button" data-testid="abboud-live-toggle" aria-expanded={open} aria-controls="abboud-live-panel" onClick={onToggle}
     aria-label={`الفصل المباشر${host.live ? ' (مباشر الآن)' : ''}${hands ? `، ${hands} يطلبون الكلام` : ''}`}
     className={`abboud-live-toggle rounded-full border font-bold ${host.live ? 'bg-red-600 text-white' : 'bg-white'}`}>📡{hands > 0 && <span className="abboud-live-badge" aria-hidden="true">✋{hands}</span>}</button>;
+}
+
+/**
+ * Top bar of «عبود المعلّم», only for the account the admin made the teacher: an obvious «📡 ابدأ الفصل المباشر»
+ * (starts and opens the panel), then «🔴 مباشر الآن · 👥 N» to reopen it.
+ */
+export function AbboudLiveHostHeaderButton({ host, open, onOpen }: { host: LiveHost; open: boolean; onOpen: (open: boolean) => void }) {
+  if (!host.config) return null;
+  const hands = host.hands.length;
+  return <button type="button" data-testid="abboud-live-header" aria-expanded={open} aria-controls="abboud-live-panel"
+    aria-label={host.live ? `الفصل المباشر: مباشر الآن، ${host.here.length} حاضر${hands ? `، ${hands} يطلبون الكلام` : ''}` : 'ابدأ الفصل المباشر'}
+    onClick={() => { if (!host.live) { void host.start(); onOpen(true); } else onOpen(!open); }}
+    className={`abboud-live-header shrink-0 rounded-xl px-3 py-3 font-bold ${host.live ? 'bg-red-600 text-white' : 'bg-white text-red-700 border border-red-300'}`}>
+    {host.live ? <>🔴 <span className="abboud-live-header-long">مباشر الآن · </span>👥 {host.here.length}{hands > 0 ? ` · ✋${hands}` : ''}</> : <>📡 <span className="abboud-live-header-long">ابدأ الفصل المباشر</span><span className="abboud-live-header-short">مباشر</span></>}
+  </button>;
 }
 
 /** A one-line nudge under the dock so Abboud notices a raised hand or the speaker's words without opening the panel. */
