@@ -83,7 +83,7 @@ test('first entry shows both students, board and mic; no writing wizard or scrip
     assert.ok(host.querySelector('[aria-label="السبورة التفاعلية"]'));
     assert.ok(button('اضغط وتحدّث')); assert.equal(host.querySelector('textarea'), null);
     assert.equal(text().includes('My name is'), false);
-    assert.equal(host.querySelectorAll('nav button').length, 5);
+    assert.equal(host.querySelectorAll('nav [aria-label="اختيار الدرس"] button').length, 16, '15 lessons + «درس من اختياري»');
   } finally { await unmount(); }
 });
 test('voice explanation → grounded question → answer → controlled error → correct completion; replay no XP', async () => {
@@ -188,8 +188,8 @@ test('review is incomplete until Abboud asks both review questions', async () =>
   try {
     await click('المراجعة وسؤالان');
     await say('Hello, two books and I like apples'); await say('Plural takes s'); await say('two books, add s');
-    assert.equal(localStorage.length, 0); assert.match(text(), /المراجعة الأول/);
-    await say('What is your name?'); assert.equal(localStorage.length, 0); assert.match(text(), /ثانياً مختلفاً/);
+    assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), null); assert.match(text(), /المراجعة الأول/);
+    await say('What is your name?'); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), null); assert.match(text(), /ثانياً مختلفاً/);
     await say('What fruit do you like?'); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), '[5]');
     assert.deepEqual(requests.map(r => r.stage), ['explain', 'answer', 'correct', 'review_one', 'review_two']);
   } finally { await unmount(); }
@@ -203,7 +203,7 @@ test('interactive board contains actual explanation, colors and counts; taps get
   const { requests, voice } = service([
     accurate('badr', 'What color are the books?'),
     accurate('badr', 'The books are red.'),
-    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Understood' }, { speaker: 'reem', text: 'three book' }], misconception: { incorrect: 'three book', correct: 'three books', reason: 'plural' } }
+    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Understood, I have three book' }], misconception: { incorrect: 'three book', correct: 'three books', reason: 'plural' } }
   ]);
   await mount();
   try {
@@ -587,4 +587,183 @@ test('Abboud\'s cartoon assets: same formats as the students, light, and the por
   const css = readFileSync('src/index.css', 'utf8');
   assert.match(css, /\.abboud-teacher-face \{ flex: none; width: 64px;/);
   assert.match(css.split('@media (max-width: 639px) {')[1], /\.abboud-teacher-face \{ width: 40px;/);
+});
+// ── Teacher stars, Sara's praise, controlled errors, «درس من اختياري», parent summary, 15 lessons, certificate ──
+const lessonOne = (extra: { understood?: unknown; repeat?: string } = {}) => [
+  accurate('badr', 'When do we say hello?'),
+  { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'I see: Hello greets people!' }, { speaker: 'reem', text: 'My name are Reem' }], misconception: { incorrect: 'My name are Reem', correct: 'My name is Reem', reason: 'Singular subject' },
+    understood: extra.understood ?? { speaker: 'badr', concept: 'Hello greets people' } },
+  { verdict: 'accurate', turns: [{ speaker: 'reem', text: extra.repeat ?? 'My name is Reem' }, { speaker: 'sara', text: 'AI summary' }],
+    praise: { quote: 'Hello greets people', strength: 'شرحت معنى Hello بجملة واضحة.', tip: 'اسأل سؤالاً قصيراً بعد الشرح.' } }
+];
+async function teachLessonOne() { await say('Hello greets people'); await say('We say hello when we meet'); await say('Use is: My name is Reem'); }
+const awardsOf = (uid = 'student-a') => JSON.parse(localStorage.getItem(`abboud-teacher-awards:v1:${uid}`) || 'null');
+const stars = () => host.querySelector('[data-testid="abboud-stars"]')?.textContent;
+test('teacher stars: one for grounded understanding, one for a verified correction; Sara praises a real quote with one tip, by voice and text', async () => {
+  const { voice } = service(lessonOne()); await mount();
+  try {
+    assert.equal(stars(), '⭐ 0');
+    await say('Hello greets people'); await say('We say hello when we meet');
+    assert.match(host.querySelector('[data-testid="abboud-star-notice"]')?.textContent || '', /نجمة شرح! بدر فهم «Hello greets people»/);
+    assert.equal(stars(), '⭐ 1');
+    await say('Use is: My name is Reem');
+    assert.match(host.querySelector('[data-testid="abboud-star-notice"]')?.textContent || '', /نجمة تصحيح! اكتشفت خطأ ريم وصحّحته: «My name is Reem»/);
+    assert.equal(stars(), '⭐ 2'); assert.deepEqual(awardsOf().stars, { L1: { explain: true, correction: true } });
+    const spoken = voice.mock.calls[2].arguments[0] as { speaker: string; text: string }[];
+    assert.equal(spoken[1].speaker, 'sara'); assert.match(spoken[1].text, /شرحت معنى Hello بجملة واضحة\. قلتَ: «Hello greets people»\. نصيحة واحدة: اسأل سؤالاً قصيراً/);
+    assert.equal(text().includes('AI summary'), false, 'the spoken and written praise is the validated one');
+    assert.match(text(), /نصيحة واحدة: اسأل سؤالاً قصيراً/);
+    // Replaying the same lesson cannot farm stars.
+    service(lessonOne()); await click('إعادة الدرس'); await teachLessonOne();
+    assert.equal(stars(), '⭐ 2'); assert.match(text(), /محسوبة لهذا الدرس من قبل/);
+    assert.equal(Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)).some(k => /xp|streak|certificate/i.test(k || '')), false, 'no official XP/certificate keys');
+  } finally { await unmount(); }
+});
+test('no fake stars: invented understanding or an unrepeated fix earn nothing, though the lesson still follows the AI verdict', async () => {
+  service(lessonOne({ understood: { speaker: 'badr', concept: 'Goodbye ends calls' }, repeat: 'OK teacher' })); await mount();
+  try {
+    await teachLessonOne();
+    assert.match(text(), /اكتمل تفاعل/); assert.equal(stars(), '⭐ 0'); assert.equal(host.querySelector('[data-testid="abboud-star-notice"]'), null);
+    assert.equal(awardsOf(), null);
+  } finally { await unmount(); }
+});
+test('Badr makes the controlled error in even lessons: unverified attempt on the board, Abboud corrects it by voice for a star', async () => {
+  service([
+    accurate('badr', 'Is it a book red?'),
+    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Thanks! So I have a book red.' }], misconception: { incorrect: 'a book red', correct: 'a red book', reason: 'Color before noun' } },
+    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'I have a red book.' }, { speaker: 'sara', text: 'x' }] }
+  ]);
+  await mount();
+  try {
+    await click('الألوان والأشياء'); await say('Color first: a red book'); await say('We say a red book');
+    const canvas = () => host.querySelector('[data-testid="tldraw-canvas"]')?.textContent || '';
+    assert.match(canvas(), /محاولة بدر \(غير مؤكدة\) — بانتظار تصحيح عبود: a book red/); assert.equal(canvas().includes('✅'), false);
+    assert.match(text(), /بدر يحاول وفي عبارته خطأ واحد صغير/);
+    await say('Not a book red: the color comes first, a red book');
+    assert.match(canvas(), /❌ a book red\n✅ a red book/); assert.match(text(), /اكتشفت خطأ بدر وصحّحته/);
+    assert.deepEqual(awardsOf().stars, { L2: { correction: true } });
+  } finally { await unmount(); }
+});
+async function typeTopic(value: string) {
+  const input = host.querySelector('[data-testid="abboud-topic-picker"] input'); assert.ok(input instanceof dom.window.HTMLInputElement);
+  const setter = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value')!.set!;
+  await act(async () => { setter.call(input, value); input.dispatchEvent(new dom.window.Event('input', { bubbles: true })); });
+  await act(async () => { host.querySelector('[data-testid="abboud-topic-picker"]')!.dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true })); });
+}
+test('«درس من اختياري»: spoken or typed topic, unsuitable topics refused gently without AI, then the same lesson path', async () => {
+  const { requests } = service([accurate('badr', 'Is a ball round?')]); await mount();
+  try {
+    await click('درس من اختياري');
+    assert.ok(host.querySelector('[data-testid="abboud-topic-picker"]')); assert.ok(button('قل موضوعك'));
+    await typeTopic('الحرب'); assert.match(text(), /خلّنا نختار موضوعاً يناسب فصلنا/); assert.equal(requests.length, 0);
+    await click('قل موضوعك'); await act(async () => { FakeRecognition.latest.say('كرة القدم'); }); await click('خلصت');
+    assert.equal(requests.length, 0, 'the topic itself is not sent to the AI');
+    assert.equal(host.querySelector('[data-testid="abboud-topic-picker"]'), null); assert.match(text(), /موضوعك: كرة القدم/);
+    assert.match(host.querySelector('[data-testid="tldraw-board"]')?.textContent || '', /✨ كرة القدم/);
+    await say('A ball is round');
+    assert.equal(requests[0].sessionId, 16); assert.equal((requests[0] as { customTopic?: string }).customTopic, 'كرة القدم'); assert.match(text(), /Is a ball round/);
+    await click('تغيير الموضوع'); assert.ok(host.querySelector('[data-testid="abboud-topic-picker"]'));
+    await click('🦖 الديناصورات'); assert.match(text(), /موضوعك: الديناصورات/);
+  } finally { await unmount(); }
+});
+test('custom lesson completes on the same path but never counts toward the fixed-lesson certificate', async () => {
+  service([
+    accurate('badr', 'What is a planet?'),
+    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'I get it: the moon goes around' }], misconception: { incorrect: 'the moon go', correct: 'the moon goes', reason: 'third person s' } },
+    { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'the moon goes around' }, { speaker: 'sara', text: 'x' }] }
+  ]);
+  mock.method(ClassroomVoice.prototype, 'play', async () => {});
+  await mount();
+  try {
+    await click('درس من اختياري'); await typeTopic('الفضاء');
+    await say('The moon goes around the earth'); await say('Yes, a planet'); await say('the moon goes, with s');
+    assert.match(text(), /اكتمل تفاعل/); assert.equal(localStorage.getItem('abboud-classroom:v2:student-a'), null);
+    assert.deepEqual(awardsOf().stars, { 'custom:الفضاء': { correction: true } });
+    assert.match(host.querySelector('[data-testid="abboud-report-current"]')?.textContent || '', /✨ الفضاء/);
+  } finally { await unmount(); }
+});
+test('parent summary after each lesson: explanation, English words and turns, stars, Sara tip; saved history and explicit share/copy', async () => {
+  service(lessonOne()); await mount();
+  const nav = globalThis.navigator as Navigator & { share?: unknown; clipboard?: unknown };
+  const original = { share: nav.share, clipboard: nav.clipboard };
+  try {
+    assert.equal(host.querySelector('[data-testid="abboud-report"]'), null);
+    await teachLessonOne();
+    const card = host.querySelector('[data-testid="abboud-report-current"]')?.textContent || '';
+    assert.match(card, /ماذا شرح: Hello greets people/);
+    assert.match(card, /hello, greets, people, we, say, when, meet, use, is, my, name, reem/);
+    assert.match(card, /تكلّم بالإنجليزي: 3 من 3/); assert.match(card, /نجوم الحصة: 2/); assert.match(card, /نصيحة سارة: اسأل سؤالاً قصيراً/);
+    const saved = JSON.parse(localStorage.getItem('abboud-teacher-reports:v1:student-a') || '[]'); assert.equal(saved.length, 1); assert.equal(saved[0].stars, 2);
+    const copied: string[] = [];
+    Object.defineProperty(nav, 'share', { value: undefined, configurable: true });
+    Object.defineProperty(nav, 'clipboard', { value: { writeText: async (t: string) => { copied.push(t); } }, configurable: true });
+    await act(async () => { button('نسخ الملخص').click(); await new Promise(r => setImmediate(r)); });
+    assert.equal(copied.length, 1); assert.match(copied[0], /📋 ملخص حصة «عبود المعلّم» — عبود/); assert.match(text(), /نُسخ الملخص/);
+    Object.defineProperty(nav, 'clipboard', { value: undefined, configurable: true });
+    await act(async () => { button('نسخ الملخص').click(); await new Promise(r => setImmediate(r)); });
+    assert.match((host.querySelector('textarea[aria-label="نص الملخص للنسخ اليدوي"]') as HTMLTextAreaElement | null)?.value || '', /نجوم الحصة: 2/);
+    assert.match(host.querySelector('[data-testid="abboud-report-history"]')?.textContent || '', /سجل آخر الحصص \(1\)/);
+    await click('الألوان والأشياء'); assert.equal(host.querySelector('[data-testid="abboud-report-current"]'), null);
+    assert.ok(host.querySelector('[data-testid="abboud-report-history"]'), 'history stays available');
+  } finally {
+    for (const key of ['share', 'clipboard'] as const) if (original[key] === undefined) delete (nav as unknown as Record<string, unknown>)[key]; else Object.defineProperty(nav, key, { value: original[key], configurable: true });
+    await unmount();
+  }
+});
+test('guest sessions still show the summary but persist no stars or reports', async () => {
+  service(lessonOne());
+  root = createRoot(host);
+  await act(async () => { root.render(<AbboudTeacherActivity onClose={() => {}} />); });
+  try {
+    await teachLessonOne();
+    assert.equal(stars(), '⭐ 2'); assert.ok(host.querySelector('[data-testid="abboud-report-current"]')); assert.match(text(), /وضع ضيف: الملخص لا يُحفظ/);
+    assert.equal(localStorage.length, 0);
+  } finally { await unmount(); }
+});
+test('15 lessons: grouped phone select, one scrollable chip row, and the certificate only after all fixed lessons', async () => {
+  localStorage.setItem('abboud-classroom:v2:student-a', JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]));
+  await mount();
+  try {
+    const select = host.querySelector('select[aria-label="اختر الدرس القصير"]'); assert.ok(select);
+    assert.deepEqual(Array.from(select.querySelectorAll('optgroup')).map(g => [g.getAttribute('label'), g.querySelectorAll('option').length]), [['الأساسيات', 5], ['مواضيع جديدة', 10], ['من اختيارك', 1]]);
+    assert.match(host.querySelector('[data-testid="abboud-progress"]')?.textContent || '', /📗 14\/15/);
+    assert.equal(Array.from(host.querySelectorAll('button')).some(b => b.textContent?.includes('الشهادة')), false);
+    await click('الأفعال اليومية'); assert.match(text(), /أنت المعلّم يا عبود/);
+  } finally { await unmount(); }
+  const all = readFileSync('src/index.css', 'utf8');
+  assert.match(all, /\.abboud-lesson-chips \{[^}]*flex-wrap: nowrap; overflow-x: auto/);
+  assert.match(all.split('@media (max-width: 639px) {')[1], /\.abboud-lesson-select \{ flex: 1 1 0%; min-width: 0; \}/);
+});
+test('«معلّم صغير» certificate: student name, stars, print and save as image; Escape closes it before the classroom', async () => {
+  localStorage.setItem('abboud-classroom:v2:student-a', JSON.stringify(Array.from({ length: 15 }, (_, i) => i + 1)));
+  localStorage.setItem('abboud-teacher-awards:v1:student-a', JSON.stringify({ stars: { L1: { explain: true, correction: true }, L2: { explain: true } }, name: 'عبود' }));
+  let closed = 0, printed = 0; const drawn: string[] = []; const downloads: string[] = [];
+  const proto = dom.window.HTMLCanvasElement.prototype;
+  const saved = { getContext: proto.getContext, toBlob: proto.toBlob, print: dom.window.print, click: dom.window.HTMLAnchorElement.prototype.click };
+  proto.getContext = (() => ({ fillRect() {}, strokeRect() {}, fillText(t: string) { drawn.push(t); } })) as never;
+  proto.toBlob = function (done: BlobCallback) { done(new dom.window.Blob(['png']) as Blob); };
+  dom.window.print = () => { printed++; assert.ok(document.body.classList.contains('abboud-print-certificate'), 'only the certificate prints'); };
+  dom.window.HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) { downloads.push(this.download); };
+  mock.method(URL, 'createObjectURL', () => 'blob:certificate'); mock.method(URL, 'revokeObjectURL', () => {});
+  root = createRoot(host);
+  await act(async () => { root.render(<AbboudTeacherActivity uid="student-a" onClose={() => { closed++; }} />); });
+  try {
+    assert.match(host.querySelector('[data-testid="abboud-progress"]')?.textContent || '', /📗 15\/15/);
+    await click('الشهادة');
+    const certificate = host.querySelector('[data-testid="abboud-certificate"]'); assert.ok(certificate);
+    assert.equal(host.querySelector('[data-testid="abboud-certificate-name"]')?.textContent, 'عبود');
+    assert.match(certificate.textContent || '', /⭐ 3 نجمة معلّم/); assert.match(certificate.textContent || '', /ليست من شهادات الأكاديمية الرسمية/);
+    const input = certificate.querySelector('input')!; const setter = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value')!.set!;
+    await act(async () => { setter.call(input, 'عبدالله'); input.dispatchEvent(new dom.window.Event('input', { bubbles: true })); });
+    assert.equal(host.querySelector('[data-testid="abboud-certificate-name"]')?.textContent, 'عبدالله');
+    await click('طباعة'); assert.equal(printed, 1); assert.equal(awardsOf().name, 'عبدالله');
+    await act(async () => { dom.window.dispatchEvent(new dom.window.Event('afterprint')); }); assert.equal(document.body.classList.contains('abboud-print-certificate'), false);
+    await click('حفظ كصورة'); assert.ok(drawn.includes('عبدالله')); assert.deepEqual(downloads, ['little-teacher-certificate.png']); assert.match(text(), /حُفظت الشهادة كصورة/);
+    await act(async () => { dom.window.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape' })); });
+    assert.equal(host.querySelector('[data-testid="abboud-certificate"]'), null); assert.equal(closed, 0, 'Escape closed the certificate, not the classroom');
+    assert.equal(Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i)).some(k => /xp|streak|certificate/i.test(k || '')), false);
+  } finally {
+    Object.assign(proto, { getContext: saved.getContext, toBlob: saved.toBlob }); dom.window.print = saved.print; dom.window.HTMLAnchorElement.prototype.click = saved.click;
+    await unmount();
+  }
 });

@@ -1,11 +1,11 @@
 import { toToolCalls, type BoardAction } from '../boardActions.js';
-import type { Reply } from './protocol.js';
+import type { Misconception } from './protocol.js';
 
 const COLORS: Record<string, string> = { red: '#ef4444', blue: '#3b82f6', yellow: '#facc15', green: '#22c55e', أحمر: '#ef4444', أزرق: '#3b82f6', أصفر: '#facc15', أخضر: '#22c55e', احمر: '#ef4444', ازرق: '#3b82f6', اصفر: '#facc15', اخضر: '#22c55e' };
 const ARABIC_NUMBERS: Record<string, number> = { واحد: 1, اثنان: 2, اثنين: 2, ثلاثة: 3, ثلاثه: 3, أربعة: 4, اربعة: 4, خمسة: 5, خمسه: 5, ستة: 6, سته: 6, سبعة: 7, سبعه: 7, ثمانية: 8, ثمانيه: 8, تسعة: 9, تسعه: 9, عشرة: 10, عشره: 10 };
 const NUMBERS = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 export type BoardToken = { text: string; color?: string; count?: number };
-export type BoardCorrection = NonNullable<Reply['misconception']> & { accepted: boolean };
+export type BoardCorrection = Misconception & { accepted: boolean };
 export function boardTokens(text: string): BoardToken[] {
   const tokens = [...new Set(text.match(/[\p{L}\p{N}]+(?:['’][\p{L}]+)?/gu) || [])].slice(0, 20);
   return tokens.map(text => {
@@ -24,8 +24,8 @@ export interface AbboudBoardContent {
 }
 /**
  * Turns Abboud's actual explanation into Sara's board actions, drawn by Sara's own board.
- * Only what was said appears: the spoken text, the colours/numbers it contained, Reem's attempt
- * (marked unverified) or the verified correction, and the latest student replies from the board.
+ * Only what was said appears: the spoken text, the colours/numbers it contained, the student's attempt
+ * (Badr's or Reem's controlled error, marked unverified) or the verified correction, and the latest student replies from the board.
  */
 export function abboudBoardActions({ lessonTitle, source, checked, correction, responses }: AbboudBoardContent): BoardAction[] {
   const actions: BoardAction[] = lessonTitle ? [{ kind: 'title', text: lessonTitle.slice(0, 60) }] : [];
@@ -36,7 +36,7 @@ export function abboudBoardActions({ lessonTitle, source, checked, correction, r
   }
   if (correction) actions.push(correction.accepted
     ? { kind: 'fix', wrong: correction.incorrect, right: correction.correct }
-    : { kind: 'highlight', text: `محاولة ريم — بانتظار تصحيح عبود: ${correction.incorrect}` });
+    : { kind: 'highlight', text: `محاولة ${NAMES[correction.speaker]} (غير مؤكدة) — بانتظار تصحيح عبود: ${correction.incorrect}` });
   for (const reply of responses.slice(-2)) actions.push({ kind: 'highlight', text: `${NAMES[reply.speaker] || reply.speaker}: ${reply.text}`.slice(0, 300) });
   return actions;
 }

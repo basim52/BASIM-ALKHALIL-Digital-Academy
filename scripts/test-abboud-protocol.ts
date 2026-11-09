@@ -9,7 +9,7 @@ const explanation = { sessionId: 1, stage: 'explain', teacherSpeech: 'Hello is a
 const reply = { verdict: 'accurate', turns: [{ speaker: 'badr', text: 'When can I say hello?' }] };
 test('request rejects invalid, oversized, or context-free payloads', () => {
   assert.equal(parseRequest(explanation).teacherSpeech, explanation.teacherSpeech);
-  for (const change of [{ teacherSpeech: '' }, { teacherSpeech: 'x'.repeat(1201) }, { sessionId: 6 }, { sessionId: 1.5 }, { stage: 'invented' }, { stage: 'correct' }, { stage: 'review_one', sessionId: 1 }, { history: Array(31).fill({ speaker: 'sara', text: 'x' }) }]) {
+  for (const change of [{ teacherSpeech: '' }, { teacherSpeech: 'x'.repeat(1201) }, { sessionId: 17 }, { sessionId: 16 }, { sessionId: 0 }, { sessionId: 1.5 }, { stage: 'invented' }, { stage: 'correct' }, { stage: 'review_one', sessionId: 1 }, { history: Array(31).fill({ speaker: 'sara', text: 'x' }) }]) {
     assert.throws(() => parseRequest({ ...explanation, ...change }));
   }
 });
@@ -38,7 +38,9 @@ test('progress isolated per student, guests not stored, replay idempotent, corru
   completeLesson(storage, 'a', 1); completeLesson(storage, 'a', 1); completeLesson(storage, 'b', 2);
   assert.deepEqual(readCompleted(storage, 'a'), [1]); assert.deepEqual(readCompleted(storage, 'b'), [2]);
   const size = data.size; completeLesson(storage, undefined, 3); assert.equal(data.size, size);
-  data.set('abboud-classroom:v2:a', '[1,1,6,"2",-1,null]'); assert.deepEqual(readCompleted(storage, 'a'), [1]);
+  data.set('abboud-classroom:v2:a', '[1,1,16,"2",-1,null]'); assert.deepEqual(readCompleted(storage, 'a'), [1], 'custom lessons and junk never count');
+  data.set('abboud-classroom:v2:a', '[6,15]'); assert.deepEqual(readCompleted(storage, 'a'), [6, 15], 'the ten new lessons are tracked');
+  assert.deepEqual(completeLesson(storage, 'a', 16), [6, 15], 'a custom lesson does not enter the fixed-lesson progress');
   data.set('abboud-classroom:v2:a', '{'); assert.deepEqual(readCompleted(storage, 'a'), []);
 });
 test('HTTP handler forwards real dialogue, validates model output, and fails honestly', async () => {
@@ -66,8 +68,8 @@ test('board focus is anchored to actual teacher dialogue and cannot spoof anothe
   assert.throws(() => parseRequest({ ...board, boardFocus: { text: 'blue', speaker: 'reem' } }));
   assert.throws(() => parseRequest({ ...board, boardFocus: { text: 'red', speaker: 'sara' } }));
   assert.throws(() => parseRequest({ ...board, history: [{ speaker: 'badr', text: source }] }));
-  assert.equal(parseReply({ verdict: 'accurate', turns: [{ speaker: 'reem', text: 'red is the color of the book' }] }, 'board', 'reem').turns.length, 1);
-  assert.throws(() => parseReply({ verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Wrong speaker' }] }, 'board', 'reem'));
+  assert.equal(parseReply({ verdict: 'accurate', turns: [{ speaker: 'reem', text: 'red is the color of the book' }] }, 'board', { boardSpeaker: 'reem' }).turns.length, 1);
+  assert.throws(() => parseReply({ verdict: 'accurate', turns: [{ speaker: 'badr', text: 'Wrong speaker' }] }, 'board', { boardSpeaker: 'reem' }));
 });
 test('Abboud content becomes Sara board actions: only actual words, colours, quantities, gated correction', async () => {
   const { boardTokens, abboudBoardActions, abboudBoardCalls, interactionError } = await import('../src/lib/abboud/board');
@@ -80,7 +82,7 @@ test('Abboud content becomes Sara board actions: only actual words, colours, qua
   assert.deepEqual(said.filter(a => a.kind === 'arrow'), [{ kind: 'arrow', from: 'three', to: '●●●' }, { kind: 'arrow', from: 'red', to: '🔴' }]);
   assert.ok(said.some(a => a.kind === 'text' && a.text.includes('three red books')));
   assert.equal(JSON.stringify(said).includes('blue'), false);
-  const c = { incorrect: 'two book', correct: 'two books', reason: 'plural', accepted: false };
+  const c = { incorrect: 'two book', correct: 'two books', reason: 'plural', speaker: 'reem' as const, accepted: false };
   const pending = abboudBoardCalls({ ...base, source: 'two books', correction: c });
   assert.equal(pending.some(a => a.tool === 'highlightError'), false, 'correct answer stays hidden until Abboud corrects');
   assert.ok(pending.some(a => a.tool === 'addNote' && a.payload.content.includes('بانتظار تصحيح عبود')));

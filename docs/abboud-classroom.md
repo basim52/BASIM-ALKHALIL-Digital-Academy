@@ -60,3 +60,27 @@ Tap an actual word/sentence, then read that exact text or ask Badr/Reem to apply
 The CI workflow now runs `npm run test:abboud` under Node 24 (matching the Vercel project and jsdom's supported engine), including the native-serverless regression; a successful bundled Vite build alone is no longer the only API startup check.
 
 Follow-up verification: clean `npm ci --ignore-scripts`; 30/30 behavior tests passed; final `npx tsc --noEmit` passed; final credential-free production build passed with the existing large-chunk warnings. No physical microphone/speaker, production-provider success, GUI screenshot, merge or deployment was verified/performed for this follow-up. Existing audit findings remain 63. No new dependencies were added.
+
+## Teacher stars, Sara's praise, chosen topics, parent summary and 15 lessons
+
+- **Lessons:** 15 fixed beginner lessons. 1–5 are unchanged: lesson 5 is still the review of 1–4, with two review questions. 6–15 are animals, family, food and drinks, body parts, clothes, weather, days of the week, school, feelings and daily actions. All use the same structure: words, an English rule, and explain → answer → correct. Phones get a grouped native select; wider screens get one horizontally scrolling chip row, so the board keeps its height.
+- **Controlled errors:** one per lesson, alternating. Reem errs in odd lessons; Badr errs in even ones (Badr acknowledges and applies in a single turn). The erring student comes from the lesson id, not from the AI. The error must appear verbatim in that student's turn. Sara's board shows it as «محاولة … (غير مؤكدة)» until Abboud's correction passes the AI check.
+- **Stars** (two kinds, at most one of each per lesson; replays never add more):
+  - Explanation star: the AI may add `understood.concept`. The client and server both keep it only if it is a whole phrase from Abboud's actual words and Badr says it.
+  - Correction star: the correct-stage verdict must be accurate, and the erring student must say the corrected form without the error.
+- **Sara's praise:** only on the turn that closes the lesson. `praise.quote` must be Abboud's own words, and `tip` must be a single sentence. Sara's spoken and written turn is then rebuilt deterministically from the validated praise (idempotent on re-validation). Ungrounded praise is dropped rather than invented.
+- **«درس من اختياري»** (`sessionId` 16):
+  - Abboud says the topic with the same continuous mic, or types it; ideas are suggested.
+  - `sanitizeTopic` strips markup and symbols, caps it at 40 characters, and refuses unsuitable themes as whole words, so «كرة القدم» is not «دم». Unsuitable topics get a gentle redirect.
+  - The server re-checks the topic (400 if unsuitable) and sends it only as untrusted payload data, never in the instructions. The AI is also told to redirect unsuitable talk with an off-topic reply.
+  - Custom lessons never count toward fixed-lesson progress or the certificate.
+- **Parent summary:** after each lesson the activity shows:
+  - what he explained;
+  - the English words he used;
+  - how many of his turns contained English;
+  - stars earned this run;
+  - Sara's tip.
+
+  The last 10 summaries are kept, and the parent can share them with Web Share or copy them; if neither works, a manual-copy box appears. Nothing is sent automatically.
+- **Certificate «معلّم صغير»:** appears after all 15 fixed lessons. The name is editable and defaults to «عبود»: the activity is not given the profile name, and Sara's components were intentionally left untouched. It can be printed (print CSS shows only the certificate) or saved as a PNG drawn with the plain 2D canvas, with no libraries.
+- **Separation:** stars, the certificate name and summaries are stored only in this device's localStorage under `abboud-teacher-awards:v1:<uid>` and `abboud-teacher-reports:v1:<uid>`. Guests keep them in memory only. They are not part of Sara's progress, XP, the academy's official certificates, Firestore or its rules. Lesson completion still uses `abboud-classroom:v2:<uid>`, now accepting ids 1–15.
