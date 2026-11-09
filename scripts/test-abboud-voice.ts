@@ -115,3 +115,26 @@ test('native fallback replay also stays in the user click instead of awaiting an
     assert.equal(fetcher.mock.callCount(), 1); assert.ok(latest); latest.onend?.(); await replay;
   } finally { voice.stop(); mock.restoreAll(); spoken.length = 0; }
 });
+test('each speaker gets their own server-accepted voice: Badr and Reem never fall back to Sara\'s', async () => {
+  const { SPEAKER_VOICES } = await import('../src/lib/abboud/voice');
+  const { readFileSync } = await import('node:fs');
+  const allowed = readFileSync('src/server/routes.ts', 'utf8').match(/const ALLOWED_VOICES = new Set\(\[([^\]]+)\]\)/);
+  assert.ok(allowed, 'server allowlist found');
+  const serverVoices = new Set(allowed[1].match(/"([A-Za-z]+)"/g)!.map(v => v.slice(1, -1)));
+  for (const [speaker, name] of Object.entries(SPEAKER_VOICES)) assert.ok(serverVoices.has(name), `${speaker}'s voice ${name} would be replaced by Kore`);
+  assert.equal(new Set(Object.values(SPEAKER_VOICES)).size, 3, 'three different voices');
+  assert.equal(SPEAKER_VOICES.sara, 'Kore');
+  const bodies: { voiceName: string; text: string }[] = [];
+  mock.method(globalThis, 'fetch', async (_url: unknown, options: RequestInit) => { bodies.push(JSON.parse(String(options.body))); return new Response('{}', { status: 503 }); });
+  const voice = new ClassroomVoice(); const active: unknown[] = []; const voices: [string, unknown, number][] = [];
+  const installed = [{ lang: 'en-US', name: 'A' }, { lang: 'en-GB', name: 'B' }, { lang: 'en-AU', name: 'C' }];
+  synthesis.getVoices = () => installed as never;
+  try {
+    const playing = voice.play([{ speaker: 'badr', text: 'Is it red?' }, { speaker: 'reem', text: 'It is blue.' }, { speaker: 'sara', text: 'Well done.' }], s => active.push(s), () => {});
+    for (let i = 0; i < 3; i++) { await tick(); assert.ok(latest); const u = latest as Utterance & { pitch?: number }; voices.push([u.text, (u.voice as { name: string } | null)?.name, u.pitch ?? 1]); u.onend?.(); }
+    await playing;
+    assert.deepEqual(bodies.map(b => [b.text, b.voiceName]), [['Is it red?', 'Orus'], ['It is blue.', 'Laomedeia'], ['Well done.', 'Kore']]);
+    assert.deepEqual(voices, [['Is it red?', 'B', 1.2], ['It is blue.', 'C', 1.4], ['Well done.', 'A', 1]], 'fallback: own installed voice and pitch per speaker');
+    assert.deepEqual(active.filter(Boolean), ['badr', 'reem', 'sara'], 'the face that talks is the speaker of that turn');
+  } finally { synthesis.getVoices = () => []; voice.stop(); mock.restoreAll(); spoken.length = 0; }
+});

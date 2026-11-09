@@ -1,7 +1,16 @@
 import { createManagedAudio, managedSpeak, unlockAudioForMobile } from '../audio';
 import type { Speaker } from './protocol';
 export type VoiceTurn = { speaker: Speaker; text: string };
-const voices = { badr: 'Puck', reem: 'Aoede', sara: 'Kore' };
+/**
+ * Each speaker's own Gemini voice. They must be in the server's ALLOWED_VOICES (src/server/routes.ts):
+ * any other name is silently replaced by Sara's «Kore», which is how Badr («Puck») used to speak in Sara's voice.
+ * Badr: a male voice; Reem: an upbeat female voice different from Sara's.
+ */
+export const SPEAKER_VOICES: Record<Speaker, string> = { badr: 'Orus', reem: 'Laomedeia', sara: 'Kore' };
+const voices = SPEAKER_VOICES;
+/** Browser-voice fallback (TTS quota/outage): a different installed voice per speaker when possible, and the
+ *  children always at a higher pitch than Sara, so Badr and Reem never sound like her. */
+export const BROWSER_VOICE: Record<Speaker, { index: number; pitch: number }> = { sara: { index: 0, pitch: 1 }, badr: { index: 1, pitch: 1.2 }, reem: { index: 2, pitch: 1.4 } };
 
 /** Activity-owned queue: completion means ended, not merely a fulfilled TTS fetch. */
 export class ClassroomVoice {
@@ -82,7 +91,9 @@ export class ClassroomVoice {
             const u = new SpeechSynthesisUtterance(turn.text); this.utterance = u;
             u.lang = lang === 'ar' ? 'ar-SA' : 'en-US';
             const available = window.speechSynthesis.getVoices().filter(v => v.lang.startsWith(lang));
-            u.voice = available[turn.speaker === 'badr' && available.length > 1 ? 1 : 0] || null;
+            const own = BROWSER_VOICE[turn.speaker];
+            u.voice = available.length ? available[own.index % available.length] : null;
+            u.pitch = own.pitch;
             u.onstart = () => active(turn.speaker);
             u.onend = () => { this.utterance = null; finish(); };
             u.onerror = () => { this.utterance = null; finish(new Error('AUDIO_FAILED')); };

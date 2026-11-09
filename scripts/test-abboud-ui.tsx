@@ -285,6 +285,45 @@ test('board starts large with a full workspace, compact student panel and reacha
     assert.equal(host.querySelector('[data-testid="abboud-board-expand"]')?.getAttribute('aria-expanded'), 'false');
   } finally { await unmount(); }
 });
+test('slim teaching dock: face, mic, short hint and «⋯» only; secondary controls live in a keyboard-accessible menu that works', async () => {
+  service([accurate('badr', 'Is it red?')]); await mount();
+  const menu = () => host.querySelector('[data-testid="abboud-dock-menu"]') as HTMLElement;
+  const toggle = () => host.querySelector('[data-testid="abboud-dock-menu-toggle"]') as HTMLButtonElement;
+  const row = () => host.querySelector('[data-testid="abboud-dock-row"]') as HTMLElement;
+  try {
+    assert.deepEqual(Array.from(row().children).map(el => el.getAttribute('data-face') || el.getAttribute('data-testid') || el.className.split(' ')[0]),
+      ['teacher-abboud', 'abboud-microphone', 'abboud-turn-status', 'abboud-dock-menu-toggle'], 'only the essentials in the row');
+    assert.match(row().textContent || '', /اضغط وتحدّث يا عبود/);
+    assert.equal(menu().hidden, true); assert.equal(toggle().getAttribute('aria-expanded'), 'false');
+    assert.equal(toggle().getAttribute('aria-controls'), menu().id); assert.ok(toggle().getAttribute('aria-label'));
+    for (const label of ['إيقاف الصوت والميكروفون', 'كتم الردود', 'إعادة الصوت', 'الكتابة كبديل']) assert.ok(menu().contains(button(label)), `${label} is in the menu`);
+    assert.ok(menu().querySelector('select[aria-label="لغة التعرف الصوتي"]')); assert.equal(row().querySelector('select'), null);
+    // Focus trap never lands on a control hidden inside the closed menu.
+    const dialog = host.querySelector('[data-testid="abboud-classroom"]') as HTMLElement;
+    const visible = Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]')).filter(el => !el.closest('[hidden]'));
+    visible[visible.length - 1].focus();
+    await act(async () => { visible[visible.length - 1].dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true })); });
+    assert.equal(dom.window.document.activeElement, visible[0], 'Tab from the last visible control wraps (hidden menu items are skipped)');
+    await act(async () => { toggle().click(); });
+    assert.equal(menu().hidden, false); assert.equal(toggle().getAttribute('aria-expanded'), 'true');
+    await click('كتم الردود'); assert.equal(button('إلغاء الكتم').getAttribute('aria-pressed'), 'true', 'mute works from the menu');
+    await click('إلغاء الكتم');
+    await act(async () => { dom.window.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); });
+    assert.equal(menu().hidden, true, 'Escape closes the menu first'); assert.ok(host.querySelector('[data-testid="abboud-classroom"]'), 'the classroom stays open');
+    assert.equal(dom.window.document.activeElement, toggle(), 'focus returns to «⋯»');
+    await act(async () => { toggle().click(); }); await click('الكتابة كبديل');
+    assert.equal(menu().hidden, true, 'choosing typing closes the menu'); assert.ok(host.querySelector('textarea#abboud-fallback'));
+    await click('إخفاء الكتابة');
+    // While listening, «خلصت» replaces the mic in the same row and the live text is a short line under it.
+    await click('اضغط وتحدّث'); await act(async () => { FakeRecognition.latest.say('Red means أحمر'); });
+    assert.match(row().textContent || '', /خلصت — أرسل كلامي/);
+    assert.match(host.querySelector('[data-testid="abboud-live-line"] [data-testid="abboud-live-transcript"]')?.textContent || '', /Red means/);
+    await click('خلصت'); await act(async () => { await new Promise(r => setImmediate(r)); });
+    assert.match(row().textContent || '', /بدر عنده سؤال/);
+    await act(async () => { toggle().click(); });
+    assert.match(menu().querySelector('[aria-label="حوار الفصل"]')?.textContent || '', /Red means أحمر[\s\S]*Is it red\?/, 'the class log is one tap away');
+  } finally { await unmount(); }
+});
 test('scoped layout contract covers 360/390 widths, bounded scrolling and the expanded viewport', () => {
   // jsdom does not measure geometry: guard the actual stylesheet hooks, not pretend pixel screenshots.
   const all = readFileSync('src/index.css', 'utf8');
@@ -294,7 +333,13 @@ test('scoped layout contract covers 360/390 widths, bounded scrolling and the ex
   assert.match(css, /\.abboud-board-surface \{ flex: 1 1 0%; min-height: 280px/);
   assert.match(css, /\.abboud-board-picks \{[^}]*overflow-y: auto; overflow-x: hidden/);
   assert.equal(/abboud-board-(body|source|title)/.test(css), false, 'old custom board styles removed');
-  assert.match(css, /\.abboud-teacher-dock \{[^}]*position: sticky; top: 0/);
+  // The teaching dock is part of the layout flow (never sticky/fixed over Sara's board) and is one slim row.
+  assert.equal(/\.abboud-(controls|teacher-dock|dock-row)[^{]*\{[^}]*position: (sticky|fixed|absolute)/.test(css), false, 'dock never overlays the board');
+  assert.match(css, /\.abboud-controls \{\s*flex: none;/); assert.match(css, /\.abboud-dock-row \{[^}]*height: 56px/);
+  assert.match(css, /\.abboud-workspace \{[^}]*flex: 1 1 0%; min-height: 320px/, 'the board area takes the rest of the height');
+  assert.match(css, /\.abboud-dialog \.abboud-shell \{[^}]*overflow-y: auto/, 'too little room scrolls the shell instead of overlapping');
+  assert.match(css, /\.abboud-dock-menu\[hidden\] \{ display: none; \}/);
+  assert.match(css, /padding-bottom: max\(4px, env\(safe-area-inset-bottom\)\)/);
   assert.match(css, /\.abboud-dialog-expanded \.abboud-shell \{[^}]*max-width: none;[^}]*height: 100dvh/);
   const mobile = css.split('@media (max-width: 639px) {')[1]; assert.ok(mobile);
   for (const width of [360, 390]) {
@@ -302,9 +347,10 @@ test('scoped layout contract covers 360/390 widths, bounded scrolling and the ex
     assert.match(mobile, /grid-template-areas: "students" "board"/);
     assert.match(mobile, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
     assert.match(mobile, /\.abboud-lessons select \{[^}]*width: 0; min-width: 0/);
-    assert.match(mobile, /\.abboud-board-surface \{ flex: none; height: clamp\(300px, 58dvh, 520px\)/);
+    assert.match(mobile, /\.abboud-board-surface \{ min-height: 240px; \}/);
     assert.match(mobile, /\.abboud-dialog \.abboud-shell \{ overflow-y: auto; overflow-x: hidden/);
-    assert.match(mobile, /\.abboud-controls \{ position: sticky; bottom: 0/);
+    assert.equal(mobile.includes('position: sticky'), false, 'phones: no sticky dock covering the board either');
+    assert.match(mobile, /\.abboud-turn-status \{ order: -1; flex-basis: 100%; font-size: 12px; -webkit-line-clamp: 1; \}/);
   }
   assert.equal(css.includes('100vw'), false);
   const shortViewport = css.split('@media (max-height: 500px) {')[1]; assert.ok(shortViewport);
@@ -591,7 +637,7 @@ test('Abboud the teacher has his own face beside the mic: idle, talks from the m
   await mount();
   try {
     const teacher = face('teacher-abboud'); assert.ok(teacher);
-    assert.ok(teacher.closest('.abboud-teacher-dock .abboud-mic-row')?.querySelector('[data-testid="abboud-microphone"]'), 'sits next to the mic in the teaching dock');
+    assert.ok(teacher.closest('.abboud-teacher-dock .abboud-dock-row')?.querySelector('[data-testid="abboud-microphone"]'), 'sits next to the mic in the teaching dock');
     assert.ok(teacher.classList.contains('abboud-teacher-face'));
     assert.equal(teacher.querySelector('img.tutor-video-poster')?.getAttribute('src'), '/tutors/teacher-abboud.webp');
     assert.deepEqual(Array.from(teacher.querySelectorAll('source')).map(s => s.getAttribute('src')), ['/tutors/video/teacher-abboud-idle.webm', '/tutors/video/teacher-abboud-idle.mp4']);
