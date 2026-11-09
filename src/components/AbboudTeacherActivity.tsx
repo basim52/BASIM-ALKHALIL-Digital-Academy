@@ -12,9 +12,16 @@ import { TOPIC_IDEAS, sanitizeTopic, topicMessage } from '../lib/abboud/topic';
 import { coveredItems, lessonItems } from '../lib/abboud/lessonBoard';
 import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
 import { ContinuousDictation, microphoneError, type DictationPause } from '../lib/abboud/recognition';
+import type { LiveClassStore } from '../lib/abboud/liveClass';
+import { useLiveStore } from '../lib/abboud/useLiveStore';
+import { AbboudLiveHostButton, AbboudLiveHostNotice, AbboudLiveHostPanel, useLiveHost } from './AbboudLiveHost';
 
 export { SESSIONS_CONFIG } from '../lib/abboud/curriculum';
-export interface AbboudTeacherProps { uid?: string; onClose: () => void }
+export interface AbboudTeacherProps {
+  uid?: string; onClose: () => void;
+  /** Tests inject an in-memory store; the app lazily uses Firestore. Live class UI appears only if the admin set one up. */
+  liveStore?: LiveClassStore | null;
+}
 type Phase = 'ready' | 'listening' | 'thinking' | 'speaking';
 const names = { badr: 'بدر', reem: 'ريم', sara: 'سارة', abboud: 'عبود' };
 const tasks: Record<Stage | 'complete', string> = {
@@ -31,7 +38,7 @@ const correctTask = (lessonId: number) => mistakeSpeaker(lessonId) === 'reem'
   : 'بدر يحاول وفي عبارته خطأ واحد صغير. اكتشفه وصحّحه بصوتك وقل السبب.';
 const starText: Record<StarKind, string> = { explain: 'نجمة شرح', correction: 'نجمة تصحيح' };
 
-export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClose }) => {
+export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClose, liveStore }) => {
   const [lessonId, setLessonId] = useState(1);
   const [boardExpanded, setBoardExpanded] = useState(false);
   const expandTrigger = useRef<HTMLButtonElement | null>(null);
@@ -56,6 +63,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   /** The dock's «⋯» menu (language, stop/mute/replay, typing, class log). Closed by default so the board keeps the screen. */
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggle = useRef<HTMLButtonElement | null>(null);
+  const [liveOpen, setLiveOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [language, setLanguage] = useState('ar-SA');
   const [completed, setCompleted] = useState<number[]>(() => readCompleted(localStorage, uid));
@@ -89,6 +97,9 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const abboudSpeech = useMemo(() => [...messages.filter(m => m.speaker === 'abboud').map(m => m.text), ...(draft ? [draft] : [])], [messages, draft]);
   /** Lesson items he has said, kept for the whole lesson run (a cleared draft never un-marks them). */
   const [explained, setExplained] = useState<string[]>([]);
+  const store = useLiveStore(liveStore);
+  // Real academy students (admin-allowlisted) can follow live; Badr and Reem are not involved in any of this.
+  const host = useLiveHost(store, uid, { lessonId, lessonTitle, source: boardSource, draft, explained });
   useEffect(() => {
     const found = coveredItems(lesson, abboudSpeech);
     setExplained(previous => found.every(key => previous.includes(key)) ? previous : [...new Set([...previous, ...found])]);
@@ -136,12 +147,13 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
       event.preventDefault();
       if (certificateOpen) setCertificateOpen(false);
       else if (menuOpen) { setMenuOpen(false); menuToggle.current?.focus({ preventScroll: true }); }
+      else if (liveOpen) setLiveOpen(false);
       else if (boardExpanded) setBoardExpanded(false);
       else onClose();
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [onClose, boardExpanded, certificateOpen, menuOpen]);
+  }, [onClose, boardExpanded, certificateOpen, menuOpen, liveOpen]);
   useEffect(() => {
     if (boardExpanded) workspace.current?.focus({ preventScroll: true });
     else if (wasExpanded.current) (expandOrigin.current?.isConnected ? expandOrigin.current : expandTrigger.current)?.focus({ preventScroll: true });
@@ -351,9 +363,12 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
             <AbboudStudentFace id="abboud" speaking={phase === 'listening'} className="abboud-teacher-face" />
             <button type="button" data-testid="abboud-microphone" disabled={phase === 'thinking' || stage === 'complete'} aria-label={phase === 'listening' ? (choosingTopic ? 'خلصت، هذا موضوعي' : 'خلصت، أرسل كلامي للطالبين') : undefined} onClick={() => phase === 'listening' ? recognition.current?.finish() : startMic()} className={`abboud-mic-button rounded-full font-bold text-white disabled:opacity-40 ${phase === 'listening' ? 'bg-emerald-700' : 'bg-indigo-700'}`}>{phase === 'listening' ? (choosingTopic ? '✅ خلصت — هذا موضوعي' : '✅ خلصت — أرسل كلامي') : choosingTopic ? '🎙️ قل موضوعك' : resumeText ? '🎙️ أكمل الكلام' : '🎙️ اضغط وتحدّث يا عبود'}</button>
             <p className="abboud-turn-status font-bold" aria-live="polite" title={status}>{status}</p>
+            <AbboudLiveHostButton host={host} open={liveOpen} onToggle={() => setLiveOpen(!liveOpen)} />
             <button ref={menuToggle} type="button" data-testid="abboud-dock-menu-toggle" aria-expanded={menuOpen} aria-controls="abboud-dock-menu" aria-label="المزيد: لغة الكلام، الصوت، الكتابة والحوار" title="المزيد" onClick={() => setMenuOpen(!menuOpen)} className="abboud-dock-more rounded-full border bg-white font-bold">⋯</button>
           </div>
           {draft && !typing && <div className="abboud-live-line" data-testid="abboud-live-line"><span className="abboud-live-label">{phase === 'listening' ? '🎙️ أسمعك الآن — لن يُرسل شيء قبل «خلصت»:' : 'كلامك المحفوظ:'}</span> <span dir="auto" data-testid="abboud-live-transcript" className="abboud-live-text">{draft}</span>{phase === 'ready' && <button type="button" disabled={stage === 'complete'} onClick={() => void submit(draft)} className="abboud-live-resend rounded-lg bg-indigo-700 text-white">إرسال الكلام المحفوظ مجدداً</button>}</div>}
+          <AbboudLiveHostNotice host={host} />
+          {liveOpen && <AbboudLiveHostPanel host={host} />}
           {starNotice && <p role="status" data-testid="abboud-star-notice" className="abboud-star-notice">{starNotice}</p>}
           {error && <p role="alert" className="abboud-dock-notice bg-red-50 text-red-800">{error}</p>}
           {audioNotice && <p role="status" className="abboud-dock-notice bg-amber-50 text-amber-900">{audioNotice}</p>}

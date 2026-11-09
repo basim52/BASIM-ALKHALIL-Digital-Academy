@@ -101,3 +101,37 @@ Follow-up verification: clean `npm ci --ignore-scripts`; 30/30 behavior tests pa
 - **«⋯» menu** (`aria-expanded`/`aria-controls`, `hidden` when closed, Escape closes it and returns focus, and the focus trap skips its hidden items): speech language, the mic note, stop / mute / replay, typing, saved summaries, the class log and the privacy note. Choosing typing closes the menu and shows the form under the dock (≤40dvh, scrollable). The completion buttons and the parent summary appear there when a lesson completes.
 - **Measured** with real Chrome (headless, CDP viewport emulation) on a local uncommitted harness that mounts the real activity with the real CSS; only the network and the mic were stubbed. Expanded mode gives Sara's canvas 63% (1024×768), 64% (1180×820), 71% (1366×1024), 68% (768×1024), 63% (1366×768) and 67% (1440×900) of the viewport height, with 0 sampled board points covered. Phones (360/390) get 46–51%. The «كلام عبود كما ورد» chip strip comes on top of those figures.
 - **Voices:** Badr's TTS voice was «Puck», which is not in the server's `ALLOWED_VOICES`, so `safeVoice` silently turned it into Sara's «Kore». Each speaker now uses an allowlisted voice of their own: Badr «Orus» (male), Reem «Laomedeia», Sara «Kore». In the browser fallback each speaker gets a different installed voice and the children a higher pitch. The speaking face is the turn's speaker, unchanged; Sara's board avatar does not follow other playback. A test checks the voice names against the server allowlist. No server change.
+
+## «فصل عبود المباشر» — real students join from their own devices
+
+Built on `main` at `9c57a5b` (PR #12 merged). Badr and Reem stay as they are: the AI classmates still answer only Abboud's own explanation; students' words are never sent to the AI.
+
+### Who decides
+- Only the admin (the existing `isAdmin()` / `MASTER_ADMINS` check) opens **لوحة الإدارة ← 👨‍🏫 فصل عبود المباشر**, picks the teacher (a registered student) and ticks as many registered students as needed (up to 30), then saves.
+- The class doc stores only the uids and the display names the admin saw. Students never read other students' `users/*` docs, and emails are not copied.
+- The teacher cannot add anyone himself (blocked by the rules, not just the UI).
+
+### Flow
+1. In «عبود المعلّم» a 📡 button appears only if the admin created a class for this student. It opens a small panel: «🔴 ابدأ الفصل المباشر».
+2. Allowed students see «🔴 فصل عبود مباشر الآن — انضم» in فصل سارة, only while the class is live, and join on their own device. They get a light view (no tldraw) with the same lesson board, Abboud's words as he speaks, marks, and the discussion.
+3. Abboud's panel shows who is present (with a heartbeat; anyone silent for 2 minutes drops off) and raised hands.
+
+### Speaking: raise a hand, then wait for permission
+- The student taps **✋ أبغى أتكلم**. Abboud sees «✋ سلمى يطلب الكلام» (and a ✋ badge on 📡) and taps **اسمح لـسلمى** or **ليس الآن**.
+- Only one speaker at a time. While it is their turn, the student can talk (**🎙️ تكلّم** uses the browser's speech-to-text, then **✅ خلصت — أرسل كلامي**) or type a question. The text appears on every screen at once.
+- **إنهاء دوره** ends the turn; the next raised hand waits.
+- We share text rather than live audio on purpose. It needs no new servers, phone costs or media relay, it works on weak connections, everyone can reread what was said, and it can't be hijacked by an open microphone.
+- Permission is enforced on the server. Firestore accepts a message only from the `speaker` of an active session.
+
+### Data and Firebase rules (needs owner approval and deployment)
+- **Data:** new collection `abboudClasses/{teacherUid}` (the admin's list) with `live/state` (the lesson being shown, the current speaker), `participants/{uid}` (presence, hand) and `messages/*` (sent turns). There are no XP, progress, certificate or payment fields, and nothing existing is changed.
+- **Rules:** the PR adds one self-contained `match /abboudClasses/{hostUid}` block at the end of `firestore.rules`. Nothing above it changes.
+- **Not deployed:** these rules have not been deployed. Until the owner reviews and runs `firebase deploy --only firestore:rules`, the production default-deny keeps this feature inert. The admin save shows an honest "not saved" message, and students see nothing.
+- **Tests:**
+  - `scripts/test-abboud-live.tsx` (part of `npm run test:abboud`) runs the multi-user flow against an in-memory backend with the same permission model.
+  - `scripts/rules/abboud-live.rules.test.ts` drives the real Firestore store against these rules in the Firestore emulator. It needs Java, so it isn't part of `npm test`; the run steps are in its header.
+
+### Not verified yet
+- A real session on several physical devices.
+- Real microphones and speech recognition on each browser (iOS Safari has limited Web Speech support; typing always works).
+- The rules in production.
