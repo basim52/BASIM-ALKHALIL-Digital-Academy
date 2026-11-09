@@ -61,6 +61,9 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
   const isRtl = lang === 'ar';
   const [onlineStudents, setOnlineStudents] = useState<any[]>([]);
   const [allStudents, setAllStudents] = useState<any[]>([]);
+  // «فصل عبود المباشر»: attendees may be any registered account (the students list above is role=='student' only,
+  // which hid the admin and parents). Loaded only while that tab is open.
+  const [liveClassUsers, setLiveClassUsers] = useState<any[]>([]);
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -338,6 +341,14 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       alert(isRtl ? "فشل في تحديث الرقم" : "Failed to update phone number");
     }
   };
+
+  useEffect(() => {
+    if (activeTab !== 'abboud_live' || !db || !auth.currentUser) return;
+    if (!MASTER_ADMINS.includes(auth.currentUser.email?.toLowerCase() || '')) return;
+    return onSnapshot(query(collection(db, 'users'), limit(2000)),
+      snapshot => setLiveClassUsers(snapshot.docs.map(d => { const u = d.data() as any; return { id: d.id, displayName: u.displayName, email: u.email, role: u.role }; })),
+      error => handleFirestoreError(error, OperationType.GET, 'users'));
+  }, [activeTab]);
 
   useEffect(() => {
     if (!db || !auth.currentUser) return;
@@ -638,7 +649,7 @@ export const AdminDashboard = ({ lang }: { lang: Language }) => {
       </div>
 
       {activeTab === 'abboud_live' && (
-        <Suspense fallback={null}><AbboudLiveClassAdmin students={allStudents} /></Suspense>
+        <Suspense fallback={null}><AbboudLiveClassAdmin students={liveClassUsers.length ? liveClassUsers : allStudents} selfUid={auth.currentUser?.uid} selfName={auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || undefined} /></Suspense>
       )}
 
       {activeTab === 'students_logbook' && (
