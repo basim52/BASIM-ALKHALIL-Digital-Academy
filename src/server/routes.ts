@@ -11,6 +11,7 @@ import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { getAdminAuth, getAdminDb, FieldValue } from "./firebaseAdmin.js";
 import { sanitizeBoard, toToolCalls } from "../lib/boardActions.js";
 import crypto from "node:crypto";
+import { SOCRATIC_CHAT, SOCRATIC_SPOKEN } from "./socratic.js";
 import { NOTE_VOICES, cleanNoteInput, buildNotePrompt, extractNoteAnswer, NOTE_GEN_CONFIG, parseBoardImage, buildImagePrompt } from "./boardNote.js";
 
 const logToFile = (msg: string) => {
@@ -1676,6 +1677,8 @@ FEMALE IDENTITY & TONE:
 - REPLIES: Keep turns short and natural (1-2 sentences). Friendly conversation only — no lessons, no grammar lectures, no drills, no quizzes, no exercises.
 - NO CODE/MARKUP IN AUDIO: Never speak JSON, markdown stars, board items, or quiz options aloud in the "reply". Speak naturally and concisely as a teacher directly to the student.
 
+${SOCRATIC_CHAT}
+
 LANGUAGE MODE (${preferredLang === 'en' ? 'ENGLISH IMMERSION MODE 🇬🇧' : 'ARABIC TUTOR EXPLANATION MODE 🇸🇦'}):
    ${preferredLang === 'en'
      ? '* Student has explicitly toggled to ENGLISH mode. Speak primarily in natural, clear, friendly English so the student practices listening and speaking in an English immersion environment. Use brief Arabic only if the student is stuck.'
@@ -2671,7 +2674,7 @@ Respond ONLY with a valid JSON object matching:
     if (!initAI() || !aiLive) { send({ t: "error", error: "AI_UNAVAILABLE" }); return res.end(); }
     const sys = `${tutor ? `You are ${tutor.who}, in a live spoken conversation` : "You are Sara, a warm English tutor on a live PHONE CALL"} with ${String(name).slice(0, 40) || "a student"} (CEFR ${String(level).slice(0, 8)}).
 Scenario: ${String(scenario).slice(0, 300)}
-${context && !free ? `What this student needs (real data from the app): ${String(context).slice(0, 700)}\nWeave this practice in naturally.\n` : ""}Rules: spoken English only, 1-2 short sentences (max 35 words), no lists, no markdown, no emojis. Match the level. ${free ? "This is a free, open conversation: follow the student's topic like a friend on the phone. Do not correct, test or evaluate; just reply naturally and keep the talk going." : "If the student makes a clear mistake, model the correct form briefly, then ask one follow-up question."}`;
+${context && !free ? `What this student needs (real data from the app): ${String(context).slice(0, 700)}\nWeave this practice in naturally.\n` : ""}Rules: spoken English only, 1-2 short sentences (max 35 words), no lists, no markdown, no emojis. Match the level. ${free ? "This is a free, open conversation: follow the student's topic like a friend on the phone. Do not correct, test or evaluate; just reply naturally and keep the talk going." : "If the student makes a clear mistake, model the correct form briefly, then ask one follow-up question."}${tutor && !free ? `\n${SOCRATIC_SPOKEN}` : ""}`;
     const contents = formatGeminiHistory((Array.isArray(history) ? history : []).slice(-8), text);
     let firstTextMs = 0, firstAudioMs = 0, idx = 0, usedModel = "";
     let audioChain: Promise<void> = Promise.resolve();
