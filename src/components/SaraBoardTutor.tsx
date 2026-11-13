@@ -18,6 +18,8 @@ import { TUTOR_FILL_BLANK_TRACKS } from '../data/fillBlankTracks';
 const FillBlankPlayer = lazy(() => import('./SaraFillBlankPlayer').then(m => ({ default: m.FillBlankPlayer })));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
 const AbboudTeacherActivity = lazy(() => import('./AbboudTeacherActivity'));
+// «ركّب الجملة»: a picture sentence-building activity shared by every teacher's class (own static data, no XP/progress).
+const PictureSentenceBuilder = lazy(() => import('./PictureSentenceBuilder'));
 // «فصل عبود المباشر» entry: renders nothing unless the admin allowed this student and that class is live now.
 const AbboudLiveJoin = lazy(() => import('./AbboudLiveJoin'));
 import SaraVocabPlayer from './SaraVocabPlayer';
@@ -100,6 +102,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
   const [toolsOpen, setToolsOpen] = useState(!!initialToolsOpen);
   const [fbOpen, setFbOpen] = useState(false);
   const [repeatOpen, setRepeatOpen] = useState(false); // «ردّد مع سارة» (pilot: Sara only)
+  const [sentenceOpen, setSentenceOpen] = useState(false); // «ركّب الجملة» with the selected class teacher
   const [abboudOpen, setAbboudOpen] = useState(false); // «عبود المعلّم» (teaching virtual AI students)
   // Practise the student's last passed Sara lesson; null → the built-in sentences (level pick).
   const [repeatLesson, setRepeatLesson] = useState<import('../lib/repeatPractice').RepeatLessonSource | null>(null);
@@ -181,6 +184,13 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
     </div>
     {repeatOpen && <Suspense fallback={null}><SaraRepeatPractice uid={uid} lesson={repeatLesson} onClose={() => setRepeatOpen(false)} /></Suspense>}
     {abboudOpen && <Suspense fallback={null}><AbboudTeacherActivity uid={uid} onClose={() => setAbboudOpen(false)} /></Suspense>}
+    <button type="button" onClick={() => { voice.stop(); setSentenceOpen(true); }} data-testid="class-sentence-builder-open"
+      className="shrink-0 w-full rounded-2xl border-2 border-indigo-400/70 bg-[#0A1533] px-3 py-2 flex items-center gap-2 text-right active:scale-[0.99] transition-transform" style={{ boxShadow: '0 0 14px #6366f199' }}>
+      <span className="w-9 h-9 rounded-full bg-yellow-300 text-[#0A1533] flex items-center justify-center text-lg shrink-0">🧩</span>
+      <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-yellow-300">{L(`ركّب الجملة مع ${persona.nameAr}`, `Build the sentence with ${persona.nameEn}`)}</span>
+      <span className="block text-[10.5px] font-bold text-white/70">{L('صور وجمل كاملة، وركّب الجملة من كلماتها — ٣ محاولات', 'Pictures and full sentences; build one from its words, 3 tries')}</span></span>
+    </button>
+    {sentenceOpen && <Suspense fallback={null}><PictureSentenceBuilder teacherNameAr={persona.nameAr} teacherGender={persona.gender} voiceName={persona.voice} onClose={() => setSentenceOpen(false)} /></Suspense>}
     <div data-testid="kids-teachers" className="shrink-0 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] p-2">
       <p className="text-[12px] font-black text-[#002147] mb-1.5">{L("🌱 من الصفر — للصغار والكبار", "🌱 From zero, for kids and adults")}</p>
       <div className="grid grid-cols-4 gap-1.5">
