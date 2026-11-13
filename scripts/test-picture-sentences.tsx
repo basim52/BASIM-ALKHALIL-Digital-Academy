@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import React, { act } from 'react';
 import { MAX_ATTEMPTS, attemptsLeft, chipLabel, firstWordChip, hintAfter, initialState, isCorrectOrder, scramble, submit, tokenize } from '../src/lib/pictureSentenceBuilder';
-import { PICTURE_SENTENCE_SETS } from '../src/data/classroom/pictureSentences';
+import { CLASSROOM_SENTENCES, PICTURE_SENTENCE_SETS, sentencesFor } from '../src/data/classroom/pictureSentences';
+import { BOARD_PERSONAS } from '../src/data/saraBoardPersonas';
 
 const words = tokenize('The boy plays football');
 
@@ -70,22 +71,38 @@ test('hintAfter and firstWordChip', () => {
   assert.equal(firstWordChip(dup, [3, 1, 0, 2, 4], []), 3);
 });
 
-test('content: at least 3 sets of 5 sentences, beginner length growing across sets', () => {
-  assert.ok(PICTURE_SENTENCE_SETS.length >= 3);
+test('content: every class has 4 graded sets of 5 (3 → 4 → 5 → 6–7 words)', () => {
   const ids = new Set<string>();
-  let prevAvg = 0;
-  for (const set of PICTURE_SENTENCE_SETS) {
-    assert.equal(set.rows.length, 5, set.id);
-    for (const r of set.rows) {
-      assert.ok(!ids.has(r.id)); ids.add(r.id);
-      assert.ok(r.emoji && r.ar.trim(), r.id);
-      assert.doesNotMatch(r.en, /[.?!,]/, `${r.id} has punctuation`);
-      const n = tokenize(r.en).length; assert.ok(n >= 3 && n <= 7, `${r.id}: ${n} words`);
-    }
-    const avg = set.rows.reduce((a, r) => a + tokenize(r.en).length, 0) / set.rows.length;
-    assert.ok(avg > prevAvg, `${set.id} should be longer on average`); prevAvg = avg;
+  for (const [cid, c] of Object.entries(CLASSROOM_SENTENCES)) {
+    assert.ok(c.themeAr.trim(), cid);
+    assert.equal(c.sets.length, 4, cid);
+    c.sets.forEach((set, si) => {
+      assert.equal(set.rows.length, 5, set.id);
+      for (const r of set.rows) {
+        assert.ok(!ids.has(r.id), `duplicate id ${r.id}`); ids.add(r.id);
+        assert.ok(r.emoji && r.ar.trim(), r.id);
+        assert.doesNotMatch(r.en, /[.?!,]/, `${r.id} has punctuation`);
+        const n = tokenize(r.en).length;
+        if (si < 3) assert.equal(n, si + 3, `${r.id}: ${n} words`); else assert.ok(n === 6 || n === 7, `${r.id}: ${n} words`);
+      }
+    });
   }
-  assert.ok(PICTURE_SENTENCE_SETS[0].rows.every(r => tokenize(r.en).length === 3));
+});
+
+test('content: each teacher (and Abboud\'s class) has its own sentences, none shared between classes', () => {
+  const classes = [...BOARD_PERSONAS.map(p => p.id), 'abboud'];
+  for (const id of classes) assert.ok(CLASSROOM_SENTENCES[id as keyof typeof CLASSROOM_SENTENCES], `missing sets for ${id}`);
+  assert.equal(Object.keys(CLASSROOM_SENTENCES).length, classes.length);
+  const owner = new Map<string, string>();
+  for (const id of classes) for (const set of sentencesFor(id).sets) for (const r of set.rows) {
+    const key = r.en.toLowerCase();
+    assert.ok(!owner.has(key) || owner.get(key) === id, `«${r.en}» is in both ${owner.get(key)} and ${id}`);
+    owner.set(key, id);
+  }
+  const themes = new Set(classes.map(id => sentencesFor(id).themeAr));
+  assert.equal(themes.size, classes.length, 'every class has a distinct theme');
+  assert.equal(sentencesFor('unknown'), CLASSROOM_SENTENCES.sara);
+  assert.equal(PICTURE_SENTENCE_SETS, CLASSROOM_SENTENCES.sara.sets);
 });
 
 // ---------- UI (jsdom, fake voice) ----------
@@ -131,11 +148,14 @@ test('UI: hidden target row, hints over 3 attempts, then the answer and Sara spe
   await act(async () => root.unmount());
 });
 
-test('UI: correct build → teacher reads it, next sentence; whole set → done', async () => {
+test('UI: Mohammed\'s class shows his own sentences; correct build → he reads it; whole set → done', async () => {
   const { host, root, spoken, voice } = setup();
-  await act(async () => { root.render(<PictureSentenceBuilder onClose={() => {}} voice={voice} teacherNameAr="محمد" teacherGender="male" voiceName="Charon" random={() => 0.3} />); });
+  await act(async () => { root.render(<PictureSentenceBuilder classroomId="business" onClose={() => {}} voice={voice} teacherNameAr="محمد" teacherGender="male" voiceName="Charon" random={() => 0.3} />); });
   assert.match(host.textContent || '', /ركّب الجملة مع محمد/);
-  const rows = PICTURE_SENTENCE_SETS[0].rows;
+  assert.equal(host.querySelector('[data-testid=psb-theme]')?.textContent, CLASSROOM_SENTENCES.business.themeAr);
+  const rows = CLASSROOM_SENTENCES.business.sets[0].rows;
+  assert.equal(host.querySelector('[data-testid=psb-row-en-2]')?.textContent, rows[1].en);
+  assert.notEqual(rows[1].en, CLASSROOM_SENTENCES.sara.sets[0].rows[1].en);
   for (const [i, r] of rows.entries()) {
     await tapWords(host, tokenize(r.en));
     assert.equal(spoken.at(-1), r.en);
@@ -145,5 +165,12 @@ test('UI: correct build → teacher reads it, next sentence; whole set → done'
     if (i < rows.length - 1) assert.ok(host.querySelector('[data-testid=psb-puzzle]'));
   }
   assert.ok(host.querySelector('[data-testid=psb-set-done]'));
+  await act(async () => root.unmount());
+});
+
+test('UI: Abboud\'s class opens with its own lesson-topic sentences', async () => {
+  const { host, root, voice } = setup();
+  await act(async () => { root.render(<PictureSentenceBuilder classroomId="abboud" onClose={() => {}} voice={voice} random={() => 0.3} />); });
+  assert.equal(host.querySelector('[data-testid=psb-row-en-2]')?.textContent, CLASSROOM_SENTENCES.abboud.sets[0].rows[1].en);
   await act(async () => root.unmount());
 });

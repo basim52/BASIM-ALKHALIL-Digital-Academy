@@ -429,7 +429,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           </div>}
         </section>
       </div>
-      {sentenceOpen && <Suspense fallback={null}><PictureSentenceBuilder onClose={() => setSentenceOpen(false)} /></Suspense>}
+      {sentenceOpen && <Suspense fallback={null}><PictureSentenceBuilder classroomId="abboud" onClose={() => setSentenceOpen(false)} /></Suspense>}
       {certificateOpen && <AbboudCertificate name={awards.name} stars={starCount(awards)} onName={name => setAwards(current => saveName(localStorage, uid, current, name))} onClose={() => setCertificateOpen(false)} />}
     </div>
   );
