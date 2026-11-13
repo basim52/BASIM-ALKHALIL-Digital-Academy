@@ -17,6 +17,8 @@ import { useLiveStore, useLiveUid } from '../lib/abboud/useLiveStore';
 import type { AudioDeps } from '../lib/abboud/liveAudio';
 import { LiveTrackAudio, AbboudLiveHostHeaderButton, AbboudLiveHostButton, AbboudLiveHostNotice, AbboudLiveHostPanel, useLiveHost } from './AbboudLiveHost';
 const AbboudLiveJoin = lazy(() => import('./AbboudLiveJoin'));
+// «ركّب الجملة»: picture sentence-building practice inside the class (static data; no stars, XP or progress).
+const PictureSentenceBuilder = lazy(() => import('./PictureSentenceBuilder'));
 /** For accounts that are not this class's teacher: who starts the live class, and the join entry if they are invited. */
 function AbboudLiveViewer({ uid, liveStore, error }: { uid?: string; liveStore?: LiveClassStore | null; error: string }) {
   return <div className="abboud-live-viewer" data-testid="abboud-live-viewer">
@@ -85,6 +87,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
   const [runStars, setRunStars] = useState<StarKind[]>([]);
   const [starNotice, setStarNotice] = useState('');
   const [certificateOpen, setCertificateOpen] = useState(false);
+  const [sentenceOpen, setSentenceOpen] = useState(false);
   /** «درس من اختياري»: the cleaned topic Abboud picked (empty until chosen). */
   const [customTopic, setCustomTopic] = useState('');
   const [topicDraft, setTopicDraft] = useState('');
@@ -353,6 +356,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           <div className="min-w-0 flex-1"><h2 id="abboud-title" className="text-xl font-bold sm:text-2xl">فصل عبود المعلّم</h2><p className="text-sm">أنت تشرح، بدر وريم يتعلّمان، وسارة تشرف بلطف.</p></div>
           <AbboudLiveHostHeaderButton host={host} open={liveOpen} onOpen={setLiveOpen} />
           <button ref={expandTrigger} type="button" data-testid="abboud-board-expand" aria-expanded={boardExpanded} aria-controls="abboud-workspace" onClick={() => toggleBoard(!boardExpanded)} className="abboud-expand-toggle rounded-xl bg-indigo-700 px-3 py-3 font-bold text-white">{boardExpanded ? '↩ رجوع لحجم الفصل' : '⛶ توسعة السبورة'}</button>
+          <button type="button" data-testid="abboud-sentence-builder-open" onClick={() => { stop(); setSentenceOpen(true); }} className="shrink-0 rounded-xl bg-[#0A1533] px-3 py-3 font-bold text-yellow-300" style={{ boxShadow: '0 0 10px #6366f1aa' }}>🧩 ركّب الجملة</button>
           <button type="button" onClick={() => { stop(); onClose(); }} aria-label="إغلاق الفصل" className="shrink-0 rounded-xl bg-white px-3 py-3 font-bold">إغلاق</button>
         </header>
         {!host.config && <AbboudLiveViewer uid={liveUid} liveStore={liveStore} error={host.error} />}
@@ -425,6 +429,7 @@ export const AbboudTeacherActivity: React.FC<AbboudTeacherProps> = ({ uid, onClo
           </div>}
         </section>
       </div>
+      {sentenceOpen && <Suspense fallback={null}><PictureSentenceBuilder onClose={() => setSentenceOpen(false)} /></Suspense>}
       {certificateOpen && <AbboudCertificate name={awards.name} stars={starCount(awards)} onName={name => setAwards(current => saveName(localStorage, uid, current, name))} onClose={() => setCertificateOpen(false)} />}
     </div>
   );
