@@ -107,7 +107,10 @@ export function buildSentenceCards(input: SentenceBuilderInput): SentenceCard[] 
   const goal0 = bank.goals[0];
   const outcome = card('outcome', '🚀', 'ليش تبي تحقق هدفك؟', `I want to ${goal0.en} because it will help me `, '.', `أنا أبغى ${goal0.ar} لأنه بيساعدني `, '.', [
     o('learn faster','أتعلم أسرع'), o('speak with confidence','أتحدث بثقة'), o('help my family','أساعد عائلتي'), o('get better opportunities','أحصل على فرص أفضل')]);
-  return band === 'beginner' ? [like, favourite, can, now, want] : band === 'intermediate' ? [like, can, want, went, favourite] : [want, outcome, can, went, favourite];
+  const set = band === 'beginner' ? [like, favourite, can, now, want] : band === 'intermediate' ? [like, can, want, went, favourite] : [want, outcome, can, went, favourite];
+  // Vocab lessons open on the golden-word card so the child starts with the lesson words.
+  if (favourite.id === 'fav-word') return [favourite, ...set.filter(card => card.id !== 'fav-word')];
+  return set;
 }
 
 export interface SentenceActivity { trackId: string; lessonId: string; lessonTitleAr: string; sentencesBuilt: number; sentences: string[]; at: number }
