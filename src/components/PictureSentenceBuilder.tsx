@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { PICTURE_SENTENCE_SETS, type PictureSentenceSet } from '../data/classroom/pictureSentences';
+import { sentencesFor, type PictureSentenceSet } from '../data/classroom/pictureSentences';
 import { MAX_ATTEMPTS, attemptsLeft, chipLabel, firstWordChip, initialState, scramble, submit, tokenize, type PuzzleState } from '../lib/pictureSentenceBuilder';
 import { ClassroomVoice, type VoiceTurn } from '../lib/abboud/voice';
 
@@ -9,6 +9,8 @@ export interface PictureSentenceBuilderProps {
   onClose: () => void;
   /** Teacher of the class that opened the activity (default Sara). `voiceName` is their own TTS voice. */
   teacherNameAr?: string; voiceName?: string; teacherGender?: 'female' | 'male';
+  /** Which class opened it: picks that class's own sentence sets (a teacher persona id, or 'abboud'). Default Sara. */
+  classroomId?: string;
   sets?: PictureSentenceSet[];
   voice?: SentenceVoice;
   random?: () => number;
@@ -25,7 +27,9 @@ const glow = (i: number, on = false) => {
  * Arabic meaning + 🔊). One row is the puzzle: its English is hidden and its words are scrambled into small chips at the
  * bottom. Three attempts with growing hints, then the answer. Standalone: nothing is saved, no XP, no progress.
  */
-export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ onClose, teacherNameAr = 'سارة', voiceName, teacherGender = 'female', sets = PICTURE_SENTENCE_SETS, voice: injected, random }) => {
+export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ onClose, teacherNameAr = 'سارة', voiceName, teacherGender = 'female', classroomId = 'sara', sets: customSets, voice: injected, random }) => {
+  const classroom = sentencesFor(classroomId);
+  const sets = customSets || classroom.sets;
   const voice = useRef<SentenceVoice>(injected || new ClassroomVoice());
   const she = teacherGender === 'female';
   const [setIdx, setSetIdx] = useState(0);
@@ -77,6 +81,7 @@ export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ 
         <header className="flex items-center gap-2 mb-3">
           <div className="flex-1 min-w-0">
             <h2 id="psb-title" className="text-lg sm:text-2xl font-black text-yellow-300">🧩 ركّب الجملة مع {teacherNameAr}</h2>
+            <p className="text-[12px] sm:text-sm font-bold text-sky-200" data-testid="psb-theme">{classroom.themeAr}</p>
             <p className="text-[12px] sm:text-sm text-white/75">شوف الصورة والمعنى، وركّب الجملة الإنجليزية من الكلمات تحت. نشاط تدريب فقط، بدون نقاط.</p>
           </div>
           <button type="button" onClick={() => { voice.current.stop(); onClose(); }} className="shrink-0 rounded-xl bg-white/10 border border-white/20 px-3 py-2 font-bold" aria-label="إغلاق ركّب الجملة">إغلاق</button>

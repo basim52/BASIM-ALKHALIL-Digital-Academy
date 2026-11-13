@@ -190,7 +190,7 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
       <span className="flex-1 min-w-0"><span className="block text-[13px] font-black text-yellow-300">{L(`ركّب الجملة مع ${persona.nameAr}`, `Build the sentence with ${persona.nameEn}`)}</span>
       <span className="block text-[10.5px] font-bold text-white/70">{L('صور وجمل كاملة، وركّب الجملة من كلماتها — ٣ محاولات', 'Pictures and full sentences; build one from its words, 3 tries')}</span></span>
     </button>
-    {sentenceOpen && <Suspense fallback={null}><PictureSentenceBuilder teacherNameAr={persona.nameAr} teacherGender={persona.gender} voiceName={persona.voice} onClose={() => setSentenceOpen(false)} /></Suspense>}
+    {sentenceOpen && <Suspense fallback={null}><PictureSentenceBuilder classroomId={persona.id} teacherNameAr={persona.nameAr} teacherGender={persona.gender} voiceName={persona.voice} onClose={() => setSentenceOpen(false)} /></Suspense>}
     <div data-testid="kids-teachers" className="shrink-0 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] p-2">
       <p className="text-[12px] font-black text-[#002147] mb-1.5">{L("🌱 من الصفر — للصغار والكبار", "🌱 From zero, for kids and adults")}</p>
       <div className="grid grid-cols-4 gap-1.5">
