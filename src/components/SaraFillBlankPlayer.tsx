@@ -13,6 +13,9 @@ import { TutorVideoFace } from './tutor3d/TutorVideoFace';
 import './tutor3d/tutorBoard.css';
 import { type SaraBlankLesson, type SaraBlankCard, type FillBlankTrack, trackFillBlankLevel, FILL_BLANK_LEVELS } from '../data/saraTracks/fillBlank';
 import { SARA_FILL_BLANK } from '../data/fillBlankTracks';
+import SaraLessonMap, { useSaraStreak } from './SaraLessonMap';
+import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
+import { freeCallPresetFor } from './SaraLessonCall';
 
 interface Props { isOpen: boolean; onClose: () => void; uid?: string; unlockAll?: boolean }
 interface TrackProps extends Props { track: FillBlankTrack }
@@ -190,6 +193,8 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
   const read = () => (sara ? readUnlocked(TID, uid) : readTutorUnlocked(TID, uid));
   const [unlockedRaw, setUnlocked] = useState(read);
   const [active, setActive] = useState<SaraBlankLesson | null>(null);
+  const [chat, setChat] = useState(false);
+  const streak = useSaraStreak(sara ? uid : undefined);
   useEffect(() => {
     if (!isOpen) return;
     setUnlocked(read());
@@ -226,6 +231,14 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
         {active ? (
           <Lesson key={active.id} l={active} track={track} onBack={() => { saraStopNarrator(); setActive(null); }} onDone={() => onDone(active)}
             hasNext={!!nextOf(active)} onNext={() => { const n = nextOf(active); if (n) setActive(n); }} />
+        ) : sara ? (
+          /* Sara: zigzag lesson map (reads the same saved counter; tutors' fill-blank lists below stay as they are) */
+          <SaraLessonMap lessons={LESSONS} levels={LV.map((v, i) => ({ id: `l${i + 1}`, titleAr: v.ar, titleEn: v.en }))}
+            sectionOf={l => `l${Math.min(trackFillBlankLevel(track, l.order), LV.length)}`}
+            unlocked={unlockedRaw} unlockAll={unlockAll} lang={t('ar', 'en') as 'ar' | 'en'} trackTitleAr={track.titleAr} trackTitleEn={track.titleEn}
+            kind="grammar" colorOffset={4} streak={streak}
+            onOpen={l => { saraUnlockNarrator(); markLastTrack(uid, TID); setActive(l); }}
+            onFreeChat={() => { saraUnlockNarrator(); setChat(true); }} />
         ) : (
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
             {LESSONS.map((l, i) => {
@@ -248,6 +261,7 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
             })}
           </div>
         )}
+        {chat && sara && (() => { const cur = LESSONS.find(x => x.order === Math.min(unlockedRaw, LESSONS.length)) || LESSONS[0]; return <SaraLivePhoneCallModal isOpen onClose={() => setChat(false)} studentName="" studentLevel="A2" isRtl studentId={uid} preset={freeCallPresetFor(cur.titleEn, cur.titleAr)} />; })()}
       </div>
     </div>
   );

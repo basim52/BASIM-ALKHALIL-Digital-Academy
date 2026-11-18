@@ -1,44 +1,55 @@
-import React from 'react';
-import { Lock, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
 import { SARA_NEW_LEVELS, useLevelPassed } from '../lib/saraLevelGate';
 import { NewLevelTestCard } from './SaraNewLevelTest';
 import type { NewTrackKey, NewLevelId } from '../lib/saraNewTrackTests';
 import { saraUnlockNarrator } from './SaraTrackPlayer';
+import SaraLessonMap, { useSaraStreak } from './SaraLessonMap';
+import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
+import { freeCallPresetFor } from './SaraLessonCall';
+import type { MapKind } from '../lib/saraLessonMap';
 
-interface Item { id: string; order: number; titleAr: string; icon?: string }
-/** Lesson list split by level: the next level opens when the previous level's lessons are finished (or its test was passed, older rule kept so nothing re-locks). Failing a test never blocks progress. */
-export function SaraLevelledList<T extends Item>({ lessons, unlockedRaw, unlockAll, uid, track, trackId, refresh, onOpen, onTest }: {
+interface Item { id: string; order: number; titleAr: string; titleEn?: string; icon?: string }
+/** Each track's emoji family + first level colour on the map. */
+const STYLE: Record<NewTrackKey, { kind: MapKind; colorOffset: number }> = {
+  daily: { kind: 'daily', colorOffset: 5 }, vocabulary: { kind: 'vocabulary', colorOffset: 6 },
+  listening: { kind: 'listening', colorOffset: 1 }, pronunciation: { kind: 'pronunciation', colorOffset: 2 },
+};
+
+/** Lesson map split by level: the next level opens when the previous level's lessons are finished (or its test was passed, older rule kept so nothing re-locks). Failing a test never blocks progress.
+ *  Display only: reads the saved counter, never writes progress. */
+export function SaraLevelledList<T extends Item>({ lessons, unlockedRaw, unlockAll, uid, track, trackId, refresh, onOpen, onTest, titleAr = '', titleEn }: {
   lessons: T[]; unlockedRaw: number; unlockAll?: boolean; uid?: string; track: NewTrackKey; trackId: string; refresh: number;
-  onOpen: (l: T) => void; onTest: (level: NewLevelId) => void;
+  onOpen: (l: T) => void; onTest: (level: NewLevelId) => void; titleAr?: string; titleEn?: string;
 }) {
   const passed = { a: useLevelPassed(uid, trackId, 'a', refresh), b: useLevelPassed(uid, trackId, 'b', refresh), c: useLevelPassed(uid, trackId, 'c', refresh) } as Record<string, boolean>;
   const unlocked = unlockAll ? lessons.length : unlockedRaw;
+  const [chat, setChat] = useState(false);
+  const streak = useSaraStreak(uid);
+  const levelOf = (order: number) => SARA_NEW_LEVELS.find(lv => order >= lv.from && order <= lv.to);
+  const gateOf = (li: number) => {
+    const prev = li > 0 ? SARA_NEW_LEVELS[li - 1] : null;
+    return !prev || !!unlockAll || passed[prev.id] || unlockedRaw > prev.to;
+  };
+  const levels = SARA_NEW_LEVELS.map((lv, li) => {
+    const prev = li > 0 ? SARA_NEW_LEVELS[li - 1] : null;
+    return { id: lv.id, titleAr: lv.titleAr, noteAr: gateOf(li) || !prev ? undefined : `يفتح بعد إنهاء دروس ${prev.titleAr}` };
+  });
+  const current = lessons.find(l => l.order === Math.min(unlockedRaw, lessons.length)) || lessons[0];
+  const style = STYLE[track] || { kind: 'conversation' as MapKind, colorOffset: 0 };
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
-      {SARA_NEW_LEVELS.map((lv, li) => {
-        const ls = lessons.filter(l => l.order >= lv.from && l.order <= lv.to);
-        if (!ls.length) return null;
-        const prev = li > 0 ? SARA_NEW_LEVELS[li - 1] : null;
-        const gate = !prev || !!unlockAll || passed[prev.id] || unlockedRaw > prev.to;
-        return (
-          <React.Fragment key={lv.id}>
-            <p className="text-[12px] font-black text-[#C49E3A] mt-1">{lv.titleAr}{!gate && <span className="text-slate-500"> · يفتح بعد إنهاء دروس {prev?.titleAr}</span>}</p>
-            {ls.map(l => {
-              const open = gate && l.order <= unlocked;
-              return (
-                <button key={l.id} disabled={!open} onClick={() => { saraUnlockNarrator(); onOpen(l); }}
-                  className={`w-full min-w-0 flex items-center gap-2 p-2.5 rounded-xl border-2 text-start ${open ? 'bg-white border-amber-300' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
-                  <span className="w-7 h-7 rounded-full bg-[#002147] text-amber-300 text-[12px] font-black flex items-center justify-center shrink-0">{l.order - lv.from + 1}</span>
-                  <span className="flex-1 min-w-0 text-[13px] font-black text-[#002147] truncate">{l.icon ? `${l.icon} ` : ''}{l.titleAr}</span>
-                  {open ? (l.order < unlockedRaw ? <CheckCircle2 size={16} className="text-emerald-600" /> : null) : <Lock size={14} className="text-slate-400" />}
-                </button>
-              );
-            })}
-            <NewLevelTestCard uid={uid} admin={!!unlockAll} refresh={refresh} track={track} level={lv.id} open={!!unlockAll || (gate && unlockedRaw > lv.to)} onStart={() => onTest(lv.id)} />
-          </React.Fragment>
-        );
-      })}
-    </div>
+    <>
+      <SaraLessonMap lessons={lessons} levels={levels} sectionOf={l => levelOf(l.order)?.id ?? 'a'} numbering="level"
+        unlocked={unlockedRaw} unlockAll={unlockAll} lang="ar" trackTitleAr={titleAr} trackTitleEn={titleEn} kind={style.kind} colorOffset={style.colorOffset}
+        isOpen={l => { const li = SARA_NEW_LEVELS.findIndex(lv => l.order >= lv.from && l.order <= lv.to); return gateOf(Math.max(0, li)) && l.order <= unlocked; }}
+        onOpen={l => { saraUnlockNarrator(); onOpen(l); }}
+        onFreeChat={current ? () => { saraUnlockNarrator(); setChat(true); } : undefined} streak={streak}
+        renderLevelEnd={id => {
+          const li = SARA_NEW_LEVELS.findIndex(lv => lv.id === id); const lv = SARA_NEW_LEVELS[li];
+          if (!lv) return null;
+          return <NewLevelTestCard uid={uid} admin={!!unlockAll} refresh={refresh} track={track} level={lv.id} open={!!unlockAll || (gateOf(li) && unlockedRaw > lv.to)} onStart={() => onTest(lv.id)} />;
+        }} />
+      {chat && current && <SaraLivePhoneCallModal isOpen onClose={() => setChat(false)} studentName="" studentLevel="A2" isRtl studentId={uid} preset={freeCallPresetFor(current.titleEn || current.titleAr, current.titleAr)} />}
+    </>
   );
 }
 export default SaraLevelledList;

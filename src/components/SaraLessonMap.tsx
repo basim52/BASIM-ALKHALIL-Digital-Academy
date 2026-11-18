@@ -1,43 +1,75 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Lock, Check, MessageCircle, ChevronsDown, ChevronsUp } from 'lucide-react';
-import type { SaraTrackLesson } from '../data/saraTracks/foundations';
-import { mapNodeState, mapNodeOpen, currentLessonOrder, zigzagOffset, lessonIcon, levelColor, type MapNodeState } from '../lib/saraLessonMap';
+import { getStudentStreak } from '../services/streakService';
+import { mapNodeState, mapNodeOpen, currentLessonOrder, zigzagOffset, lessonIcon, levelColor, type MapNodeState, type MapKind } from '../lib/saraLessonMap';
 
-export interface SaraLessonMapLevel { id: string; titleAr: string; titleEn?: string }
+/** Minimal shape every Sara lesson list already has. */
+export interface MapLesson { id: string; order: number; titleAr: string; titleEn?: string; icon?: string; levelId?: string }
+export interface SaraLessonMapLevel {
+  id: string; titleAr: string; titleEn?: string;
+  /** Short tab label (default: CEFR code / "المستوى n"). */
+  shortAr?: string; shortEn?: string;
+  /** Extra line under the level banner (e.g. "يفتح بعد إنهاء دروس المستوى الأول"). */
+  noteAr?: string; noteEn?: string;
+}
 
-interface Props {
-  lessons: SaraTrackLesson[];
+interface Props<T extends MapLesson> {
+  lessons: T[];
   levels?: SaraLessonMapLevel[];
+  /** Which level a lesson belongs to (default: lesson.levelId). */
+  sectionOf?: (l: T) => string;
   /** Existing saved progress counter (highest open lesson order). Read only. */
   unlocked: number;
   unlockAll?: boolean;
+  /** Existing open rule when it is more than `order <= unlocked` (e.g. level gates). */
+  isOpen?: (l: T) => boolean;
   lang: 'ar' | 'en';
   trackTitleAr: string;
   trackTitleEn?: string;
-  onOpen: (lesson: SaraTrackLesson) => void;
+  /** Lesson family: picks fitting emojis when a lesson has no icon of its own. */
+  kind?: MapKind;
+  /** First level colour (each track starts on its own colour). */
+  colorOffset?: number;
+  onOpen: (lesson: T) => void;
   onFreeChat?: () => void;
   /** Existing streak value (days). Hidden when missing/0. */
   streak?: number | null;
-  /** Rendered after a level's last lesson (the existing end-of-level test button). */
+  /** Rendered after a level's last lesson (the existing end-of-level test). */
   renderLevelEnd?: (levelId: string) => React.ReactNode;
   /** Sara's existing portrait. */
   saraImage?: string;
+  /** Number lessons across the whole track (default) or inside each level (like the levelled lists). */
+  numbering?: 'track' | 'level';
+}
+
+/** 🔥 The student's existing streak (read only; null when there is none). Nothing is written. */
+export function useSaraStreak(uid?: string): number | null {
+  const [streak, setStreak] = useState<number | null>(null);
+  useEffect(() => {
+    if (!uid) return;
+    let alive = true;
+    getStudentStreak(uid).then(s => { if (alive) setStreak(s.current > 0 ? s.current : null); }).catch(() => {});
+    return () => { alive = false; };
+  }, [uid]);
+  return streak;
 }
 
 const NODE = 68;      // circle size (px)
 const ROW = 112;      // vertical distance between nodes (px)
 const STEP = 58;      // horizontal px per zigzag unit
 const TOP = 84;       // first node centre (px)
+const CEFR = /^[abc][12]$/i;
 
-/** 🗺️ Duolingo-style winding lesson map for one of Sara's tracks (display + navigation only). */
-export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlockAll, lang, trackTitleAr, trackTitleEn, onOpen, onFreeChat, streak, renderLevelEnd, saraImage = '/tutors/sara.webp' }) => {
+/** 🗺️ Duolingo-style winding lesson map for Sara's lesson lists (display + navigation only; never writes progress). */
+export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf, unlocked, unlockAll, isOpen, lang, trackTitleAr, trackTitleEn, kind = 'grammar', colorOffset = 0, onOpen, onFreeChat, streak, renderLevelEnd, saraImage = '/tutors/sara.webp', numbering = 'track' }: Props<T>) {
   const t = (ar: string, en: string) => (lang === 'en' ? en : ar);
   const rtl = lang !== 'en';
+  const secOf = (l: T) => (sectionOf ? sectionOf(l) : l.levelId) ?? 'all';
   const sections = useMemo(() => {
-    const defs = levels?.length ? levels : [{ id: lessons[0]?.levelId || 'all', titleAr: trackTitleAr, titleEn: trackTitleEn }];
-    const out = defs.map((lv, i) => ({ ...lv, index: i, lessons: lessons.filter(l => (levels?.length ? l.levelId === lv.id : true)) })).filter(s => s.lessons.length);
-    return out;
-  }, [lessons, levels, trackTitleAr, trackTitleEn]);
+    const defs: SaraLessonMapLevel[] = levels?.length ? levels : [{ id: 'all', titleAr: trackTitleAr, titleEn: trackTitleEn }];
+    return defs.map((lv, i) => ({ ...lv, index: i, lessons: lessons.filter(l => (levels?.length ? secOf(l) === lv.id : true)) })).filter(s => s.lessons.length);
+  }, [lessons, levels, trackTitleAr, trackTitleEn, sectionOf]); // eslint-disable-line react-hooks/exhaustive-deps
+  const openOf = (l: T) => (isOpen ? isOpen(l) : mapNodeOpen(l.order, unlocked, unlockAll));
   const currentOrder = useMemo(() => currentLessonOrder(lessons.map(l => l.order), unlocked), [lessons, unlocked]);
   const currentSection = Math.max(0, sections.findIndex(s => s.lessons.some(l => l.order === currentOrder)));
   const [tab, setTab] = useState(currentSection);
@@ -80,8 +112,10 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
   useEffect(() => { const id = setTimeout(() => jumpToCurrent(false), 60); return () => clearTimeout(id); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!section) return null;
-  const color = levelColor(section.id, section.index);
+  const colorOf = (i: number) => levelColor('', i, colorOffset);
+  const color = colorOf(section.index);
   const doneIn = (s: typeof section) => s.lessons.filter(l => mapNodeState(l.order, unlocked) === 'done').length;
+  const shortOf = (s: typeof section) => s.shortAr ? t(s.shortAr, s.shortEn || s.shortAr) : CEFR.test(s.id) ? s.id.toUpperCase() : t(`المستوى ${s.index + 1}`, `Level ${s.index + 1}`);
   const sign = rtl ? -1 : 1; // first bend goes toward the reading direction
   const pts = section.lessons.map((_, i) => ({ x: width / 2 + sign * zigzagOffset(i) * STEP, y: TOP + i * ROW }));
   const pathD = pts.map((p, i) => {
@@ -94,6 +128,8 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
   const lastDoneIdx = section.lessons.reduce((acc, l, i) => (mapNodeState(l.order, unlocked) !== 'locked' ? i : acc), -1);
   const doneD = lastDoneIdx > 0 ? pathD.split(' C ').slice(0, lastDoneIdx + 1).join(' C ') : '';
   const showJump = !currentVisible || tab !== currentSection;
+  const posInLevel = (l: T) => section.lessons.indexOf(l) + 1;
+  const showLevelPos = numbering === 'level';
 
   return (
     <div data-testid="sara-lesson-map" className="relative flex-1 min-h-0 flex flex-col bg-white" dir={rtl ? 'rtl' : 'ltr'}>
@@ -126,12 +162,12 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
         {sections.length > 1 && (
           <div className="flex gap-2 overflow-x-auto px-3 pb-1 no-scrollbar">
             {sections.map((s, i) => {
-              const c = levelColor(s.id, s.index); const active = i === tab;
+              const c = colorOf(s.index); const active = i === tab;
               return (
                 <button key={s.id} data-testid={`sara-map-tab-${s.id}`} onClick={() => setTab(i)}
                   className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border-2"
                   style={active ? { background: c.fill, borderColor: c.shadow, color: '#fff' } : { background: '#fff', borderColor: '#e5e7eb', color: '#475569' }}>
-                  {s.id === 'a' ? t('التأسيس', 'Foundations') : s.id.toUpperCase()} · {doneIn(s)}/{s.lessons.length}
+                  {shortOf(s)} · {doneIn(s)}/{s.lessons.length}
                 </button>
               );
             })}
@@ -140,8 +176,9 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
 
         {/* Unit banner */}
         <div className="mx-3 mt-2 rounded-2xl p-3 text-white" style={{ background: color.fill, boxShadow: `0 4px 0 ${color.shadow}` }}>
-          <p className="text-[11px] font-black opacity-90">{t(`المستوى ${section.index + 1} · ${section.lessons.length} درس`, `Level ${section.index + 1} · ${section.lessons.length} lessons`)}</p>
+          <p className="text-[11px] font-black opacity-90">{sections.length > 1 ? t(`المستوى ${section.index + 1} · ${section.lessons.length} درس`, `Level ${section.index + 1} · ${section.lessons.length} lessons`) : t(`${section.lessons.length} درس`, `${section.lessons.length} lessons`)}</p>
           <p className="text-[15px] font-black leading-snug">{t(section.titleAr, section.titleEn || section.titleAr)}</p>
+          {section.noteAr && <p data-testid="sara-map-level-note" className="text-[11px] font-bold opacity-90">🔒 {t(section.noteAr, section.noteEn || section.noteAr)}</p>}
           <div className="mt-2 h-2.5 rounded-full bg-white/30 overflow-hidden">
             <div className="h-full rounded-full bg-white" style={{ width: `${Math.round((doneIn(section) / section.lessons.length) * 100)}%` }} />
           </div>
@@ -156,26 +193,27 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
           </svg>
           {section.lessons.map((l, i) => {
             const state: MapNodeState = mapNodeState(l.order, unlocked);
-            const open = mapNodeOpen(l.order, unlocked, unlockAll);
+            const open = openOf(l);
             const p = pts[i];
-            const isCurrent = state === 'current';
+            const isCurrent = state === 'current' && open;
             const isJumpTarget = l.order === currentOrder;
             // Title sits beside the circle, on the roomier side (away from the bend).
             const labelLeft = p.x > width / 2 + 1 || (Math.abs(p.x - width / 2) <= 1 && (pts[i + 1]?.x ?? pts[i - 1]?.x ?? 0) > width / 2);
-            const fill = state === 'locked' && !open ? '#e5e7eb' : color.fill;
-            const shadow = state === 'locked' && !open ? '#c4c9d1' : color.shadow;
+            const fill = !open ? '#e5e7eb' : color.fill;
+            const shadow = !open ? '#c4c9d1' : color.shadow;
+            const num = showLevelPos ? posInLevel(l) : l.order;
             return (
               <div key={l.id} className="absolute" style={{ left: p.x, top: p.y, transform: 'translate(-50%, -50%)' }}>
                 <button
                   ref={isJumpTarget ? (el => { currentRef.current = el; }) : undefined}
-                  data-testid={`sara-map-node-${l.id}`} data-state={state} disabled={!open}
+                  data-testid={`sara-map-node-${l.id}`} data-state={open || state === 'done' ? state : 'locked'} disabled={!open}
                   onClick={() => open && onOpen(l)}
-                  aria-label={`${l.order}. ${t(l.titleAr, l.titleEn)}`}
+                  aria-label={`${num}. ${t(l.titleAr, l.titleEn || l.titleAr)}`}
                   className="relative rounded-full flex items-center justify-center transition-transform active:translate-y-1 disabled:cursor-not-allowed"
                   style={{ width: NODE, height: NODE, background: fill, boxShadow: `0 6px 0 ${shadow}` }}>
                   {isCurrent && <span className="slm-pulse absolute inset-0 rounded-full" style={{ background: color.fill }} />}
                   {isCurrent && <span className="absolute -inset-2 rounded-full border-4" style={{ borderColor: color.soft }} />}
-                  <span className={`relative text-[28px] leading-none ${!open ? 'grayscale opacity-50' : ''}`}>{lessonIcon(l.titleEn, i)}</span>
+                  <span className={`relative text-[28px] leading-none ${!open ? 'grayscale opacity-50' : ''}`}>{l.icon || lessonIcon(l.titleEn || l.titleAr, i, kind)}</span>
                   {state === 'done' && (
                     <span className="absolute -bottom-1 -end-1 w-6 h-6 rounded-full bg-[#ffc800] border-2 border-white flex items-center justify-center text-white shadow"><Check size={14} strokeWidth={4} /></span>
                   )}
@@ -187,7 +225,7 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
                   style={labelLeft ? { right: NODE + 12, textAlign: 'right' } : { left: NODE + 12, textAlign: 'left' }}>
                   <p className={`inline-block px-2 py-1 rounded-xl bg-white/95 text-[11px] font-black leading-tight line-clamp-3 ${open ? 'text-slate-800' : 'text-slate-400'}`}
                     style={isCurrent ? { boxShadow: `0 0 0 2px ${color.fill}` } : undefined}>
-                    <span style={{ color: open ? color.shadow : undefined }}>{l.order}.</span> {t(l.titleAr, l.titleEn)}
+                    <span style={{ color: open ? color.shadow : undefined }}>{num}.</span> {t(l.titleAr, l.titleEn || l.titleAr)}
                   </p>
                   {isCurrent && (
                     <span className="slm-bob mt-1 block w-fit px-2.5 py-0.5 rounded-lg text-white text-[11px] font-black"
@@ -203,7 +241,7 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
         {renderLevelEnd && <div className="px-3 pb-4">{renderLevelEnd(section.id)}</div>}
         {tab < sections.length - 1 && (
           <div className="px-3 pb-6">
-            <button onClick={() => { setTab(tab + 1); scroller.current?.scrollTo?.({ top: 0 }); }}
+            <button data-testid="sara-map-next-level" onClick={() => { setTab(tab + 1); scroller.current?.scrollTo?.({ top: 0 }); }}
               className="w-full py-2.5 rounded-2xl border-2 border-slate-200 text-[12px] font-black text-slate-600">
               {t('المستوى التالي ←', 'Next level →')}
             </button>
@@ -214,12 +252,12 @@ export const SaraLessonMap: React.FC<Props> = ({ lessons, levels, unlocked, unlo
       {showJump && currentOrder !== null && (
         <button data-testid="sara-map-jump" onClick={() => jumpToCurrent()} aria-label={t('ارجع لدرسي', 'Go to my lesson')}
           className="absolute bottom-5 end-4 z-20 w-14 h-14 rounded-2xl bg-white border-2 border-slate-200 shadow-lg flex items-center justify-center"
-          style={{ color: levelColor(sections[currentSection].id, currentSection).fill }}>
+          style={{ color: colorOf(currentSection).fill }}>
           {currentAbove && tab === currentSection ? <ChevronsUp size={28} strokeWidth={3} /> : <ChevronsDown size={28} strokeWidth={3} />}
         </button>
       )}
     </div>
   );
-};
+}
 
 export default SaraLessonMap;
