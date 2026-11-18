@@ -14,6 +14,8 @@ import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
 import SaraLessonCall, { lessonCallPreset, freeCallPresetFor } from './SaraLessonCall';
 import SaraSentenceBuilder from './SaraSentenceBuilder';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
+import SaraLessonMap from './SaraLessonMap';
+import { getStudentStreak } from '../services/streakService';
 import { toToolCalls, type BoardAction } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
@@ -198,6 +200,8 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
   </div>
 ); };
 
+/** Tracks shown as the zigzag lesson map (sample: Advanced Grammar only; others keep the list). */
+const MAP_TRACKS = new Set(['advanced_v2']);
 /** Tracks that get «حاور سارة» after the exercises (Conversation + Grammar: foundations, advanced). */
 const CALL_TRACKS: Record<string, 'conversation' | 'grammar'> = { conversation_v2: 'conversation', foundations: 'grammar', advanced_v2: 'grammar' };
 
@@ -224,6 +228,15 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const [activeSeg, setActiveSeg] = useState(-1);
   const [blocked, setBlocked] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [mapChatOpen, setMapChatOpen] = useState(false);
+  // 🔥 Existing streak (read only) for the lesson map header; hidden when none.
+  const [streak, setStreak] = useState<number | null>(null);
+  useEffect(() => {
+    if (!MAP_TRACKS.has(track.id) || !uid) return;
+    let alive = true;
+    getStudentStreak(uid).then(s => { if (alive) setStreak(s.current > 0 ? s.current : null); }).catch(() => {});
+    return () => { alive = false; };
+  }, [track.id, uid]);
   const [askOpen, setAskOpen] = useState(false);
   const [askText, setAskText] = useState('');
   const [askReply, setAskReply] = useState('');
@@ -357,6 +370,27 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
     }
   };
 
+  /** End-of-level test button (unchanged logic; shared by the lesson list and the map). */
+  const levelTestButton = (lv: (typeof levels)[number] | undefined) => {
+    if (!lv) return null;
+    const last = lv.lessons[lv.lessons.length - 1].order;
+    const testOpen = !!unlockAll || unlockedRaw > last;
+    return (
+      <LevelQuota uid={uid} trackId={track.id} levelId={lv.id} refresh={test?.result?.createdAtMs ?? 0}>{q => { const can = testOpen && (!!unlockAll || (!q.loading && q.remaining > 0)); return (
+      <button data-testid={`level-test-${lv.id}`} disabled={!can} onClick={() => startTest(lv)}
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-start ${can ? 'bg-[#002147] border-amber-400 text-white' : 'bg-slate-100 border-slate-200 text-slate-500 opacity-70'}`}>
+        <span className="text-lg">🏁</span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-[13px] font-black truncate">اختبار نهاية المستوى — {lv.titleAr}</span>
+          <span className="block text-[11px] opacity-80 truncate">{testOpen ? `النجاح من ${LEVEL_TEST_PASS}%` : `يفتح بعد اجتياز الدرس ${last}`}</span>
+          {testOpen && !q.loading && <span data-testid="level-test-quota" className={`block text-[11px] font-black ${can ? 'text-amber-300' : 'text-rose-600'}`}>{quotaLabel(q)}{q.last ? ` · آخر محاولة ${q.last.score}%` : ''}</span>}
+        </span>
+        {!can && <Lock size={14} />}
+      </button>); }}</LevelQuota>
+    );
+  };
+  const useMap = MAP_TRACKS.has(track.id);
+
   if (!isOpen) return null;
   const passed = !!lesson?.content && checkPick === lesson.content.check.correctIndex;
 
@@ -382,8 +416,16 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           <button onClick={() => { stop(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
 
+        {/* Lesson map (sample: Advanced Grammar) — reads the same saved progress, no writes */}
+        {!lesson && !test && useMap && (
+          <SaraLessonMap lessons={track.lessons} levels={track.levels} unlocked={unlockedRaw} unlockAll={unlockAll} lang={lang === 'en' ? 'en' : 'ar'}
+            trackTitleAr={track.titleAr} trackTitleEn={track.titleEn} onOpen={openLesson} streak={streak}
+            onFreeChat={() => { unlockNarrator(); stop(); setMapChatOpen(true); }}
+            renderLevelEnd={id => <div className="grid">{levelTestButton(levels.find(v => v.id === id))}</div>} />
+        )}
+
         {/* Lesson list */}
-        {!lesson && !test && (
+        {!lesson && !test && !useMap && (
           <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
             {track.lessons.map((l, idx) => {
               const open = l.order <= unlocked;
@@ -401,25 +443,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
                   </span>
                   {open ? (l.order < unlocked ? <CheckCircle2 size={16} className="text-emerald-600" /> : null) : <Lock size={14} className="text-slate-400" />}
                 </button>
-                {(() => {
-                  const lv = levels.find(v => v.lessons[v.lessons.length - 1]?.id === l.id);
-                  if (!lv) return null;
-                  const last = lv.lessons[lv.lessons.length - 1].order;
-                  const testOpen = !!unlockAll || unlockedRaw > last;
-                  return (
-                    <LevelQuota uid={uid} trackId={track.id} levelId={lv.id} refresh={test?.result?.createdAtMs ?? 0}>{q => { const can = testOpen && (!!unlockAll || (!q.loading && q.remaining > 0)); return (
-                    <button data-testid={`level-test-${lv.id}`} disabled={!can} onClick={() => startTest(lv)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-start ${can ? 'bg-[#002147] border-amber-400 text-white' : 'bg-slate-100 border-slate-200 text-slate-500 opacity-70'}`}>
-                      <span className="text-lg">🏁</span>
-                      <span className="flex-1 min-w-0">
-                        <span className="block text-[13px] font-black truncate">اختبار نهاية المستوى — {lv.titleAr}</span>
-                        <span className="block text-[11px] opacity-80 truncate">{testOpen ? `النجاح من ${LEVEL_TEST_PASS}%` : `يفتح بعد اجتياز الدرس ${last}`}</span>
-                        {testOpen && !q.loading && <span data-testid="level-test-quota" className={`block text-[11px] font-black ${can ? 'text-amber-300' : 'text-rose-600'}`}>{quotaLabel(q)}{q.last ? ` · آخر محاولة ${q.last.score}%` : ''}</span>}
-                      </span>
-                      {!can && <Lock size={14} />}
-                    </button>); }}</LevelQuota>
-                  );
-                })()}
+                {levelTestButton(levels.find(v => v.lessons[v.lessons.length - 1]?.id === l.id))}
                 </React.Fragment>
               );
             })}
@@ -632,6 +656,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           </Suspense>
         )}
         {chatOpen && lesson && <SaraLivePhoneCallModal isOpen onClose={() => setChatOpen(false)} studentName="" studentLevel="A2" isRtl studentId={uid} preset={freeCallPresetFor(lesson.titleEn, lesson.titleAr)} />}
+        {mapChatOpen && !lesson && (() => { const cur = track.lessons.find(x => x.order === Math.min(unlockedRaw, track.lessons.length)) || track.lessons[0]; return <SaraLivePhoneCallModal isOpen onClose={() => setMapChatOpen(false)} studentName="" studentLevel="A2" isRtl studentId={uid} preset={freeCallPresetFor(cur.titleEn, cur.titleAr)} />; })()}
         {/* ❓ Ask Sara sheet (overlay, does not affect the page layout) */}
         {askOpen && lesson?.content && (
           <div className="absolute inset-0 z-10 bg-slate-950/40 flex items-end" onClick={() => { stop(); setAskOpen(false); }}>
