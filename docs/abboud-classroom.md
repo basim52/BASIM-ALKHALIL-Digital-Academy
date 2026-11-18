@@ -181,7 +181,13 @@ The owner's report: «الفصل المباشر مافيه صوت مش مرتب 
   - Transceiver 0 carries Abboud's mic to the student.
   - Transceiver 1 (sendrecv) carries the permitted speaker's mic to Abboud. Abboud's device relays that track to the other students with `replaceTrack`, so changing the speaker needs no renegotiation.
 - *Signaling.* `abboudClasses/{host}/rtc/{student}` holds `{sessionId, offer, answer, updatedAt}`. Full SDPs, no trickle ICE. A student may write `answer: 'restart:<n>'` to ask for a fresh offer.
-- *ICE.* Only Google's public STUN, no TURN. On strict networks (some mobile carriers, school firewalls) a connection cannot form, and that student's device then reads Abboud's finished sentences by TTS (Charon), clearly labelled «🔊 صوت آلي».
+- *ICE.* `POST /api/abboud/ice-servers` (signed-in only) returns public STUN plus a TURN relay when one is configured in the server env (names only; values are never logged or returned in errors):
+  - Cloudflare Realtime TURN, short-lived credentials minted per request: `CLOUDFLARE_TURN_KEY_ID`, `CLOUDFLARE_TURN_KEY_API_TOKEN`;
+  - or any TURN service / own coturn with fixed credentials: `ABBOUD_TURN_URLS` (comma-separated `turn:`/`turns:` URLs), `ABBOUD_TURN_USERNAME`, `ABBOUD_TURN_CREDENTIAL`.
+  Without TURN, phones on mobile data or behind carrier NAT usually cannot connect at all; Abboud's panel then says so («⚠️ خادم ترحيل الصوت (TURN) غير مضبوط»).
+- *No synthetic voices for people (2026-11-18).* Previously, while the live voice was connecting or when it failed, each student's device read Abboud's finished sentences (and the speaker's) with a TTS voice. Owners heard that as «صوت عبود يُسجَّل ويُبث بصوت آخر». Now Abboud and students are only ever heard live; when the live voice is not connected their words appear as text, the status says so honestly, and the connection retries (student device up to 3 times, Abboud's device on every `failed`/long `disconnected`, plus «🔄 أعد توصيل الصوت»). Badr, Reem and Sara (AI classmates) keep their own voices on each device.
+- *Resuming.* If Abboud's page reloads while the class is live, his device rebuilds the voice hub for the running session (before, students stayed silent until he ended and restarted the class). If the browser needs a tap for the mic, the panel shows «🎤 شغّل صوتك المباشر».
+- *Student turn.* «🎙️ تكلّم» opens the student's live mic for the whole turn, until «خلصت» or Abboud ends the turn. Speech-to-text is only an extra written copy: if it stops or errors (common on phones), the live voice continues.
 - *Muting.* Abboud's mic is muted while Badr/Reem/Sara play on his device, so students don't hear them twice, and whenever he turns «صوتك المباشر» off. Students have their own mute.
 - *Size.* Abboud's device uploads one stream per student, which is fine for small classes. Around 30 students needs a media server (SFU).
 
@@ -201,4 +207,5 @@ The owner's report: «الفصل المباشر مافيه صوت مش مرتب 
   - the teacher reaches both students;
   - the speaker reaches the teacher and is relayed to the other student;
   - the mute and the end of a turn silence it.
-- Not verified: real phones and microphones; Android/iOS running speech recognition and `getUserMedia` at the same time; networks that need TURN; Enterprise Firestore realtime listeners in production.
+- `scripts/live-audio.wrtc.test.ts` also runs the class **relay-only** (`iceTransportPolicy: 'relay'`) through a local TURN server (`node-turn`), proving audio flows when no direct path exists.
+- Not verified: real phones and microphones; Android/iOS running speech recognition and `getUserMedia` at the same time; a real TURN provider across real mobile networks; Enterprise Firestore realtime listeners in production.
