@@ -1,6 +1,6 @@
 // @ts-nocheck — not part of `npm test`/tsc: needs a native WebRTC stack for Node.
 // Real WebRTC check of the live-class audio hub (liveAudio.ts): real SDP/ICE/RTP between 3 peers on this machine, tone "mics".
-// Run (from the repo root): npm i --no-save @roamhq/wrtc && npx tsx --test scripts/live-audio.wrtc.test.ts
+// Run (from the repo root): npm i --no-save @roamhq/wrtc node-turn && npx tsx --test scripts/live-audio.wrtc.test.ts
 import { createRequire } from 'node:module';
 import { test, after } from 'node:test';
 after(() => setTimeout(() => process.exit(process.exitCode || 0), 500));
@@ -67,4 +67,44 @@ test('real WebRTC (native stack): teacher voice reaches both students; the speak
   for (const e of [teacherAtSalma, teacherAtHessa, relayAtHessa, salmaAtHost]) e.stop();
   host.close(); stopHost(); for (const g of Object.values(guests)) { g.stop(); g.audio.close(); }
   timers.forEach(clearInterval);
+});
+
+// Mobile data / carrier NAT: no direct path at all. Forcing relay-only proves the class still works through TURN, with the
+// ICE servers coming from the same loader the app uses (/api/abboud/ice-servers → createPeer(iceServers)).
+test('relay only (as on mobile data): teacher voice and the speaker\'s voice flow through a TURN server', async () => {
+  const Turn = createRequire(import.meta.url)('node-turn');
+  const turn = new Turn({ listeningPort: 3479, listeningIps: ['127.0.0.1'], relayIps: ['127.0.0.1'], authMech: 'long-term', credentials: { abboud: 'class-pass' }, realm: 'academy', debugLevel: 'OFF' });
+  turn.start();
+  try {
+    const b = createMemoryLiveBackend();
+    await b.as('boss', { admin: true }).saveConfig({ hostUid: 'abood', hostName: 'عبود', allowed: ['salma'], names: { salma: 'سلمى' } });
+    const hs = b.as('abood');
+    await hs.publishState('abood', liveState({ active: true, sessionId: 'R1', lessonId: 2, lessonTitle: 't', source: '', draft: '', explained: [], speaker: 'salma' }));
+    const ice = { iceServers: [{ urls: ['turn:127.0.0.1:3479?transport=udp'], username: 'abboud', credential: 'class-pass' }], relay: true };
+    const used: RTCIceServer[][] = []; const pcs: any[] = [];
+    const peer = (iceServers: RTCIceServer[]) => { used.push(iceServers); const pc = new w.RTCPeerConnection({ iceServers, iceTransportPolicy: 'relay' }); pcs.push(pc); return pc as RTCPeerConnection; };
+    let speaker: MediaStreamTrack | null = null;
+    const host = new HostAudio(hs, 'abood', 'R1', { createPeer: peer, loadIce: async () => ice, getMic: tone(440), gatherMs: 3000 }, { onSpeakerTrack: t => { speaker = t; }, onError: e => console.error('host', e) });
+    await host.startMic(); host.setSpeaker('salma');
+    const stopHost = hs.watchSignals('abood', s => void host.onSignals(s));
+    const st = b.as('salma'); await st.join('abood', 'salma', 'R1', false);
+    const g: any = { tracks: [], state: 'new' };
+    g.audio = new GuestAudio(st, 'abood', 'salma', { createPeer: peer, loadIce: async () => ice, getMic: tone(660), gatherMs: 3000 }, { onTracks: t => { g.tracks = t; }, onState: s => { g.state = s; } });
+    const stopGuest = st.watchSignal('abood', 'salma', sig => void g.audio.onSignal(sig, 'R1'));
+    host.sync(['salma']);
+    for (let i = 0; i < 80 && g.state !== 'connected'; i++) await wait(200);
+    assert.equal(g.state, 'connected', 'connects with relay candidates only');
+    assert.ok(used.length >= 2 && used.every(s => s === ice.iceServers), 'both sides used the loaded TURN servers');
+    // The selected pair really is relayed.
+    const stats = await pcs[0].getStats(); let relayed = false;
+    stats.forEach((r: any) => { if (r.type === 'local-candidate' && r.candidateType === 'relay') relayed = true; });
+    assert.ok(relayed, 'relay candidates in use');
+    const teacher = ear(g.tracks[0]); await wait(1500);
+    assert.ok(teacher.loud > 20, `Salma hears the teacher through TURN (${teacher.loud})`);
+    await g.audio.startMic();
+    for (let i = 0; i < 25 && !speaker; i++) await wait(200);
+    const atHost = ear(speaker!); await wait(1500);
+    assert.ok(atHost.loud > 20, `the teacher hears Salma through TURN (${atHost.loud})`);
+    teacher.stop(); atHost.stop(); host.close(); g.audio.close(); stopHost(); stopGuest();
+  } finally { turn.stop(); timers.forEach(clearInterval); }
 });

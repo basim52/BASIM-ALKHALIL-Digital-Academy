@@ -34,18 +34,17 @@ function RemoteAudio({ track, muted, onBlocked }: { track: MediaStreamTrack; mut
   return <audio ref={el} autoPlay muted={muted} data-testid="abboud-live-remote-audio" hidden />;
 }
 
-/** How a finished line is voiced on this device when it is not heard live. */
+/** How an AI classmate's line (Badr, Reem, Sara) is voiced on this device. People (Abboud, students) are only ever heard live. */
 export type LiveSpeak = (entry: TimelineEntry) => Promise<void>;
-const TTS_VOICE: Record<TimelineEntry['who'], VoiceTurn['speaker']> = { abboud: 'badr', badr: 'badr', reem: 'reem', sara: 'sara', student: 'reem' };
-const TTS_OVERRIDE: Partial<Record<TimelineEntry['who'], string>> = { abboud: 'Charon', student: 'Achernar' };
+const AI_VOICES = new Set<TimelineEntry['who']>(['badr', 'reem', 'sara']);
 function defaultSpeak(voice: ClassroomVoice): LiveSpeak {
-  return entry => voice.play([{ speaker: TTS_VOICE[entry.who], text: entry.text, voiceName: TTS_OVERRIDE[entry.who] }], () => {}, () => {}).catch(() => {});
+  return entry => AI_VOICES.has(entry.who) ? voice.play([{ speaker: entry.who as VoiceTurn['speaker'], text: entry.text }], () => {}, () => {}).catch(() => {}) : Promise.resolve();
 }
 
 /**
  * A registered student's seat in Abboud's live class, on their own device.
- *  - Hears Abboud's real voice live (WebRTC from his device) and the allowed speaker relayed through it; if live
- *    audio cannot connect, a clearly marked automatic voice reads Abboud's finished sentences.
+ *  - Hears Abboud's real voice live (WebRTC from his device) and the allowed speaker relayed through it. A person's
+ *    words are never re-read by a synthetic voice: if live audio cannot connect, they appear as text and it keeps retrying.
  *  - Badr and Reem are here too: their replies (generated only on Abboud's device) arrive through the shared feed
  *    and play on each device with their own voices and faces.
  *  - Text is one clean bubble per finished utterance (no interim recognition).
@@ -66,6 +65,8 @@ export default function AbboudLiveGuest({ store, uid, config, onClose, audio, sp
   const [hand, setHand] = useState(false);
   const [text, setText] = useState('');
   const [listening, setListening] = useState(false);
+  /** This student's turn is open: live mic on (and speech-to-text when the browser has it), until «خلصت». */
+  const [talking, setTalking] = useState(false);
   const [language, setLanguage] = useState('ar-SA');
   const [notice, setNotice] = useState('');
   const [muted, setMuted] = useState(false);
@@ -110,7 +111,15 @@ export default function AbboudLiveGuest({ store, uid, config, onClose, audio, sp
     return () => { stop(); g.close(); live.current = null; setTracks([]); };
   }, [store, hostUid, uid, sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
   // Abboud allowing the turn lowers the hand; losing the turn stops a running mic without sending anything.
-  useEffect(() => { if (myTurn) setHand(false); else { live.current?.stopMic(); if (dictation.current) { dictation.current.cancel(); dictation.current = null; setListening(false); } } }, [myTurn]);
+  useEffect(() => { if (myTurn) setHand(false); else { live.current?.stopMic(); setTalking(false); if (dictation.current) { dictation.current.cancel(); dictation.current = null; setListening(false); } } }, [myTurn]);
+  // A failed connection asks Abboud's device for a fresh one a few times on its own (his device also retries).
+  const autoRetries = useRef(0);
+  useEffect(() => {
+    if (voiceState === 'connected') { autoRetries.current = 0; return; }
+    if (voiceState !== 'failed' || autoRetries.current >= 3) return;
+    const t = setTimeout(() => { autoRetries.current++; setVoiceState('new'); void live.current?.requestRestart(); }, 4000);
+    return () => clearTimeout(t);
+  }, [voiceState]);
   useEffect(() => { dialog.current?.focus(); return () => dictation.current?.cancel(); }, []);
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); onClose(); } };
@@ -118,8 +127,7 @@ export default function AbboudLiveGuest({ store, uid, config, onClose, audio, sp
   }, [onClose]);
 
   const lines = useMemo(() => timeline(feed, messages, config, uid), [feed, messages, config, uid]);
-  const heardLive = voiceState === 'connected';
-  // Voicing on this device: Badr/Reem/Sara always (their own voices); Abboud and the speaker only when not heard live.
+  // Voicing on this device: only Badr/Reem/Sara (AI classmates, their own voices). Abboud and students are heard live, never synthesised.
   const voice = useRef<ClassroomVoice | null>(null);
   const spoken = useRef<Set<string> | null>(null);
   const queue = useRef<TimelineEntry[]>([]); const playing = useRef(false);
@@ -131,8 +139,7 @@ export default function AbboudLiveGuest({ store, uid, config, onClose, audio, sp
     for (const line of lines) {
       if (spoken.current.has(line.key)) continue;
       spoken.current.add(line.key);
-      const ai = line.who === 'badr' || line.who === 'reem' || line.who === 'sara';
-      if (muted || !(ai || (!heardLive && (line.who === 'abboud' || (line.who === 'student' && line.uid !== uid))))) continue;
+      if (muted || !AI_VOICES.has(line.who)) continue;
       queue.current.push(line);
     }
     void (async () => {
@@ -140,7 +147,7 @@ export default function AbboudLiveGuest({ store, uid, config, onClose, audio, sp
       try { for (let next = queue.current.shift(); next; next = queue.current.shift()) { setSpeaking(next.who); await play.current(next); setSpeaking(null); } }
       finally { playing.current = false; setSpeaking(null); }
     })();
-  }, [lines, muted, heardLive, uid]);
+  }, [lines, muted]);
   function toggleMute() { const next = !muted; setMuted(next); if (next) { queue.current = []; voice.current?.stop(); } setBlocked(false); }
 
   const lesson = state ? lessonFor(state.lessonId, state.lessonTitle.replace(/^\S+\s/, '')) : undefined;
@@ -161,26 +168,29 @@ export default function AbboudLiveGuest({ store, uid, config, onClose, audio, sp
     try { await store.postMessage(hostUid, { senderId: uid, text: clean, via, sessionId }); setText(''); setNotice(''); }
     catch { setNotice('لم يُرسل كلامك: دورك في الكلام انتهى أو انقطع الاتصال. ارفع يدك مجدداً.'); }
   }
+  function endTalking() { live.current?.stopMic(); setTalking(false); }
   function mic() {
-    if (dictation.current) { dictation.current.finish(); return; }
+    if (talking) { if (dictation.current) dictation.current.finish(); else endTalking(); return; }
+    setTalking(true); setNotice('');
+    // Your real voice goes live to Abboud (and everyone) for the whole turn; speech-to-text is only an extra written copy.
+    void live.current?.startMic().catch(() => setNotice('لم يُسمح بالميكروفون، فصوتك لا يصل مباشرة. اسمح بالميكروفون من إعدادات المتصفح، أو اكتب سؤالك.'));
     const Constructor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    // Your live voice goes to Abboud (and everyone) while you talk; the text is sent when you finish.
-    void live.current?.startMic().catch(() => setNotice('لم يُسمح بالميكروفون للصوت المباشر؛ سيُرسل كلامك نصاً فقط.'));
-    if (!Constructor) { setNotice('هذا المتصفح لا يحوّل الكلام لنص. صوتك المباشر يصل إن كان متصلاً، واكتب سؤالك أيضاً.'); return; }
+    if (!Constructor) return;
+    const keepTalking = () => { if (!live.current?.micOn) endTalking(); };
     const d: ContinuousDictation = new ContinuousDictation(() => new Constructor(), language, {
       onListening: () => setListening(true),
       onText: () => {}, // interim words stay private; only the finished sentence is shared
-      onFinished: t => { dictation.current = null; setListening(false); live.current?.stopMic(); void send(t, 'mic'); },
-      onError: (code, t) => { dictation.current = null; setListening(false); live.current?.stopMic(); setText(tidyUtterance(t)); setNotice(microphoneError(code)); },
-      onPaused: (_r, t) => { dictation.current = null; setListening(false); live.current?.stopMic(); setText(tidyUtterance(t)); setNotice('توقّف الميكروفون. كلامك ظاهر؛ أرسله أو تابع.'); }
+      onFinished: t => { dictation.current = null; setListening(false); endTalking(); void send(t, 'mic'); },
+      onError: (code, t) => { dictation.current = null; setListening(false); setText(tidyUtterance(t)); setNotice(`${microphoneError(code)} صوتك المباشر مستمر حتى تضغط «خلصت».`); keepTalking(); },
+      onPaused: (_r, t) => { dictation.current = null; setListening(false); setText(tidyUtterance(t)); setNotice('توقّف تحويل كلامك لنص، وصوتك المباشر مستمر. اضغط «خلصت» عندما تنتهي.'); keepTalking(); }
     });
-    dictation.current = d; setNotice('');
-    try { d.start(); } catch { dictation.current = null; live.current?.stopMic(); setNotice(microphoneError('start-failed')); }
+    dictation.current = d;
+    try { d.start(); } catch { dictation.current = null; setNotice('تعذّر تحويل كلامك لنص، وصوتك المباشر مستمر حتى تضغط «خلصت».'); keepTalking(); }
   }
   const voiceLabel = voiceState === 'connected' ? `🎧 تسمع صوت ${config.hostName} مباشرة`
-    : voiceState === 'off' ? '🔊 صوت آلي يقرأ جمل عبود (هذا المتصفح لا يدعم الصوت المباشر)'
-    : voiceState === 'failed' || voiceState === 'disconnected' || voiceState === 'closed' ? '🔊 صوت آلي يقرأ جمل عبود (تعذّر الصوت المباشر على هذه الشبكة)'
-    : '⏳ جاري توصيل صوت عبود المباشر… (حتى يتصل: صوت آلي يقرأ جمله)';
+    : voiceState === 'off' ? `🔇 هذا المتصفح لا يدعم الصوت المباشر؛ كلام ${config.hostName} يظهر نصاً فقط. استخدم Chrome أو Safari حديثاً.`
+    : voiceState === 'failed' || voiceState === 'disconnected' || voiceState === 'closed' ? `⚠️ لم يتصل صوت ${config.hostName} المباشر على هذه الشبكة؛ كلامه يظهر نصاً حتى يتصل.`
+    : `⏳ جاري توصيل صوت ${config.hostName} المباشر…`;
 
   return <div ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="abboud-live-title" dir="rtl" data-testid="abboud-live-guest" className="abboud-live-guest fixed inset-0 z-[300] bg-slate-950/95">
     <div className="abboud-live-guest-shell bg-slate-100 text-slate-900">
@@ -230,13 +240,13 @@ export default function AbboudLiveGuest({ store, uid, config, onClose, audio, sp
           {myTurn ? <>
             <p className="font-bold text-emerald-800">🎙️ دورك الآن يا {me} — {config.hostName} سمح لك بالكلام</p>
             <div className="abboud-live-guest-talk">
-              <button type="button" onClick={mic} className={`rounded-full px-4 py-2 font-bold text-white ${listening ? 'bg-emerald-700' : 'bg-indigo-700'}`}>{listening ? '✅ خلصت — أرسل كلامي' : '🎙️ تكلّم'}</button>
-              <select aria-label="لغة كلامك" value={language} disabled={listening} onChange={e => setLanguage(e.target.value)} className="rounded-lg border p-2"><option value="ar-SA">العربية</option><option value="en-US">English</option></select>
+              <button type="button" onClick={mic} className={`rounded-full px-4 py-2 font-bold text-white ${talking ? 'bg-emerald-700' : 'bg-indigo-700'}`}>{talking ? '✅ خلصت — أرسل كلامي' : '🎙️ تكلّم'}</button>
+              <select aria-label="لغة كلامك" value={language} disabled={talking} onChange={e => setLanguage(e.target.value)} className="rounded-lg border p-2"><option value="ar-SA">العربية</option><option value="en-US">English</option></select>
             </div>
-            {listening && <p className="text-xs">🔴 صوتك يصل الآن للفصل؛ النص يُرسل عندما تضغط «خلصت».</p>}
+            {talking && <p className="text-xs">🔴 صوتك يصل الآن للفصل مباشرة{listening ? '؛ النص يُرسل عندما تضغط «خلصت».' : '.'}</p>}
             <form className="abboud-live-guest-talk" onSubmit={e => { e.preventDefault(); void send(text, 'text'); }}>
-              <input aria-label="اكتب سؤالك أو مشاركتك" value={text} maxLength={MAX_MESSAGE} onChange={e => setText(e.target.value)} disabled={listening} className="min-w-0 flex-1 rounded-lg border p-2" />
-              <button type="submit" disabled={listening || !text.trim()} className="rounded-lg bg-indigo-700 px-3 py-2 text-white disabled:opacity-40">إرسال</button>
+              <input aria-label="اكتب سؤالك أو مشاركتك" value={text} maxLength={MAX_MESSAGE} onChange={e => setText(e.target.value)} disabled={talking} className="min-w-0 flex-1 rounded-lg border p-2" />
+              <button type="submit" disabled={talking || !text.trim()} className="rounded-lg bg-indigo-700 px-3 py-2 text-white disabled:opacity-40">إرسال</button>
             </form>
           </> : <>
             {speakerName && <p className="text-sm">🎙️ {speakerName} يتكلم الآن</p>}

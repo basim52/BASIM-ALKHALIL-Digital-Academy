@@ -38,22 +38,35 @@ export function useLiveHost(store: LiveClassStore | null, uid: string | undefine
     try { await store.publishFeed(uid, { sessionId: s.sessionId, items: feed.current }); setFeedError(''); }
     catch (e) { setFeedError(`${liveErrorText(e, 'نشر كلام الفصل وبدر وريم')} (يحتاج نشر قواعد live/feed الجديدة).`); }
   }
-  // Live voice (WebRTC, this device is the hub).
+  // Live voice (WebRTC, this device is the hub). Abboud's real voice only — nothing is re-synthesised for students.
   const audio = useRef<HostAudio | null>(null);
   const [voiceOn, setVoiceOn] = useState(true);
   const [audioNote, setAudioNote] = useState('');
+  const [needMic, setNeedMic] = useState(false);
+  const [relay, setRelay] = useState<boolean | null>(null);
   const [peerStates, setPeerStates] = useState<Record<string, RTCPeerConnectionState>>({});
   const [speakerTrack, setSpeakerTrack] = useState<MediaStreamTrack | null>(null);
   const audioDeps = options.audio;
-  function openAudio(sessionId: string) {
-    audio.current?.close(); audio.current = null; setPeerStates({}); setSpeakerTrack(null);
-    if (!store || !uid || audioDeps === false || (!audioDeps && !liveAudioSupported())) { setAudioNote('🔇 الصوت المباشر غير مدعوم في هذا المتصفح؛ الطلاب يسمعون نسخة آلية من جملك.'); return; }
-    const a = new HostAudio(store, uid, sessionId, audioDeps || {}, { onPeers: setPeerStates, onSpeakerTrack: setSpeakerTrack, onError: () => setAudioNote('تعذّر توصيل الصوت لأحد الطلاب؛ يسمع نسخة آلية من جملك وسنعيد المحاولة.') });
-    audio.current = a;
-    // Called inside the tap so the browser can ask for the microphone.
-    a.startMic().then(() => setAudioNote(''), () => setAudioNote('🎤 لم يُسمح بالميكروفون للبث المباشر. الطلاب يسمعون نسخة آلية من جملك؛ اسمح بالميكروفون ثم أعد بدء الفصل.'));
+  const MIC_BLOCKED = '🎤 الميكروفون غير مفعّل للبث المباشر، فالطلاب لا يسمعونك. اضغط «🎤 شغّل صوتك المباشر» واسمح بالميكروفون.';
+  function micOn(a: HostAudio) {
+    return a.startMic().then(() => { if (audio.current === a) { setNeedMic(false); setAudioNote(''); } }, () => { if (audio.current === a) { setNeedMic(true); setAudioNote(MIC_BLOCKED); } });
   }
-  useEffect(() => { if (!sessionId) { audio.current?.close(); audio.current = null; setPeerStates({}); setSpeakerTrack(null); } }, [sessionId]);
+  function openAudio(sessionId: string) {
+    audio.current?.close(); audio.current = null; setPeerStates({}); setSpeakerTrack(null); setRelay(null); setNeedMic(false);
+    if (!store || !uid || audioDeps === false || (!audioDeps && !liveAudioSupported())) { setAudioNote('🔇 الصوت المباشر غير مدعوم في هذا المتصفح؛ استخدم Chrome أو Safari حديثاً ليسمعك الطلاب.'); return; }
+    const a = new HostAudio(store, uid, sessionId, audioDeps || {}, {
+      onPeers: setPeerStates, onSpeakerTrack: setSpeakerTrack,
+      onIce: info => { if (audio.current === a) setRelay(info.relay); },
+      onMicEnded: () => { if (audio.current === a) { setNeedMic(true); setAudioNote('🎤 توقف الميكروفون (ربما أخذه تطبيق أو اتصال آخر). اضغط «🎤 شغّل صوتك المباشر».'); } },
+      onError: () => { if (audio.current === a) setAudioNote('تعذّر توصيل الصوت لأحد الطلاب. نعيد المحاولة تلقائياً، أو اضغط «🔄 أعد توصيل الصوت».'); }
+    });
+    audio.current = a;
+    // From «ابدأ» this runs inside the tap (permission prompt); when resuming after a reload it works if permission was given before.
+    void micOn(a);
+  }
+  // A class that is already live (page reloaded, app reopened) gets its voice hub back instead of staying silent.
+  useEffect(() => { if (sessionId && audio.current?.sessionId !== sessionId) openAudio(sessionId); }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!sessionId) { audio.current?.close(); audio.current = null; setPeerStates({}); setSpeakerTrack(null); setNeedMic(false); setRelay(null); } }, [sessionId]);
   useEffect(() => () => { audio.current?.close(); }, []);
   useEffect(() => { if (!store || !uid || !sessionId) return; return store.watchSignals(uid, list => void audio.current?.onSignals(list), () => {}); }, [store, uid, sessionId]);
   useEffect(() => { audio.current?.setSpeaker(state?.active ? state.speaker : ''); }, [state?.speaker, state?.active, peerStates]);
@@ -81,8 +94,12 @@ export function useLiveHost(store: LiveClassStore | null, uid: string | undefine
   const hands = useMemo(() => raisedHands(participants, state, now), [participants, state, now]);
   return {
     config, state, here, hands, messages, error: error || feedError, live: !!state?.active,
-    say, voiceOn, audioNote, peerStates, speakerTrack,
+    say, voiceOn, audioNote, peerStates, speakerTrack, needMic, relay,
     toggleVoice: () => setVoiceOn(v => !v),
+    /** Inside the teacher's tap: (re)open the mic for the live voice. */
+    enableMic: () => { if (audio.current) void micOn(audio.current); else if (sessionId) openAudio(sessionId); },
+    /** Rebuild every student's live-voice connection. */
+    reconnectAudio: () => { setAudioNote(''); if (audio.current) audio.current.reconnectAll(hereKey ? hereKey.split(',') : []); else if (sessionId) openAudio(sessionId); },
     start: () => {
       const id = newSessionId(); feed.current = [];
       openAudio(id);
@@ -162,7 +179,10 @@ export function AbboudLiveHostPanel({ host }: { host: LiveHost }) {
       <div className="abboud-live-row text-sm" data-testid="abboud-live-voice">
         <button type="button" aria-pressed={host.voiceOn} onClick={host.toggleVoice} className="rounded-lg border bg-white px-3 py-1">{host.voiceOn ? '🎤 صوتك المباشر يعمل — إيقاف' : '🔇 صوتك المباشر متوقف — تشغيل'}</button>
         <span>🎧 {host.here.filter(p => host.peerStates[p.uid] === 'connected').length} من {host.here.length} يسمعونك مباشرة</span>
+        {host.needMic && <button type="button" onClick={host.enableMic} className="rounded-lg bg-red-600 px-3 py-1 font-bold text-white">🎤 شغّل صوتك المباشر</button>}
+        {host.here.some(p => host.peerStates[p.uid] !== 'connected') && <button type="button" onClick={host.reconnectAudio} className="rounded-lg border bg-white px-3 py-1">🔄 أعد توصيل الصوت</button>}
       </div>
+      {host.relay === false && host.here.some(p => host.peerStates[p.uid] !== 'connected') && <p role="status" data-testid="abboud-live-no-relay" className="abboud-dock-notice bg-amber-50 text-amber-900">⚠️ خادم ترحيل الصوت (TURN) غير مضبوط بعد: الطلاب على بيانات الجوال أو بعض شبكات البيت قد لا يسمعونك مباشرة. جرّبوا شبكة Wi-Fi واحدة حتى يُضبط.</p>}
       {host.audioNote && <p role="status" className="abboud-dock-notice bg-amber-50 text-amber-900">{host.audioNote}</p>}
 
       {speaker && <div className="abboud-live-row" data-testid="abboud-live-speaker"><span>🎙️ <b>{nameOf(config, speaker)}</b> يتكلم الآن</span>

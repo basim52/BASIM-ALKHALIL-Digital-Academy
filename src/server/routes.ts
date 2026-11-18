@@ -1,4 +1,5 @@
 import { abboudTeacherHandler } from './abboudTeacher.js';
+import { iceServersHandler } from './iceServers.js';
 import { LESSON_TRIGRAMS_B64 } from "./generated/lessonTrigrams.js";
 import { textTrigrams } from "./lessonTextNorm.js";
 import "dotenv/config";
@@ -2150,6 +2151,9 @@ ${JSON.stringify(texts)}`;
   // - Badr (curious AI student) asks questions based on Abboud's explanation.
   // - Reem (friendly AI student) attempts application with deliberate pedagogical beginner errors.
   // - Supervisor Sara evaluates accuracy, intervenes gently when needed, and avoids false praise.
+  // «فصل عبود المباشر»: STUN + TURN relay (from env) so live voice connects on mobile data too. Signed-in only (POST /api/* middleware).
+  app.post("/api/abboud/ice-servers", iceServersHandler(process.env, fetch as any, logToFile));
+
   app.post("/api/sara/abboud-teacher", abboudTeacherHandler(async (prompt, systemInstruction, responseSchema) => {
     if (!initAI() || !aiLive) throw new Error('AI_UNAVAILABLE');
     const result = await callAiWithRetry({
