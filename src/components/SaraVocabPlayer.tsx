@@ -183,7 +183,7 @@ export const SaraVocabPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockA
         {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
             onNextLesson={(active.order % 30 ? VOCAB_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? VOCAB_LESSONS[active.order] : undefined)!); } : undefined} />
           : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} uid={uid} />) : (
-          <SaraLevelledList lessons={VOCAB_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="vocabulary" trackId={VOCAB_TRACK_ID}
+          <SaraLevelledList lessons={VOCAB_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="vocabulary" titleAr="المفردات" titleEn="Vocabulary" trackId={VOCAB_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(VOCAB_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
         {testing && <SaraNewLevelTest track="vocabulary" level={testing} uid={uid} onClose={() => { setTesting(null); setTestTick(n => n + 1); }} />}

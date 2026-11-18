@@ -14,8 +14,8 @@ import { pushTrackProgress, markLastTrack } from '../lib/saraProgressSync';
 import SaraLessonCall, { lessonCallPreset, freeCallPresetFor } from './SaraLessonCall';
 import SaraSentenceBuilder from './SaraSentenceBuilder';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
-import SaraLessonMap from './SaraLessonMap';
-import { getStudentStreak } from '../services/streakService';
+import SaraLessonMap, { useSaraStreak } from './SaraLessonMap';
+import type { MapKind } from '../lib/saraLessonMap';
 import { toToolCalls, type BoardAction } from '../lib/boardActions';
 const TutorTldrawBoard = lazy(() => import('./TutorTldrawBoard'));
 const SaraRepeatPractice = lazy(() => import('./SaraRepeatPractice'));
@@ -200,8 +200,12 @@ const Choice: React.FC<{ q: SaraChoiceQuestion; picked: number | null; onPick: (
   </div>
 ); };
 
-/** Tracks shown as the zigzag lesson map (sample: Advanced Grammar only; others keep the list). */
-const MAP_TRACKS = new Set(['advanced_v2']);
+/** Every Sara whiteboard track is shown as the zigzag lesson map: emoji family + first level colour per track. */
+const MAP_STYLE: Record<string, { kind: MapKind; colorOffset: number }> = {
+  foundations: { kind: 'grammar', colorOffset: 0 }, advanced_v2: { kind: 'grammar', colorOffset: 0 },
+  conversation_v2: { kind: 'conversation', colorOffset: 1 }, reading_v2: { kind: 'reading', colorOffset: 3 }, writing_v2: { kind: 'writing', colorOffset: 2 },
+};
+const mapStyleOf = (trackId: string) => MAP_STYLE[trackId] || { kind: 'grammar' as MapKind, colorOffset: 0 };
 /** Tracks that get «حاور سارة» after the exercises (Conversation + Grammar: foundations, advanced). */
 const CALL_TRACKS: Record<string, 'conversation' | 'grammar'> = { conversation_v2: 'conversation', foundations: 'grammar', advanced_v2: 'grammar' };
 
@@ -230,13 +234,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
   const [chatOpen, setChatOpen] = useState(false);
   const [mapChatOpen, setMapChatOpen] = useState(false);
   // 🔥 Existing streak (read only) for the lesson map header; hidden when none.
-  const [streak, setStreak] = useState<number | null>(null);
-  useEffect(() => {
-    if (!MAP_TRACKS.has(track.id) || !uid) return;
-    let alive = true;
-    getStudentStreak(uid).then(s => { if (alive) setStreak(s.current > 0 ? s.current : null); }).catch(() => {});
-    return () => { alive = false; };
-  }, [track.id, uid]);
+  const streak = useSaraStreak(uid);
   const [askOpen, setAskOpen] = useState(false);
   const [askText, setAskText] = useState('');
   const [askReply, setAskReply] = useState('');
@@ -389,7 +387,8 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
       </button>); }}</LevelQuota>
     );
   };
-  const useMap = MAP_TRACKS.has(track.id);
+  const mapStyle = mapStyleOf(track.id);
+  const mapLevels = useMemo(() => track.levels?.map(v => ({ ...v, shortAr: v.id === 'a' ? 'التأسيس' : undefined, shortEn: v.id === 'a' ? 'Foundations' : undefined })), [track]);
 
   if (!isOpen) return null;
   const passed = !!lesson?.content && checkPick === lesson.content.check.correctIndex;
@@ -416,38 +415,12 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
           <button onClick={() => { stop(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
         </div>
 
-        {/* Lesson map (sample: Advanced Grammar) — reads the same saved progress, no writes */}
-        {!lesson && !test && useMap && (
-          <SaraLessonMap lessons={track.lessons} levels={track.levels} unlocked={unlockedRaw} unlockAll={unlockAll} lang={lang === 'en' ? 'en' : 'ar'}
+        {/* Lesson map — reads the same saved progress, no writes */}
+        {!lesson && !test && (
+          <SaraLessonMap lessons={track.lessons} levels={mapLevels} kind={mapStyle.kind} colorOffset={mapStyle.colorOffset} unlocked={unlockedRaw} unlockAll={unlockAll} lang={lang === 'en' ? 'en' : 'ar'}
             trackTitleAr={track.titleAr} trackTitleEn={track.titleEn} onOpen={openLesson} streak={streak}
             onFreeChat={() => { unlockNarrator(); stop(); setMapChatOpen(true); }}
             renderLevelEnd={id => <div className="grid">{levelTestButton(levels.find(v => v.id === id))}</div>} />
-        )}
-
-        {/* Lesson list */}
-        {!lesson && !test && !useMap && (
-          <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
-            {track.lessons.map((l, idx) => {
-              const open = l.order <= unlocked;
-              const lvl = track.levels?.find(v => v.id === l.levelId);
-              const showLevel = !!lvl && (idx === 0 || track.lessons[idx - 1].levelId !== l.levelId);
-              return (
-                <React.Fragment key={l.id}>
-                {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-700">{lvl!.titleAr}</p>}
-                <button disabled={!open} onClick={() => openLesson(l)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-start ${open ? 'bg-white border-amber-300 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
-                  <span className="w-6 h-6 rounded-full bg-[#002147] text-white text-[11px] font-black flex items-center justify-center shrink-0">{l.order}</span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-[13px] font-black text-slate-800 truncate">{l.titleAr}</span>
-                    <span dir="ltr" className="block text-[11px] text-slate-500 truncate text-end">{l.titleEn}</span>
-                  </span>
-                  {open ? (l.order < unlocked ? <CheckCircle2 size={16} className="text-emerald-600" /> : null) : <Lock size={14} className="text-slate-400" />}
-                </button>
-                {levelTestButton(levels.find(v => v.lessons[v.lessons.length - 1]?.id === l.id))}
-                </React.Fragment>
-              );
-            })}
-          </div>
         )}
 
         {lesson && !lesson.content && (

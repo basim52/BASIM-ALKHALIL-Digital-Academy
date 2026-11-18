@@ -211,7 +211,7 @@ export const SaraDailyPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unlockA
         {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
             onNextLesson={(active.order % 30 ? DAILY_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? DAILY_LESSONS[active.order] : undefined)!); } : undefined} />
           : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} uid={uid} />) : (
-          <SaraLevelledList lessons={DAILY_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="daily" trackId={DAILY_TRACK_ID}
+          <SaraLevelledList lessons={DAILY_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="daily" titleAr="إنجليزي الحياة اليومية" titleEn="Daily Life English" trackId={DAILY_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(DAILY_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
         {testing && <SaraNewLevelTest track="daily" level={testing} uid={uid} onClose={() => { setTesting(null); setTestTick(n => n + 1); }} />}
