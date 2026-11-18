@@ -26,8 +26,71 @@ export function currentLessonOrder(orders: number[], unlocked: number): number |
 const WAVE = [0, 0.9, 1.5, 0.9, 0, -0.9, -1.5, -0.9];
 export const zigzagOffset = (index: number) => WAVE[((index % WAVE.length) + WAVE.length) % WAVE.length];
 
-/** A fitting emoji for a grammar lesson, picked from its English title. */
-const ICONS: [RegExp, string][] = [
+/** Lesson families: which keyword list wins first and which emojis fill the gaps. */
+export type MapKind = 'grammar' | 'conversation' | 'reading' | 'writing' | 'listening' | 'pronunciation' | 'vocabulary' | 'daily';
+
+/** Sounds & speech (pronunciation, reading-aloud lessons). */
+const SOUND_ICONS: [RegExp, string][] = [
+  [/intonation|pitch|tone|sarcas|surprise|exclamation|emotion/i, '📈'],
+  [/stress|rhythm|syllab|thought group|pace/i, '🥁'],
+  [/\bth\b|tongue/i, '👅'],
+  [/vowel|schwa|\bee\b|\boo\b|long a|short i|magic e|\bu vs|\bo vs|\be vs|oa vs|oy vs|ow vs|er vs|walk vs/i, '🅰️'],
+  [/silent/i, '🤫'],
+  [/link|connected|weak form|strong form|elision|assimilation|contraction|reduction|fast speech|dropping|disappearing|glottal/i, '🔗'],
+  [/homophone|spelling|ough|same spelling|confusable|minimal pair|mispronounc/i, '🔤'],
+  [/-ed|-s endings|ending|suffix|-tion|-sion|-ture|-sure|-age|-ous|-ate|prefix/i, '🧩'],
+  [/cluster|consonant/i, '🧱'],
+  [/phonics|letter sound|blending|digraph|alphabet/i, '🔠'],
+  [/number|year|date|teen|abbreviation/i, '🔢'],
+  [/american|british|flap/i, '🌍'],
+  [/aloud|shadowing|speech|presentation|fluen|challenge|filler/i, '🎤'],
+  [/question|echo|choice|tag/i, '❓'],
+  [/ vs |\bvs\b/i, '👄'],
+];
+
+/** Everyday & academic topics (conversation, listening, reading, writing, vocabulary). */
+const TOPIC_ICONS: [RegExp, string][] = [
+  [/\breview\b|\bfinal\b/i, '🏆'],
+  [/greet|hello/i, '👋'],
+  [/meet|introduc|yourself|networking/i, '🤝'],
+  [/family|relationship/i, '👨‍👩‍👧'],
+  [/airport|flight|passport|travel|holiday|announcement/i, '✈️'],
+  [/hotel|landlord|renting|flat\b|home|house/i, '🏨'],
+  [/doctor|pharmac|health|clinic|medic|antibiotic|emergenc|sugar|fitness/i, '🩺'],
+  [/restaurant|food|drink|dinner|menu|recipe|cooking/i, '🍽️'],
+  [/direction|getting around|taxi|metro|rail|transport|garage/i, '🧭'],
+  [/shop|cloth|returns|exchange|advert/i, '🛍️'],
+  [/bank|money|saving|price|financ|econom|cost|fraud/i, '💰'],
+  [/phone|call\b|calls|voicemail/i, '📞'],
+  [/weather|temperature|climate|solar|cooling/i, '🌤️'],
+  [/hobb|free time|sport|leisure/i, '⚽'],
+  [/invitation|plan|congratulat|occasion|party/i, '🎉'],
+  [/apolog|excuse|complain|refund|customer|sympathy|thank/i, '🙏'],
+  [/job|interview|work|meeting|team|board|supervisor|colleague|business|professional|\bcv\b|cover letter|linkedin|chairing|minutes|proposal|executive/i, '💼'],
+  [/opinion|agree|debate|pros and cons|argument|persua|negotiat|rebuttal|bias|for-and-against|thesis/i, '⚖️'],
+  [/email|letter/i, '📧'],
+  [/news|report|documentary|article|editorial|headline/i, '📰'],
+  [/summar|abstract|definition/i, '📋'],
+  [/stor|novel|narrat|dialogue|metaphor|show, don/i, '📚'],
+  [/describ|people|personality|body language|feeling/i, '🧑'],
+  [/school|classroom|study|studies|universit|exam|admission|graduat|phd|lecture|research|academic/i, '🎓'],
+  [/museum|history|incense|wisdom|culture/i, '🏛️'],
+  [/science|footprint|psycholog|memor|nudge|philosoph|procrastinat|decision/i, '🧠'],
+  [/technolog|\bai\b|smart|digital|technical/i, '🤖'],
+  [/environment|coral|nature|desalination|circular|water/i, '🌊'],
+  [/sleep/i, '😴'],
+  [/graph|chart|timetable/i, '📊'],
+  [/skim|scan|inference|infer|context|purpose|tone|implied|between the lines/i, '🔎'],
+  [/edit|proofread/i, '🖍️'],
+  [/present|speech|talk|signpost|rhetoric/i, '🎤'],
+  [/language|countries|nationalit/i, '🗣️'],
+  [/time|clock|\bday/i, '⏰'],
+  [/number/i, '🔢'],
+  [/suggest|advice|recommend|instruction/i, '💡'],
+];
+
+/** Grammar points. */
+const GRAMMAR_ICONS: [RegExp, string][] = [
   [/\breview\b|\btest\b|\bfinal\b/i, '🏆'],
   [/introduc|yourself|greet/i, '👋'],
   [/\bfamily\b/i, '👨‍👩‍👧'],
@@ -54,18 +117,45 @@ const ICONS: [RegExp, string][] = [
   [/gerund|infinitive|verb pattern/i, '🧩'],
   [/link|connect|conjunction|contrast|concession|discourse|parallel|complex sentence|apposition/i, '🪢'],
   [/adverb|frequency|manner/i, '⚡'],
-  [/adjective|modifier/i, '🎨'],
+  [/adjective|modifier|colou?r/i, '🎨'],
   [/article|generic reference/i, '📰'],
   [/preposition|time reference/i, '📍'],
-  [/noun|nominal|word formation|plural|possess/i, '📦'],
+  [/noun|nominal|word formation|plural|possess|pronoun/i, '📦'],
   [/punctuation|ellipsis|substitution|absolute/i, '✂️'],
   [/so\/such|\btoo\b|enough|as if|as though|rather|it's time/i, '⚖️'],
+  [/alphabet|letter/i, '🔠'],
+  [/number|telling the time|days/i, '🔢'],
+  [/imperative/i, '📢'],
+  [/like|dislike/i, '❤️'],
+  [/food|direction/i, '🍽️'],
   [/\bbe\b|\bam\b|\bis\b|\bare\b|\bhave\b|\bhas\b/i, '🙋'],
 ];
-const FALLBACK = ['📘', '✏️', '🌟', '🎯'];
-export function lessonIcon(titleEn: string, index = 0): string {
-  for (const [re, icon] of ICONS) if (re.test(titleEn)) return icon;
-  return FALLBACK[index % FALLBACK.length];
+
+const FALLBACKS: Record<MapKind, string[]> = {
+  grammar: ['📘', '✏️', '🌟', '🎯'],
+  conversation: ['💬', '🗨️', '🙋', '🤝'],
+  reading: ['📖', '🔎', '📚', '📰'],
+  writing: ['✍️', '📝', '🖊️', '📄'],
+  listening: ['🎧', '📻', '🔊', '🎙️'],
+  pronunciation: ['👄', '🗣️', '🔊', '🎵'],
+  vocabulary: ['📗', '🔤', '💡', '⭐'],
+  daily: ['🌍', '💬', '🏙️', '⭐'],
+};
+const ORDER: Record<MapKind, [RegExp, string][][]> = {
+  grammar: [GRAMMAR_ICONS, TOPIC_ICONS],
+  conversation: [TOPIC_ICONS],
+  listening: [TOPIC_ICONS, SOUND_ICONS, GRAMMAR_ICONS],
+  reading: [SOUND_ICONS, TOPIC_ICONS],
+  writing: [TOPIC_ICONS, GRAMMAR_ICONS],
+  pronunciation: [SOUND_ICONS, TOPIC_ICONS],
+  vocabulary: [TOPIC_ICONS],
+  daily: [TOPIC_ICONS],
+};
+/** A fitting emoji for a lesson, picked from its English title (lesson's own icon wins when the data has one). */
+export function lessonIcon(titleEn: string, index = 0, kind: MapKind = 'grammar'): string {
+  for (const list of ORDER[kind]) for (const [re, icon] of list) if (re.test(titleEn)) return icon;
+  const fb = FALLBACKS[kind];
+  return fb[index % fb.length];
 }
 
 /** Node colours per level (Duolingo-like bright circles; each level its own colour). */
@@ -76,10 +166,9 @@ export const LEVEL_COLORS: Record<string, { fill: string; shadow: string; soft: 
   c1: { fill: '#ff9600', shadow: '#cc7800', soft: '#ffefd6' },
   c2: { fill: '#ff4b4b', shadow: '#ea2b2b', soft: '#ffe0e0' },
 };
-const ROTATION = ['#58cc02', '#1cb0f6', '#ce82ff', '#ff9600', '#ff4b4b'];
-export function levelColor(levelId: string, levelIndex = 0) {
-  const c = LEVEL_COLORS[levelId];
-  if (c) return c;
-  const fill = ROTATION[levelIndex % ROTATION.length];
-  return { fill, shadow: fill, soft: '#f1f5f9' };
+const PALETTE = [LEVEL_COLORS.a, LEVEL_COLORS.b1, LEVEL_COLORS.b2, LEVEL_COLORS.c1, LEVEL_COLORS.c2,
+  { fill: '#00c2a8', shadow: '#009e89', soft: '#d5fbf5' }, { fill: '#ff6fae', shadow: '#d9508f', soft: '#ffe3f0' }];
+/** Colour for the n-th level of a track; `offset` lets each track start on its own colour. */
+export function levelColor(_levelId: string, levelIndex = 0, offset = 0) {
+  return PALETTE[(((levelIndex + offset) % PALETTE.length) + PALETTE.length) % PALETTE.length];
 }

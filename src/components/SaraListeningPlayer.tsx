@@ -147,7 +147,7 @@ export const SaraListeningPlayer: React.FC<Props> = ({ isOpen, onClose, uid, unl
         {active ? (board ? <SaraLessonBoard key={'board-' + active.id} {...boardOf(active)} onClose={() => setBoard(false)} onPassed={() => onPassed(active)}
             onNextLesson={(active.order % 30 ? LISTENING_LESSONS[active.order] : undefined) ? () => { setBoard(false); setActive((active.order % 30 ? LISTENING_LESSONS[active.order] : undefined)!); } : undefined} />
           : <Lesson key={active.id} l={active} onBack={() => { setBoard(false); setActive(null); }} onPassed={() => onPassed(active)} onBoard={() => setBoard(true)} />) : (
-          <SaraLevelledList lessons={LISTENING_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="listening" trackId={LISTENING_TRACK_ID}
+          <SaraLevelledList lessons={LISTENING_LESSONS} unlockedRaw={unlockedRaw} unlockAll={unlockAll} uid={uid} track="listening" titleAr={LISTENING_TITLE_AR} titleEn="Listening" trackId={LISTENING_TRACK_ID}
             refresh={testTick} onOpen={l => setActive(LISTENING_LESSONS.find(x => x.id === l.id) || null)} onTest={lv => setTesting(lv)} />
         )}
         {testing && <SaraNewLevelTest track="listening" level={testing} uid={uid} onClose={() => { setTesting(null); setTestTick(n => n + 1); }} />}
