@@ -4,7 +4,7 @@ import { spellingItemsFor } from '../lib/spelling';
 import { useT } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { Volume2, Square, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
-import { readTutorUnlocked, saveTutorUnlocked } from '../lib/tutorProgress';
+import { readTutorUnlocked, saveTutorUnlocked, syncTutorUnlocked } from '../lib/tutorProgress';
 import { TtsDebugOverlay, longPressDebug } from './TtsDebugOverlay';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator, saraLastReason } from './SaraTrackPlayer';
 import { toToolCalls } from '../lib/boardActions';
@@ -53,6 +53,13 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const persona = personaById(track.personaId);
   const t = useT(); const NM = t(persona.nameAr, persona.nameEn);
   const [unlocked, setUnlocked] = useState(() => readTutorUnlocked(track.id, uid));
+  // Progress saved on another device: read the cloud copy and keep the higher counter (never lowers, never writes Firebase).
+  useEffect(() => {
+    let alive = true;
+    setUnlocked(cur => Math.max(cur, readTutorUnlocked(track.id, uid)));
+    void syncTutorUnlocked(track.id, uid).then(n => { if (alive) setUnlocked(cur => Math.max(cur, n)); });
+    return () => { alive = false; };
+  }, [track.id, uid]);
   const [lessonRaw, setLesson] = useState<TutorLesson | null>(mockLessonOrder ? track.lessons[mockLessonOrder - 1] : null);
   const [lang] = useExplainLang();
   const { view: lesson, loading: enLoading } = useLessonView(lessonRaw, lang);
