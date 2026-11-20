@@ -408,3 +408,31 @@
 .abboud-live-voice { margin: 0; padding: 2px 12px 4px; font-size: 12px; flex: none; }
 .abboud-live-guest-chat li.abboud-live-line-badr, .abboud-live-guest-chat li.abboud-live-line-reem { background: #fffbeb; }
 .abboud-live-guest-chat li.abboud-live-line-abboud { background: #eef2ff; }
+
+/* ── App sidebar on iPad / short screens ─────────────────────────────────────
+   On landscape iPads (1024–1366 wide, 744–1024 tall) the one-column sidebar list
+   ran past the bottom of the screen, so the lower section icons were hidden.
+   Short desktop-width screens: two-column icon grid so every section fits.
+   Short tablet rail (portrait iPad): tighter rows. Any leftover overflow gets
+   the «more below» arrow (NavOverflowHint). */
+@media (min-width: 1024px) and (max-height: 1100px) {
+  .academy-sidebar { padding: 12px; }
+  .academy-sidebar-head { margin-bottom: 8px; }
+  .academy-sidebar-search { margin-bottom: 8px; }
+  .academy-sidebar-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-content: start; padding-top: 2px; }
+  .academy-sidebar-nav > *, .academy-sidebar-foot > * { margin: 0; }
+  .academy-sidebar .academy-sidebar-item { flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 5px 4px; min-height: 48px; border-radius: 14px; }
+  .academy-sidebar .academy-sidebar-item svg { width: 18px; height: 18px; }
+  .academy-sidebar .academy-sidebar-item .nav-label-full { display: none; }
+  .academy-sidebar .academy-sidebar-item .nav-label-short { display: block; max-width: 100%; margin-top: 1px; font-size: 10px; }
+  .academy-sidebar-foot { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .academy-sidebar-foot .academy-sidebar-item { min-height: 44px; }
+}
+@media (min-width: 768px) and (max-width: 1023.98px) and (max-height: 1300px) {
+  .academy-sidebar[data-expanded="false"] .academy-sidebar-head { margin-bottom: 8px; }
+  .academy-sidebar[data-expanded="false"] .academy-sidebar-search { margin-bottom: 6px; }
+  .academy-sidebar[data-expanded="false"] .academy-sidebar-nav > :not(:last-child) { margin-block-end: 2px; }
+  .academy-sidebar[data-expanded="false"] .academy-sidebar-item { padding: 5px 4px; }
+  .academy-sidebar[data-expanded="false"] .academy-sidebar-item svg { width: 18px; height: 18px; }
+  .academy-sidebar[data-expanded="false"] .academy-sidebar-item .nav-label-short { margin-top: 2px; }
+}
