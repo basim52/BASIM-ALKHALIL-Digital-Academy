@@ -333,6 +333,7 @@ import { macroeconomicAuditsE1 } from './data/lessons/e_c2_2';
 import { existentialInquiryE1 } from './data/lessons/e_c2_3';
 import { linguisticFluidityE1 } from './data/lessons/e_c2_4';
 import { aestheticSynthesisE1 } from './data/lessons/e_c2_5';
+import { NavOverflowHint } from './components/NavOverflowHint';
 const GlobalCommandPalette = lazy(() => import('./components/GlobalCommandPalette').then(m => ({ default: m.GlobalCommandPalette })));
 const AdaptiveLearningPath = lazy(() => import('./components/AdaptiveLearningPath').then(m => ({ default: m.AdaptiveLearningPath })));
 const DynamicWorksheetGenerator = lazy(() => import('./components/DynamicWorksheetGenerator').then(m => ({ default: m.DynamicWorksheetGenerator })));
@@ -4838,6 +4839,7 @@ export default function AuthenticatedApp({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isTabletSidebarExpanded, setIsTabletSidebarExpanded] = useState<boolean>(false);
+  const sidebarNavRef = useRef<HTMLElement | null>(null);
   const [selectedReadingLevel, setSelectedReadingLevel] = useState<ReadingLevel>('A1');
   const [selectedGrammarLevel, setSelectedGrammarLevel] = useState<GrammarLevel>('A1');
   const [selectedConversationLevel, setSelectedConversationLevel] = useState<ConversationLevel>('A1');
@@ -7040,10 +7042,10 @@ export default function AuthenticatedApp({
               </AnimatePresence>
 
               {/* Desktop/Tablet Sidebar (Touch-Optimized Rail on Tablet, Full Bar on Desktop) */}
-              <aside className={`hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} ${
+              <aside data-expanded={isTabletSidebarExpanded ? 'true' : 'false'} className={`academy-sidebar hidden md:flex ${isRtl ? 'right-0 border-l-2' : 'left-0 border-r-2'} ${
                 isTabletSidebarExpanded ? 'w-72 md:w-80 shadow-2xl z-[70]' : 'w-20 lg:w-64 shadow-xs z-[45]'
               } bg-white text-slate-800 flex-col p-2 lg:p-4 fixed h-full transition-all duration-300 border-slate-200 pointer-events-auto select-none`}>
-                <div className="flex items-center justify-between gap-2 px-1 mb-4 overflow-hidden">
+                <div className="academy-sidebar-head flex items-center justify-between gap-2 px-1 mb-4 overflow-hidden">
                   <div className="flex items-center gap-2.5 overflow-hidden">
                     <div className="w-10 h-10 lg:w-11 lg:h-11 bg-[#58cc02] rounded-2xl flex shrink-0 items-center justify-center text-white shadow-md font-black text-xl lg:text-2xl relative animate-bounce-slow">
                       🦉
@@ -7078,7 +7080,7 @@ export default function AuthenticatedApp({
                 {/* Quick Command Palette Launcher */}
                 <button
                   onClick={() => setIsCommandPaletteOpen(true)}
-                  className={`mb-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl border border-slate-200 flex items-center transition-all group cursor-pointer ${
+                  className={`academy-sidebar-search mb-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl border border-slate-200 flex items-center transition-all group cursor-pointer ${
                     isTabletSidebarExpanded ? 'w-full px-3 justify-between' : 'w-full px-2 justify-center lg:justify-between lg:px-3'
                   }`}
                   title={isRtl ? 'بحث سريع (Ctrl + K)' : 'Quick Search (Ctrl + K)'}
@@ -7095,7 +7097,8 @@ export default function AuthenticatedApp({
                 </button>
 
                 {/* Main Navigation List with Touch-Friendly Tablet Rail */}
-                <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar py-1">
+                <div className="relative flex-1 min-h-0 flex flex-col">
+                <nav ref={sidebarNavRef} data-testid="sidebar-nav" className="academy-sidebar-nav flex-1 min-h-0 space-y-1 overflow-y-auto no-scrollbar py-1">
                   {[
                     { id: 'dashboard', label: t.dashboard, shortLabel: isRtl ? 'الرئيسية' : 'Home', icon: LayoutDashboard },
                     { id: 'sara-tutor', label: lang === 'ar' ? 'سارة – معلمتك 👩‍🏫' : 'Teacher Sara 👩‍🏫', shortLabel: isRtl ? 'سارة 👩‍🏫' : 'Sara', icon: Sparkles },
@@ -7133,7 +7136,7 @@ export default function AuthenticatedApp({
                               setIsTabletSidebarExpanded(false);
                             }
                           }}
-                          className={`w-full flex ${
+                          className={`academy-sidebar-item w-full flex ${
                             isTabletSidebarExpanded 
                               ? 'flex-row items-center gap-3 px-3 py-2.5 justify-start' 
                               : 'flex-col items-center justify-center p-2 lg:flex-row lg:items-center lg:gap-3 lg:px-3 lg:py-2.5 lg:justify-start'
@@ -7146,14 +7149,14 @@ export default function AuthenticatedApp({
                           <item.icon size={20} className={`shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-[#58cc02]' : 'text-slate-400'}`} />
                           
                           {/* Tablet Rail Touch Label: clearly visible under icon */}
-                          <span className={`text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-1 transition-colors ${
+                          <span className={`nav-label-short text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-1 transition-colors ${
                             isActive ? 'text-[#58cc02]' : 'text-slate-600 group-hover:text-slate-900'
                           } ${isTabletSidebarExpanded ? 'hidden' : 'block lg:hidden'}`}>
                             {item.shortLabel}
                           </span>
 
                           {/* Desktop / Expanded Label */}
-                          <span className={`text-[11px] lg:text-xs font-bold uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} truncate ${
+                          <span className={`nav-label-full text-[11px] lg:text-xs font-bold uppercase tracking-wider ${isRtl ? 'text-right' : 'text-left'} truncate ${
                             isTabletSidebarExpanded ? 'block' : 'hidden lg:block'
                           }`}>
                             {item.label}
@@ -7173,22 +7176,24 @@ export default function AuthenticatedApp({
                     );
                   })}
                 </nav>
+                <NavOverflowHint target={sidebarNavRef} label={isRtl ? 'باقي الأقسام تحت' : 'More sections below'} />
+                </div>
 
-                <div className="pt-2 mt-1 border-t border-slate-100 space-y-1">
+                <div className="academy-sidebar-foot pt-2 mt-1 border-t border-slate-100 space-y-1">
                   <button 
                     onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-                    className={`w-full flex ${
+                    className={`academy-sidebar-item w-full flex ${
                       isTabletSidebarExpanded ? 'flex-row items-center gap-3 px-3 py-2 justify-start' : 'flex-col items-center justify-center p-2 lg:flex-row lg:items-center lg:gap-3 lg:px-3 lg:py-2 lg:justify-start'
                     } rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition-all group`}
                     title={t.languageToggle}
                   >
                     <Settings size={18} className="shrink-0 text-slate-400 group-hover:rotate-45 transition-transform" />
-                    <span className={`text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-0.5 ${
+                    <span className={`nav-label-short text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-0.5 ${
                       isTabletSidebarExpanded ? 'hidden' : 'block lg:hidden'
                     }`}>
                       {lang === 'ar' ? 'اللغة' : 'Lang'}
                     </span>
-                    <span className={`text-[10px] lg:text-[11px] font-bold uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} truncate ${
+                    <span className={`nav-label-full text-[10px] lg:text-[11px] font-bold uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} truncate ${
                       isTabletSidebarExpanded ? 'block' : 'hidden lg:block'
                     }`}>
                       {t.languageToggle}
@@ -7196,18 +7201,18 @@ export default function AuthenticatedApp({
                   </button>
                   <button 
                     onClick={handleLogout}
-                    className={`w-full flex ${
+                    className={`academy-sidebar-item w-full flex ${
                       isTabletSidebarExpanded ? 'flex-row items-center gap-3 px-3 py-2 justify-start' : 'flex-col items-center justify-center p-2 lg:flex-row lg:items-center lg:gap-3 lg:px-3 lg:py-2 lg:justify-start'
                     } rounded-xl hover:bg-rose-50/80 text-rose-600 transition-all group`}
                     title={t.logout}
                   >
                     <LogOut size={18} className="shrink-0 text-rose-400 group-hover:translate-x-1 transition-transform" />
-                    <span className={`text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-0.5 ${
+                    <span className={`nav-label-short text-[9px] font-black tracking-tight text-center leading-tight truncate max-w-[66px] mt-0.5 ${
                       isTabletSidebarExpanded ? 'hidden' : 'block lg:hidden'
                     }`}>
                       {lang === 'ar' ? 'خروج' : 'Exit'}
                     </span>
-                    <span className={`text-[10px] lg:text-[11px] font-bold uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} truncate ${
+                    <span className={`nav-label-full text-[10px] lg:text-[11px] font-bold uppercase tracking-widest ${isRtl ? 'text-right' : 'text-left'} truncate ${
                       isTabletSidebarExpanded ? 'block' : 'hidden lg:block'
                     }`}>
                       {t.logout}
