@@ -172,3 +172,15 @@ const PALETTE = [LEVEL_COLORS.a, LEVEL_COLORS.b1, LEVEL_COLORS.b2, LEVEL_COLORS.
 export function levelColor(_levelId: string, levelIndex = 0, offset = 0) {
   return PALETTE[(((levelIndex + offset) % PALETTE.length) + PALETTE.length) % PALETTE.length];
 }
+
+/** Each specialised teacher's emoji family + first level colour on the map (keyed by persona id). */
+export const TEACHER_MAP_STYLE: Record<string, { kind: MapKind; colorOffset: number }> = {
+  grammar: { kind: 'grammar', colorOffset: 0 },        // نورة
+  business: { kind: 'conversation', colorOffset: 1 },  // محمد
+  exams: { kind: 'writing', colorOffset: 3 },          // علي
+  lama: { kind: 'pronunciation', colorOffset: 6 },     // لمى
+  reem: { kind: 'vocabulary', colorOffset: 5 },        // ريم
+  haya: { kind: 'grammar', colorOffset: 2 },           // هيا
+  jana: { kind: 'grammar', colorOffset: 4 },           // جنى
+};
+export const teacherMapStyle = (personaId: string) => TEACHER_MAP_STYLE[personaId] || { kind: 'grammar' as MapKind, colorOffset: 0 };

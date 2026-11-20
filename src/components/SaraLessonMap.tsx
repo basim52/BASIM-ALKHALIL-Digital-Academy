@@ -38,6 +38,13 @@ interface Props<T extends MapLesson> {
   renderLevelEnd?: (levelId: string) => React.ReactNode;
   /** Sara's existing portrait. */
   saraImage?: string;
+  /** Another teacher's portrait (/tutors/{id}.webp); wins over saraImage. */
+  teacherImage?: string;
+  /** Teacher shown on top of the map (default: Sara). */
+  teacherNameAr?: string;
+  teacherNameEn?: string;
+  /** Shown instead of the photo if it fails to load. */
+  teacherEmoji?: string;
   /** Number lessons across the whole track (default) or inside each level (like the levelled lists). */
   numbering?: 'track' | 'level';
 }
@@ -60,8 +67,9 @@ const STEP = 58;      // horizontal px per zigzag unit
 const TOP = 84;       // first node centre (px)
 const CEFR = /^[abc][12]$/i;
 
-/** 🗺️ Duolingo-style winding lesson map for Sara's lesson lists (display + navigation only; never writes progress). */
-export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf, unlocked, unlockAll, isOpen, lang, trackTitleAr, trackTitleEn, kind = 'grammar', colorOffset = 0, onOpen, onFreeChat, streak, renderLevelEnd, saraImage = '/tutors/sara.webp', numbering = 'track' }: Props<T>) {
+/** 🗺️ Duolingo-style winding lesson map for Sara's and the other teachers' lesson lists (display + navigation only; never writes progress). */
+export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf, unlocked, unlockAll, isOpen, lang, trackTitleAr, trackTitleEn, kind = 'grammar', colorOffset = 0, onOpen, onFreeChat, streak, renderLevelEnd, saraImage = '/tutors/sara.webp', teacherImage, teacherNameAr = 'سارة', teacherNameEn = 'Sara', teacherEmoji = '👩‍🏫', numbering = 'track' }: Props<T>) {
+  const [photoBad, setPhotoBad] = useState(false);
   const t = (ar: string, en: string) => (lang === 'en' ? en : ar);
   const rtl = lang !== 'en';
   const secOf = (l: T) => (sectionOf ? sectionOf(l) : l.levelId) ?? 'all';
@@ -140,11 +148,13 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
         .slm-bob { animation: slm-bob 1.4s ease-in-out infinite }
       `}</style>
       <div ref={scroller} className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-24">
-        {/* Sara header */}
+        {/* Teacher header (Sara by default) */}
         <div className="m-3 rounded-3xl bg-gradient-to-br from-[#002147] to-[#0b3d7a] text-white p-3 flex items-center gap-3 shadow-md">
-          <img src={saraImage} alt={t('سارة', 'Sara')} width={64} height={64} className="w-16 h-16 rounded-full object-cover border-[3px] border-[#E6C36A] bg-[#001a38] shrink-0" />
+          {photoBad
+            ? <span data-testid="sara-map-teacher-emoji" className="w-16 h-16 rounded-full border-[3px] border-[#E6C36A] bg-[#001a38] shrink-0 flex items-center justify-center text-[30px]">{teacherEmoji}</span>
+            : <img data-testid="sara-map-teacher-photo" src={teacherImage || saraImage} alt={t(teacherNameAr, teacherNameEn)} width={64} height={64} onError={() => setPhotoBad(true)} className="w-16 h-16 rounded-full object-cover border-[3px] border-[#E6C36A] bg-[#001a38] shrink-0" />}
           <div className="flex-1 min-w-0">
-            <p className="text-[15px] font-black">{t('سارة', 'Sara')}</p>
+            <p data-testid="sara-map-teacher-name" className="text-[15px] font-black">{t(teacherNameAr, teacherNameEn)}</p>
             <p className="text-[11px] text-amber-200 font-bold truncate">{t(trackTitleAr, trackTitleEn || trackTitleAr)}</p>
             {!!streak && streak > 0 && (
               <span data-testid="sara-map-streak" className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-[11px] font-black">🔥 {streak} {t('يوم', streak === 1 ? 'day' : 'days')}</span>
