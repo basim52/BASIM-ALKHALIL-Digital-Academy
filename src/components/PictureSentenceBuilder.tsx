@@ -77,8 +77,8 @@ export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ 
 
   return (
     <div className="fixed inset-0 z-[320] bg-black/70 flex items-stretch sm:items-center justify-center p-0 sm:p-4" dir="rtl" role="dialog" aria-modal="true" aria-labelledby="psb-title" data-testid="picture-sentence-builder">
-      <div className="w-full sm:max-w-2xl max-h-full overflow-y-auto sm:rounded-3xl p-3 sm:p-5 text-white" style={{ background: 'radial-gradient(circle at 50% 0%, #16245a 0%, #0A1533 60%)' }}>
-        <header className="flex items-center gap-2 mb-3">
+      <div className="psb-panel w-full sm:max-w-2xl max-h-full overflow-y-auto sm:rounded-3xl p-3 sm:p-5 text-white" style={{ background: 'radial-gradient(circle at 50% 0%, #16245a 0%, #0A1533 60%)' }}>
+        <header className="psb-head flex items-center gap-2 mb-3">
           <div className="flex-1 min-w-0">
             <h2 id="psb-title" className="text-lg sm:text-2xl font-black text-yellow-300">🧩 ركّب الجملة مع {teacherNameAr}</h2>
             <p className="text-[12px] sm:text-sm font-bold text-sky-200" data-testid="psb-theme">{classroom.themeAr}</p>
@@ -87,7 +87,7 @@ export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ 
           <button type="button" onClick={() => { voice.current.stop(); onClose(); }} className="shrink-0 rounded-xl bg-white/10 border border-white/20 px-3 py-2 font-bold" aria-label="إغلاق ركّب الجملة">إغلاق</button>
         </header>
 
-        <nav className="flex gap-1.5 overflow-x-auto pb-2 mb-2" aria-label="المجموعات">
+        <nav className="psb-sets flex gap-1.5 overflow-x-auto pb-2 mb-2" aria-label="المجموعات">
           {sets.map((s, i) => (
             <button key={s.id} type="button" onClick={() => goSet(i)} aria-pressed={i === setIdx} data-testid={`psb-set-${i + 1}`}
               className={`shrink-0 rounded-full px-3 py-1.5 text-[12px] font-black border ${i === setIdx ? 'bg-yellow-300 text-[#0A1533] border-yellow-200' : 'bg-white/5 border-white/20 text-white/85'}`}>
@@ -96,7 +96,7 @@ export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ 
           ))}
         </nav>
 
-        <ol className="flex flex-col gap-2.5" aria-label="بطاقة الجمل">
+        <ol className="psb-rows flex flex-col gap-2.5" aria-label="بطاقة الجمل">
           {set.rows.map((r, i) => {
             const target = !done && i === rowIdx;
             const hidden = target && !finished;
@@ -117,7 +117,7 @@ export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ 
         </ol>
 
         {done ? (
-          <section className="mt-4 rounded-2xl p-4 text-center bg-[#0d1b45]" style={glow(1)} data-testid="psb-set-done">
+          <section className="psb-work mt-4 rounded-2xl p-4 text-center bg-[#0d1b45]" style={glow(1)} data-testid="psb-set-done">
             <p className="text-3xl">🏆</p>
             <p className="font-black text-yellow-300 text-lg">خلّصت جمل «{set.titleAr}»!</p>
             <p className="text-sm text-white/80 mb-3">اقرأ البطاقة كلها بصوتك مع {teacherNameAr}.</p>
@@ -127,7 +127,7 @@ export const PictureSentenceBuilder: React.FC<PictureSentenceBuilderProps> = ({ 
             </div>
           </section>
         ) : (
-          <section className="mt-4 rounded-2xl p-3 bg-[#0d1b45]" style={glow(0)} aria-label="ركّب الجملة" data-testid="psb-puzzle">
+          <section className="psb-work mt-4 rounded-2xl p-3 bg-[#0d1b45]" style={glow(0)} aria-label="ركّب الجملة" data-testid="psb-puzzle">
             <div className="flex items-center justify-between gap-2 mb-2 text-[12px] sm:text-sm">
               <span className="font-black text-yellow-300">الجملة {rowIdx + 1} من {set.rows.length}: {row.emoji} {row.ar}</span>
               <span data-testid="psb-attempts" className="text-white/80">{finished ? '' : `المحاولات: ${attemptsLeft(state)} من ${MAX_ATTEMPTS}`}</span>

@@ -147,15 +147,18 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
     } catch { setSaved('fail'); }
   };
 
-  const shell = (children: React.ReactNode) => (
-    <div data-testid="sara-board-tutor" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">{children}</div>
+  const shell = (children: React.ReactNode, extra = 'overflow-hidden') => (
+    <div data-testid="sara-board-tutor" className={`flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white ${extra}`}>{children}</div>
   );
 
   if (track) return <TutorTrackPlayer track={track} uid={uid} onBack={() => setTrack(null)} />;
   const personaTrack = TUTOR_TRACKS.find(t => t.personaId === persona.id);
   const fbTrack = TUTOR_FILL_BLANK_TRACKS.find(t => t.personaId === persona.id);
 
+  // Pick screen: scrolls when the screen is short (iPad landscape) instead of clipping the lower buttons;
+  // on landscape screens the teachers sit in one column and the topic/actions in another (see .class-pick in index.css).
   if (step === 'pick') return shell(<>
+    <div className="contents class-pick-col class-pick-teachers" data-testid="class-pick-teachers">
     <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[11px] text-amber-200/90 font-bold">{L("اختر المعلم واكتب وش تبي تتعلم، ويشرحه لك على السبورة.", "Pick a teacher and type what you want to learn; they explain it on the board.")}</p><ExplainLangToggle /></div>
     <div className="grid grid-cols-4 gap-1.5 shrink-0">
       {BOARD_PERSONAS.filter(p => !p.kids).map(p => {
@@ -207,6 +210,8 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
         })}
       </div>
     </div>
+    </div>
+    <div className="contents class-pick-col class-pick-actions" data-testid="class-pick-actions">
     <input dir="ltr" value={topic} maxLength={300} onChange={e => setTopic(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') void ask(); }}
       placeholder={persona.examplesAr[0]} data-testid="board-topic"
       className="shrink-0 rounded-xl bg-[#0a2d5c] border border-amber-400/40 px-3 py-2 text-[14px] font-bold text-white placeholder:text-white/30 outline-none focus:border-amber-400" />
@@ -309,8 +314,9 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
     {fbOpen && fbTrack && <Suspense fallback={null}><FillBlankPlayer isOpen track={fbTrack} uid={uid} onClose={() => setFbOpen(false)} /></Suspense>}
     <div className="flex-1" />
     <button onClick={() => void ask()} disabled={!topic.trim() || busy} data-testid="board-ask"
-      className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{busy ? L(`${persona.nameAr} ${persona.gender === 'female' ? 'تجهّز' : 'يجهّز'} السبورة…`, `${persona.nameEn} is preparing the board…`) : L('اشرح لي على السبورة', 'Explain it on the board')}</button>
-  </>);
+      className="class-pick-ask shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{busy ? L(`${persona.nameAr} ${persona.gender === 'female' ? 'تجهّز' : 'يجهّز'} السبورة…`, `${persona.nameEn} is preparing the board…`) : L('اشرح لي على السبورة', 'Explain it on the board')}</button>
+    </div>
+  </>, 'overflow-y-auto overscroll-contain class-pick');
 
   if (!board) return shell(null);
 

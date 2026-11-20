@@ -1473,6 +1473,16 @@ const SmartWhiteboardComponent: React.FC<SmartWhiteboardProps> = ({
   };
   
   // Custom Size and Scaling State (التحكم بحجم السبورة تكبيراً وتصغيراً حسب الرغبة)
+  // Rotating an iPad while the board is open: re-render so the inline size below is re-clamped to the
+  // new window (it reads window.innerWidth/innerHeight at render time); otherwise the portrait height
+  // stays and the bottom toolbar ends up below a landscape screen.
+  const [, setViewportTick] = useState(0);
+  useEffect(() => {
+    const onResize = () => setViewportTick(v => v + 1);
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    return () => { window.removeEventListener('resize', onResize); window.removeEventListener('orientationchange', onResize); };
+  }, []);
   const [customSize, setCustomSize] = useState<{ width: number; height: number }>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('alkhalil_whiteboard_size');
