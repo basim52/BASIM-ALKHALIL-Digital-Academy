@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, ArrowRight, Lock, CheckCircle2 } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useT } from '../lib/explainLang';
 import { cancelAllSpeech } from '../lib/audio';
@@ -14,6 +14,8 @@ import './tutor3d/tutorBoard.css';
 import { type SaraBlankLesson, type SaraBlankCard, type FillBlankTrack, trackFillBlankLevel, FILL_BLANK_LEVELS } from '../data/saraTracks/fillBlank';
 import { SARA_FILL_BLANK } from '../data/fillBlankTracks';
 import SaraLessonMap, { useSaraStreak } from './SaraLessonMap';
+import TutorConversation from './TutorConversation';
+import { teacherMapStyle } from '../lib/saraLessonMap';
 import { SaraLivePhoneCallModal } from './SaraLivePhoneCallModal';
 import { freeCallPresetFor } from './SaraLessonCall';
 
@@ -190,6 +192,7 @@ const Lesson: React.FC<{ l: SaraBlankLesson; track: FillBlankTrack; onBack: () =
 export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, unlockAll, track }) => {
   const t = useT();
   const LESSONS = track.lessons, TID = track.id, sara = track.store === 'sara';
+  const P = personaById(track.personaId);
   const read = () => (sara ? readUnlocked(TID, uid) : readTutorUnlocked(TID, uid));
   const [unlockedRaw, setUnlocked] = useState(read);
   const [active, setActive] = useState<SaraBlankLesson | null>(null);
@@ -207,7 +210,6 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
     }).catch(() => {});
   }, [isOpen, uid, TID]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!isOpen) return null;
-  const unlocked = unlockAll ? LESSONS.length : unlockedRaw;
   const onDone = (l: SaraBlankLesson) => setUnlocked(cur => {
     const next = l.order + 1; if (next <= cur) return cur;
     if (sara) {
@@ -231,35 +233,19 @@ export const FillBlankPlayer: React.FC<TrackProps> = ({ isOpen, onClose, uid, un
         {active ? (
           <Lesson key={active.id} l={active} track={track} onBack={() => { saraStopNarrator(); setActive(null); }} onDone={() => onDone(active)}
             hasNext={!!nextOf(active)} onNext={() => { const n = nextOf(active); if (n) setActive(n); }} />
-        ) : sara ? (
-          /* Sara: zigzag lesson map (reads the same saved counter; tutors' fill-blank lists below stay as they are) */
+        ) : chat && !sara ? (
+          /* Other teachers: their existing chat (no call modal) */
+          <TutorConversation persona={P} onBack={() => setChat(false)} />
+        ) : (
+          /* Zigzag lesson map for Sara and every other teacher (reads the same saved counter, never writes progress) */
           <SaraLessonMap lessons={LESSONS} levels={LV.map((v, i) => ({ id: `l${i + 1}`, titleAr: v.ar, titleEn: v.en }))}
             sectionOf={l => `l${Math.min(trackFillBlankLevel(track, l.order), LV.length)}`}
             unlocked={unlockedRaw} unlockAll={unlockAll} lang={t('ar', 'en') as 'ar' | 'en'} trackTitleAr={track.titleAr} trackTitleEn={track.titleEn}
-            kind="grammar" colorOffset={4} streak={streak}
-            onOpen={l => { saraUnlockNarrator(); markLastTrack(uid, TID); setActive(l); }}
+            kind={sara ? 'grammar' : teacherMapStyle(P.id).kind} colorOffset={sara ? 4 : teacherMapStyle(P.id).colorOffset} streak={streak}
+            numbering={sara ? 'track' : 'level'}
+            {...(sara ? {} : { teacherImage: `/tutors/${P.id}.webp`, teacherNameAr: P.nameAr, teacherNameEn: P.nameEn, teacherEmoji: P.emoji })}
+            onOpen={l => { saraUnlockNarrator(); if (sara) markLastTrack(uid, TID); setActive(l); }}
             onFreeChat={() => { saraUnlockNarrator(); setChat(true); }} />
-        ) : (
-          <div className="flex-1 min-h-0 overflow-y-auto p-3 grid gap-1.5 content-start">
-            {LESSONS.map((l, i) => {
-              const open = l.order <= unlocked;
-              const lv = trackFillBlankLevel(track, l.order), head = i === 0 || trackFillBlankLevel(track, LESSONS[i - 1].order) !== lv ? LV[Math.min(lv, LV.length) - 1] : null;
-              return (
-                <React.Fragment key={l.id}>
-                  {head && <p data-testid="fill-blank-level" className="mt-1 px-1 text-[12px] font-black text-[#002147] border-b-2 border-[#C49E3A]/50 pb-0.5">{t(head.ar, head.en)}</p>}
-                  <button disabled={!open} data-testid="fill-blank-lesson-item" onClick={() => { saraUnlockNarrator(); if (sara) markLastTrack(uid, TID); setActive(l); }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-start ${open ? 'bg-white border-amber-300 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`}>
-                    <span className="w-6 h-6 rounded-full bg-[#002147] text-white text-[11px] font-black flex items-center justify-center shrink-0">{l.order}</span>
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-[13px] font-black text-slate-800 truncate">{l.icon} {t(l.titleAr, l.titleEn)}</span>
-                      <span dir="ltr" className="block text-[11px] text-slate-500 truncate text-end">{l.titleEn} · {t(`${l.cards.length} جمل`, `${l.cards.length} sentences`)}</span>
-                    </span>
-                    {open ? (l.order < unlockedRaw ? <CheckCircle2 size={16} className="text-emerald-600" /> : null) : <Lock size={14} className="text-slate-400" />}
-                  </button>
-                </React.Fragment>
-              );
-            })}
-          </div>
         )}
         {chat && sara && (() => { const cur = LESSONS.find(x => x.order === Math.min(unlockedRaw, LESSONS.length)) || LESSONS[0]; return <SaraLivePhoneCallModal isOpen onClose={() => setChat(false)} studentName="" studentLevel="A2" isRtl studentId={uid} preset={freeCallPresetFor(cur.titleEn, cur.titleAr)} />; })()}
       </div>

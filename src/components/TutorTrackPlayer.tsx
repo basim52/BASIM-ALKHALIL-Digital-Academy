@@ -3,13 +3,15 @@ import { SpellingExercise } from './SpellingExercise';
 import { spellingItemsFor } from '../lib/spelling';
 import { useT } from '../lib/explainLang';
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
-import { Volume2, Square, Lock, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
+import { Volume2, Square, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { readTutorUnlocked, saveTutorUnlocked } from '../lib/tutorProgress';
 import { TtsDebugOverlay, longPressDebug } from './TtsDebugOverlay';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator, saraLastReason } from './SaraTrackPlayer';
 import { toToolCalls } from '../lib/boardActions';
 import { personaById } from '../data/saraBoardPersonas';
 import TutorConversation from './TutorConversation';
+import SaraLessonMap from './SaraLessonMap';
+import { teacherMapStyle } from '../lib/saraLessonMap';
 import KidsCardBoard from './KidsCardBoard';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
@@ -61,6 +63,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const v = useVoice(persona.voice);
   const [replay, setReplay] = useState(0);
   const [talk, setTalk] = useState(false);
+  const [freeTalk, setFreeTalk] = useState(false); // «دردشة حرة» from the map: this teacher's existing chat, no lesson scope
   const calls = useMemo(() => (lesson?.board ? toToolCalls(lesson.board) : []), [lesson]);
   const kidsBoard = !!(persona.kids && lesson?.kids);
   const boardNarration = lesson?.content ? (kidsBoard ? `${lesson.content.explanationAr} ${lesson.kids!.say}` : `${lesson.content.explanationAr} ${lesson.content.example.map(e => e.en).join('. ')}`) : '';
@@ -108,28 +111,27 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     <button disabled={disabled} onClick={() => { v.stop(); onClick(); }} data-testid="tutor-next" className="shrink-0 w-full py-3 rounded-xl bg-amber-400 text-[#001a38] text-[15px] font-black disabled:opacity-40">{label}</button>
   );
 
-  // Lesson list
+  /** Open a lesson from the map (same steps the old list ran). */
+  const openLesson = (l: TutorLesson) => { setLesson(l); setStep({ k: 'board' }); trans.reset(); const cc = l.content!; const lk = persona.kids ? l.kids : undefined; if (lang === 'en') { v.stop(); trans.narrationStarted(); void englishLessonAsync(l).then(x => { const e2 = x.content!; playBoard(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else playBoard(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); };
+
+  // Lesson map (same zigzag map as Sara's lessons; reads the saved counter only, never writes progress)
   if (!lesson) {
-    return shell(
-      <><p {...longPressDebug()} className="text-[10px] text-amber-300 font-bold select-none">{persona.emoji} {NM}</p><p className="text-[13px] font-black truncate">{t(track.titleAr, (track as { titleEn?: string }).titleEn || track.titleAr)}</p></>,
-      <div className="flex-1 min-h-0 overflow-y-auto grid gap-1.5 content-start" data-testid="tutor-lessons">
-        {track.lessons.map((l, idx) => {
-          const open = l.order <= unlocked;
-          const lvl = track.levels?.find(v => v.id === l.levelId);
-          const showLevel = !!lvl && (track.levels?.length || 0) > 1 && (idx === 0 || track.lessons[idx - 1].levelId !== l.levelId);
-          return (
-            <React.Fragment key={l.id}>
-            {showLevel && <p className="mt-2 first:mt-0 px-1 text-[12px] font-black text-amber-300" data-testid="tutor-level-head">{t(lvl!.titleAr, (lvl as { titleEn?: string }).titleEn || lvl!.titleAr)}</p>}
-            <button disabled={!open} onClick={() => { setLesson(l); setStep({ k: 'board' }); trans.reset(); const cc = l.content!; const lk = persona.kids ? (l as TutorLesson).kids : undefined; if (lang === 'en') { v.stop(); trans.narrationStarted(); void englishLessonAsync(l).then(x => { const e2 = x.content!; playBoard(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else playBoard(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); }}
-              className={`flex items-center gap-2 rounded-xl px-3 py-2 text-start border ${open ? 'bg-[#0a2d5c] border-amber-400/40' : 'bg-white/5 border-white/10 opacity-60'}`}>
-              <span className="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-[#001a38] text-[12px] font-black flex items-center justify-center">{l.order}</span>
-              <span className="flex-1 min-w-0">{lang === 'en' ? <span dir="ltr" className="block text-[13px] font-black truncate text-start">{l.titleEn}</span> : <><span className="block text-[13px] font-black truncate">{l.titleAr}</span><span dir="ltr" className="block text-[11px] text-white/60 font-bold truncate text-start">{l.titleEn}</span></>}</span>
-              {!open && <Lock size={14} className="text-white/50 shrink-0" />}
-              {l.order < unlocked && <CheckCircle2 size={14} className="text-emerald-300 shrink-0" />}
-            </button>
-            </React.Fragment>
-          );
-        })}
+    if (freeTalk) return <TutorConversation persona={persona} onBack={() => setFreeTalk(false)} />;
+    const style = teacherMapStyle(persona.id);
+    return (
+      <div data-testid="tutor-track" className="flex-1 min-h-0 flex flex-col bg-white overflow-hidden">
+        <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#001a38] text-white">
+          <button onClick={() => { v.stop(); onBack(); }} aria-label={t("رجوع", "Back")} className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
+          <div className="min-w-0 flex-1"><p {...longPressDebug()} className="text-[10px] text-amber-300 font-bold select-none">{persona.emoji} {NM}</p><p className="text-[13px] font-black truncate">{t(track.titleAr, (track as { titleEn?: string }).titleEn || track.titleAr)}</p></div>
+          <ExplainLangToggle />
+        </div>
+        <div data-testid="tutor-lessons" className="flex-1 min-h-0 flex flex-col">
+          <SaraLessonMap lessons={track.lessons} levels={track.levels} unlocked={unlocked} lang={lang === 'en' ? 'en' : 'ar'}
+            trackTitleAr={track.titleAr} trackTitleEn={(track as { titleEn?: string }).titleEn} kind={style.kind} colorOffset={style.colorOffset} numbering="level"
+            teacherImage={`/tutors/${persona.id}.webp`} teacherNameAr={persona.nameAr} teacherNameEn={persona.nameEn} teacherEmoji={persona.emoji}
+            onOpen={l => openLesson(l)} onFreeChat={() => { v.stop(); setFreeTalk(true); }} />
+        </div>
+        <TtsDebugOverlay />
       </div>
     );
   }
