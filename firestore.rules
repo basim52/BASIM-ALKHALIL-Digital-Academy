@@ -49,6 +49,11 @@ service cloud.firestore {
       );
     }
 
+    // «غرفتي» room item ids (e.g. 'ch-cat', 'hat-grad') — cosmetic only
+    function isRoomItemId(v) {
+      return v is string && v.size() <= 32 && v.matches('^[a-z]+-[a-z]+$');
+    }
+
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
@@ -181,6 +186,24 @@ service cloud.firestore {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.auth.uid == userId;
         allow update, delete: if isAdmin();
+      }
+
+      // «غرفتي»: the child's room/character choices, synced across devices (users/{userId}/gamify/room).
+      // Separate small doc — never progress or XP. Owner only, exact fields, ids/sizes validated.
+      match /gamify/{docId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update: if isOwner(userId) && docId == 'room' &&
+          request.resource.data.keys().hasOnly(['character', 'hat', 'pet', 'wall', 'decor', 'updatedAt']) &&
+          request.resource.data.keys().hasAll(['character', 'hat', 'pet', 'wall', 'decor', 'updatedAt']) &&
+          isRoomItemId(request.resource.data.character) && isRoomItemId(request.resource.data.hat) &&
+          isRoomItemId(request.resource.data.pet) && isRoomItemId(request.resource.data.wall) &&
+          request.resource.data.decor is list && request.resource.data.decor.size() <= 4 &&
+          (request.resource.data.decor.size() < 1 || isRoomItemId(request.resource.data.decor[0])) &&
+          (request.resource.data.decor.size() < 2 || isRoomItemId(request.resource.data.decor[1])) &&
+          (request.resource.data.decor.size() < 3 || isRoomItemId(request.resource.data.decor[2])) &&
+          (request.resource.data.decor.size() < 4 || isRoomItemId(request.resource.data.decor[3])) &&
+          request.resource.data.updatedAt is int && request.resource.data.updatedAt > 0;
+        allow delete: if isOwner(userId) || isAdmin();
       }
     }
 

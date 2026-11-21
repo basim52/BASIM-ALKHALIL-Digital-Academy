@@ -188,13 +188,18 @@ export function sanitizeRoom(raw: unknown, xp: number): RoomState {
   return { character: pick('character'), hat: pick('hat'), pet: pick('pet'), wall: pick('wall'), decor };
 }
 
-/** Room choices live on this device only (localStorage) — no Firestore write, no rules change. */
+/** Room choices: device copy in localStorage (cache/offline), synced to users/{uid}/gamify/room (see roomSync.ts). */
 export const roomKey = (uid?: string | null) => `academy_room_v1_${uid || 'guest'}`;
 export function loadRoom(uid: string | null | undefined, xp: number): RoomState {
   try { const s = localStorage.getItem(roomKey(uid)); return sanitizeRoom(s ? JSON.parse(s) : null, xp); } catch { return { ...DEFAULT_ROOM }; }
 }
-export function saveRoom(uid: string | null | undefined, room: RoomState) {
-  try { localStorage.setItem(roomKey(uid), JSON.stringify(room)); } catch { /* private mode */ }
+/** Saves the device copy (also the offline cache of the cloud copy) with the time of the change. */
+export function saveRoom(uid: string | null | undefined, room: RoomState, updatedAt: number = Date.now()) {
+  try { localStorage.setItem(roomKey(uid), JSON.stringify({ ...room, updatedAt })); } catch { /* private mode */ }
+}
+/** When the device copy was last changed (0 = never saved). */
+export function roomUpdatedAt(uid: string | null | undefined): number {
+  try { const s = localStorage.getItem(roomKey(uid)); const n = s ? Number(JSON.parse(s)?.updatedAt) : 0; return Number.isFinite(n) && n > 0 ? n : 0; } catch { return 0; }
 }
 /** Avatar shown on the map: the room's character + hat + pet (defaults when nothing is saved). */
 export function readAvatar(uid?: string | null): { character: string; hat: string; pet: string } {

@@ -189,3 +189,75 @@ test('parent card line uses only real numbers', () => {
   assert.match(parentLine('عبود', 6, 2), /نجم الأسبوع/);
   assert.match(parentLine('', 2, 2), /بطلنا/);
 });
+
+// ───── Room cloud sync (users/{uid}/gamify/room) — most recent wins ─────
+const { mergeRooms, syncRoomWith, toCloudDoc, fromCloudDoc } = await import('../src/lib/roomSync');
+const R = (character: string, at: number) => ({ room: { ...DEFAULT_ROOM, character }, updatedAt: at });
+
+test('merge: most recent updatedAt wins, tie → cloud, nothing → nothing', () => {
+  assert.deepEqual(mergeRooms(null, null), { winner: 'none', room: null, pushCloud: false, writeLocal: false });
+  let m = mergeRooms(R('ch-cat', 200), R('ch-hero', 100));
+  assert.equal(m.winner, 'local'); assert.equal(m.pushCloud, true); assert.equal(m.writeLocal, false); assert.equal(m.room!.room.character, 'ch-cat');
+  m = mergeRooms(R('ch-cat', 100), R('ch-hero', 200));
+  assert.equal(m.winner, 'cloud'); assert.equal(m.pushCloud, false); assert.equal(m.writeLocal, true); assert.equal(m.room!.room.character, 'ch-hero');
+  m = mergeRooms(R('ch-cat', 100), R('ch-cat', 100));
+  assert.equal(m.winner, 'cloud'); assert.equal(m.writeLocal, false, 'already identical → no write');
+  m = mergeRooms(null, R('ch-girl', 5)); assert.equal(m.winner, 'cloud'); assert.equal(m.writeLocal, true, 'new device pulls the cloud copy');
+  m = mergeRooms(R('ch-girl', 5), null); assert.equal(m.pushCloud, true, 'first sync uploads the device copy');
+  m = mergeRooms(R('ch-girl', 0), R('ch-cat', 3)); assert.equal(m.winner, 'cloud', 'unsaved device copy never wins');
+});
+
+function fakeIO(local: any, cloud: any, opts: { readFails?: boolean; writeFails?: boolean } = {}) {
+  const log: string[] = [];
+  const io = {
+    local, cloud,
+    readLocal: () => io.local,
+    writeLocal: (r: any) => { log.push('local'); io.local = r; },
+    readCloud: async () => { if (opts.readFails) throw new Error('offline'); return io.cloud; },
+    writeCloud: async (r: any) => { log.push('cloud'); if (opts.writeFails) throw new Error('denied'); io.cloud = r; },
+  };
+  return { io, log };
+}
+
+test('sync: pulls a newer cloud copy (another device) into this device', async () => {
+  const { io, log } = fakeIO(R('ch-boy', 100), R('ch-astro', 900));
+  const m = await syncRoomWith(io);
+  assert.equal(m.winner, 'cloud'); assert.deepEqual(log, ['local']); assert.equal(io.local.room.character, 'ch-astro');
+});
+
+test('sync: pushes a newer device copy (changed offline) to the cloud', async () => {
+  const { io, log } = fakeIO(R('ch-cat', 900), R('ch-boy', 100));
+  await syncRoomWith(io);
+  assert.deepEqual(log, ['cloud']); assert.equal(io.cloud.room.character, 'ch-cat');
+});
+
+test('sync: offline / denied keeps the device copy untouched', async () => {
+  let { io, log } = fakeIO(R('ch-cat', 900), null, { readFails: true });
+  let m = await syncRoomWith(io);
+  assert.ok(m.error); assert.deepEqual(log, []); assert.equal(io.local.room.character, 'ch-cat');
+  ({ io, log } = fakeIO(R('ch-cat', 900), null, { writeFails: true }));
+  m = await syncRoomWith(io);
+  assert.ok(m.error); assert.equal(io.local.room.character, 'ch-cat', 'still newer locally → retried next time');
+});
+
+test('cloud doc shape matches the rule (exact fields, ≤4 decor, int ms) and bad docs are ignored', () => {
+  const d = toCloudDoc({ ...DEFAULT_ROOM, decor: ['dc-plant', 'dc-books', 'dc-teddy', 'dc-game', 'dc-globe'] }, 1700000000000.7);
+  assert.deepEqual(Object.keys(d).sort(), ['character', 'decor', 'hat', 'pet', 'updatedAt', 'wall']);
+  assert.equal(d.decor.length, 4); assert.ok(Number.isInteger(d.updatedAt));
+  assert.equal(fromCloudDoc(null), null);
+  assert.equal(fromCloudDoc({ character: 'ch-cat' }), null, 'no updatedAt → ignored');
+  const back = fromCloudDoc({ character: 'BAD ID', hat: 'hat-crown', pet: 7, wall: 'wall-space', decor: ['dc-books', 3, 'x y'], updatedAt: 5 })!;
+  assert.deepEqual(back.room, { character: 'ch-boy', hat: 'hat-crown', pet: 'pet-none', wall: 'wall-space', decor: ['dc-books'] });
+  // Locked items from the cloud still show only when XP allows (XP read only).
+  assert.equal(sanitizeRoom(back.room, 0).hat, 'hat-none');
+  assert.equal(sanitizeRoom(back.room, 1000).hat, 'hat-crown');
+});
+
+test('device copy carries updatedAt and the map/room only write the room key', async () => {
+  const { saveRoom, roomUpdatedAt, loadRoom } = await import('../src/lib/gamify');
+  saveRoom('kid9', { ...DEFAULT_ROOM, character: 'ch-girl' }, 1234);
+  assert.equal(roomUpdatedAt('kid9'), 1234);
+  assert.equal(loadRoom('kid9', 0).character, 'ch-girl');
+  assert.equal(roomUpdatedAt('nobody'), 0);
+  localStorage.clear();
+});

@@ -7,7 +7,7 @@ import { useGamifyData } from './gamify/useGamifyData';
 import GamifyBar from './gamify/GamifyBar';
 import MapZoneScene from './gamify/MapZoneScene';
 import AvatarFigure from './gamify/AvatarFigure';
-import { ROOM_EVENT } from './gamify/StudentRoom';
+import { ROOM_EVENT, syncRoom } from './gamify/roomCloud';
 
 /** Minimal shape every Sara lesson list already has. */
 export interface MapLesson { id: string; order: number; titleAr: string; titleEn?: string; icon?: string; levelId?: string }
@@ -84,6 +84,7 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
   useEffect(() => {
     const re = () => setAvatar(readAvatar(gamify.uid)); re();
     window.addEventListener(ROOM_EVENT, re); window.addEventListener('storage', re);
+    void syncRoom(gamify.uid); // the character chosen on another device walks here too
     return () => { window.removeEventListener(ROOM_EVENT, re); window.removeEventListener('storage', re); };
   }, [gamify.uid]);
   const [walked, setWalked] = useState(false);

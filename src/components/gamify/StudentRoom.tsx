@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { X, Lock } from 'lucide-react';
 import AvatarFigure from './AvatarFigure';
-import { ROOM_ITEMS, WALLS, MAX_DECOR, itemUnlocked, nextUnlock, loadRoom, saveRoom, roomItem, type RoomSlot, type RoomState } from '../../lib/gamify';
+import { ROOM_ITEMS, WALLS, MAX_DECOR, itemUnlocked, nextUnlock, loadRoom, roomItem, type RoomSlot, type RoomState } from '../../lib/gamify';
 
-export const ROOM_EVENT = 'academy-room-changed';
+import { ROOM_EVENT, saveRoomEverywhere, syncRoom } from './roomCloud';
+export { ROOM_EVENT };
 const SLOTS: { slot: RoomSlot; ar: string; en: string; icon: string }[] = [
   { slot: 'character', ar: 'الشخصية', en: 'Character', icon: '🧒' },
   { slot: 'hat', ar: 'القبعة', en: 'Hat', icon: '🧢' },
@@ -23,10 +24,13 @@ export function StudentRoom({ uid, xp, name, lang = 'ar', onClose }: { uid: stri
   const [room, setRoom] = useState<RoomState>(() => loadRoom(uid, points));
   const [slot, setSlot] = useState<RoomSlot>('character');
   useEffect(() => { setRoom(loadRoom(uid, points)); }, [uid, points]);
-  const update = (next: RoomState) => {
-    setRoom(next); saveRoom(uid, next);
-    try { window.dispatchEvent(new Event(ROOM_EVENT)); } catch { /* ignore */ }
-  };
+  // Pull the choices saved on another device (most recent wins), then re-read the device copy.
+  useEffect(() => {
+    const re = () => setRoom(loadRoom(uid, points));
+    window.addEventListener(ROOM_EVENT, re); void syncRoom(uid);
+    return () => window.removeEventListener(ROOM_EVENT, re);
+  }, [uid, points]);
+  const update = (next: RoomState) => { setRoom(next); saveRoomEverywhere(uid, next); };
   const choose = (id: string) => {
     const it = roomItem(id); if (!it || !itemUnlocked(points, it)) return;
     if (it.slot === 'decor') {
