@@ -42,7 +42,7 @@ export function SaraLevelledList<T extends Item>({ lessons, unlockedRaw, unlockA
         unlocked={unlockedRaw} unlockAll={unlockAll} lang="ar" trackTitleAr={titleAr} trackTitleEn={titleEn} kind={style.kind} colorOffset={style.colorOffset}
         isOpen={l => { const li = SARA_NEW_LEVELS.findIndex(lv => l.order >= lv.from && l.order <= lv.to); return gateOf(Math.max(0, li)) && l.order <= unlocked; }}
         onOpen={l => { saraUnlockNarrator(); onOpen(l); }}
-        onFreeChat={current ? () => { saraUnlockNarrator(); setChat(true); } : undefined} streak={streak}
+        onFreeChat={current ? () => { saraUnlockNarrator(); setChat(true); } : undefined} streak={streak} uid={uid}
         renderLevelEnd={id => {
           const li = SARA_NEW_LEVELS.findIndex(lv => lv.id === id); const lv = SARA_NEW_LEVELS[li];
           if (!lv) return null;

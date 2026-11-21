@@ -418,7 +418,7 @@ export const SaraTrackPlayer: React.FC<Props> = ({ isOpen, onClose, track, uid, 
         {/* Lesson map — reads the same saved progress, no writes */}
         {!lesson && !test && (
           <SaraLessonMap lessons={track.lessons} levels={mapLevels} kind={mapStyle.kind} colorOffset={mapStyle.colorOffset} unlocked={unlockedRaw} unlockAll={unlockAll} lang={lang === 'en' ? 'en' : 'ar'}
-            trackTitleAr={track.titleAr} trackTitleEn={track.titleEn} onOpen={openLesson} streak={streak}
+            trackTitleAr={track.titleAr} trackTitleEn={track.titleEn} onOpen={openLesson} streak={streak} uid={uid}
             onFreeChat={() => { unlockNarrator(); stop(); setMapChatOpen(true); }}
             renderLevelEnd={id => <div className="grid">{levelTestButton(levels.find(v => v.id === id))}</div>} />
         )}

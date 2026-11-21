@@ -2,6 +2,12 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import { Lock, Check, MessageCircle, ChevronsDown, ChevronsUp } from 'lucide-react';
 import { getStudentStreak } from '../services/streakService';
 import { mapNodeState, mapNodeOpen, currentLessonOrder, zigzagOffset, lessonIcon, levelColor, type MapNodeState, type MapKind } from '../lib/saraLessonMap';
+import { zoneFor, readAvatar } from '../lib/gamify';
+import { useGamifyData } from './gamify/useGamifyData';
+import GamifyBar from './gamify/GamifyBar';
+import MapZoneScene from './gamify/MapZoneScene';
+import AvatarFigure from './gamify/AvatarFigure';
+import { ROOM_EVENT, syncRoom } from './gamify/roomCloud';
 
 /** Minimal shape every Sara lesson list already has. */
 export interface MapLesson { id: string; order: number; titleAr: string; titleEn?: string; icon?: string; levelId?: string }
@@ -47,6 +53,8 @@ interface Props<T extends MapLesson> {
   teacherEmoji?: string;
   /** Number lessons across the whole track (default) or inside each level (like the levelled lists). */
   numbering?: 'track' | 'level';
+  /** Student uid for the streak / room / parent card row (default: signed-in user). Read only. */
+  uid?: string;
 }
 
 /** 🔥 The student's existing streak (read only; null when there is none). Nothing is written. */
@@ -68,8 +76,18 @@ const TOP = 84;       // first node centre (px)
 const CEFR = /^[abc][12]$/i;
 
 /** 🗺️ Duolingo-style winding lesson map for Sara's and the other teachers' lesson lists (display + navigation only; never writes progress). */
-export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf, unlocked, unlockAll, isOpen, lang, trackTitleAr, trackTitleEn, kind = 'grammar', colorOffset = 0, onOpen, onFreeChat, streak, renderLevelEnd, saraImage = '/tutors/sara.webp', teacherImage, teacherNameAr = 'سارة', teacherNameEn = 'Sara', teacherEmoji = '👩‍🏫', numbering = 'track' }: Props<T>) {
+export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf, unlocked, unlockAll, isOpen, lang, trackTitleAr, trackTitleEn, kind = 'grammar', colorOffset = 0, onOpen, onFreeChat, streak, renderLevelEnd, saraImage = '/tutors/sara.webp', teacherImage, teacherNameAr = 'سارة', teacherNameEn = 'Sara', teacherEmoji = '👩‍🏫', numbering = 'track', uid }: Props<T>) {
   const [photoBad, setPhotoBad] = useState(false);
+  const gamify = useGamifyData(uid);
+  // 🧒 The student's character from "غرفتي" (device only) walks on the map.
+  const [avatar, setAvatar] = useState(() => readAvatar(gamify.uid));
+  useEffect(() => {
+    const re = () => setAvatar(readAvatar(gamify.uid)); re();
+    window.addEventListener(ROOM_EVENT, re); window.addEventListener('storage', re);
+    void syncRoom(gamify.uid); // the character chosen on another device walks here too
+    return () => { window.removeEventListener(ROOM_EVENT, re); window.removeEventListener('storage', re); };
+  }, [gamify.uid]);
+  const [walked, setWalked] = useState(false);
   const t = (ar: string, en: string) => (lang === 'en' ? en : ar);
   const rtl = lang !== 'en';
   const secOf = (l: T) => (sectionOf ? sectionOf(l) : l.levelId) ?? 'all';
@@ -83,6 +101,8 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
   const [tab, setTab] = useState(currentSection);
   useEffect(() => { setTab(currentSection); }, [currentSection]);
   const section = sections[Math.min(tab, sections.length - 1)];
+  // Avatar walks from the previous lesson to the current one each time the level opens.
+  useEffect(() => { setWalked(false); const id = setTimeout(() => setWalked(true), 450); return () => clearTimeout(id); }, [section?.id, currentOrder]);
 
   const scroller = useRef<HTMLDivElement>(null);
   const pathBox = useRef<HTMLDivElement>(null);
@@ -138,6 +158,22 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
   const showJump = !currentVisible || tab !== currentSection;
   const posInLevel = (l: T) => section.lessons.indexOf(l) + 1;
   const showLevelPos = numbering === 'level';
+  const zoneOf = (s: { index: number }) => zoneFor(s.index);
+  const zone = zoneOf(section);
+  const sectionOpen = (s: typeof section) => s.lessons.some(l => openOf(l));
+  const zoneLocked = !sectionOpen(section);
+  const zoneIsNew = !zoneLocked && section.index > 0 && doneIn(section) === 0;
+  const walkIdx = section.lessons.findIndex(l => l.order === currentOrder);
+  const showAvatar = walkIdx >= 0 && openOf(section.lessons[walkIdx]);
+  // Stands beside a lesson circle, on the side away from its title.
+  const besideOf = (i: number) => {
+    const p = pts[i] || pts[0];
+    const lblLeft = p.x > width / 2 + 1 || (Math.abs(p.x - width / 2) <= 1 && (pts[i + 1]?.x ?? pts[i - 1]?.x ?? 0) > width / 2);
+    return { x: p.x + (lblLeft ? 1 : -1) * (NODE / 2 + 30), y: p.y + 22 };
+  };
+  const avFrom = besideOf(Math.max(0, walkIdx - 1));
+  const avTo = besideOf(Math.max(0, walkIdx));
+  const avAt = walked ? avTo : avFrom;
 
   return (
     <div data-testid="sara-lesson-map" className="relative flex-1 min-h-0 flex flex-col bg-white" dir={rtl ? 'rtl' : 'ltr'}>
@@ -146,6 +182,10 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
         @keyframes slm-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
         .slm-pulse { animation: slm-pulse 1.6s ease-out infinite }
         .slm-bob { animation: slm-bob 1.4s ease-in-out infinite }
+        @keyframes slm-hop { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+        .slm-hop { animation: slm-hop .45s ease-in-out infinite }
+        @keyframes slm-pop { 0% { transform: scale(.6); opacity: 0 } 70% { transform: scale(1.08) } 100% { transform: scale(1); opacity: 1 } }
+        .slm-pop { animation: slm-pop .6s ease-out both }
       `}</style>
       <div ref={scroller} className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-24">
         {/* Teacher header (Sara by default) */}
@@ -168,6 +208,9 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
           )}
         </div>
 
+        {/* 🔥 streak · 🏠 room · 🏅 parent card */}
+        <GamifyBar data={gamify} lang={lang} />
+
         {/* Level tabs */}
         {sections.length > 1 && (
           <div className="flex gap-2 overflow-x-auto px-3 pb-1 no-scrollbar">
@@ -177,7 +220,7 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
                 <button key={s.id} data-testid={`sara-map-tab-${s.id}`} onClick={() => setTab(i)}
                   className="shrink-0 px-3 py-1.5 rounded-full text-[11px] font-black border-2"
                   style={active ? { background: c.fill, borderColor: c.shadow, color: '#fff' } : { background: '#fff', borderColor: '#e5e7eb', color: '#475569' }}>
-                  {shortOf(s)} · {doneIn(s)}/{s.lessons.length}
+                  {sectionOpen(s) ? zoneOf(s).emoji : '🔒'} {shortOf(s)} · {doneIn(s)}/{s.lessons.length}
                 </button>
               );
             })}
@@ -188,6 +231,8 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
         <div className="mx-3 mt-2 rounded-2xl p-3 text-white" style={{ background: color.fill, boxShadow: `0 4px 0 ${color.shadow}` }}>
           <p className="text-[11px] font-black opacity-90">{sections.length > 1 ? t(`المستوى ${section.index + 1} · ${section.lessons.length} درس`, `Level ${section.index + 1} · ${section.lessons.length} lessons`) : t(`${section.lessons.length} درس`, `${section.lessons.length} lessons`)}</p>
           <p className="text-[15px] font-black leading-snug">{t(section.titleAr, section.titleEn || section.titleAr)}</p>
+          <p data-testid="sara-map-zone-name" className="text-[11px] font-black opacity-95">{zone.emoji} {t(zone.nameAr, zone.nameEn)}{zoneLocked ? t(' · مقفلة', ' · locked') : ''}</p>
+          {zoneIsNew && <p data-testid="sara-map-zone-new" className="slm-pop mt-1 inline-block px-2 py-0.5 rounded-full bg-white/25 text-[11px] font-black">✨ {t('منطقة جديدة انفتحت لك!', 'New zone unlocked!')}</p>}
           {section.noteAr && <p data-testid="sara-map-level-note" className="text-[11px] font-bold opacity-90">🔒 {t(section.noteAr, section.noteEn || section.noteAr)}</p>}
           <div className="mt-2 h-2.5 rounded-full bg-white/30 overflow-hidden">
             <div className="h-full rounded-full bg-white" style={{ width: `${Math.round((doneIn(section) / section.lessons.length) * 100)}%` }} />
@@ -195,7 +240,8 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
         </div>
 
         {/* Winding path */}
-        <div ref={pathBox} dir="ltr" className="relative mx-auto w-full" style={{ height }}>
+        <div ref={pathBox} dir="ltr" className="relative mx-auto w-full mt-2" style={{ height }}>
+          <MapZoneScene zone={zone} width={width} height={height} rows={pts} locked={zoneLocked} />
           <svg className="absolute left-0 top-0 pointer-events-none" width={width} height={height} aria-hidden>
             <path d={pathD} fill="none" stroke="#e5e7eb" strokeWidth={14} strokeLinecap="round" />
             {doneD && <path d={doneD} fill="none" stroke={color.soft} strokeWidth={14} strokeLinecap="round" />}
@@ -247,6 +293,14 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
               </div>
             );
           })}
+          {showAvatar && (
+            <div data-testid="sara-map-avatar" data-walked={walked ? '1' : '0'} className="absolute z-10 pointer-events-none"
+              style={{ left: avAt.x, top: avAt.y, transform: 'translate(-50%,-100%)', transition: 'left 1.1s ease-in-out, top 1.1s ease-in-out' }}>
+              <div className={walked ? 'slm-bob' : 'slm-hop'}>
+                <AvatarFigure character={avatar.character} hat={avatar.hat} pet={avatar.pet} size={34} />
+              </div>
+            </div>
+          )}
         </div>
         {renderLevelEnd && <div className="px-3 pb-4">{renderLevelEnd(section.id)}</div>}
         {tab < sections.length - 1 && (
