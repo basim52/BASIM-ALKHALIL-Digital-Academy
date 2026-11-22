@@ -71,7 +71,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   const step = phase.k === 'learn' ? 0 : phase.k === 'choose' ? 1 + phase.n : phase.k === 'order' ? 1 + pics.choose.length : total;
   const card = 'rounded-2xl bg-white overflow-hidden';
   const Pic: React.FC<{ src: string; alt: string; className?: string; testId?: string }> = ({ src, alt, className = '', testId }) => (
-    <img src={src} alt={alt} draggable={false} loading="eager" decoding="async" data-testid={testId} className={`w-full aspect-square object-cover bg-slate-100 ${className}`} />
+    <img src={src} alt={alt} draggable={false} loading="eager" decoding="async" data-testid={testId} className={`block w-full aspect-square object-contain bg-slate-50 ${className}`} />
   );
   const Next: React.FC<{ label: string; disabled?: boolean }> = ({ label, disabled }) => (
     <button data-testid="lina-next" disabled={disabled} onClick={() => { stop(); advance(); }} className="shrink-0 w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: theme.accent }}>{label}</button>
@@ -140,7 +140,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const done = picked !== null; const ok = done && wrongWords[picked!].toLowerCase() === w.bad.toLowerCase();
     body = (<div data-testid="lina-wrong" className="flex-1 min-h-0 flex flex-col gap-2">
       <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">🔍 {t('وش الغلط في الصورة؟ اضغط الكلمة الغلط', "What's wrong with the picture? Tap the wrong word")}</p><Listen text={w.en} /></div>
-      <div className={`${card} shrink min-h-0`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={s.img} alt="" className="max-h-[38vh] object-contain" /></div>
+      <div className={`${card} shrink-0 mx-auto w-[min(100%,40vh)] aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={s.img} alt={s.en} testId="lina-wrong-img" className="h-full" /></div>
       <div dir="ltr" className="flex flex-wrap gap-1.5 shrink-0">
         {wrongWords.map((wd, i) => {
           const bad = wd.toLowerCase() === w.bad.toLowerCase();
