@@ -196,13 +196,13 @@ export const SaraBoardTutor: React.FC<{ uid?: string; unlockAll?: boolean; tools
     {sentenceOpen && <Suspense fallback={null}><PictureSentenceBuilder classroomId={persona.id} teacherNameAr={persona.nameAr} teacherGender={persona.gender} voiceName={persona.voice} onClose={() => setSentenceOpen(false)} /></Suspense>}
     <div data-testid="kids-teachers" className="shrink-0 rounded-2xl bg-[#fdfaf3] border-2 border-[#C49E3A] p-2">
       <p className="text-[12px] font-black text-[#002147] mb-1.5">{L("🌱 من الصفر — للصغار والكبار", "🌱 From zero, for kids and adults")}</p>
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-5 gap-1">
         {BOARD_PERSONAS.filter(p => p.kids).map(p => {
           const on = persona.id === p.id, k = p.kids!;
           return (
             <button key={p.id} data-testid={`board-persona-${p.id}`} onClick={() => setPersona(p)}
               className="rounded-2xl p-1.5 flex flex-col items-center gap-0.5 bg-white transition-transform active:scale-95" style={{ border: `3px solid ${on ? k.accent : k.accent + '40'}`, background: on ? k.soft : '#fff' }}>
-              <img src={`/tutors/${p.id}.webp`} alt={L(p.nameAr, p.nameEn)} loading="lazy" draggable={false} className="w-12 h-12 rounded-full object-cover" style={{ boxShadow: `0 0 0 3px ${k.accent}` }} />
+              <img src={`/tutors/${p.id}.webp`} alt={L(p.nameAr, p.nameEn)} loading="lazy" draggable={false} className="w-11 h-11 rounded-full object-cover" style={{ boxShadow: `0 0 0 3px ${k.accent}` }} />
               <span className="text-[13px] font-black" style={{ color: k.ink }}>{L(p.nameAr, p.nameEn)}</span>
               <span className="text-[9px] font-bold text-center leading-tight text-slate-600">{L(p.roleAr, p.roleEn || p.roleAr)}</span>
             </button>

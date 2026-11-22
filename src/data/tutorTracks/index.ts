@@ -16,6 +16,7 @@ import { LAMA_LESSONS } from './lama';
 import { REEM_LESSONS } from './reem';
 import { HAYA_LESSONS } from './haya';
 import { JANA_LESSONS } from './jana';
+import { LINA_HOUSE, LINA_MAP_LEVELS, LINA_SOON_LESSONS, type LinaMapLevel } from './lina';
 /** Specialty tutor tracks. Kept OUT of SARA_TRACKS so Sara's plan/basket/unlocking/level tests are unaffected. Level map: docs/tutor-curricula-levels.md */
 /** Level 1 was written with most answers in position B: move each correct answer to a stable pseudo-random position (swap only, same options). */
 const spread = (lessons: TutorLesson[]): TutorLesson[] => lessons.map(l => {
@@ -28,7 +29,9 @@ const spread = (lessons: TutorLesson[]): TutorLesson[] => lessons.map(l => {
   };
   return { ...l, content: { ...l.content, check: fix(l.content.check, 'c'), exercises: l.content.exercises.map((e, i) => fix(e, `e${i}`)) } };
 });
-export type TutorTrack = SaraTrack & { lessons: TutorLesson[]; personaId: Exclude<PersonaId, 'sara'> };
+export type TutorTrack = SaraTrack & { lessons: TutorLesson[]; personaId: Exclude<PersonaId, 'sara'>;
+  /** Map only: tabs for every class (built + «قريباً») and the text-only outlines of the coming ones (always locked). */
+  mapLevels?: LinaMapLevel[]; comingSoon?: TutorLesson[] };
 export const NOURA_TRACK: TutorTrack = {
   id: 'tutor-noura', personaId: 'grammar',
   titleAr: 'أخطاء العرب الشائعة مع نورة', titleEn: 'Common Mistakes of Arabic Speakers',
@@ -107,5 +110,13 @@ export const JANA_TRACK: TutorTrack = {
   ],
   lessons: JANA_LESSONS,
 };
-export const TUTOR_TRACKS: TutorTrack[] = [NOURA_TRACK, MOHAMMED_TRACK, ALI_TRACK, LAMA_TRACK, REEM_TRACK, HAYA_TRACK, JANA_TRACK];
+/** لينا: picture classes for kids (البيت built; 7 more classes on the map as «قريباً»). */
+export const LINA_TRACK: TutorTrack = {
+  id: 'tutor-lina', personaId: 'lina',
+  titleAr: 'فصول الصور مع لينا', titleEn: 'Picture Classes with Lina',
+  levels: [{ id: 'house', titleAr: 'فصل البيت', titleEn: 'The House' }],
+  lessons: LINA_HOUSE,
+  mapLevels: LINA_MAP_LEVELS, comingSoon: LINA_SOON_LESSONS,
+};
+export const TUTOR_TRACKS: TutorTrack[] = [NOURA_TRACK, MOHAMMED_TRACK, ALI_TRACK, LAMA_TRACK, REEM_TRACK, HAYA_TRACK, JANA_TRACK, LINA_TRACK];
 export type { TutorLesson };

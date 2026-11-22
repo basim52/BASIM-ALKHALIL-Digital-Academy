@@ -26,6 +26,7 @@ const PERSONA_MAP: Record<TutorId, PersonaId> = {
   reem: 'reem',
   haya: 'haya',
   jana: 'jana',
+  lina: 'lina',
 };
 
 const SIZE_PX: Record<'sm' | 'md' | 'lg', number> = {

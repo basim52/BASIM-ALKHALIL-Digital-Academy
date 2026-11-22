@@ -182,5 +182,6 @@ export const TEACHER_MAP_STYLE: Record<string, { kind: MapKind; colorOffset: num
   reem: { kind: 'vocabulary', colorOffset: 5 },        // ريم
   haya: { kind: 'grammar', colorOffset: 2 },           // هيا
   jana: { kind: 'grammar', colorOffset: 4 },           // جنى
+  lina: { kind: 'daily', colorOffset: 3 },             // لينا
 };
 export const teacherMapStyle = (personaId: string) => TEACHER_MAP_STYLE[personaId] || { kind: 'grammar' as MapKind, colorOffset: 0 };

@@ -2026,6 +2026,7 @@ ${gEn ? "- LANGUAGE: the student chose English explanations, so write reasonAr a
     reem: "Reem, a cheerful female teacher of everyday English words for absolute beginners, children and adults (level A0, one picture word at a time)",
     haya: "Haya, a calm female teacher of basic English sentences for beginners, children and adults (level A0-A1, short sentences like I like, I have, I can, There is)",
     jana: "Jana, an energetic female teacher who gives beginners short English exercises and review (level A0-A1, fill the blank, a or an, at, to, for)",
+    lina: "Lina, a cheerful female teacher of picture-based English classes for kids (level A0-A1, one short sentence per picture: home, family, daily routine)",
   };
   app.post("/api/sara/board", async (req: express.Request, res: express.Response) => {
     const uid = String((req as any).authUid || "");
@@ -2666,6 +2667,7 @@ Respond ONLY with a valid JSON object matching:
       reem: { voice: "Laomedeia", who: "Reem, a cheerful female teacher of everyday words for absolute beginners; use only very simple A0 words" },
       haya: { voice: "Vindemiatrix", who: "Haya, a calm female teacher of basic sentences for beginners; use short A1 sentences like I like, I have, I can" },
       jana: { voice: "Autonoe", who: "Jana, an energetic female teacher who practises and reviews basic English with beginners; short A1 sentences only" },
+      lina: { voice: "Zephyr", who: "Lina, a cheerful female teacher of picture classes for kids; talk about simple pictures of home and daily life in very short A1 sentences" },
     } as Record<string, { voice: string; who: string }>)[String(persona)] || null;
     if (warm) { initAI(); return res.json({ ok: true, ai: !!aiLive }); } // warms the function, auth and AI client
     const text = String(message).slice(0, 600).trim();
