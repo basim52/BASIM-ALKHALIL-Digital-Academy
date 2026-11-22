@@ -189,3 +189,86 @@ test('«وش الغلط؟» never hides «النتيجة»: picture shrinks to f
     assert.ok(q('[data-testid="tutor-lessons"]'), 'back on the map');
   });
 });
+
+// Tablet landscape («تابلت لازم وضعية عمودية»): every step splits into picture | sentence + buttons, so nothing
+// sits below the fold; rotating switches live. matchMedia is stubbed (jsdom has no layout).
+function fakeOrientation(landscape: boolean) {
+  const listeners = new Set<() => void>();
+  const state = { landscape };
+  (dom.window as unknown as { matchMedia: unknown }).matchMedia = (query: string) => ({
+    get matches() { return query.includes('landscape') && state.landscape; }, media: query,
+    addEventListener: (_: string, f: () => void) => listeners.add(f), removeEventListener: (_: string, f: () => void) => listeners.delete(f),
+  });
+  return { rotate: async (to: boolean) => { state.landscape = to; await act(async () => { listeners.forEach(f => f()); dom.window.dispatchEvent(new dom.window.Event('resize')); }); } };
+}
+const splitOk = (id: string) => {
+  const step = q(`[data-testid="${id}"]`)!; assert.ok(step, id);
+  assert.equal(step.dataset.layout, 'split', `${id} uses two columns in landscape`);
+  const pic = step.querySelector('[data-testid="lina-split-pic"]')!, side = step.querySelector('[data-testid="lina-split-side"]')!;
+  assert.ok(pic && side, `${id}: picture column + side column`);
+  assert.ok(side.querySelector('[data-testid="lina-next"]'), `${id}: Next/Result button lives in the side column`);
+  assert.ok(!pic.querySelector('[data-testid="lina-next"]'));
+  assert.match((side.querySelector('[data-testid="lina-next"]')!.parentElement!.className), /shrink-0/, 'button never shrinks away');
+  return { pic, side };
+};
+
+test('tablet landscape: every Lina step is two columns (picture | sentence, words, options, button) → result split → saved → map', async () => {
+  fakeOrientation(true);
+  try {
+    const l = LINA_TRACK.lessons[0]; const p = l.pics!;
+    await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+      await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+      assert.equal(q('[data-testid="lina-picture-lesson"]')?.dataset.layout, 'split');
+      assert.ok(!q('[data-testid="lesson-steps"]'), 'the شرح/تمارين strip is folded away in landscape to save height');
+      for (let i = 0; i < p.scenes.length; i++) {
+        const { pic, side } = splitOk('lina-pic-learn');
+        assert.equal(pic.querySelector('[data-testid="lina-scene-img"]')?.getAttribute('src'), p.scenes[i].img, 'picture on one side');
+        assert.match(side.querySelector('[data-testid="lina-scene-en"]')?.textContent || '', new RegExp(p.scenes[i].en.replace('.', '\\.')), 'its sentence beside it');
+        await click(q('[data-testid="lina-next"]'));
+      }
+      for (let n = 0; n < p.choose.length; n++) {
+        const { pic } = splitOk('lina-choose');
+        assert.equal(pic.querySelectorAll('[data-testid^="lina-choose-opt-"]').length, 4, '4 pictures in a 2×2 square');
+        assert.match(pic.querySelector('[data-testid="lina-pic-grid"]')!.className, /grid-rows-2/);
+        await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`));
+        await click(q('[data-testid="lina-next"]'));
+      }
+      const { pic: op } = splitOk('lina-order');
+      assert.equal(op.querySelectorAll('[data-testid^="lina-order-opt-"]').length, 4);
+      for (let i = 0; i < p.scenes.length; i++) await click(q(`[data-testid="lina-order-opt-${i}"]`));
+      assert.equal(qa('[data-testid="lina-order-story"] li').length, 4, 'the story sentences appear beside the pictures');
+      await click(q('[data-testid="lina-next"]'));
+      const { pic: wp, side: ws } = splitOk('lina-wrong');
+      assert.ok(wp.querySelector('[data-testid="lina-wrong-img"]'));
+      assert.ok(ws.querySelector('[data-bad="1"]'), 'words beside the picture');
+      await click(q('[data-bad="1"]'));
+      assert.ok(ws.querySelector('[data-testid="lina-wrong-fix"]'));
+      await click(q('[data-testid="lina-next"]'));
+      const rs = q('[data-testid="tutor-result-screen"]')!;
+      assert.equal(rs.dataset.layout, 'split', 'result screen: score | next steps side by side');
+      assert.equal(q('[data-testid="tutor-result"]')?.textContent, `جاوبت ${picTotal(p)} من ${picTotal(p)} صح`);
+      assert.ok(rs.querySelector('[data-testid="tutor-next-lesson"]'), 'next-lesson button on screen');
+      assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '2', 'same counter as portrait');
+      await click(q('[data-testid="tutor-track"] button[aria-label]'));
+      assert.ok(q('[data-testid="tutor-lessons"]'), 'back on the map');
+    });
+  } finally { delete (dom.window as unknown as { matchMedia?: unknown }).matchMedia; }
+});
+
+test('rotating the tablet switches Lina\'s layout live (portrait stack ⇄ landscape split) without losing the step', async () => {
+  const o = fakeOrientation(false);
+  try {
+    await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+      await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+      await click(q('[data-testid="lina-next"]'));
+      assert.equal(q('[data-testid="lina-picture-lesson"]')?.dataset.layout, 'stack');
+      const img = q('[data-testid="lina-scene-img"]')?.getAttribute('src');
+      await o.rotate(true);
+      assert.equal(q('[data-testid="lina-picture-lesson"]')?.dataset.layout, 'split');
+      assert.equal(q('[data-testid="lina-scene-img"]')?.getAttribute('src'), img, 'still on picture 2');
+      await o.rotate(false);
+      assert.equal(q('[data-testid="lina-picture-lesson"]')?.dataset.layout, 'stack');
+      assert.ok(q('[data-testid="lesson-steps"]'), 'portrait keeps the steps strip');
+    });
+  } finally { delete (dom.window as unknown as { matchMedia?: unknown }).matchMedia; }
+});

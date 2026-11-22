@@ -14,6 +14,7 @@ import SaraLessonMap from './SaraLessonMap';
 import { teacherMapStyle } from '../lib/saraLessonMap';
 import KidsCardBoard from './KidsCardBoard';
 import LinaPictureLesson from './LinaPictureLesson';
+import { useLandscapeSplit } from '../lib/useLandscapeSplit';
 import { picTotal } from '../data/tutorTracks/lina';
 import { mapNodeOpen } from '../lib/saraLessonMap';
 import ExplainLangToggle from './ExplainLangToggle';
@@ -94,6 +95,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const repeatItems = useMemo(() => (lessonRaw ? extractLessonItems(lessonRaw) : []), [lessonRaw]);
   const spellItems = useMemo(() => (lessonRaw ? spellingItemsFor(lessonRaw as any) : []), [lessonRaw]);
   const [repeatOpen, setRepeatOpen] = useState(false);
+  const land = useLandscapeSplit(); // tablet landscape: picture lessons + result screen use two columns
 
   const shell = (head: React.ReactNode, body: React.ReactNode) => (
     <div data-testid="tutor-track" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">
@@ -103,7 +105,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
         <ExplainLangToggle />
         {lesson?.content && <button onClick={() => { v.stop(); setTalk(true); }} data-testid={`tutor-lesson-talk-${persona.id}`} className="shrink-0 px-2.5 py-1.5 rounded-xl bg-[#0a2d5c] border border-[#C49E3A] text-amber-300 text-[11px] font-black">💬 {t("محاورة", "Talk with")} {NM}</button>}
       </div>
-      {lesson?.content && <LessonSteps at={step.k === 'done' ? 2 : step.k === 'check' || step.k === 'ex' || step.k === 'spell' ? 1 : 0} repeat={repeatItems.length > 0} />}
+      {lesson?.content && !(land && lesson.pics) && <LessonSteps at={step.k === 'done' ? 2 : step.k === 'check' || step.k === 'ex' || step.k === 'spell' ? 1 : 0} repeat={repeatItems.length > 0} />}
       {body}
       <TtsDebugOverlay />
     </div>
@@ -240,12 +242,13 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   }
 
   const nextLesson = track.lessons[lesson.order];
-  return shell(head, <>
-    <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
+  return shell(head, <div data-testid="tutor-result-screen" data-layout={land ? 'split' : 'stack'} className={land ? 'flex-1 min-h-0 flex flex-row gap-4 items-stretch' : 'contents'}>
+    <div className={`flex flex-col items-center justify-center gap-2 text-center ${land ? 'flex-1 min-w-0' : 'flex-1'}`}>
       <span className="text-[44px]">{persona.emoji}</span>
       <p className="text-[18px] font-black text-amber-300" data-testid="tutor-result">{t(`جاوبت ${correct} من ${total} صح`, `You got ${correct} of ${total} right`)}</p>
       <p className="text-[12px] font-bold text-white/80">{correct === total ? t('ممتاز!', 'Excellent!') : t('تقدر تعيد الدرس متى ما بغيت.', 'You can redo the lesson any time.')}</p>
     </div>
+    <div className={land ? 'flex-1 min-w-0 min-h-0 overflow-y-auto overscroll-contain flex flex-col justify-center gap-2' : 'contents'}>
     <div className="shrink-0">
       <ExercisesDoneCue say={(text, end) => v.play(text, { done: end })} onRepeat={repeatItems.length > 0 ? () => { v.stop(); setRepeatOpen(true); } : undefined}
         onNext={nextLesson ? () => { v.stop(); setLesson(nextLesson); setStep({ k: 'board' }); setCorrect(0); } : () => { v.stop(); setLesson(null); }}
@@ -254,12 +257,13 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
     <div className="flex gap-2 shrink-0">
       <button onClick={() => { v.stop(); setStep({ k: 'board' }); setCorrect(0); }} className="flex-1 px-3 py-2.5 rounded-xl bg-white/10 text-[13px] font-black">{t("أعد الدرس", "Redo lesson")}</button>
     </div>
+    </div>
     {repeatOpen && lessonRaw && repeatItems.length > 0 && (
       <Suspense fallback={null}>
         <SaraRepeatPractice autoStart uid={uid} teacher={teacher} backLabel="رجوع للدرس" onClose={() => setRepeatOpen(false)}
           lesson={{ trackId: track.id, lessonId: lessonRaw.id, titleAr: lessonRaw.titleAr, titleEn: lessonRaw.titleEn, items: repeatItems }} />
       </Suspense>
     )}
-  </>);
+  </div>);
 };
 export default TutorTrackPlayer;
