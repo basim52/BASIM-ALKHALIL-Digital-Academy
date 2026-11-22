@@ -3,6 +3,8 @@ import { Volume2, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 import type { PicLesson } from '../data/tutorTracks/lina';
 import { picTotal } from '../data/tutorTracks/lina';
 import type { KidsTheme } from '../data/saraBoardPersonas';
+import { TutorVideoFace } from './tutor3d/TutorVideoFace';
+import './tutor3d/tutorBoard.css';
 
 /**
  * 🖼️ لينا's picture lesson: each sentence with its own illustration, then activities on the pictures:
@@ -17,6 +19,10 @@ export interface LinaPictureLessonProps {
   t: (ar: string, en: string) => string;
   teacherNameAr: string;
   teacherNameEn: string;
+  /** Teacher persona id for the talking video face (same TutorVideoFace as Sara and the other teachers). */
+  faceId?: string;
+  /** True while the teacher's voice is playing (the face switches to its talk loop). */
+  speaking?: boolean;
   /** This teacher's own cloud voice. */
   say: (text: string) => void;
   stop: () => void;
@@ -33,7 +39,7 @@ export function stableShuffle(n: number, salt: string, notIdentity = false): num
 }
 const words = (s: string) => s.replace(/[.!?,]/g, '').split(/\s+/).filter(Boolean);
 
-export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, pics, theme, t, teacherNameAr, teacherNameEn, say, stop, onDone }) => {
+export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, pics, theme, t, teacherNameAr, teacherNameEn, faceId, speaking = false, say, stop, onDone }) => {
   const { scenes } = pics;
   const total = picTotal(pics);
   const [phase, setPhase] = useState<Phase>({ k: 'learn', i: 0 });
@@ -65,7 +71,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   const step = phase.k === 'learn' ? 0 : phase.k === 'choose' ? 1 + phase.n : phase.k === 'order' ? 1 + pics.choose.length : total;
   const card = 'rounded-2xl bg-white overflow-hidden';
   const Pic: React.FC<{ src: string; alt: string; className?: string; testId?: string }> = ({ src, alt, className = '', testId }) => (
-    <img src={src} alt={alt} draggable={false} loading="eager" decoding="async" data-testid={testId} className={`w-full aspect-square object-cover bg-slate-100 ${className}`} />
+    <img src={src} alt={alt} draggable={false} loading="eager" decoding="async" data-testid={testId} className={`block w-full aspect-square object-contain bg-slate-50 ${className}`} />
   );
   const Next: React.FC<{ label: string; disabled?: boolean }> = ({ label, disabled }) => (
     <button data-testid="lina-next" disabled={disabled} onClick={() => { stop(); advance(); }} className="shrink-0 w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: theme.accent }}>{label}</button>
@@ -134,7 +140,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const done = picked !== null; const ok = done && wrongWords[picked!].toLowerCase() === w.bad.toLowerCase();
     body = (<div data-testid="lina-wrong" className="flex-1 min-h-0 flex flex-col gap-2">
       <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">🔍 {t('وش الغلط في الصورة؟ اضغط الكلمة الغلط', "What's wrong with the picture? Tap the wrong word")}</p><Listen text={w.en} /></div>
-      <div className={`${card} shrink min-h-0`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={s.img} alt="" className="max-h-[38vh] object-contain" /></div>
+      <div className={`${card} shrink-0 mx-auto w-[min(100%,40vh)] aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={s.img} alt={s.en} testId="lina-wrong-img" className="h-full" /></div>
       <div dir="ltr" className="flex flex-wrap gap-1.5 shrink-0">
         {wrongWords.map((wd, i) => {
           const bad = wd.toLowerCase() === w.bad.toLowerCase();
@@ -156,6 +162,11 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   return (
     <div data-testid="lina-picture-lesson" className="flex-1 min-h-0 flex flex-col gap-2">
       <div className="shrink-0 flex items-center gap-2">
+        {faceId && <button type="button" data-testid="lina-face" data-speaking={speaking ? '1' : '0'} aria-label={t(`استمع لـ${teacherNameAr}`, `Listen to ${teacherNameEn}`)}
+          onClick={() => say(phase.k === 'learn' ? scenes[phase.i].en : phase.k === 'choose' ? scenes[pics.choose[phase.n]].en : phase.k === 'wrong' ? pics.wrong.en : scenes[0].en)}
+          className="relative shrink-0 w-14 h-14 rounded-full overflow-hidden bg-[#001a38]" style={{ border: `3px solid ${theme.accent}`, boxShadow: speaking ? `0 0 14px ${theme.accent}` : undefined }}>
+          <TutorVideoFace id={faceId} alt={t(teacherNameAr, teacherNameEn)} isSpeaking={speaking} onFail={() => {}} />
+        </button>}
         <span className="text-[11px] font-black text-white/80">{t(teacherNameAr, teacherNameEn)}</span>
         <div className="flex-1 flex gap-1" aria-hidden>{Array.from({ length: total + 1 }, (_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i <= step ? theme.accent : 'rgba(255,255,255,.18)' }} />)}</div>
         <span data-testid="lina-stars" className="text-[12px] font-black text-amber-300">⭐ {score}</span>

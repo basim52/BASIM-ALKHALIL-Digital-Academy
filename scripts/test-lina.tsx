@@ -10,7 +10,7 @@ import { tutorProgressKey } from '../src/lib/tutorProgress';
 
 const dom = new JSDOM('<html><body><div id="root"></div></body></html>', { url: 'http://localhost' });
 Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, localStorage: dom.window.localStorage, Audio: dom.window.Audio, IS_REACT_ACT_ENVIRONMENT: true });
-Object.assign(globalThis, { requestAnimationFrame: (run: FrameRequestCallback) => setTimeout(() => run(Date.now()), 0) });
+Object.assign(globalThis, { requestAnimationFrame: (run: FrameRequestCallback) => setTimeout(() => run(Date.now()), 16), cancelAnimationFrame: (id: ReturnType<typeof setTimeout>) => clearTimeout(id) });
 Object.assign(dom.window.HTMLMediaElement.prototype, { play() { return Promise.resolve(); }, pause() {}, load() {} });
 Object.assign(dom.window.HTMLElement.prototype, { scrollIntoView() {} });
 const { createRoot } = await import('react-dom/client');
@@ -54,7 +54,7 @@ test('Lina house lessons: every sentence has its own small webp picture; activit
     for (const s of p.scenes) {
       assert.ok(!seen.has(s.img), `${s.img} reused`); seen.add(s.img);
       const f = `public${s.img}`; assert.ok(fs.existsSync(f), f);
-      assert.ok(fs.statSync(f).size < 80_000, `${f} too big`);
+      assert.ok(fs.statSync(f).size < 200_000, `${f} too big`);
       assert.ok(s.en && s.ar, l.id);
     }
     assert.ok(p.choose.every(i => i >= 0 && i < p.scenes.length));
@@ -63,6 +63,13 @@ test('Lina house lessons: every sentence has its own small webp picture; activit
     assert.deepEqual(l.content!.example.map(e => e.en), p.scenes.map(s => s.en));
   }
   assert.equal(seen.size, 40);
+  for (const f of seen) {
+    const b = fs.readFileSync(`public${f}`); const kind = b.toString('ascii', 12, 16);
+    const [w, h] = kind === 'VP8X' ? [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)]
+      : kind === 'VP8 ' ? [b.readUInt16LE(26) & 0x3fff, b.readUInt16LE(28) & 0x3fff]
+      : [1 + (b.readUInt32LE(21) & 0x3fff), 1 + ((b.readUInt32LE(21) >> 14) & 0x3fff)];
+    assert.ok(w === h && w >= 768, `${f} is ${w}x${h}, want a square >= 768px`);
+  }
 });
 
 test('Lina map renders: teacher on top, 8 class tabs, coming-soon lessons locked, house lesson 1 current', async () => {
@@ -105,6 +112,8 @@ test('picture lesson: learn the pictures, choose, order the story, spot the mist
     for (let n = 0; n < p.choose.length; n++) {
       assert.ok(q('[data-testid="lina-choose"]'));
       assert.equal(qa('[data-testid^="lina-choose-opt-"]').length, 4);
+      for (const img of qa('[data-testid^="lina-choose-opt-"] img')) assert.match(img.className, /aspect-square[^]*object-contain/, 'whole square picture, never cropped');
+      assert.ok(!qa('[data-testid="lina-choose"] img').some(i => /object-cover/.test(i.className)));
       await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`));
       await click(q('[data-testid="lina-next"]'));
     }
@@ -115,6 +124,7 @@ test('picture lesson: learn the pictures, choose, order the story, spot the mist
     assert.match(q('[data-testid="lina-order-result"]')?.textContent || '', /صح/);
     await click(q('[data-testid="lina-next"]'));
     assert.ok(q('[data-testid="lina-wrong"]'));
+    assert.match(q('[data-testid="lina-wrong-img"]')?.className || '', /object-contain/);
     await click(q('[data-testid="lina-wrong-word-0"][data-bad="1"], [data-bad="1"]'));
     assert.match(q('[data-testid="lina-wrong-fix"]')?.textContent || '', /kitchen/);
     await click(q('[data-testid="lina-next"]'));
@@ -129,5 +139,22 @@ test('other teachers\' saved progress is untouched by Lina', async () => {
   await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
     await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
     assert.deepEqual(TUTOR_TRACKS.filter(t => t !== LINA_TRACK).map(t => localStorage.getItem(tutorProgressKey(t.id))), before);
+  });
+});
+
+test('Lina animates like the other teachers: idle/talk/laugh clips (webm + mp4) for the shared TutorVideoFace', () => {
+  for (const k of ['idle', 'talk', 'laugh']) for (const ext of ['webm', 'mp4']) {
+    const f = `public/tutors/video/lina-${k}.${ext}`; assert.ok(fs.existsSync(f), f);
+    const size = fs.statSync(f).size; assert.ok(size > 10_000 && size < 200_000, `${f}: ${size}`);
+  }
+});
+
+test('picture lesson shows Lina\'s talking video face (same component as the teachers\' board)', async () => {
+  await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+    await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+    const face = q('[data-testid="lina-face"]'); assert.ok(face);
+    assert.ok(face!.querySelector('.tutor-video-face'), 'TutorVideoFace inside');
+    assert.equal(face!.querySelector('.tutor-video-poster')?.getAttribute('src'), '/tutors/lina.webp');
+    assert.ok(face!.querySelector('source[src="/tutors/video/lina-idle.webm"]'), 'idle loop loaded');
   });
 });
