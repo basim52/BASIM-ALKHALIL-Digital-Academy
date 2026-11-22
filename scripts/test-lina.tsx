@@ -158,3 +158,34 @@ test('picture lesson shows Lina\'s talking video face (same component as the tea
     assert.ok(face!.querySelector('source[src="/tutors/video/lina-idle.webm"]'), 'idle loop loaded');
   });
 });
+
+// Regression («وش الغلط ويوقف»): on short Android phones the fixed-size picture + the words + the answer box pushed
+// «النتيجة» below the screen inside an overflow-hidden page, so the lesson looked stuck after tapping a word.
+test('«وش الغلط؟» never hides «النتيجة»: picture shrinks to fit, step scrolls, button is sticky; wrong answer still finishes and saves', async () => {
+  localStorage.removeItem(tutorProgressKey(LINA_TRACK.id));
+  const l = LINA_TRACK.lessons[0]; const p = l.pics!;
+  await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+    await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+    for (let i = 0; i < p.scenes.length; i++) await click(q('[data-testid="lina-next"]'));
+    for (let n = 0; n < p.choose.length; n++) { await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`)); await click(q('[data-testid="lina-next"]')); }
+    for (let i = 0; i < p.scenes.length; i++) await click(q(`[data-testid="lina-order-opt-${i}"]`));
+    await click(q('[data-testid="lina-next"]'));
+    const step = q('[data-testid="lina-wrong"]')!; assert.ok(step);
+    assert.match(step.className, /overflow-y-auto/, 'the step can scroll on short screens');
+    const frame = q('[data-testid="lina-wrong-frame"]')!;
+    assert.match(frame.parentElement!.className, /flex-1/, 'the picture takes only the free space');
+    assert.doesNotMatch(frame.className + frame.parentElement!.className, /shrink-0|\d+vh/, 'no fixed-height picture that pushes the button away');
+    const next = q('[data-testid="lina-next"]') as HTMLButtonElement;
+    assert.match(next.parentElement!.className, /sticky bottom-0/, '«النتيجة» stays pinned at the bottom');
+    assert.equal(next.parentElement!.parentElement, step, 'button lives inside the scrolling step');
+    assert.ok(next.disabled);
+    await click(q('[data-bad="0"]')); // a wrong word
+    assert.ok(q('[data-testid="lina-wrong-fix"]'));
+    assert.equal(next.textContent, 'النتيجة'); assert.ok(!(q('[data-testid="lina-next"]') as HTMLButtonElement).disabled);
+    await click(q('[data-testid="lina-next"]'));
+    assert.equal(q('[data-testid="tutor-result"]')?.textContent, `جاوبت ${picTotal(p) - 1} من ${picTotal(p)} صح`);
+    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '2');
+    await click(q('[data-testid="tutor-track"] button[aria-label]'));
+    assert.ok(q('[data-testid="tutor-lessons"]'), 'back on the map');
+  });
+});
