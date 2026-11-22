@@ -74,7 +74,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     <img src={src} alt={alt} draggable={false} loading="eager" decoding="async" data-testid={testId} className={`block w-full aspect-square object-contain bg-slate-50 ${className}`} />
   );
   const Next: React.FC<{ label: string; disabled?: boolean }> = ({ label, disabled }) => (
-    <button data-testid="lina-next" disabled={disabled} onClick={() => { stop(); advance(); }} className="shrink-0 w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: theme.accent }}>{label}</button>
+    <div className="sticky bottom-0 z-10 shrink-0 bg-[#001a38] pt-1"><button data-testid="lina-next" disabled={disabled} onClick={() => { stop(); advance(); }} className="w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: theme.accent }}>{label}</button></div>
   );
   const Listen: React.FC<{ text: string }> = ({ text }) => (
     <button data-testid="lina-listen" onClick={() => say(text)} className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={14} /> {t('اسمع', 'Listen')}</button>
@@ -96,10 +96,10 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     </div>);
   } else if (phase.k === 'choose') {
     const target = pics.choose[phase.n]; const s = scenes[target];
-    body = (<div data-testid="lina-choose" className="flex-1 min-h-0 flex flex-col gap-2">
+    body = (<div data-testid="lina-choose" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">👂 {t('اسمع واختر الصورة الصحيحة', 'Listen and choose the right picture')}</p><Listen text={s.en} /></div>
       {picked !== null && <p dir="ltr" className="shrink-0 text-[16px] font-black text-white text-start">{s.en}</p>}
-      <div className="grid grid-cols-2 gap-2 min-h-0 content-start">
+      <div className="grid grid-cols-2 gap-2 shrink-0 content-start w-full max-w-[max(13rem,calc(100dvh-19rem))] mx-auto">
         {chooseOrder[phase.n].map(si => {
           const st = picked === null ? theme.accent + '55' : si === target ? '#10B981' : si === picked ? '#F43F5E' : '#e5e7eb';
           return <button key={si} data-testid={`lina-choose-opt-${si}`} data-correct={si === target ? '1' : '0'} disabled={picked !== null}
@@ -114,10 +114,10 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   } else if (phase.k === 'order') {
     const full = seq.length === scenes.length;
     const right = full && seq.every((v, i) => v === i);
-    body = (<div data-testid="lina-order" className="flex-1 min-h-0 flex flex-col gap-2">
+    body = (<div data-testid="lina-order" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">📖 {t('رتّب الصور حسب القصة: اضغطها بالترتيب', 'Put the pictures in story order: tap them in order')}</p>
         {seq.length > 0 && !full && <button onClick={() => setSeq([])} className="shrink-0 p-1.5 rounded-lg bg-white/10" aria-label={t('من جديد', 'Start again')}><RotateCcw size={15} /></button>}</div>
-      <div className="grid grid-cols-2 gap-2 min-h-0 content-start">
+      <div className="grid grid-cols-2 gap-2 shrink-0 content-start w-full max-w-[max(13rem,calc(100dvh-19rem))] mx-auto">
         {orderMix.map(si => {
           const pos = seq.indexOf(si);
           const st = !full ? (pos >= 0 ? theme.accent : theme.accent + '40') : (pos === si ? '#10B981' : '#F43F5E');
@@ -138,9 +138,9 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   } else {
     const w = pics.wrong; const s = scenes[w.scene];
     const done = picked !== null; const ok = done && wrongWords[picked!].toLowerCase() === w.bad.toLowerCase();
-    body = (<div data-testid="lina-wrong" className="flex-1 min-h-0 flex flex-col gap-2">
+    body = (<div data-testid="lina-wrong" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">🔍 {t('وش الغلط في الصورة؟ اضغط الكلمة الغلط', "What's wrong with the picture? Tap the wrong word")}</p><Listen text={w.en} /></div>
-      <div className={`${card} shrink-0 mx-auto w-[min(100%,40vh)] aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={s.img} alt={s.en} testId="lina-wrong-img" className="h-full" /></div>
+      <div className="flex-1 min-h-[7rem] flex justify-center"><div data-testid="lina-wrong-frame" className={`${card} h-full max-w-full aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={s.img} alt={s.en} testId="lina-wrong-img" className="h-full" /></div></div>
       <div dir="ltr" className="flex flex-wrap gap-1.5 shrink-0">
         {wrongWords.map((wd, i) => {
           const bad = wd.toLowerCase() === w.bad.toLowerCase();
@@ -154,7 +154,6 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
         <p className={`text-[13px] font-black ${ok ? 'text-emerald-300' : 'text-rose-300'}`}>{ok ? t('صح! لقيت الغلط 🎉', 'Yes! You found it 🎉') : t('الغلط كان:', 'The mistake was:')} <span dir="ltr">{w.bad} → {w.fix}</span></p>
         <p dir="ltr" className="text-[16px] font-black text-white text-start">{fixed}</p>
       </div>}
-      <div className="flex-1" />
       <Next label={t('النتيجة', 'Result')} disabled={!done} />
     </div>);
   }
