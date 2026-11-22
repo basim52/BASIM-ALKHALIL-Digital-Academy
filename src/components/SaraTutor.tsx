@@ -594,7 +594,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
 
   // Plan 1: Voice & Speech Intelligence States (Phonetics, Hesitation, Role-Play)
   const [saraTool, setSaraTool] = useState<SaraToolId | null>(null);
-  const BOARD_TEACHERS: [string, string, string][] = [['sara', 'سارة', 'Sara'], ['grammar', 'نورة', 'Noura'], ['business', 'محمد', 'Mohammed'], ['exams', 'علي', 'Ali'], ['lama', 'لمى', 'Lama'], ['reem', 'ريم', 'Reem'], ['haya', 'هيا', 'Haya'], ['jana', 'جنى', 'Jana']];
+  const BOARD_TEACHERS: [string, string, string][] = [['sara', 'سارة', 'Sara'], ['grammar', 'نورة', 'Noura'], ['business', 'محمد', 'Mohammed'], ['exams', 'علي', 'Ali'], ['lama', 'لمى', 'Lama'], ['reem', 'ريم', 'Reem'], ['haya', 'هيا', 'Haya'], ['jana', 'جنى', 'Jana'], ['lina', 'لينا', 'Lina']];
   /** 🧑‍🏫 فصل المعلمين — the first thing on Sara's page: a full-width navy & gold hero with all 8 teacher portraits. */
   const renderTeachersBanner = () => (
           <button
@@ -616,11 +616,11 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
                 {isRtl ? 'ادخل الفصل' : 'Enter class'}{isRtl ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}
               </span>
             </span>
-            {/* 8 teacher portraits: 4×2 on phone, one row of 8 from tablet up. */}
-            <span className="relative mt-5 sm:mt-6 grid grid-cols-4 md:grid-cols-8 gap-x-2 gap-y-4 sm:gap-x-3" data-testid="sara-board-teachers">
+            {/* 9 teacher portraits: 5+4 on phone, one row of 9 from tablet up. */}
+            <span className="relative mt-5 sm:mt-6 grid grid-cols-5 md:grid-cols-9 gap-x-1.5 gap-y-4 sm:gap-x-3" data-testid="sara-board-teachers">
               {BOARD_TEACHERS.map(([img, a, e]) => (
                 <span key={img} className="min-w-0 flex flex-col items-center gap-1.5">
-                  <img src={`/tutors/${img}.webp`} alt="" width={80} height={80} loading="lazy" decoding="async" className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover bg-[#0a2d5c] border-2 border-[#C49E3A]/80 group-hover:border-[#C49E3A] shadow-md transition-colors" />
+                  <img src={`/tutors/${img}.webp`} alt="" width={80} height={80} loading="lazy" decoding="async" className="w-14 h-14 sm:w-20 sm:h-20 rounded-full object-cover bg-[#0a2d5c] border-2 border-[#C49E3A]/80 group-hover:border-[#C49E3A] shadow-md transition-colors" />
                   <span className="max-w-full truncate text-[12px] sm:text-[13px] font-black text-amber-100 leading-none">{isRtl ? a : e}</span>
                 </span>
               ))}

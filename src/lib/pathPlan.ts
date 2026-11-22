@@ -62,7 +62,7 @@ const atMidnight = (x: Date) => { const d = new Date(x); d.setHours(0, 0, 0, 0);
 const addDays = (x: Date, n: number) => { const d = new Date(x); d.setDate(d.getDate() + n); return d; };
 const NAME: Record<string, [string, string, string]> = { // trackId → [ar, en, portrait]
   'tutor-noura': ['نورة', 'Noura', 'grammar'], 'tutor-mohammed': ['محمد', 'Mohammed', 'business'], 'tutor-ali': ['علي', 'Ali', 'exams'],
-  'tutor-lama': ['لمى', 'Lama', 'lama'], 'tutor-reem': ['ريم', 'Reem', 'reem'], 'tutor-haya': ['هيا', 'Haya', 'haya'], 'tutor-jana': ['جنى', 'Jana', 'jana'],
+  'tutor-lama': ['لمى', 'Lama', 'lama'], 'tutor-reem': ['ريم', 'Reem', 'reem'], 'tutor-haya': ['هيا', 'Haya', 'haya'], 'tutor-jana': ['جنى', 'Jana', 'jana'], 'tutor-lina': ['لينا', 'Lina', 'lina'],
 };
 const nameOf = (s: PathStep): [string, string, string] => (s.kind === 'tutor' ? NAME[s.trackId] : null) || ['سارة', 'Sara', 'sara'];
 /** «أكمل الجملة» exercise track of each teacher (same ids/progress stores as SaraFillBlankPlayer). Lesson counts mirror data/fillBlankTracks.ts. */

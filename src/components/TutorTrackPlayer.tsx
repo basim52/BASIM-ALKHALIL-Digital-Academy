@@ -13,6 +13,9 @@ import TutorConversation from './TutorConversation';
 import SaraLessonMap from './SaraLessonMap';
 import { teacherMapStyle } from '../lib/saraLessonMap';
 import KidsCardBoard from './KidsCardBoard';
+import LinaPictureLesson from './LinaPictureLesson';
+import { picTotal } from '../data/tutorTracks/lina';
+import { mapNodeOpen } from '../lib/saraLessonMap';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
 import type { TutorTrack, TutorLesson } from '../data/tutorTracks';
@@ -76,7 +79,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const boardNarration = lesson?.content ? (kidsBoard ? `${lesson.content.explanationAr} ${lesson.kids!.say}` : `${lesson.content.explanationAr} ${lesson.content.example.map(e => e.en).join('. ')}`) : '';
   // Board end → check question: this teacher's own cloud voice says the cue line, gold card + 3s countdown (first run only).
   const trans = useBoardNextTransition({
-    active: !!lesson?.content && step.k === 'board' && !talk,
+    active: !!lesson?.content && !lesson?.pics && step.k === 'board' && !talk,
     drawMs: kidsBoard ? 1500 : boardDrawMs(calls.length),
     say: (text, onEnd) => v.play(text, { done: onEnd, fail: onEnd }),
     stopSay: () => v.stop(),
@@ -119,7 +122,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   );
 
   /** Open a lesson from the map (same steps the old list ran). */
-  const openLesson = (l: TutorLesson) => { setLesson(l); setStep({ k: 'board' }); trans.reset(); const cc = l.content!; const lk = persona.kids ? l.kids : undefined; if (lang === 'en') { v.stop(); trans.narrationStarted(); void englishLessonAsync(l).then(x => { const e2 = x.content!; playBoard(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else playBoard(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); };
+  const openLesson = (l: TutorLesson) => { if (l.pics) { v.stop(); setLesson(l); setStep({ k: 'board' }); trans.reset(); setPicked(null); setCheckWrong(false); setCorrect(0); return; } setLesson(l); setStep({ k: 'board' }); trans.reset(); const cc = l.content!; const lk = persona.kids ? l.kids : undefined; if (lang === 'en') { v.stop(); trans.narrationStarted(); void englishLessonAsync(l).then(x => { const e2 = x.content!; playBoard(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else playBoard(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); };
 
   // Lesson map (same zigzag map as Sara's lessons; reads the saved counter only, never writes progress)
   if (!lesson) {
@@ -133,7 +136,8 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
           <ExplainLangToggle />
         </div>
         <div data-testid="tutor-lessons" className="flex-1 min-h-0 flex flex-col">
-          <SaraLessonMap lessons={track.lessons} levels={track.levels} unlocked={unlocked} lang={lang === 'en' ? 'en' : 'ar'}
+          <SaraLessonMap lessons={track.comingSoon ? [...track.lessons, ...track.comingSoon] : track.lessons} levels={track.mapLevels || track.levels} unlocked={unlocked}
+            isOpen={track.comingSoon ? (l => !l.soon && mapNodeOpen(l.order, unlocked)) : undefined} lang={lang === 'en' ? 'en' : 'ar'}
             trackTitleAr={track.titleAr} trackTitleEn={(track as { titleEn?: string }).titleEn} kind={style.kind} colorOffset={style.colorOffset} numbering="level"
             teacherImage={`/tutors/${persona.id}.webp`} teacherNameAr={persona.nameAr} teacherNameEn={persona.nameEn} teacherEmoji={persona.emoji}
             onOpen={l => openLesson(l)} onFreeChat={() => { v.stop(); setFreeTalk(true); }} />
@@ -145,7 +149,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
 
   const c = lesson.content!;
   if (talk) return <TutorConversation persona={persona} onBack={() => setTalk(false)} lesson={{ titleEn: lesson.titleEn, titleAr: lesson.titleAr, examples: c.example.map(e => e.en) }} />;
-  const total = 1 + c.exercises.length + spellItems.length;
+  const total = lesson.pics ? picTotal(lesson.pics) : 1 + c.exercises.length + spellItems.length;
   const finish = () => {
     setStep({ k: 'done' });
     if (!mockStep && lesson.order >= unlocked && lesson.order < track.lessons.length + 1) { const nu = lesson.order + 1; setUnlocked(nu); saveUnlocked(track.id, uid, nu); }
@@ -153,6 +157,11 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const head = <><p {...longPressDebug()} className="text-[10px] text-amber-300 font-bold select-none">{NM} — {t('الدرس', 'Lesson')} {lesson.order}</p><p className="text-[13px] font-black truncate">{t(lesson.titleAr, lesson.titleEn)}{enLoading ? ' · …EN' : ''}</p></>;
   const kids = persona.kids && lesson.kids ? lesson.kids : null; // «من الصفر» teachers: picture-card board instead of tldraw
   const narration = kids ? `${c.explanationAr} ${kids.say}` : `${c.explanationAr} ${c.example.map(e => e.en).join('. ')}`;
+
+  // 🖼️ لينا: picture lesson (sentence pictures → choose the picture → order the story → «وش الغلط؟»), then the same result screen + progress save.
+  if (lesson.pics && step.k !== 'done') return shell(head, <LinaPictureLesson key={lesson.id} lessonId={lesson.id} pics={lesson.pics} theme={persona.kids || { accent: '#F97316', soft: '#FFF7ED', ink: '#7C2D12' }}
+    t={t} teacherNameAr={persona.nameAr} teacherNameEn={persona.nameEn} say={text => v.play(text)} stop={v.stop}
+    onDone={n => { setCorrect(n); finish(); }} />);
 
   if (step.k === 'board') return shell(head, <>
     <div onClickCapture={e => { if ((e.target as HTMLElement).closest('[data-testid=tutor-voice]')) setReplay(r => r + 1); }}><VoiceBtn text={narration} onPlay={() => playBoard(narration)} /></div>

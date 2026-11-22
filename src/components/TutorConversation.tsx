@@ -16,6 +16,7 @@ const STARTERS: Record<string, { en: string; scenario: string }> = {
   reem: { en: "Hello! I'm Reem. Let's learn easy words. What is your favourite colour?", scenario: 'Absolute beginner (A0): everyday words (colours, food, family, animals); very short simple sentences' },
   haya: { en: "Hi, I'm Haya. Let's make easy sentences. Tell me: what do you like?", scenario: 'Beginner (A0-A1): basic sentences with I like, I have, This is, I can, There is; very short and slow' },
   jana: { en: "Hi! I'm Jana. Let's practise! Finish my sentence: I like ...", scenario: 'Beginner (A0-A1): quick practice and review of easy words and sentences; one short question at a time' },
+  lina: { en: "Hi! I'm Lina. Let's talk about pictures! What is in your kitchen?", scenario: 'Kids picture class (A0-A1): home, family and daily routine; one very short question at a time about simple things the child can see' },
   exams: { en: "Hi, I'm Ali. Let's practise IELTS Speaking Part 1. First question: do you work or are you a student?", scenario: 'IELTS Speaking practice: ask one exam-style question at a time (Part 1 topics), encourage extended answers with reasons and examples' },
 };
 type Line = { role: 'tutor' | 'me'; text: string };

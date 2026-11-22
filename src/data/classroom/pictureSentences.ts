@@ -310,6 +310,39 @@ export const CLASSROOM_SENTENCES: Record<ClassroomId, ClassroomSentences> = {
       ] },
     ],
   },
+  lina: {
+    themeAr: "فصول الصور: البيت والعائلة", basisAr: "لينا: فصل البيت (غرف البيت، الصباح، الفطور، الواجب، التنظيف، المطبخ، الصالة، العشا، وقت النوم)",
+    sets: [
+      { id: 'lina-1', titleAr: "في بيتنا", titleEn: "In our home", words: "٣ كلمات", rows: [
+        { id: 'lina-1-1', emoji: "🛏️", en: "Omar wakes up", ar: "عمر يصحى" },
+        { id: 'lina-1-2', emoji: "🍳", en: "Mom makes eggs", ar: "ماما تسوي بيض" },
+        { id: 'lina-1-3', emoji: "📖", en: "Dad reads books", ar: "بابا يقرا كتب" },
+        { id: 'lina-1-4', emoji: "🐈", en: "Cats sleep everywhere", ar: "القطاوة تنام بكل مكان" },
+        { id: 'lina-1-5', emoji: "🌴", en: "Gardens need water", ar: "الحدايق تحتاج ماي" },
+      ] },
+      { id: 'lina-2', titleAr: "صباحي", titleEn: "My morning", words: "٤ كلمات", rows: [
+        { id: 'lina-2-1', emoji: "🪥", en: "Omar brushes his teeth", ar: "عمر يفرش أسنانه" },
+        { id: 'lina-2-2', emoji: "🥛", en: "Dad pours fresh milk", ar: "بابا يصب حليب طازج" },
+        { id: 'lina-2-3', emoji: "👟", en: "Omar wears black shoes", ar: "عمر يلبس جزمة سودا" },
+        { id: 'lina-2-4', emoji: "🎒", en: "The bag is blue", ar: "الشنطة زرقا" },
+        { id: 'lina-2-5', emoji: "🚗", en: "Dad drives to school", ar: "بابا يسوق للمدرسة" },
+      ] },
+      { id: 'lina-3', titleAr: "نساعد في البيت", titleEn: "Helping at home", words: "٥ كلمات", rows: [
+        { id: 'lina-3-1', emoji: "🧹", en: "Mom sweeps the kitchen floor", ar: "ماما تكنس أرض المطبخ" },
+        { id: 'lina-3-2', emoji: "🪴", en: "Dad waters the green plants", ar: "بابا يسقي الزرع الأخضر" },
+        { id: 'lina-3-3', emoji: "🛏️", en: "Omar makes his bed neatly", ar: "عمر يرتب سريره زين" },
+        { id: 'lina-3-4', emoji: "🥕", en: "We wash carrots and cucumbers", ar: "نغسل جزر وخيار" },
+        { id: 'lina-3-5', emoji: "🗑️", en: "Omar takes the trash out", ar: "عمر يطلع الزبالة" },
+      ] },
+      { id: 'lina-4', titleAr: "مساء العائلة", titleEn: "Family evening", words: "٦–٧ كلمات", rows: [
+        { id: 'lina-4-1', emoji: "🍽️", en: "The family eats dinner at the table", ar: "العائلة تتعشى على الطاولة" },
+        { id: 'lina-4-2', emoji: "🥗", en: "Omar passes the salad to Dad", ar: "عمر يعطي بابا السلطة" },
+        { id: 'lina-4-3', emoji: "🍵", en: "Mom drinks tea in the evening", ar: "ماما تشرب شاي بالمسا" },
+        { id: 'lina-4-4', emoji: "🧸", en: "Omar puts on his blue pajamas", ar: "عمر يلبس بيجامته الزرقا" },
+        { id: 'lina-4-5', emoji: "🌙", en: "Mom reads a story before bed", ar: "ماما تقرا قصة قبل النوم" },
+      ] },
+    ],
+  },
 };
 
 /** The sets for one class (unknown ids fall back to Sara's everyday sets). */

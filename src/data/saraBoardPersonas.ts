@@ -1,5 +1,5 @@
 /** Specialty board tutors (Sara's colleagues). Each has its own Gemini cloud voice, distinct from Sara's "Kore". */
-export type PersonaId = 'sara' | 'grammar' | 'business' | 'exams' | 'lama' | 'reem' | 'haya' | 'jana';
+export type PersonaId = 'sara' | 'grammar' | 'business' | 'exams' | 'lama' | 'reem' | 'haya' | 'jana' | 'lina';
 /** «من الصفر» teachers (kids and adult beginners): their own bright card colours inside the navy/gold frame. */
 export interface KidsTheme { accent: string; soft: string; ink: string }
 export interface BoardPersona { id: PersonaId; nameAr: string; nameEn: string; gender: 'female' | 'male'; voice: string; emoji: string; roleAr: string; roleEn?: string; trackHint: string; examplesAr: string[]; kids?: KidsTheme }
@@ -12,5 +12,6 @@ export const BOARD_PERSONAS: BoardPersona[] = [
   { id: 'reem', nameAr: 'ريم', nameEn: 'Reem', gender: 'female', voice: 'Laomedeia', emoji: '🍎', roleAr: 'كلمات كل يوم', roleEn: 'Everyday words', trackHint: 'vocabulary', examplesAr: ['Colours', 'Fruits', 'My family'], kids: { accent: '#0EA5E9', soft: '#F0F9FF', ink: '#0C4A6E' } },
   { id: 'haya', nameAr: 'هيا', nameEn: 'Haya', gender: 'female', voice: 'Vindemiatrix', emoji: '💬', roleAr: 'جمل أساسية', roleEn: 'Basic sentences', trackHint: 'sentences', examplesAr: ['I like ...', 'I have ...', 'There is ...'], kids: { accent: '#8B5CF6', soft: '#F5F3FF', ink: '#4C1D95' } },
   { id: 'jana', nameAr: 'جنى', nameEn: 'Jana', gender: 'female', voice: 'Autonoe', emoji: '✏️', roleAr: 'تمارين ومراجعة', roleEn: 'Exercises and review', trackHint: 'practice', examplesAr: ['at, to, for', 'a or an', 'am, is, are'], kids: { accent: '#10B981', soft: '#ECFDF5', ink: '#064E3B' } },
+  { id: 'lina', nameAr: 'لينا', nameEn: 'Lina', gender: 'female', voice: 'Zephyr', emoji: '🖼️', roleAr: 'فصول الصور', roleEn: 'Picture classes', trackHint: 'pictures', examplesAr: ['Rooms of the house', 'My morning', 'At breakfast'], kids: { accent: '#F97316', soft: '#FFF7ED', ink: '#7C2D12' } },
 ];
 export const personaById = (id: string) => BOARD_PERSONAS.find(p => p.id === id) || BOARD_PERSONAS[1];
