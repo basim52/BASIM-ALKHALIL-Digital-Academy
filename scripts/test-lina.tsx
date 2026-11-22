@@ -10,7 +10,7 @@ import { tutorProgressKey } from '../src/lib/tutorProgress';
 
 const dom = new JSDOM('<html><body><div id="root"></div></body></html>', { url: 'http://localhost' });
 Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, localStorage: dom.window.localStorage, Audio: dom.window.Audio, IS_REACT_ACT_ENVIRONMENT: true });
-Object.assign(globalThis, { requestAnimationFrame: (run: FrameRequestCallback) => setTimeout(() => run(Date.now()), 0) });
+Object.assign(globalThis, { requestAnimationFrame: (run: FrameRequestCallback) => setTimeout(() => run(Date.now()), 16), cancelAnimationFrame: (id: ReturnType<typeof setTimeout>) => clearTimeout(id) });
 Object.assign(dom.window.HTMLMediaElement.prototype, { play() { return Promise.resolve(); }, pause() {}, load() {} });
 Object.assign(dom.window.HTMLElement.prototype, { scrollIntoView() {} });
 const { createRoot } = await import('react-dom/client');
@@ -129,5 +129,22 @@ test('other teachers\' saved progress is untouched by Lina', async () => {
   await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
     await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
     assert.deepEqual(TUTOR_TRACKS.filter(t => t !== LINA_TRACK).map(t => localStorage.getItem(tutorProgressKey(t.id))), before);
+  });
+});
+
+test('Lina animates like the other teachers: idle/talk/laugh clips (webm + mp4) for the shared TutorVideoFace', () => {
+  for (const k of ['idle', 'talk', 'laugh']) for (const ext of ['webm', 'mp4']) {
+    const f = `public/tutors/video/lina-${k}.${ext}`; assert.ok(fs.existsSync(f), f);
+    const size = fs.statSync(f).size; assert.ok(size > 10_000 && size < 200_000, `${f}: ${size}`);
+  }
+});
+
+test('picture lesson shows Lina\'s talking video face (same component as the teachers\' board)', async () => {
+  await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+    await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+    const face = q('[data-testid="lina-face"]'); assert.ok(face);
+    assert.ok(face!.querySelector('.tutor-video-face'), 'TutorVideoFace inside');
+    assert.equal(face!.querySelector('.tutor-video-poster')?.getAttribute('src'), '/tutors/lina.webp');
+    assert.ok(face!.querySelector('source[src="/tutors/video/lina-idle.webm"]'), 'idle loop loaded');
   });
 });

@@ -3,6 +3,8 @@ import { Volume2, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 import type { PicLesson } from '../data/tutorTracks/lina';
 import { picTotal } from '../data/tutorTracks/lina';
 import type { KidsTheme } from '../data/saraBoardPersonas';
+import { TutorVideoFace } from './tutor3d/TutorVideoFace';
+import './tutor3d/tutorBoard.css';
 
 /**
  * 🖼️ لينا's picture lesson: each sentence with its own illustration, then activities on the pictures:
@@ -17,6 +19,10 @@ export interface LinaPictureLessonProps {
   t: (ar: string, en: string) => string;
   teacherNameAr: string;
   teacherNameEn: string;
+  /** Teacher persona id for the talking video face (same TutorVideoFace as Sara and the other teachers). */
+  faceId?: string;
+  /** True while the teacher's voice is playing (the face switches to its talk loop). */
+  speaking?: boolean;
   /** This teacher's own cloud voice. */
   say: (text: string) => void;
   stop: () => void;
@@ -33,7 +39,7 @@ export function stableShuffle(n: number, salt: string, notIdentity = false): num
 }
 const words = (s: string) => s.replace(/[.!?,]/g, '').split(/\s+/).filter(Boolean);
 
-export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, pics, theme, t, teacherNameAr, teacherNameEn, say, stop, onDone }) => {
+export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, pics, theme, t, teacherNameAr, teacherNameEn, faceId, speaking = false, say, stop, onDone }) => {
   const { scenes } = pics;
   const total = picTotal(pics);
   const [phase, setPhase] = useState<Phase>({ k: 'learn', i: 0 });
@@ -156,6 +162,11 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   return (
     <div data-testid="lina-picture-lesson" className="flex-1 min-h-0 flex flex-col gap-2">
       <div className="shrink-0 flex items-center gap-2">
+        {faceId && <button type="button" data-testid="lina-face" data-speaking={speaking ? '1' : '0'} aria-label={t(`استمع لـ${teacherNameAr}`, `Listen to ${teacherNameEn}`)}
+          onClick={() => say(phase.k === 'learn' ? scenes[phase.i].en : phase.k === 'choose' ? scenes[pics.choose[phase.n]].en : phase.k === 'wrong' ? pics.wrong.en : scenes[0].en)}
+          className="relative shrink-0 w-14 h-14 rounded-full overflow-hidden bg-[#001a38]" style={{ border: `3px solid ${theme.accent}`, boxShadow: speaking ? `0 0 14px ${theme.accent}` : undefined }}>
+          <TutorVideoFace id={faceId} alt={t(teacherNameAr, teacherNameEn)} isSpeaking={speaking} onFail={() => {}} />
+        </button>}
         <span className="text-[11px] font-black text-white/80">{t(teacherNameAr, teacherNameEn)}</span>
         <div className="flex-1 flex gap-1" aria-hidden>{Array.from({ length: total + 1 }, (_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i <= step ? theme.accent : 'rgba(255,255,255,.18)' }} />)}</div>
         <span data-testid="lina-stars" className="text-[12px] font-black text-amber-300">⭐ {score}</span>

@@ -160,7 +160,7 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
 
   // 🖼️ لينا: picture lesson (sentence pictures → choose the picture → order the story → «وش الغلط؟»), then the same result screen + progress save.
   if (lesson.pics && step.k !== 'done') return shell(head, <LinaPictureLesson key={lesson.id} lessonId={lesson.id} pics={lesson.pics} theme={persona.kids || { accent: '#F97316', soft: '#FFF7ED', ink: '#7C2D12' }}
-    t={t} teacherNameAr={persona.nameAr} teacherNameEn={persona.nameEn} say={text => v.play(text)} stop={v.stop}
+    t={t} teacherNameAr={persona.nameAr} teacherNameEn={persona.nameEn} faceId={persona.id} speaking={v.st === 'loading'} say={text => v.play(text)} stop={v.stop}
     onDone={n => { setCorrect(n); finish(); }} />);
 
   if (step.k === 'board') return shell(head, <>
