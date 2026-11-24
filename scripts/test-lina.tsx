@@ -401,3 +401,39 @@ test('market class: 10 new lessons with their own pictures; a market match lesso
     assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '14');
   });
 });
+
+test('Lina «قلها بصوتك»: parent consent card first; the mic never starts before consent; skip never blocks; card returns if storage is cleared', async () => {
+  const { default: LinaSayIt, LINA_MIC_CONSENT_KEY } = await import('../src/components/LinaSayIt');
+  let made = 0, started = 0;
+  class FakeSR { lang = ''; interimResults = false; continuous = false; maxAlternatives = 1; onresult: unknown = null; onerror: unknown = null; onend: unknown = null; onstart: unknown = null;
+    constructor() { made++; } start() { started++; } stop() {} abort() {} }
+  (window as any).webkitSpeechRecognition = FakeSR;
+  const el = <LinaSayIt sentence="This is the kitchen." t={(ar: string) => ar} accent="#F97316" say={() => {}} stop={() => {}} />;
+  try {
+    localStorage.clear();
+    await withRoot(el, async () => {
+      assert.ok(q('[data-testid="lina-mic-consent"]'), 'consent card shows first');
+      assert.match(q('[data-testid="lina-mic-consent-text"]')!.textContent!, /Google/);
+      assert.equal(q('[data-testid="lina-say-mic"]'), null, 'no mic button before consent');
+      await click(q('[data-testid="lina-mic-skip"]'));
+      assert.ok(q('[data-testid="lina-say-skipped"]'), 'skip → short note, the lesson goes on');
+      assert.equal(localStorage.getItem(LINA_MIC_CONSENT_KEY), null, 'skipping is not consent');
+      await click(q('[data-testid="lina-consent-reopen"]'));
+      await click(q('[data-testid="lina-mic-agree"]'));
+      assert.equal(localStorage.getItem(LINA_MIC_CONSENT_KEY), '1');
+      assert.equal(made + started, 0, 'agreeing alone never opens the mic');
+      await click(q('[data-testid="lina-say-mic"]'));
+      assert.equal(started, 1, 'the mic starts only on a tap after consent');
+      await click(q('[data-testid="lina-say-stop"]'));
+      await click(q('[data-testid="lina-mic-withdraw"]'));
+      assert.ok(q('[data-testid="lina-mic-consent"]'), 'withdrawn → card again');
+      assert.equal(localStorage.getItem(LINA_MIC_CONSENT_KEY), null);
+    });
+    // consent given, then storage cleared → card again and no mic
+    localStorage.setItem(LINA_MIC_CONSENT_KEY, '1');
+    await withRoot(el, async () => { assert.ok(q('[data-testid="lina-say-mic"]'), 'remembered consent → mic button'); });
+    started = 0;
+    await withRoot(el, async () => { assert.ok(q('[data-testid="lina-mic-consent"]'), 'cleared storage → card again'); assert.equal(q('[data-testid="lina-say-mic"]'), null); });
+    assert.equal(started, 0);
+  } finally { delete (window as any).webkitSpeechRecognition; localStorage.clear(); }
+});

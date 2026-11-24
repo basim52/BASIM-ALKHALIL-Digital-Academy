@@ -1,9 +1,10 @@
 import type { TutorLesson } from './nouraL1';
 import type { SaraChoiceQuestion } from '../saraTracks/foundations';
 /**
- * لينا — picture classes for kids. Every sentence has its own 3D illustration (public/lina/<class>/hNN-i.webp, 512px webp).
- * Built now: «فصل البيت» (10 lessons × 4 pictures). The other 7 classes are on the map as «قريباً» with text-only outlines,
- * so their pictures can be added in later batches. Progress uses the existing tutor counter (tutor_track_tutor-lina_*).
+ * لينا — picture classes for kids. Every sentence has its own 3D illustration (public/lina/<class>/<h|m>NN-i.webp, 768×768 webp).
+ * Built and open: «فصل البيت» (lessons 1–10) and «فصل السوق» (lessons 11–20), 4 pictures per lesson. The other 6 classes are on
+ * the map as «قريباً» with text-only outlines. Progress uses the existing tutor counter (tutor_track_tutor-lina_*); a class badge
+ * comes from that counter, and the class story only keeps a «seen» flag in localStorage.
  */
 export type PicScene = { img: string; en: string; ar: string };
 export type PicWrong = { scene: number; en: string; bad: string; fix: string };
