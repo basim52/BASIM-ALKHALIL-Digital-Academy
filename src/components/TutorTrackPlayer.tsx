@@ -15,7 +15,8 @@ import { teacherMapStyle } from '../lib/saraLessonMap';
 import KidsCardBoard from './KidsCardBoard';
 import LinaPictureLesson from './LinaPictureLesson';
 import { useLandscapeSplit } from '../lib/useLandscapeSplit';
-import { picTotal } from '../data/tutorTracks/lina';
+import { picTotal, LINA_CLASSES, linaClassDone, linaClassOf, type LinaClass } from '../data/tutorTracks/lina';
+import LinaClassStory, { linaStorySeen } from './LinaClassStory';
 import { mapNodeOpen } from '../lib/saraLessonMap';
 import ExplainLangToggle from './ExplainLangToggle';
 import { useExplainLang, useLessonView, englishLessonAsync } from '../lib/explainLang';
@@ -95,6 +96,8 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   const repeatItems = useMemo(() => (lessonRaw ? extractLessonItems(lessonRaw) : []), [lessonRaw]);
   const spellItems = useMemo(() => (lessonRaw ? spellingItemsFor(lessonRaw as any) : []), [lessonRaw]);
   const [repeatOpen, setRepeatOpen] = useState(false);
+  const [storyCls, setStoryCls] = useState<LinaClass | null>(null); // 📖 لينا: end-of-class story (no progress change)
+  const linaTrack = track.id === 'tutor-lina';
   const land = useLandscapeSplit(); // tablet landscape: picture lessons + result screen use two columns
 
   const shell = (head: React.ReactNode, body: React.ReactNode) => (
@@ -126,6 +129,41 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   /** Open a lesson from the map (same steps the old list ran). */
   const openLesson = (l: TutorLesson) => { if (l.pics) { v.stop(); setLesson(l); setStep({ k: 'board' }); trans.reset(); setPicked(null); setCheckWrong(false); setCorrect(0); return; } setLesson(l); setStep({ k: 'board' }); trans.reset(); const cc = l.content!; const lk = persona.kids ? l.kids : undefined; if (lang === 'en') { v.stop(); trans.narrationStarted(); void englishLessonAsync(l).then(x => { const e2 = x.content!; playBoard(lk ? `${e2.explanationAr} ${lk.say}` : `${e2.explanationAr} ${e2.example.map(e => e.en).join('. ')}`); }); } else playBoard(lk ? `${cc.explanationAr} ${lk.say}` : `${cc.explanationAr} ${cc.example.map(e => e.en).join('. ')}`); setPicked(null); setCheckWrong(false); setCorrect(0); };
 
+  // 📖 لينا: «قصة الفصل» (from the map or the class's last result screen) — 4 narrated pictures + 2 questions + the badge.
+  if (storyCls) return (
+    <div data-testid="tutor-track" className="flex-1 min-h-0 p-3 flex flex-col gap-2 bg-[#001a38] text-white overflow-hidden">
+      <div className="flex items-center gap-2 shrink-0">
+        <button onClick={() => { v.stop(); setStoryCls(null); }} aria-label={t("رجوع", "Back")} className="p-1.5 rounded-lg bg-white/10"><ArrowRight size={16} /></button>
+        <div className="min-w-0 flex-1"><p className="text-[10px] text-amber-300 font-bold">{NM} — {t(storyCls.titleAr, storyCls.titleEn)}</p><p className="text-[13px] font-black truncate">📖 {t(`قصة الفصل: ${storyCls.story.titleAr}`, `Class story: ${storyCls.story.titleEn}`)}</p></div>
+      </div>
+      <LinaClassStory key={storyCls.id} cls={storyCls} uid={uid} t={t} accent={persona.kids?.accent || '#F97316'} say={text => v.play(text)} stop={v.stop} onClose={() => { v.stop(); setStoryCls(null); setLesson(null); }} />
+      <TtsDebugOverlay />
+    </div>
+  );
+  /** 🏅 لينا: a class badge is earned once the existing counter passes the class's last lesson (nothing new is stored). */
+  const linaBadge = (levelId: string) => {
+    const c = linaTrack ? LINA_CLASSES.find(x => x.id === levelId) : undefined;
+    if (!c) return null;
+    const got = linaClassDone(c, unlocked);
+    const n = Math.max(0, Math.min(c.lastOrder, unlocked - 1) - c.firstOrder + 1);
+    return <p data-testid={`lina-badge-${c.id}`} data-earned={got ? '1' : '0'} className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/25 text-[11px] font-black">{got ? `🏅 ${c.badgeEmoji} ${t(c.badgeAr, c.badgeEn)} ✓` : `🏅 ${t(`خلّص الفصل وتاخذ ${c.badgeAr} (${n}/${c.lastOrder - c.firstOrder + 1})`, `Finish the class to earn the ${c.badgeEn} (${n}/${c.lastOrder - c.firstOrder + 1})`)}`}</p>;
+  };
+  const linaLevelEnd = (levelId: string) => {
+    const c = linaTrack ? LINA_CLASSES.find(x => x.id === levelId) : undefined;
+    if (!c) return null;
+    const got = linaClassDone(c, unlocked); const seen = linaStorySeen(c.id, uid);
+    return (
+      <div data-testid={`lina-class-end-${c.id}`} className="rounded-2xl border-2 p-3 flex items-center gap-3" style={{ borderColor: got ? '#F59E0B' : '#e5e7eb', background: got ? '#FFFBEB' : '#f8fafc' }}>
+        <span className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center text-[28px] ${got ? '' : 'grayscale opacity-50'}`} style={{ background: got ? 'radial-gradient(circle at 30% 30%, #FDE68A, #F59E0B)' : '#e5e7eb', border: '3px solid #fff', boxShadow: '0 2px 6px rgba(0,0,0,.15)' }}>{c.badgeEmoji}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-black text-slate-800">🏅 {t(c.badgeAr, c.badgeEn)}{got ? ' ✓' : ''}</p>
+          <p className="text-[11px] font-bold text-slate-500">{got ? t(`📖 قصة الفصل: ${c.story.titleAr}${seen ? ' ✓' : ''}`, `📖 Class story: ${c.story.titleEn}${seen ? ' ✓' : ''}`) : t('خلّص كل دروس الفصل وتنفتح لك الشارة وقصة الفصل', 'Finish every lesson in the class to get the badge and the class story')}</p>
+        </div>
+        <button data-testid={`lina-story-open-${c.id}`} disabled={!got} onClick={() => { v.stop(); setStoryCls(c); }} className="shrink-0 px-3 py-2 rounded-xl text-white text-[12px] font-black disabled:opacity-40" style={{ background: '#F97316' }}>{got ? t('📖 القصة', '📖 Story') : '🔒'}</button>
+      </div>
+    );
+  };
+
   // Lesson map (same zigzag map as Sara's lessons; reads the saved counter only, never writes progress)
   if (!lesson) {
     if (freeTalk) return <TutorConversation persona={persona} onBack={() => setFreeTalk(false)} />;
@@ -142,7 +180,8 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
             isOpen={track.comingSoon ? (l => !l.soon && mapNodeOpen(l.order, unlocked)) : undefined} lang={lang === 'en' ? 'en' : 'ar'}
             trackTitleAr={track.titleAr} trackTitleEn={(track as { titleEn?: string }).titleEn} kind={style.kind} colorOffset={style.colorOffset} numbering="level"
             teacherImage={`/tutors/${persona.id}.webp`} teacherNameAr={persona.nameAr} teacherNameEn={persona.nameEn} teacherEmoji={persona.emoji}
-            onOpen={l => openLesson(l)} onFreeChat={() => { v.stop(); setFreeTalk(true); }} />
+            onOpen={l => openLesson(l)} onFreeChat={() => { v.stop(); setFreeTalk(true); }}
+            renderLevelBanner={linaTrack ? linaBadge : undefined} renderLevelEnd={linaTrack ? linaLevelEnd : undefined} />
         </div>
         <TtsDebugOverlay />
       </div>
@@ -242,6 +281,8 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
   }
 
   const nextLesson = track.lessons[lesson.order];
+  const endCls = linaTrack && lesson.pics ? linaClassOf(lesson.order) : undefined;
+  const classEnd = endCls && endCls.lastOrder === lesson.order && linaClassDone(endCls, unlocked) ? endCls : undefined;
   return shell(head, <div data-testid="tutor-result-screen" data-layout={land ? 'split' : 'stack'} className={land ? 'flex-1 min-h-0 flex flex-row gap-4 items-stretch' : 'contents'}>
     <div className={`flex flex-col items-center justify-center gap-2 text-center ${land ? 'flex-1 min-w-0' : 'flex-1'}`}>
       <span className="text-[44px]">{persona.emoji}</span>
@@ -249,6 +290,11 @@ export const TutorTrackPlayer: React.FC<{ track: TutorTrack; uid?: string; onBac
       <p className="text-[12px] font-bold text-white/80">{correct === total ? t('ممتاز!', 'Excellent!') : t('تقدر تعيد الدرس متى ما بغيت.', 'You can redo the lesson any time.')}</p>
     </div>
     <div className={land ? 'flex-1 min-w-0 min-h-0 overflow-y-auto overscroll-contain flex flex-col justify-center gap-2' : 'contents'}>
+    {classEnd && <div data-testid="lina-class-done" className="shrink-0 rounded-2xl p-2.5 flex items-center gap-2.5" style={{ background: '#FFFBEB', border: '3px solid #F59E0B' }}>
+      <span className="w-12 h-12 shrink-0 rounded-full flex items-center justify-center text-[26px]" style={{ background: 'radial-gradient(circle at 30% 30%, #FDE68A, #F59E0B)', border: '3px solid #fff' }}>{classEnd.badgeEmoji}</span>
+      <p className="flex-1 min-w-0 text-[13px] font-black text-[#7C2D12]">🏅 {t(`أخذت ${classEnd.badgeAr}! خلصت ${classEnd.titleAr}`, `You earned the ${classEnd.badgeEn}! ${classEnd.titleEn} is done`)}</p>
+      <button data-testid="lina-class-story" onClick={() => { v.stop(); setStoryCls(classEnd); }} className="shrink-0 px-3 py-2.5 rounded-xl text-white text-[13px] font-black" style={{ background: '#F97316' }}>{t('📖 قصة الفصل', '📖 Class story')}</button>
+    </div>}
     <div className="shrink-0">
       <ExercisesDoneCue say={(text, end) => v.play(text, { done: end })} onRepeat={repeatItems.length > 0 ? () => { v.stop(); setRepeatOpen(true); } : undefined}
         onNext={nextLesson ? () => { v.stop(); setLesson(nextLesson); setStep({ k: 'board' }); setCorrect(0); } : () => { v.stop(); setLesson(null); }}

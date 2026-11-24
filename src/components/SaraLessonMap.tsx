@@ -42,6 +42,8 @@ interface Props<T extends MapLesson> {
   streak?: number | null;
   /** Rendered after a level's last lesson (the existing end-of-level test). */
   renderLevelEnd?: (levelId: string) => React.ReactNode;
+  /** Extra line inside a level's banner (e.g. لينا's class badge). */
+  renderLevelBanner?: (levelId: string) => React.ReactNode;
   /** Sara's existing portrait. */
   saraImage?: string;
   /** Another teacher's portrait (/tutors/{id}.webp); wins over saraImage. */
@@ -76,7 +78,7 @@ const TOP = 84;       // first node centre (px)
 const CEFR = /^[abc][12]$/i;
 
 /** 🗺️ Duolingo-style winding lesson map for Sara's and the other teachers' lesson lists (display + navigation only; never writes progress). */
-export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf, unlocked, unlockAll, isOpen, lang, trackTitleAr, trackTitleEn, kind = 'grammar', colorOffset = 0, onOpen, onFreeChat, streak, renderLevelEnd, saraImage = '/tutors/sara.webp', teacherImage, teacherNameAr = 'سارة', teacherNameEn = 'Sara', teacherEmoji = '👩‍🏫', numbering = 'track', uid }: Props<T>) {
+export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf, unlocked, unlockAll, isOpen, lang, trackTitleAr, trackTitleEn, kind = 'grammar', colorOffset = 0, onOpen, onFreeChat, streak, renderLevelEnd, renderLevelBanner, saraImage = '/tutors/sara.webp', teacherImage, teacherNameAr = 'سارة', teacherNameEn = 'Sara', teacherEmoji = '👩‍🏫', numbering = 'track', uid }: Props<T>) {
   const [photoBad, setPhotoBad] = useState(false);
   const gamify = useGamifyData(uid);
   // 🧒 The student's character from "غرفتي" (device only) walks on the map.
@@ -233,6 +235,7 @@ export function SaraLessonMap<T extends MapLesson>({ lessons, levels, sectionOf,
           <p className="text-[15px] font-black leading-snug">{t(section.titleAr, section.titleEn || section.titleAr)}</p>
           <p data-testid="sara-map-zone-name" className="text-[11px] font-black opacity-95">{zone.emoji} {t(zone.nameAr, zone.nameEn)}{zoneLocked ? t(' · مقفلة', ' · locked') : ''}</p>
           {zoneIsNew && <p data-testid="sara-map-zone-new" className="slm-pop mt-1 inline-block px-2 py-0.5 rounded-full bg-white/25 text-[11px] font-black">✨ {t('منطقة جديدة انفتحت لك!', 'New zone unlocked!')}</p>}
+          {renderLevelBanner?.(section.id)}
           {section.noteAr && <p data-testid="sara-map-level-note" className="text-[11px] font-bold opacity-90">🔒 {t(section.noteAr, section.noteEn || section.noteAr)}</p>}
           <div className="mt-2 h-2.5 rounded-full bg-white/30 overflow-hidden">
             <div className="h-full rounded-full bg-white" style={{ width: `${Math.round((doneIn(section) / section.lessons.length) * 100)}%` }} />

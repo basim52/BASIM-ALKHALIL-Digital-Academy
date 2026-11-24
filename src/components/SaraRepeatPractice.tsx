@@ -102,7 +102,7 @@ const errMsg = (code: string): string => {
     default: return 'صار خطأ في المايك. اضغط «اضغط وردّد» وحاول مرة ثانية.';
   }
 };
-function useRepeatRecognition() {
+export function useRepeatRecognition() {
   const recRef = useRef<any>(null);
   const sessionRef = useRef(0);
   const timersRef = useRef<number[]>([]);
