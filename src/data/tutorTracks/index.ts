@@ -16,7 +16,7 @@ import { LAMA_LESSONS } from './lama';
 import { REEM_LESSONS } from './reem';
 import { HAYA_LESSONS } from './haya';
 import { JANA_LESSONS } from './jana';
-import { LINA_HOUSE, LINA_MAP_LEVELS, LINA_SOON_LESSONS, type LinaMapLevel } from './lina';
+import { LINA_LESSONS, LINA_MAP_LEVELS, LINA_SOON_LESSONS, type LinaMapLevel } from './lina';
 /** Specialty tutor tracks. Kept OUT of SARA_TRACKS so Sara's plan/basket/unlocking/level tests are unaffected. Level map: docs/tutor-curricula-levels.md */
 /** Level 1 was written with most answers in position B: move each correct answer to a stable pseudo-random position (swap only, same options). */
 const spread = (lessons: TutorLesson[]): TutorLesson[] => lessons.map(l => {
@@ -114,8 +114,8 @@ export const JANA_TRACK: TutorTrack = {
 export const LINA_TRACK: TutorTrack = {
   id: 'tutor-lina', personaId: 'lina',
   titleAr: 'فصول الصور مع لينا', titleEn: 'Picture Classes with Lina',
-  levels: [{ id: 'house', titleAr: 'فصل البيت', titleEn: 'The House' }],
-  lessons: LINA_HOUSE,
+  levels: [{ id: 'house', titleAr: 'فصل البيت', titleEn: 'The House' }, { id: 'market', titleAr: 'فصل السوق', titleEn: 'The Market' }],
+  lessons: LINA_LESSONS,
   mapLevels: LINA_MAP_LEVELS, comingSoon: LINA_SOON_LESSONS,
 };
 export const TUTOR_TRACKS: TutorTrack[] = [NOURA_TRACK, MOHAMMED_TRACK, ALI_TRACK, LAMA_TRACK, REEM_TRACK, HAYA_TRACK, JANA_TRACK, LINA_TRACK];

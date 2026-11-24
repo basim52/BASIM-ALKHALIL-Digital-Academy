@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { JSDOM } from 'jsdom';
 import React, { act } from 'react';
 import { LINA_TRACK, TUTOR_TRACKS } from '../src/data/tutorTracks';
-import { picTotal } from '../src/data/tutorTracks/lina';
+import { picTotal, LINA_CLASSES, LINA_HOUSE, LINA_MARKET } from '../src/data/tutorTracks/lina';
 import { BOARD_PERSONAS, personaById } from '../src/data/saraBoardPersonas';
 import { tutorProgressKey } from '../src/lib/tutorProgress';
 
@@ -20,6 +20,7 @@ const host = document.getElementById('root')!;
 const q = (sel: string) => host.querySelector(sel) as HTMLElement | null;
 const qa = (sel: string) => Array.from(host.querySelectorAll(sel)) as HTMLButtonElement[];
 const click = async (el: Element | null) => { assert.ok(el, 'element exists'); await act(async () => { (el as HTMLElement).click(); }); };
+const settle = async () => { await act(async () => { await new Promise(r => setTimeout(r, 60)); }); };
 async function withRoot(el: React.ReactElement, run: () => Promise<void> | void) {
   const root = createRoot(host);
   await act(async () => { root.render(el); });
@@ -36,17 +37,20 @@ test('Lina: new kids teacher with her own portrait and a distinct supported voic
   assert.ok(TUTOR_TRACKS.includes(LINA_TRACK));
 });
 
-test('Lina map: 8 picture classes, البيت built (10 lessons), 7 coming soon with text outlines only', () => {
+test('Lina map: 8 picture classes, البيت + السوق built (20 lessons), 6 coming soon with text outlines only', () => {
   const titles = (LINA_TRACK.mapLevels || []).map(l => l.titleAr).join('|');
   for (const w of ['البيت', 'السوق', 'المدرسة', 'المغامرة', 'السفر', 'الحيوانات والطبيعة', 'المشاعر', 'المهن']) assert.ok(titles.includes(w), w);
   assert.equal(LINA_TRACK.mapLevels!.length, 8);
-  assert.equal(LINA_TRACK.lessons.length, 10);
+  assert.equal(LINA_TRACK.lessons.length, 20);
+  assert.deepEqual(LINA_TRACK.lessons.map(l => l.order), Array.from({ length: 20 }, (_, i) => i + 1));
+  assert.ok(LINA_MARKET.every(l => l.levelId === 'market' && l.pics));
   const soon = LINA_TRACK.comingSoon!;
-  assert.equal(new Set(soon.map(l => l.levelId)).size, 7);
+  assert.equal(new Set(soon.map(l => l.levelId)).size, 6);
+  assert.ok(!soon.some(l => l.levelId === 'house' || l.levelId === 'market'));
   assert.ok(soon.every(l => l.soon && !l.content && !l.pics && l.order > 100), 'outlines are text only and never opened');
 });
 
-test('Lina house lessons: every sentence has its own small webp picture; activities are consistent', () => {
+test('Lina house + market lessons: every sentence has its own small webp picture; activities are consistent', () => {
   const seen = new Set<string>();
   for (const l of LINA_TRACK.lessons) {
     const p = l.pics!; assert.ok(p, l.id);
@@ -62,7 +66,7 @@ test('Lina house lessons: every sentence has its own small webp picture; activit
     assert.equal(w.en.replace(w.bad, w.fix), p.scenes[w.scene].en, `${l.id}: fixing the wrong word gives the picture's sentence`);
     assert.deepEqual(l.content!.example.map(e => e.en), p.scenes.map(s => s.en));
   }
-  assert.equal(seen.size, 40);
+  assert.equal(seen.size, 80, '40 house + 40 market pictures, none reused');
   for (const f of seen) {
     const b = fs.readFileSync(`public${f}`); const kind = b.toString('ascii', 12, 16);
     const [w, h] = kind === 'VP8X' ? [1 + b.readUIntLE(24, 3), 1 + b.readUIntLE(27, 3)]
@@ -81,8 +85,10 @@ test('Lina map renders: teacher on top, 8 class tabs, coming-soon lessons locked
     for (const lv of LINA_TRACK.mapLevels!) assert.ok(q(`[data-testid="sara-map-tab-${lv.id}"]`), lv.id);
     assert.equal(q('[data-testid="sara-map-node-tutor-lina-01"]')?.dataset.state, 'current');
     await click(q('[data-testid="sara-map-tab-market"]'));
-    const nodes = qa('[data-testid^="sara-map-node-tutor-lina-soon-market"]');
-    assert.equal(nodes.length, 5);
+    assert.equal(q('[data-testid="sara-map-node-tutor-lina-11"]')?.dataset.state, 'locked', 'market opens after the house class');
+    await click(q('[data-testid="sara-map-tab-school"]'));
+    const nodes = qa('[data-testid^="sara-map-node-tutor-lina-soon-school"]');
+    assert.equal(nodes.length, 10);
     assert.ok(nodes.every(n => n.disabled && n.dataset.state === 'locked'));
     assert.match(q('[data-testid="sara-map-level-note"]')?.textContent || '', /قريباً/);
     assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), null, 'the map writes nothing');
@@ -94,15 +100,18 @@ test('even with the house class finished, coming-soon lessons stay locked', asyn
   await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
     await click(q('[data-testid="sara-map-tab-house"]'));
     assert.ok(qa('[data-testid^="sara-map-node-tutor-lina-0"], [data-testid="sara-map-node-tutor-lina-10"]').every(n => n.dataset.state === 'done'));
+    await click(q('[data-testid="sara-map-tab-market"]'));
+    assert.equal(q('[data-testid="sara-map-node-tutor-lina-11"]')?.dataset.state, 'current', 'existing progress (11) opens the new market class');
     await click(q('[data-testid="sara-map-tab-jobs"]'));
     assert.ok(qa('[data-testid^="sara-map-node-tutor-lina-soon-jobs"]').every(n => n.disabled));
   });
 });
 
-test('picture lesson: learn the pictures, choose, order the story, spot the mistake → result + existing counter raised', async () => {
-  const l = LINA_TRACK.lessons[0]; const p = l.pics!;
+test('picture lesson: learn, choose, listen (text hidden), order the story, spot the mistake, say it → result + existing counter raised', async () => {
+  const l = LINA_TRACK.lessons[1]; const p = l.pics!; assert.ok(!p.match, 'صباح الخير is a story lesson');
+  localStorage.setItem(tutorProgressKey(LINA_TRACK.id), '2');
   await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
-    await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+    await click(q('[data-testid="sara-map-node-tutor-lina-02"]'));
     for (let i = 0; i < p.scenes.length; i++) {
       assert.ok(q('[data-testid="lina-pic-learn"]'));
       assert.equal(q('[data-testid="lina-scene-img"]')?.getAttribute('src'), p.scenes[i].img);
@@ -117,6 +126,13 @@ test('picture lesson: learn the pictures, choose, order the story, spot the mist
       await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`));
       await click(q('[data-testid="lina-next"]'));
     }
+    assert.ok(q('[data-testid="lina-listen"]'), '«اسمع واختر» step');
+    assert.equal(qa('[data-testid^="lina-listen-opt-"]').length, 4);
+    assert.ok(!(q('[data-testid="lina-listen"]')!.textContent || '').includes(p.scenes[p.listen!.scene].en), 'the sentence is hidden before the pick');
+    await click(q('[data-testid^="lina-listen-opt-"][data-correct="1"]'));
+    assert.equal(q('[data-testid="lina-listen-said"]')?.textContent, p.scenes[p.listen!.scene].en, 'shown after the pick');
+    await click(q('[data-testid="lina-next"]'));
+    assert.ok(!q('[data-testid="lina-match"]'), 'story lessons keep «رتّب حسب القصة»');
     assert.ok(q('[data-testid="lina-order"]'));
     const opts = qa('[data-testid^="lina-order-opt-"]').map(b => b.dataset.testid);
     assert.notDeepEqual(opts, p.scenes.map((_, i) => `lina-order-opt-${i}`), 'story starts shuffled');
@@ -126,10 +142,16 @@ test('picture lesson: learn the pictures, choose, order the story, spot the mist
     assert.ok(q('[data-testid="lina-wrong"]'));
     assert.match(q('[data-testid="lina-wrong-img"]')?.className || '', /object-contain/);
     await click(q('[data-testid="lina-wrong-word-0"][data-bad="1"], [data-bad="1"]'));
-    assert.match(q('[data-testid="lina-wrong-fix"]')?.textContent || '', /kitchen/);
+    assert.match(q('[data-testid="lina-wrong-fix"]')?.textContent || '', /teeth/);
+    await click(q('[data-testid="lina-next"]')); await settle();
+    assert.ok(q('[data-testid="lina-say"]'), '«قلها بصوتك» step');
+    assert.equal(q('[data-testid="lina-say-sentence"]')?.textContent, p.scenes[p.say!].en);
+    assert.ok(q('[data-testid="lina-say-unsupported"]'), 'no speech recognition here → a short note, never stuck');
+    assert.ok(!(q('[data-testid="lina-next"]') as HTMLButtonElement).disabled, 'Next always on (skip allowed)');
     await click(q('[data-testid="lina-next"]'));
+    assert.equal(picTotal(p), 5);
     assert.equal(q('[data-testid="tutor-result"]')?.textContent, `جاوبت ${picTotal(p)} من ${picTotal(p)} صح`);
-    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '2', 'same tutor counter as the other teachers');
+    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '3', 'same tutor counter as the other teachers');
   });
 });
 
@@ -162,12 +184,13 @@ test('picture lesson shows Lina\'s talking video face (same component as the tea
 // Regression («وش الغلط ويوقف»): on short Android phones the fixed-size picture + the words + the answer box pushed
 // «النتيجة» below the screen inside an overflow-hidden page, so the lesson looked stuck after tapping a word.
 test('«وش الغلط؟» never hides «النتيجة»: picture shrinks to fit, step scrolls, button is sticky; wrong answer still finishes and saves', async () => {
-  localStorage.removeItem(tutorProgressKey(LINA_TRACK.id));
-  const l = LINA_TRACK.lessons[0]; const p = l.pics!;
+  localStorage.setItem(tutorProgressKey(LINA_TRACK.id), '2');
+  const l = LINA_TRACK.lessons[1]; const p = l.pics!;
   await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
-    await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+    await click(q('[data-testid="sara-map-node-tutor-lina-02"]'));
     for (let i = 0; i < p.scenes.length; i++) await click(q('[data-testid="lina-next"]'));
     for (let n = 0; n < p.choose.length; n++) { await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`)); await click(q('[data-testid="lina-next"]')); }
+    await click(q('[data-testid^="lina-listen-opt-"][data-correct="1"]')); await click(q('[data-testid="lina-next"]'));
     for (let i = 0; i < p.scenes.length; i++) await click(q(`[data-testid="lina-order-opt-${i}"]`));
     await click(q('[data-testid="lina-next"]'));
     const step = q('[data-testid="lina-wrong"]')!; assert.ok(step);
@@ -181,10 +204,15 @@ test('«وش الغلط؟» never hides «النتيجة»: picture shrinks to f
     assert.ok(next.disabled);
     await click(q('[data-bad="0"]')); // a wrong word
     assert.ok(q('[data-testid="lina-wrong-fix"]'));
-    assert.equal(next.textContent, 'النتيجة'); assert.ok(!(q('[data-testid="lina-next"]') as HTMLButtonElement).disabled);
+    assert.equal(next.textContent, 'التالي'); assert.ok(!(q('[data-testid="lina-next"]') as HTMLButtonElement).disabled);
+    await click(q('[data-testid="lina-next"]')); await settle();
+    const sayStep = q('[data-testid="lina-say"]')!; assert.ok(sayStep);
+    assert.match(sayStep.className, /overflow-y-auto/);
+    assert.match(q('[data-testid="lina-next"]')!.parentElement!.className, /sticky bottom-0/, '«النتيجة» pinned on the say step too');
+    assert.equal(q('[data-testid="lina-next"]')!.textContent, 'النتيجة');
     await click(q('[data-testid="lina-next"]'));
     assert.equal(q('[data-testid="tutor-result"]')?.textContent, `جاوبت ${picTotal(p) - 1} من ${picTotal(p)} صح`);
-    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '2');
+    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '3');
     await click(q('[data-testid="tutor-track"] button[aria-label]'));
     assert.ok(q('[data-testid="tutor-lessons"]'), 'back on the map');
   });
@@ -215,9 +243,10 @@ const splitOk = (id: string) => {
 test('tablet landscape: every Lina step is two columns (picture | sentence, words, options, button) → result split → saved → map', async () => {
   fakeOrientation(true);
   try {
-    const l = LINA_TRACK.lessons[0]; const p = l.pics!;
+    const l = LINA_TRACK.lessons[1]; const p = l.pics!;
+    localStorage.setItem(tutorProgressKey(LINA_TRACK.id), '2');
     await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
-      await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+      await click(q('[data-testid="sara-map-node-tutor-lina-02"]'));
       assert.equal(q('[data-testid="lina-picture-lesson"]')?.dataset.layout, 'split');
       assert.ok(!q('[data-testid="lesson-steps"]'), 'the شرح/تمارين strip is folded away in landscape to save height');
       for (let i = 0; i < p.scenes.length; i++) {
@@ -233,6 +262,11 @@ test('tablet landscape: every Lina step is two columns (picture | sentence, word
         await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`));
         await click(q('[data-testid="lina-next"]'));
       }
+      const { pic: lp, side: ls } = splitOk('lina-listen');
+      assert.equal(lp.querySelectorAll('[data-testid^="lina-listen-opt-"]').length, 4, '4 pictures | hear-again button beside them');
+      assert.ok(ls.querySelector('[data-testid="lina-listen-again"]'));
+      await click(q('[data-testid^="lina-listen-opt-"][data-correct="1"]'));
+      await click(q('[data-testid="lina-next"]'));
       const { pic: op } = splitOk('lina-order');
       assert.equal(op.querySelectorAll('[data-testid^="lina-order-opt-"]').length, 4);
       for (let i = 0; i < p.scenes.length; i++) await click(q(`[data-testid="lina-order-opt-${i}"]`));
@@ -243,12 +277,15 @@ test('tablet landscape: every Lina step is two columns (picture | sentence, word
       assert.ok(ws.querySelector('[data-bad="1"]'), 'words beside the picture');
       await click(q('[data-bad="1"]'));
       assert.ok(ws.querySelector('[data-testid="lina-wrong-fix"]'));
+      await click(q('[data-testid="lina-next"]')); await settle();
+      const { pic: sp, side: ss } = splitOk('lina-say');
+      assert.ok(sp.querySelector('[data-testid="lina-say-img"]')); assert.ok(ss.querySelector('[data-testid="lina-say-box"]'), 'mic box beside the picture');
       await click(q('[data-testid="lina-next"]'));
       const rs = q('[data-testid="tutor-result-screen"]')!;
       assert.equal(rs.dataset.layout, 'split', 'result screen: score | next steps side by side');
       assert.equal(q('[data-testid="tutor-result"]')?.textContent, `جاوبت ${picTotal(p)} من ${picTotal(p)} صح`);
       assert.ok(rs.querySelector('[data-testid="tutor-next-lesson"]'), 'next-lesson button on screen');
-      assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '2', 'same counter as portrait');
+      assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '3', 'same counter as portrait');
       await click(q('[data-testid="tutor-track"] button[aria-label]'));
       assert.ok(q('[data-testid="tutor-lessons"]'), 'back on the map');
     });
@@ -271,4 +308,96 @@ test('rotating the tablet switches Lina\'s layout live (portrait stack ⇄ lands
       assert.ok(q('[data-testid="lesson-steps"]'), 'portrait keeps the steps strip');
     });
   } finally { delete (dom.window as unknown as { matchMedia?: unknown }).matchMedia; }
+});
+
+test('«وصّل الصورة بجملتها» replaces «رتّب حسب القصة» only in the 5 house lessons without a story', () => {
+  const match = LINA_HOUSE.filter(l => l.pics!.match).map(l => l.titleAr);
+  assert.deepEqual(match, ['غرف البيت', 'الفطور', 'ننظف البيت', 'في الصالة', 'العشا مع العائلة']);
+  for (const l of LINA_TRACK.lessons) {
+    const p = l.pics!;
+    assert.ok(p.listen && p.say != null, `${l.id}: listen + say steps`);
+    assert.ok(!p.choose.includes(p.listen!.scene), `${l.id}: listen asks a sentence «اختر» didn't`);
+    const cls = [...LINA_HOUSE, ...LINA_MARKET].filter(x => x.levelId === l.levelId && x.id !== l.id).flatMap(x => x.pics!.scenes.map(s => s.img));
+    assert.equal(new Set(p.listen!.decoys.map(d => d.img)).size, 3);
+    assert.ok(p.listen!.decoys.every(d => cls.includes(d.img)), `${l.id}: decoys come from other lessons of the same class`);
+  }
+});
+
+test('matching game: tap picture → sentence; a wrong pair shows a hint, all 4 matched finishes (no mistake = 1 point)', async () => {
+  const p = LINA_TRACK.lessons[0].pics!; assert.ok(p.match);
+  await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+    await click(q('[data-testid="sara-map-node-tutor-lina-01"]'));
+    for (let i = 0; i < 4; i++) await click(q('[data-testid="lina-next"]'));
+    for (let n = 0; n < p.choose.length; n++) { await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`)); await click(q('[data-testid="lina-next"]')); }
+    await click(q('[data-testid^="lina-listen-opt-"][data-correct="1"]')); await click(q('[data-testid="lina-next"]'));
+    assert.ok(q('[data-testid="lina-match"]') && !q('[data-testid="lina-order"]'));
+    assert.ok((q('[data-testid="lina-next"]') as HTMLButtonElement).disabled, 'Next waits for all pairs');
+    await click(q('[data-testid="lina-match-pic-0"]')); await click(q('[data-testid="lina-match-sen-2"]'));
+    assert.ok(q('[data-testid="lina-match-miss"]'), 'wrong pair → hint');
+    assert.equal(q('[data-testid="lina-match-pic-0"]')!.dataset.matched, '0');
+    for (let i = 0; i < 4; i++) { await click(q(`[data-testid="lina-match-sen-${i}"]`)); await click(q(`[data-testid="lina-match-pic-${i}"]`)); } // sentence first works too
+    assert.equal(qa('[data-matched="1"]').length, 8);
+    assert.ok(q('[data-testid="lina-match-done"]'));
+    await click(q('[data-testid="lina-next"]'));
+    assert.ok(q('[data-testid="lina-wrong"]'));
+    await click(q('[data-bad="1"]')); await click(q('[data-testid="lina-next"]')); await settle();
+    await click(q('[data-testid="lina-next"]'));
+    assert.equal(q('[data-testid="tutor-result"]')?.textContent, `جاوبت ${picTotal(p) - 1} من ${picTotal(p)} صح`, 'the mistake in «وصّل» costs its point');
+    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '2');
+  });
+});
+
+test('badge + end-of-class story: finishing lesson 10 earns «شارة البيت» (from the existing counter), story = 4 pictures + 2 questions', async () => {
+  localStorage.setItem(tutorProgressKey(LINA_TRACK.id), '10');
+  const house = LINA_CLASSES[0]; const p = LINA_TRACK.lessons[9].pics!;
+  await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+    assert.equal(q('[data-testid="lina-badge-house"]')?.dataset.earned, '0');
+    assert.match(q('[data-testid="lina-badge-house"]')?.textContent || '', /9\/10/);
+    assert.ok((q('[data-testid="lina-story-open-house"]') as HTMLButtonElement).disabled, 'story locked until the class is done');
+    await click(q('[data-testid="sara-map-node-tutor-lina-10"]'));
+    for (let i = 0; i < 4; i++) await click(q('[data-testid="lina-next"]'));
+    for (let n = 0; n < p.choose.length; n++) { await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`)); await click(q('[data-testid="lina-next"]')); }
+    await click(q('[data-testid^="lina-listen-opt-"][data-correct="1"]')); await click(q('[data-testid="lina-next"]'));
+    for (let i = 0; i < 4; i++) await click(q(`[data-testid="lina-order-opt-${i}"]`));
+    await click(q('[data-testid="lina-next"]')); await click(q('[data-bad="1"]')); await click(q('[data-testid="lina-next"]')); await settle();
+    await click(q('[data-testid="lina-next"]'));
+    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '11');
+    assert.ok(q('[data-testid="lina-class-done"]'), 'badge banner on the last lesson\'s result');
+    await click(q('[data-testid="lina-class-story"]'));
+    for (let i = 0; i < 4; i++) {
+      assert.equal(q('[data-testid="lina-story-img"]')?.getAttribute('src'), house.story.pages[i].img);
+      assert.ok(fs.existsSync(`public${house.story.pages[i].img}`), 'story reuses existing house pictures');
+      await click(q('[data-testid="lina-story-next"]'));
+    }
+    for (let i = 0; i < 2; i++) { assert.ok((q('[data-testid="lina-story-next"]') as HTMLButtonElement).disabled); await click(q('[data-testid^="lina-story-opt-"][data-correct="1"]')); await click(q('[data-testid="lina-story-next"]')); }
+    assert.match(q('[data-testid="lina-story-score"]')?.textContent || '', /2 من 2/);
+    assert.ok(q('[data-testid="lina-story-badge"]'));
+    await click(q('[data-testid="lina-story-next"]'));
+    assert.ok(q('[data-testid="tutor-lessons"]'), 'back on the map');
+    await click(q('[data-testid="sara-map-tab-house"]'));
+    assert.equal(q('[data-testid="lina-badge-house"]')?.dataset.earned, '1', 'badge shown on Lina\'s map');
+    assert.ok(!(q('[data-testid="lina-story-open-house"]') as HTMLButtonElement).disabled);
+    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '11', 'the story never changes progress');
+    const keys = Object.keys(localStorage).sort();
+    assert.deepEqual(keys.filter(k => /lina/.test(k)), ['lina_story_house_guest', 'tutor_track_tutor-lina_guest'], 'only the existing counter + a local «story seen» flag');
+  });
+});
+
+test('market class: 10 new lessons with their own pictures; a market match lesson finishes and saves', async () => {
+  assert.deepEqual(LINA_MARKET.filter(l => l.pics!.match).map(l => l.titleEn), ['The Fruit Shop', 'The Vegetable Shop', 'The Toy Shop']);
+  for (const l of LINA_MARKET) for (const s of l.pics!.scenes) assert.match(s.img, /^\/lina\/market\/m\d\d-[1-4]\.webp$/);
+  localStorage.setItem(tutorProgressKey(LINA_TRACK.id), '13');
+  const p = LINA_MARKET[2].pics!;
+  await withRoot(<TutorTrackPlayer track={LINA_TRACK} onBack={() => {}} />, async () => {
+    await click(q('[data-testid="sara-map-tab-market"]'));
+    await click(q('[data-testid="sara-map-node-tutor-lina-13"]'));
+    for (let i = 0; i < 4; i++) await click(q('[data-testid="lina-next"]'));
+    for (let n = 0; n < p.choose.length; n++) { await click(q(`[data-testid="lina-choose-opt-${p.choose[n]}"]`)); await click(q('[data-testid="lina-next"]')); }
+    await click(q('[data-testid^="lina-listen-opt-"][data-correct="1"]')); await click(q('[data-testid="lina-next"]'));
+    for (let i = 0; i < 4; i++) { await click(q(`[data-testid="lina-match-pic-${i}"]`)); await click(q(`[data-testid="lina-match-sen-${i}"]`)); }
+    await click(q('[data-testid="lina-next"]')); await click(q('[data-bad="1"]')); await click(q('[data-testid="lina-next"]')); await settle();
+    await click(q('[data-testid="lina-next"]'));
+    assert.equal(q('[data-testid="tutor-result"]')?.textContent, `جاوبت ${picTotal(p)} من ${picTotal(p)} صح`);
+    assert.equal(localStorage.getItem(tutorProgressKey(LINA_TRACK.id)), '14');
+  });
 });
