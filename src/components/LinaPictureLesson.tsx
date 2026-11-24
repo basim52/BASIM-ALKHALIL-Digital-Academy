@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Volume2, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 import type { PicLesson } from '../data/tutorTracks/lina';
 import { picTotal } from '../data/tutorTracks/lina';
@@ -42,6 +42,17 @@ export function stableShuffle(n: number, salt: string, notIdentity = false): num
 }
 const words = (s: string) => s.replace(/[.!?,]/g, '').split(/\s+/).filter(Boolean);
 
+/** Lesson picture. Lazy by default; `eager` only for the first picture the kid sees on a screen. */
+const LinaPic: React.FC<{ src: string; alt: string; className?: string; testId?: string; eager?: boolean }> = ({ src, alt, className = '', testId, eager }) => (
+  <img src={src} alt={alt} draggable={false} loading={eager ? 'eager' : 'lazy'} decoding="async" data-testid={testId} className={`block w-full aspect-square object-contain bg-slate-50 ${className}`} />
+);
+const LinaNext: React.FC<{ label: string; disabled?: boolean; accent: string; onNext: () => void }> = ({ label, disabled, accent, onNext }) => (
+  <div className="sticky bottom-0 z-10 shrink-0 bg-[#001a38] pt-1"><button data-testid="lina-next" disabled={disabled} onClick={onNext} className="w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: accent }}>{label}</button></div>
+);
+const LinaListen: React.FC<{ text: string; label: string; onSay: (text: string) => void }> = ({ text, label, onSay }) => (
+  <button data-testid="lina-listen" onClick={() => onSay(text)} className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={14} /> {label}</button>
+);
+
 export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, pics, theme, t, teacherNameAr, teacherNameEn, faceId, speaking = false, say, stop, onDone }) => {
   const { scenes } = pics;
   const land = useLandscapeSplit();
@@ -71,14 +82,18 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   const fixed = useMemo(() => pics.wrong.en.replace(new RegExp(`\\b${pics.wrong.bad}\\b`), pics.wrong.fix), [pics]);
 
   // Each screen speaks its English sentence once (the learn card / the sentence to find / the wrong sentence).
+  // Latest voice functions in a ref, so a new say/stop from the parent never replays a screen's sentence.
+  const voice = useRef({ say, stop });
+  useEffect(() => { voice.current = { say, stop }; }, [say, stop]);
   useEffect(() => {
+    const { say, stop } = voice.current;
     if (phase.k === 'learn') say(scenes[phase.i].en);
     else if (phase.k === 'choose') say(scenes[pics.choose[phase.n]].en);
     else if (phase.k === 'wrong') say(pics.wrong.en);
     else if (phase.k === 'listen' && pics.listen) say(scenes[pics.listen.scene].en);
     else if (phase.k === 'say' && sayScene) say(sayScene.en);
     return () => stop();
-  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, scenes, pics, sayScene]);
 
   const advance = () => {
     setPicked(null); setSeq([]); setOrderTried(false); setSel(null); setMatched([]); setMiss(null); setMistakes(0);
@@ -93,15 +108,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   const L = pics.listen ? 1 : 0;
   const step = phase.k === 'learn' ? 0 : phase.k === 'choose' ? 1 + phase.n : phase.k === 'listen' ? 1 + pics.choose.length : phase.k === 'order' || phase.k === 'match' ? 1 + pics.choose.length + L : total;
   const card = 'rounded-2xl bg-white overflow-hidden';
-  const Pic: React.FC<{ src: string; alt: string; className?: string; testId?: string }> = ({ src, alt, className = '', testId }) => (
-    <img src={src} alt={alt} draggable={false} loading="eager" decoding="async" data-testid={testId} className={`block w-full aspect-square object-contain bg-slate-50 ${className}`} />
-  );
-  const Next: React.FC<{ label: string; disabled?: boolean }> = ({ label, disabled }) => (
-    <div className="sticky bottom-0 z-10 shrink-0 bg-[#001a38] pt-1"><button data-testid="lina-next" disabled={disabled} onClick={() => { stop(); advance(); }} className="w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: theme.accent }}>{label}</button></div>
-  );
-  const Listen: React.FC<{ text: string }> = ({ text }) => (
-    <button data-testid="lina-listen" onClick={() => say(text)} className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400 text-[#001a38] text-[12px] font-black"><Volume2 size={14} /> {t('اسمع', 'Listen')}</button>
-  );
+  const goNext = () => { stop(); advance(); };
 
   /** Tablet landscape: picture(s) on one side, sentence / words / options and the Next button on the other. */
   const split = (id: string, pic: React.ReactNode, side: React.ReactNode, next: React.ReactNode) => (
@@ -121,12 +128,12 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const label = <p className="text-[12px] font-black text-amber-200 shrink-0">🖼️ {t(`الصورة ${phase.i + 1} من ${scenes.length} · اسمع وكرر`, `Picture ${phase.i + 1} of ${scenes.length} · listen and repeat`)}</p>;
     const zoomBtn = (cls: string) => (
       <button className={`min-h-0 flex items-center justify-center bg-slate-50 ${cls}`} onClick={() => setZoom(s.img)} aria-label={t('كبّر الصورة', 'Enlarge picture')}>
-        <img src={s.img} alt={s.en} data-testid="lina-scene-img" draggable={false} className="max-h-full max-w-full aspect-square object-contain" />
+        <img src={s.img} alt={s.en} data-testid="lina-scene-img" draggable={false} loading="eager" className="max-h-full max-w-full aspect-square object-contain" />
       </button>
     );
     const en = <button data-testid="lina-scene-en" dir="ltr" onClick={() => say(s.en)} className={`shrink-0 px-3 pt-2 font-black text-start flex items-center gap-2 ${land ? 'text-[26px] leading-tight' : 'text-[20px]'}`} style={{ color: theme.ink }}><Volume2 size={land ? 22 : 18} className="shrink-0" style={{ color: theme.accent }} /> {s.en}</button>;
     const ar = <p className={`shrink-0 px-3 pb-2 font-bold text-slate-500 ${land ? 'text-[16px]' : 'text-[13px]'}`}>{s.ar}</p>;
-    const next = <Next label={phase.i + 1 < scenes.length ? t('الصورة التالية', 'Next picture') : t('يلا نلعب بالصور! 🎮', "Let's play! 🎮")} />;
+    const next = <LinaNext accent={theme.accent} onNext={goNext} label={phase.i + 1 < scenes.length ? t('الصورة التالية', 'Next picture') : t('يلا نلعب بالصور! 🎮', "Let's play! 🎮")} />;
     body = land ? split('lina-pic-learn',
       <div className={`${card} w-full h-full flex`} style={{ border: `4px solid ${theme.accent}` }}>{zoomBtn('flex-1 w-full h-full')}</div>,
       <>{label}<div className="rounded-2xl bg-white shrink-0" style={{ border: `4px solid ${theme.accent}` }}>{en}{ar}</div></>,
@@ -141,16 +148,16 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     </div>);
   } else if (phase.k === 'choose') {
     const target = pics.choose[phase.n]; const s = scenes[target];
-    const head = <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">👂 {t('اسمع واختر الصورة الصحيحة', 'Listen and choose the right picture')}</p><Listen text={s.en} /></div>;
+    const head = <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">👂 {t('اسمع واختر الصورة الصحيحة', 'Listen and choose the right picture')}</p><LinaListen text={s.en} label={t('اسمع', 'Listen')} onSay={say} /></div>;
     const said = picked !== null && <p dir="ltr" className={`shrink-0 font-black text-white text-start ${land ? 'text-[22px]' : 'text-[16px]'}`}>{s.en}</p>;
-    const cells = chooseOrder[phase.n].map(si => {
+    const cells = chooseOrder[phase.n].map((si, ci) => {
       const st = picked === null ? theme.accent + '55' : si === target ? '#10B981' : si === picked ? '#F43F5E' : '#e5e7eb';
       return <button key={si} data-testid={`lina-choose-opt-${si}`} data-correct={si === target ? '1' : '0'} disabled={picked !== null}
         onClick={() => { setPicked(si); if (si === target) setScore(x => x + 1); }}
-        className={`${card} transition-transform active:scale-95 ${land ? 'min-h-0 min-w-0' : ''}`} style={{ border: `4px solid ${st}` }}><Pic src={scenes[si].img} alt="" className={land ? 'h-full' : ''} /></button>;
+        className={`${card} transition-transform active:scale-95 ${land ? 'min-h-0 min-w-0' : ''}`} style={{ border: `4px solid ${st}` }}><LinaPic src={scenes[si].img} alt="" eager={ci === 0} className={land ? 'h-full' : ''} /></button>;
     });
     const fb = picked !== null && <p className={`text-[13px] font-black shrink-0 ${picked === target ? 'text-emerald-300' : 'text-rose-300'}`}>{picked === target ? <><CheckCircle2 size={15} className="inline" /> {t('صح! برافو', 'Correct!')}</> : <><XCircle size={15} className="inline" /> {t('الصورة الصحيحة عليها إطار أخضر', 'The right picture has the green frame')}</>}</p>;
-    const next = <Next label={t('التالي', 'Next')} disabled={picked === null} />;
+    const next = <LinaNext accent={theme.accent} onNext={goNext} label={t('التالي', 'Next')} disabled={picked === null} />;
     body = land ? split('lina-choose', grid2x2(cells), <>{head}{said}{fb}</>, next) : (<div data-testid="lina-choose" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       {head}
       {said}
@@ -168,11 +175,11 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
       const st = picked === null ? theme.accent + '55' : o.right ? '#10B981' : n === picked ? '#F43F5E' : '#e5e7eb';
       return <button key={o.s.img} data-testid={`lina-listen-opt-${n}`} data-correct={o.right ? '1' : '0'} disabled={picked !== null}
         onClick={() => { setPicked(n); if (o.right) setScore(x => x + 1); }}
-        className={`${card} transition-transform active:scale-95 ${land ? 'min-h-0 min-w-0' : ''}`} style={{ border: `4px solid ${st}` }}><Pic src={o.s.img} alt="" className={land ? 'h-full' : ''} /></button>;
+        className={`${card} transition-transform active:scale-95 ${land ? 'min-h-0 min-w-0' : ''}`} style={{ border: `4px solid ${st}` }}><LinaPic src={o.s.img} alt="" eager={n === 0} className={land ? 'h-full' : ''} /></button>;
     });
     const ok = picked !== null && listenOpts[picked]?.right;
     const fb = picked !== null && <p data-testid="lina-listen-fb" className={`text-[13px] font-black shrink-0 ${ok ? 'text-emerald-300' : 'text-rose-300'}`}>{ok ? <><CheckCircle2 size={15} className="inline" /> {t('سمعتها صح! برافو', 'You heard it right!')}</> : <><XCircle size={15} className="inline" /> {t('الصورة الصحيحة عليها إطار أخضر', 'The right picture has the green frame')}</>}</p>;
-    const next = <Next label={t('التالي', 'Next')} disabled={picked === null} />;
+    const next = <LinaNext accent={theme.accent} onNext={goNext} label={t('التالي', 'Next')} disabled={picked === null} />;
     body = land ? split('lina-listen', grid2x2(cells), <>{head}{again}{said}{fb}</>, next) : (<div data-testid="lina-listen" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       {head}
       {again}
@@ -194,12 +201,12 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const tapPic = (si: number) => { if (matched.includes(si)) return; setMiss(null); if (sel?.side === 'sen') tryPair(si, sel.i); else setSel({ side: 'pic', i: si }); };
     const tapSen = (si: number) => { if (matched.includes(si)) return; setMiss(null); say(scenes[si].en); if (sel?.side === 'pic') tryPair(sel.i, si); else setSel({ side: 'sen', i: si }); };
     const head = <p className="shrink-0 text-[13px] font-black text-amber-200">🔗 {t('وصّل كل صورة بجملتها: اضغط الصورة وبعدين جملتها', 'Match each picture to its sentence: tap a picture, then its sentence')}</p>;
-    const picCells = matchPics.map(si => {
+    const picCells = matchPics.map((si, ci) => {
       const m = matched.includes(si); const on = sel?.side === 'pic' && sel.i === si; const bad = miss?.pic === si;
       const st = m ? colorOf(si) : bad ? '#F43F5E' : on ? '#FBBF24' : theme.accent + '55';
       return <button key={si} data-testid={`lina-match-pic-${si}`} data-matched={m ? '1' : '0'} disabled={m} onClick={() => tapPic(si)}
         className={`${card} relative transition-transform active:scale-95 ${land ? 'min-h-0 min-w-0' : ''} ${on ? 'scale-[1.03]' : ''}`} style={{ border: `4px solid ${st}` }}>
-        <Pic src={scenes[si].img} alt="" className={land ? 'h-full' : ''} />
+        <LinaPic src={scenes[si].img} alt={t(`صورة ${ci + 1}`, `Picture ${ci + 1}`)} eager={ci === 0} className={land ? 'h-full' : ''} />
         {m && <span className="absolute top-1 start-1 w-7 h-7 rounded-full text-white text-[14px] font-black flex items-center justify-center shadow" style={{ background: colorOf(si) }}>✓</span>}
       </button>;
     });
@@ -211,7 +218,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     })}</div>;
     const fb = miss ? <p data-testid="lina-match-miss" className="shrink-0 text-[13px] font-black text-rose-300"><XCircle size={15} className="inline" /> {t('مو هذي جملتها، جرّب ثانية', 'Not that one, try again')}</p>
       : done ? <p data-testid="lina-match-done" className="shrink-0 text-[13px] font-black text-emerald-300"><CheckCircle2 size={15} className="inline" /> {mistakes === 0 ? t('وصّلتها كلها صح! 🎉', 'All matched right! 🎉') : t('خلصت التوصيل! برافو', 'All matched! Well done')}</p> : null;
-    const next = <Next label={t('التالي', 'Next')} disabled={!done} />;
+    const next = <LinaNext accent={theme.accent} onNext={goNext} label={t('التالي', 'Next')} disabled={!done} />;
     body = land ? split('lina-match', grid2x2(picCells), <>{head}{senBtns}{fb}</>, next) : (<div data-testid="lina-match" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       {head}
       <div className="grid grid-cols-4 gap-1.5 shrink-0 w-full max-w-[36rem] mx-auto">{picCells}</div>
@@ -225,8 +232,8 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const sentence = <p data-testid="lina-say-sentence" dir="ltr" className={`shrink-0 font-black text-white text-start ${land ? 'text-[24px] leading-tight' : 'text-[19px]'}`}>{sayScene.en}</p>;
     const ar = <p className="shrink-0 text-[13px] font-bold text-white/70">{sayScene.ar}</p>;
     const box = <Suspense fallback={<p className="text-[12px] text-white/70">…</p>}><LinaSayIt sentence={sayScene.en} t={t} accent={theme.accent} say={say} stop={stop} /></Suspense>;
-    const frame = <div className={`${card} h-full max-w-full aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={sayScene.img} alt={sayScene.en} testId="lina-say-img" className="h-full" /></div>;
-    const next = <Next label={t('النتيجة', 'Result')} />;
+    const frame = <div className={`${card} h-full max-w-full aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><LinaPic eager src={sayScene.img} alt={sayScene.en} testId="lina-say-img" className="h-full" /></div>;
+    const next = <LinaNext accent={theme.accent} onNext={goNext} label={t('النتيجة', 'Result')} />;
     body = land ? split('lina-say', frame, <>{head}{sentence}{ar}{box}</>, next) : (<div data-testid="lina-say" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       {head}
       <div className="flex-1 min-h-[6rem] max-h-[42dvh] flex justify-center">{frame}</div>
@@ -240,13 +247,13 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const right = full && seq.every((v, i) => v === i);
     const head = <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">📖 {t('رتّب الصور حسب القصة: اضغطها بالترتيب', 'Put the pictures in story order: tap them in order')}</p>
       {seq.length > 0 && !full && <button onClick={() => setSeq([])} className="shrink-0 p-1.5 rounded-lg bg-white/10" aria-label={t('من جديد', 'Start again')}><RotateCcw size={15} /></button>}</div>;
-    const cells = orderMix.map(si => {
+    const cells = orderMix.map((si, ci) => {
       const pos = seq.indexOf(si);
       const st = !full ? (pos >= 0 ? theme.accent : theme.accent + '40') : (pos === si ? '#10B981' : '#F43F5E');
       return <button key={si} data-testid={`lina-order-opt-${si}`} disabled={pos >= 0 || full}
         onClick={() => { const nx = [...seq, si]; setSeq(nx); say(scenes[si].en); if (nx.length === scenes.length) { const ok = nx.every((v, i) => v === i); if (ok && !orderTried) setScore(x => x + 1); setOrderTried(true); } }}
         className={`${card} relative ${land ? 'min-h-0 min-w-0' : ''}`} style={{ border: `4px solid ${st}` }}>
-        <Pic src={scenes[si].img} alt="" className={land ? 'h-full' : ''} />
+        <LinaPic src={scenes[si].img} alt="" eager={ci === 0} className={land ? 'h-full' : ''} />
         {pos >= 0 && <span className="absolute top-1.5 start-1.5 w-8 h-8 rounded-full text-white text-[16px] font-black flex items-center justify-center shadow" style={{ background: theme.accent }}>{pos + 1}</span>}
         {full && pos !== si && <span className="absolute bottom-1.5 end-1.5 px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[12px] font-black">{t(`مكانها ${si + 1}`, `goes ${si + 1}`)}</span>}
       </button>;
@@ -254,7 +261,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const res = full && <p data-testid="lina-order-result" className={`text-[13px] font-black shrink-0 ${right ? 'text-emerald-300' : 'text-rose-300'}`}>{right ? <><CheckCircle2 size={15} className="inline" /> {t('ترتيب صح! قصة حلوة', 'Right order! Nice story')}</> : <><XCircle size={15} className="inline" /> {t('قريب! شوف الأرقام الخضرا', 'Close! See the green numbers')}</>}</p>;
     const again = full && !right && <button onClick={() => setSeq([])} className="shrink-0 py-2 rounded-xl bg-white/10 text-[13px] font-black">{t('جرّب مرة ثانية', 'Try again')}</button>;
     const story = land && seq.length > 0 && <ol dir="ltr" data-testid="lina-order-story" className="shrink-0 flex flex-col gap-1 text-start">{seq.map((si, i) => <li key={si} className="text-[15px] font-black text-white"><span className="text-amber-300">{i + 1}.</span> {scenes[si].en}</li>)}</ol>;
-    const next = <Next label={t('التالي', 'Next')} disabled={!full} />;
+    const next = <LinaNext accent={theme.accent} onNext={goNext} label={t('التالي', 'Next')} disabled={!full} />;
     body = land ? split('lina-order', grid2x2(cells), <>{head}{story}{res}{again}</>, next) : (<div data-testid="lina-order" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       {head}
       <div className="grid grid-cols-2 gap-2 shrink-0 content-start w-full max-w-[max(13rem,calc(100dvh-19rem))] mx-auto">{cells}</div>
@@ -266,8 +273,8 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
   } else {
     const w = pics.wrong; const s = scenes[w.scene];
     const done = picked !== null; const ok = done && wrongWords[picked!].toLowerCase() === w.bad.toLowerCase();
-    const head = <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">🔍 {t('وش الغلط في الصورة؟ اضغط الكلمة الغلط', "What's wrong with the picture? Tap the wrong word")}</p><Listen text={w.en} /></div>;
-    const frame = <div data-testid="lina-wrong-frame" className={`${card} h-full max-w-full aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><Pic src={s.img} alt={s.en} testId="lina-wrong-img" className="h-full" /></div>;
+    const head = <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">🔍 {t('وش الغلط في الصورة؟ اضغط الكلمة الغلط', "What's wrong with the picture? Tap the wrong word")}</p><LinaListen text={w.en} label={t('اسمع', 'Listen')} onSay={say} /></div>;
+    const frame = <div data-testid="lina-wrong-frame" className={`${card} h-full max-w-full aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><LinaPic eager src={s.img} alt={s.en} testId="lina-wrong-img" className="h-full" /></div>;
     const wordsEl = <div dir="ltr" className="flex flex-wrap gap-1.5 shrink-0">
       {wrongWords.map((wd, i) => {
         const bad = wd.toLowerCase() === w.bad.toLowerCase();
@@ -281,7 +288,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
       <p className={`text-[13px] font-black ${ok ? 'text-emerald-300' : 'text-rose-300'}`}>{ok ? t('صح! لقيت الغلط 🎉', 'Yes! You found it 🎉') : t('الغلط كان:', 'The mistake was:')} <span dir="ltr">{w.bad} → {w.fix}</span></p>
       <p dir="ltr" className="text-[16px] font-black text-white text-start">{fixed}</p>
     </div>;
-    const next = <Next label={sayScene ? t('التالي', 'Next') : t('النتيجة', 'Result')} disabled={!done} />;
+    const next = <LinaNext accent={theme.accent} onNext={goNext} label={sayScene ? t('التالي', 'Next') : t('النتيجة', 'Result')} disabled={!done} />;
     body = land ? split('lina-wrong', frame, <>{head}{wordsEl}{fix}</>, next) : (<div data-testid="lina-wrong" className="flex-1 min-h-0 flex flex-col gap-2 overflow-y-auto overscroll-contain scroll-pb-16">
       {head}
       <div className="flex-1 min-h-[7rem] flex justify-center">{frame}</div>

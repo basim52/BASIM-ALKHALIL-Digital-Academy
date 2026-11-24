@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Volume2, CheckCircle2, XCircle } from 'lucide-react';
 import type { LinaClass } from '../data/tutorTracks/lina';
 import { useLandscapeSplit } from '../lib/useLandscapeSplit';
@@ -22,18 +22,26 @@ export interface LinaClassStoryProps {
   onClose: () => void;
 }
 
+const StoryNext: React.FC<{ label: string; disabled?: boolean; accent: string; onNext: () => void }> = ({ label, disabled, accent, onNext }) => (
+  <div className="sticky bottom-0 z-10 shrink-0 bg-[#001a38] pt-1"><button data-testid="lina-story-next" disabled={disabled} onClick={onNext} className="w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: accent }}>{label}</button></div>
+);
+
 export const LinaClassStory: React.FC<LinaClassStoryProps> = ({ cls, uid, t, accent, say, stop, onClose }) => {
   const land = useLandscapeSplit();
   const { story } = cls;
   const [step, setStep] = useState<Step>({ k: 'page', i: 0 });
   const [picked, setPicked] = useState<number | null>(null);
   const [right, setRight] = useState(0);
+  // Latest voice functions in a ref, so a new say/stop from the parent never replays the page.
+  const voice = useRef({ say, stop });
+  useEffect(() => { voice.current = { say, stop }; }, [say, stop]);
   useEffect(() => {
+    const { say, stop } = voice.current;
     if (step.k === 'page') say(story.pages[step.i].en);
     else if (step.k === 'q') say(story.questions[step.i].promptEn);
     else { try { localStorage.setItem(linaStoryKey(cls.id, uid), '1'); } catch { /* ignore */ } }
     return () => stop();
-  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [step, story, cls.id, uid]);
   const next = () => {
     stop(); setPicked(null);
     if (step.k === 'page') setStep(step.i + 1 < story.pages.length ? { k: 'page', i: step.i + 1 } : { k: 'q', i: 0 });
@@ -42,10 +50,7 @@ export const LinaClassStory: React.FC<LinaClassStoryProps> = ({ cls, uid, t, acc
   };
   const total = story.pages.length + story.questions.length;
   const at = step.k === 'page' ? step.i : step.k === 'q' ? story.pages.length + step.i : total;
-  const Next: React.FC<{ label: string; disabled?: boolean }> = ({ label, disabled }) => (
-    <div className="sticky bottom-0 z-10 shrink-0 bg-[#001a38] pt-1"><button data-testid="lina-story-next" disabled={disabled} onClick={next} className="w-full py-3 rounded-xl text-white text-[15px] font-black disabled:opacity-40" style={{ background: accent }}>{label}</button></div>
-  );
-  const frame = (img: string, alt: string) => <div className="rounded-2xl bg-white overflow-hidden h-full max-w-full aspect-square" style={{ border: `4px solid ${accent}` }}><img src={img} alt={alt} data-testid="lina-story-img" draggable={false} className="block w-full h-full aspect-square object-contain bg-slate-50" /></div>;
+  const frame = (img: string, alt: string) => <div className="rounded-2xl bg-white overflow-hidden h-full max-w-full aspect-square" style={{ border: `4px solid ${accent}` }}><img src={img} alt={alt} data-testid="lina-story-img" draggable={false} loading="eager" className="block w-full h-full aspect-square object-contain bg-slate-50" /></div>;
   const layout = (id: string, pic: React.ReactNode, side: React.ReactNode, nx: React.ReactNode) => land ? (
     <div data-testid={id} data-layout="split" className="flex-1 min-h-0 flex flex-row gap-3">
       <div className="h-full max-w-[56%] aspect-square shrink-0 min-h-0 min-w-0 flex items-center justify-center">{pic}</div>
@@ -67,7 +72,7 @@ export const LinaClassStory: React.FC<LinaClassStoryProps> = ({ cls, uid, t, acc
       <p className="shrink-0 text-[12px] font-black text-amber-200">📖 {t(`${story.titleAr} · الصورة ${step.i + 1} من ${story.pages.length}`, `${story.titleEn} · picture ${step.i + 1} of ${story.pages.length}`)}</p>
       <button data-testid="lina-story-en" dir="ltr" onClick={() => say(p.en)} className={`shrink-0 rounded-2xl bg-white px-3 py-2 font-black text-start flex items-center gap-2 text-[#001a38] ${land ? 'text-[24px] leading-tight' : 'text-[19px]'}`}><Volume2 size={20} className="shrink-0" style={{ color: accent }} /> {p.en}</button>
       <p className="shrink-0 text-[13px] font-bold text-white/75">{p.ar}</p>
-    </>, <Next label={step.i + 1 < story.pages.length ? t('كمّل القصة', 'Next picture') : t('يلا أسئلة القصة ❓', 'Story questions ❓')} />);
+    </>, <StoryNext accent={accent} onNext={next} label={step.i + 1 < story.pages.length ? t('كمّل القصة', 'Next picture') : t('يلا أسئلة القصة ❓', 'Story questions ❓')} />);
   } else if (step.k === 'q') {
     const q = story.questions[step.i];
     const opts = <div className="grid gap-1.5 shrink-0">{q.options.map((o, i) => {
@@ -76,8 +81,8 @@ export const LinaClassStory: React.FC<LinaClassStoryProps> = ({ cls, uid, t, acc
         onClick={() => { setPicked(i); say(o); if (i === q.correctIndex) setRight(r => r + 1); }} className={`px-3 py-2.5 rounded-xl border-2 text-[17px] font-black text-start ${st}`}>{o}</button>;
     })}</div>;
     const fb = picked !== null && <p className={`text-[13px] font-black shrink-0 ${picked === q.correctIndex ? 'text-emerald-300' : 'text-rose-300'}`}>{picked === q.correctIndex ? <><CheckCircle2 size={15} className="inline" /> {t('صح!', 'Correct!')}</> : <><XCircle size={15} className="inline" /> {t('الجواب:', 'Answer:')} <span dir="ltr">{q.options[q.correctIndex]}</span></>}</p>;
-    const strip = <div className="grid grid-cols-4 gap-1.5 shrink-0 w-full max-w-[30rem]">{story.pages.map(p => <img key={p.img} src={p.img} alt="" className="w-full aspect-square object-cover rounded-xl border-2 border-white/30" />)}</div>;
-    body = layout('lina-story-q', land ? <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full">{story.pages.map(p => <img key={p.img} src={p.img} alt="" className="w-full h-full min-h-0 object-cover rounded-xl border-2 border-white/30" />)}</div> : null, <>
+    const strip = <div className="grid grid-cols-4 gap-1.5 shrink-0 w-full max-w-[30rem]">{story.pages.map((p, i) => <img key={p.img} src={p.img} alt="" loading={i === 0 ? 'eager' : 'lazy'} className="w-full aspect-square object-cover rounded-xl border-2 border-white/30" />)}</div>;
+    body = layout('lina-story-q', land ? <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full">{story.pages.map((p, i) => <img key={p.img} src={p.img} alt="" loading={i === 0 ? 'eager' : 'lazy'} className="w-full h-full min-h-0 object-cover rounded-xl border-2 border-white/30" />)}</div> : null, <>
       <p className="shrink-0 text-[12px] font-black text-amber-200">❓ {t(`سؤال ${step.i + 1} من ${story.questions.length} عن القصة`, `Question ${step.i + 1} of ${story.questions.length} about the story`)}</p>
       {!land && strip}
       <div className="shrink-0 rounded-2xl bg-white p-3" style={{ border: `4px solid ${accent}` }}>
@@ -85,13 +90,13 @@ export const LinaClassStory: React.FC<LinaClassStoryProps> = ({ cls, uid, t, acc
         <button dir="ltr" onClick={() => say(q.promptEn)} className="mt-1 text-[17px] font-black text-start text-[#001a38] flex items-center gap-1.5"><Volume2 size={16} style={{ color: accent }} /> {q.promptEn}</button>
       </div>
       {opts}{fb}
-    </>, <Next label={step.i + 1 < story.questions.length ? t('التالي', 'Next') : t('شارتي 🏅', 'My badge 🏅')} disabled={picked === null} />);
+    </>, <StoryNext accent={accent} onNext={next} label={step.i + 1 < story.questions.length ? t('التالي', 'Next') : t('شارتي 🏅', 'My badge 🏅')} disabled={picked === null} />);
   } else {
     body = layout('lina-story-end', null, <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
       <span data-testid="lina-story-badge" className="w-24 h-24 rounded-full flex items-center justify-center text-[48px] shadow-lg" style={{ background: 'radial-gradient(circle at 30% 30%, #FDE68A, #F59E0B)', border: '5px solid #fff' }}>{cls.badgeEmoji}</span>
       <p className="text-[20px] font-black text-amber-300">🏅 {t(cls.badgeAr, cls.badgeEn)}</p>
       <p data-testid="lina-story-score" className="text-[14px] font-bold text-white/85">{t(`خلصت قصة الفصل! جاوبت ${right} من ${story.questions.length} صح`, `Story done! You got ${right} of ${story.questions.length} right`)}</p>
-    </div>, <Next label={t('رجوع للخريطة', 'Back to the map')} />);
+    </div>, <StoryNext accent={accent} onNext={next} label={t('رجوع للخريطة', 'Back to the map')} />);
   }
   return (
     <div data-testid="lina-story" data-layout={land ? 'split' : 'stack'} className="flex-1 min-h-0 flex flex-col gap-2">
