@@ -274,7 +274,7 @@ export const LinaPictureLesson: React.FC<LinaPictureLessonProps> = ({ lessonId, 
     const w = pics.wrong; const s = scenes[w.scene];
     const done = picked !== null; const ok = done && wrongWords[picked!].toLowerCase() === w.bad.toLowerCase();
     const head = <div className="flex items-center gap-2 shrink-0"><p className="flex-1 text-[13px] font-black text-amber-200">🔍 {t('وش الغلط في الصورة؟ اضغط الكلمة الغلط', "What's wrong with the picture? Tap the wrong word")}</p><LinaListen text={w.en} label={t('اسمع', 'Listen')} onSay={say} /></div>;
-    const frame = <div data-testid="lina-wrong-frame" className={`${card} h-full max-w-full aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><LinaPic eager src={s.img} alt={s.en} testId="lina-wrong-img" className="h-full" /></div>;
+    const frame = <div data-testid="lina-wrong-frame" className={`${card} h-full max-w-full aspect-square`} style={{ border: `4px solid ${theme.accent}` }}><LinaPic eager src={s.img} alt={t('صورة التمرين', 'Exercise picture')} testId="lina-wrong-img" className="h-full" /></div>;
     const wordsEl = <div dir="ltr" className="flex flex-wrap gap-1.5 shrink-0">
       {wrongWords.map((wd, i) => {
         const bad = wd.toLowerCase() === w.bad.toLowerCase();

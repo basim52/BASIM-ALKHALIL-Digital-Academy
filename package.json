@@ -16,7 +16,7 @@
     "build": "tsx scripts/pretranslate-lessons.ts && tsx scripts/build-lesson-ngrams.ts && tsx scripts/pretranslate-ui.ts && vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && eslint src",
     "test:sentences": "tsx --test scripts/test-picture-sentences.tsx",
     "test:socratic": "tsx --test scripts/test-socratic.ts",
     "test:sara-map": "tsx --import ./scripts/test-stubs/register-map.mjs --test scripts/test-sara-lesson-map.tsx",
@@ -63,11 +63,14 @@
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.28.0",
+    "eslint": "^10.15.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^31.0.0",
     "sharp": "^0.35.3",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
+    "typescript-eslint": "^8.74.0",
     "vite": "^6.2.3"
   }
 }
