@@ -408,6 +408,11 @@ test('Lina «قلها بصوتك»: parent consent card first; the mic never sta
   class FakeSR { lang = ''; interimResults = false; continuous = false; maxAlternatives = 1; onresult: unknown = null; onerror: unknown = null; onend: unknown = null; onstart: unknown = null;
     constructor() { made++; } start() { started++; } stop() {} abort() {} }
   (window as any).webkitSpeechRecognition = FakeSR;
+  const passGate = async (wrong: boolean) => {
+    const [a, b] = q('[data-testid="lina-gate-q"]')!.textContent!.split('×').map(x => Number(x.trim()));
+    for (const d of String(a * b + (wrong ? 1 : 0))) await click(q(`[data-testid="lina-gate-key-${d}"]`));
+    await click(q('[data-testid="lina-gate-ok"]'));
+  };
   const el = <LinaSayIt sentence="This is the kitchen." t={(ar: string) => ar} accent="#F97316" say={() => {}} stop={() => {}} />;
   try {
     localStorage.clear();
@@ -420,6 +425,13 @@ test('Lina «قلها بصوتك»: parent consent card first; the mic never sta
       assert.equal(localStorage.getItem(LINA_MIC_CONSENT_KEY), null, 'skipping is not consent');
       await click(q('[data-testid="lina-consent-reopen"]'));
       await click(q('[data-testid="lina-mic-agree"]'));
+      assert.ok(q('[data-testid="lina-parent-gate"]'), '«أوافق» first asks the grown-up question');
+      assert.equal(localStorage.getItem(LINA_MIC_CONSENT_KEY), null, 'no consent before the question is answered');
+      await passGate(true);
+      assert.ok(q('[data-testid="lina-gate-wrong"]') && q('[data-testid="lina-mic-consent"]'), 'wrong answer → stays on the card');
+      assert.equal(localStorage.getItem(LINA_MIC_CONSENT_KEY), null);
+      assert.equal(q('[data-testid="lina-say-mic"]'), null);
+      await passGate(false);
       assert.equal(localStorage.getItem(LINA_MIC_CONSENT_KEY), '1');
       assert.equal(made + started, 0, 'agreeing alone never opens the mic');
       await click(q('[data-testid="lina-say-mic"]'));
@@ -436,4 +448,30 @@ test('Lina «قلها بصوتك»: parent consent card first; the mic never sta
     await withRoot(el, async () => { assert.ok(q('[data-testid="lina-mic-consent"]'), 'cleared storage → card again'); assert.equal(q('[data-testid="lina-say-mic"]'), null); });
     assert.equal(started, 0);
   } finally { delete (window as any).webkitSpeechRecognition; localStorage.clear(); }
+});
+
+test('Lina «قلها بصوتك»: blocked localStorage → consent kept for this step only; grown-up question stays hard; wrong-word picture alt is neutral', async () => {
+  const { default: LinaSayIt, makeParentGate } = await import('../src/components/LinaSayIt');
+  for (let i = 0; i < 200; i++) { const g = makeParentGate(); assert.ok(g.a >= 12 && g.a <= 29 && g.b >= 3 && g.b <= 9 && g.answer === g.a * g.b && g.answer >= 36); }
+  let started = 0;
+  class FakeSR { lang = ''; interimResults = false; continuous = false; maxAlternatives = 1; onresult: unknown = null; onerror: unknown = null; onend: unknown = null; onstart: unknown = null; start() { started++; } stop() {} abort() {} }
+  (window as any).webkitSpeechRecognition = FakeSR;
+  const proto = Object.getPrototypeOf(localStorage); const realSet = proto.setItem, realGet = proto.getItem;
+  proto.setItem = function () { throw new Error('blocked'); }; proto.getItem = function () { throw new Error('blocked'); };
+  const el = <LinaSayIt sentence="This is the kitchen." t={(ar: string) => ar} accent="#F97316" say={() => {}} stop={() => {}} />;
+  try {
+    await withRoot(el, async () => {
+      assert.ok(q('[data-testid="lina-mic-consent"]'), 'card shows when storage is blocked');
+      await click(q('[data-testid="lina-mic-agree"]'));
+      const [a, b] = q('[data-testid="lina-gate-q"]')!.textContent!.split('×').map(x => Number(x.trim()));
+      for (const d of String(a * b)) await click(q(`[data-testid="lina-gate-key-${d}"]`));
+      await click(q('[data-testid="lina-gate-ok"]'));
+      await click(q('[data-testid="lina-say-mic"]'));
+      assert.equal(started, 1, 'start() accepts the in-step consent');
+    });
+  } finally { proto.setItem = realSet; proto.getItem = realGet; delete (window as any).webkitSpeechRecognition; }
+  assert.equal(localStorage.getItem('lina_mic_consent'), null, 'storage really was blocked: nothing was saved');
+  localStorage.clear();
+  const src = fs.readFileSync('src/components/LinaPictureLesson.tsx', 'utf8');
+  assert.match(src, /testId="lina-wrong-img"/); assert.doesNotMatch(src, /alt=\{s\.en\} testId="lina-wrong-img"/, 'wrong-word picture alt does not give the sentence away');
 });

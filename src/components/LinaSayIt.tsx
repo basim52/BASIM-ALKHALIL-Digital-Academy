@@ -9,11 +9,16 @@ import { useRepeatRecognition } from './SaraRepeatPractice';
  *
  * Privacy (kids): the check uses the browser's built-in speech recognition (Web Speech API). This app does not save or
  * upload the audio itself, but the browser may send it to its speech service (in Chrome: Google's servers) to turn it
- * into text. So the mic never starts before a parent agrees on a one-time card; the agreement is kept in localStorage
- * (`lina_mic_consent`) and the card comes back if it is cleared or withdrawn. «تخطّي» skips the mic for this step only.
+ * into text. So the mic never starts before a parent agrees on a one-time card. «أوافق (ولي الأمر)» first asks a quick
+ * grown-up question (a two-digit × one-digit sum on an in-card keypad); a wrong answer just stays on the card with a new
+ * question. The agreement is kept in localStorage (`lina_mic_consent`), and the card comes back if it is cleared or withdrawn.
+ * If localStorage is blocked, the agreement lives only in this component's state, so it counts for this step only.
+ * «تخطّي» skips the mic for this step only and never blocks the lesson.
  */
 export const LINA_MIC_CONSENT_KEY = 'lina_mic_consent';
 export const linaMicConsented = () => { try { return localStorage.getItem(LINA_MIC_CONSENT_KEY) === '1'; } catch { return false; } };
+/** A sum a young kid is unlikely to solve: 12..29 × 3..9. */
+export const makeParentGate = (rnd: () => number = Math.random) => { const a = 12 + Math.floor(rnd() * 18), b = 3 + Math.floor(rnd() * 7); return { a, b, answer: a * b }; };
 export interface LinaSayItProps {
   sentence: string;
   t: (ar: string, en: string) => string;
@@ -29,11 +34,27 @@ const LinaSayIt: React.FC<LinaSayItProps> = ({ sentence, t, accent, say, stop, o
   const [res, setRes] = useState<{ score: number; passed: boolean; heard: string; missing: string[] } | null>(null);
   const supported = rec.supported;
   const [consent, setConsent] = useState(linaMicConsented);
+  // true when localStorage refused the agreement: then it lives only here, for this step.
+  const [sessionOnly, setSessionOnly] = useState(false);
   const [skipped, setSkipped] = useState(false);
-  const agree = () => { try { localStorage.setItem(LINA_MIC_CONSENT_KEY, '1'); } catch { /* still agreed for this step */ } setConsent(true); };
-  const withdraw = () => { rec.stop(); try { localStorage.removeItem(LINA_MIC_CONSENT_KEY); } catch { /* ignore */ } setConsent(false); setRes(null); };
+  const [gate, setGate] = useState<{ a: number; b: number; answer: number } | null>(null);
+  const [typed, setTyped] = useState('');
+  const [gateWrong, setGateWrong] = useState(false);
+  const agree = () => {
+    let saved = false;
+    try { localStorage.setItem(LINA_MIC_CONSENT_KEY, '1'); saved = linaMicConsented(); } catch { /* blocked storage */ }
+    setSessionOnly(!saved); setConsent(true); setGate(null); setTyped(''); setGateWrong(false);
+  };
+  const checkGate = () => {
+    if (!gate) return;
+    if (typed !== '' && Number(typed) === gate.answer) agree();
+    else { setGateWrong(true); setTyped(''); setGate(makeParentGate()); }
+  };
+  const withdraw = () => { rec.stop(); try { localStorage.removeItem(LINA_MIC_CONSENT_KEY); } catch { /* ignore */ } setConsent(false); setSessionOnly(false); setRes(null); };
+  /** The mic may open only with the parent's OK: saved in localStorage, or (storage blocked) given in this step. */
+  const allowed = () => consent && (sessionOnly || linaMicConsented());
   const start = () => {
-    if (!consent || !linaMicConsented()) { setConsent(false); return; } // never open the mic without the parent's OK
+    if (!allowed()) { setConsent(false); return; } // never open the mic without the parent's OK
     stop(); setRes(null);
     rec.start(sentence, r => { const sc = r.score ?? 0; setRes({ score: sc, passed: !!r.passed, heard: r.transcript, missing: r.missing }); onTry?.(sc, !!r.passed); });
   };
@@ -50,11 +71,24 @@ const LinaSayIt: React.FC<LinaSayItProps> = ({ sentence, t, accent, say, stop, o
           </div>
         : <div data-testid="lina-mic-consent" role="dialog" aria-label={t('موافقة ولي الأمر على المايك', 'Parent consent for the mic')} className="rounded-2xl bg-white p-3 text-[#001a38] flex flex-col gap-2" style={{ border: `3px solid ${accent}` }}>
             <p className="text-[14px] font-black">👨‍👩‍👦 {t('لولي الأمر', 'For the parent')}</p>
-            <p data-testid="lina-mic-consent-text" className="text-[13px] font-bold leading-relaxed">{t('هذي الخطوة تستخدم المايك. المتصفح قد يرسل صوت الطفل لخدمة Google للتعرف على الكلام وتحويله لنص. التطبيق نفسه ما يحفظ الصوت ولا يرفعه.', "This step uses the mic. The browser may send your child's voice to Google's speech service to turn it into text. The app itself does not save or upload the audio.")}</p>
-            <div className="flex gap-2 flex-wrap">
-              <button data-testid="lina-mic-agree" onClick={agree} className="flex-1 min-w-[8rem] py-2.5 rounded-xl text-white text-[14px] font-black" style={{ background: accent }}>{t('أوافق (ولي الأمر)', 'I agree (parent)')}</button>
+            {!gate && <p data-testid="lina-mic-consent-text" className="text-[13px] font-bold leading-relaxed">{t('هذي الخطوة تستخدم المايك. المتصفح قد يرسل صوت الطفل لخدمة Google للتعرف على الكلام وتحويله لنص. التطبيق نفسه ما يحفظ الصوت ولا يرفعه.', "This step uses the mic. The browser may send your child's voice to Google's speech service to turn it into text. The app itself does not save or upload the audio.")}</p>}
+            {gate ? <div data-testid="lina-parent-gate" className="flex flex-col gap-2">
+              <p className="text-[13px] font-black">🔒 {t('شكرًا! سؤال صغير للكبار عشان نتأكد إنك ولي الأمر: كم حاصل', 'Thanks! A quick grown-up check: what is')} <span dir="ltr" data-testid="lina-gate-q" className="inline-block px-1.5 rounded-md bg-amber-100 text-[16px]">{gate.a} × {gate.b}</span> {t('؟', '?')}</p>
+              <div className="flex items-center gap-2">
+                <output data-testid="lina-gate-input" dir="ltr" aria-live="polite" className="flex-1 min-w-0 h-10 rounded-xl border-2 border-slate-300 bg-slate-50 px-3 text-[20px] font-black flex items-center">{typed || <span className="text-slate-400 text-[14px]">{t('اكتب الجواب', 'Type the answer')}</span>}</output>
+                <button data-testid="lina-gate-ok" onClick={checkGate} disabled={!typed} className="shrink-0 h-10 px-4 rounded-xl text-white text-[14px] font-black disabled:opacity-40" style={{ background: accent }}>{t('تأكيد', 'OK')}</button>
+                <button data-testid="lina-mic-skip" onClick={() => { setGate(null); setTyped(''); setGateWrong(false); setSkipped(true); }} className="shrink-0 h-10 px-3 rounded-xl bg-slate-100 text-[#001a38] text-[13px] font-black border-2 border-slate-200">{t('تخطّي', 'Skip')}</button>
+              </div>
+              <div dir="ltr" className="grid grid-cols-6 gap-1.5">
+                {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map(d => <button key={d} data-testid={`lina-gate-key-${d}`} onClick={() => { setGateWrong(false); setTyped(x => (x + d).slice(0, 4)); }} className="h-10 rounded-xl bg-slate-100 border-2 border-slate-200 text-[18px] font-black">{d}</button>)}
+                <button data-testid="lina-gate-back" aria-label={t('امسح', 'Delete')} onClick={() => setTyped(x => x.slice(0, -1))} className="h-10 rounded-xl bg-slate-100 border-2 border-slate-200 text-[16px] font-black">⌫</button>
+                <button data-testid="lina-gate-cancel" onClick={() => { setGate(null); setTyped(''); setGateWrong(false); }} className="h-10 rounded-xl bg-slate-100 border-2 border-slate-200 text-[12px] font-black">{t('رجوع', 'Back')}</button>
+              </div>
+              {gateWrong && <p data-testid="lina-gate-wrong" className="text-[12px] font-black text-rose-600">{t('مو هذا الجواب. هذا سؤال جديد، ولو تبغى تقدر تضغط «تخطّي».', 'Not quite. Here is a new one, or tap «Skip».')}</p>}
+            </div> : <div className="flex gap-2 flex-wrap">
+              <button data-testid="lina-mic-agree" onClick={() => { setGate(makeParentGate()); setTyped(''); setGateWrong(false); }} className="flex-1 min-w-[8rem] py-2.5 rounded-xl text-white text-[14px] font-black" style={{ background: accent }}>{t('أوافق (ولي الأمر)', 'I agree (parent)')}</button>
               <button data-testid="lina-mic-skip" onClick={() => setSkipped(true)} className="flex-1 min-w-[6rem] py-2.5 rounded-xl bg-slate-100 text-[#001a38] text-[14px] font-black border-2 border-slate-200">{t('تخطّي', 'Skip')}</button>
-            </div>
+            </div>}
           </div>}
     </div>
   );
