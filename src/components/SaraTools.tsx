@@ -1,6 +1,6 @@
 import { BidiText } from './BidiText';
 import { getExplainLang, L, useExplainLang } from '../lib/explainLang';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { X, Volume2, Square, Mic, Printer, CheckCircle2 } from 'lucide-react';
 import type { SaraTrack, SaraTrackLesson, SaraChoiceQuestion } from '../data/saraTracks/foundations';
 import { FOUNDATIONS_TRACK } from '../data/saraTracks/foundations';
@@ -21,19 +21,21 @@ import SaraBoardTutor, { type SaraClassTool } from './SaraBoardTutor';
 import { getDailyTopic, readFreeTopicDay, type FreeTopicDay } from '../lib/saraDailyTopic';
 import { readLocalOnboarding } from '../lib/onboardingGate';
 import type { OnboardingRecord } from '../lib/onboarding';
+/** مدرسة حياة: its own chunk, loaded only when opened (question bank is built on demand). */
+const HayatSchool = lazy(() => import('./HayatSchool'));
 
-export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach' | 'grammar' | 'board';
+export type SaraToolId = 'placement' | 'speed' | 'worksheet' | 'plan' | 'roleplay' | 'pronunciation' | 'voicecoach' | 'grammar' | 'board' | 'hayat';
 export const SARA_TRACKS: SaraTrack[] = [FOUNDATIONS_TRACK, ADVANCED_TRACK, CONVERSATION_TRACK, READING_TRACK, WRITING_TRACK];
 export interface PlacementOutcome { level: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'; bandId: string; trackId: string; score: number }
 interface Props { tool: SaraToolId | null; onClose: () => void; uid?: string; unlockAll?: boolean; onPlacementDone?: (r: PlacementOutcome) => void; onOpenTrack?: (trackId: string) => void; classTools?: SaraClassTool[]; classPersona?: string; classToolsOpen?: boolean }
 
 const TITLES_EN: Record<SaraToolId, string> = {
   placement: '🎯 Placement test', speed: '⚡ Speed challenge', worksheet: '📝 Worksheet', plan: '🗓️ Weekly study plan',
-  roleplay: '🎭 Role-play adventures', pronunciation: '🔊 Pronunciation lab', voicecoach: '🎙️ Voice coach', grammar: '✍️ Grammar check', board: "🧑‍🏫 Teachers' Class",
+  roleplay: '🎭 Role-play adventures', pronunciation: '🔊 Pronunciation lab', voicecoach: '🎙️ Voice coach', grammar: '✍️ Grammar check', board: "🧑‍🏫 Teachers' Class", hayat: "🌿 Hayat's School",
 };
 const TITLES: Record<SaraToolId, string> = {
   placement: '🎯 اختبار تحديد المستوى', speed: '⚡ تحدي السرعة', worksheet: '📝 ورقة عمل', plan: '🗓️ خطة الدراسة الأسبوعية',
-  roleplay: '🎭 مغامرات لعب الأدوار', pronunciation: '🔊 مختبر النطق', voicecoach: '🎙️ مدرب الصوت', grammar: '✍️ تدقيق نحوي', board: '🧑‍🏫 فصل المعلمين',
+  roleplay: '🎭 مغامرات لعب الأدوار', pronunciation: '🔊 مختبر النطق', voicecoach: '🎙️ مدرب الصوت', grammar: '✍️ تدقيق نحوي', board: '🧑‍🏫 فصل المعلمين', hayat: '🌿 مدرسة حياة',
 };
 
 const shuffle = <T,>(a: T[]): T[] => { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; };
@@ -857,10 +859,10 @@ export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPl
   const p = { uid, unlockAll };
   return (
     <div className="fixed inset-0 z-[210] bg-slate-950/60 flex items-stretch justify-center" dir={lang === "en" ? "ltr" : "rtl"}>
-      <div data-testid="sara-track-page" className={`relative w-full ${tool === 'board' ? 'max-w-6xl' : 'max-w-xl'} h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden`}>
+      <div data-testid="sara-track-page" className={`relative w-full ${tool === 'board' || tool === 'hayat' ? 'max-w-6xl' : 'max-w-xl'} h-[100dvh] bg-[#fdfaf3] flex flex-col overflow-hidden`}>
         <div className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[#002147] text-white">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-amber-300 font-bold truncate">{L("أدوات سارة", "Sara's tools")}</p>
+            <p className="text-[10px] text-amber-300 font-bold truncate">{tool === 'hayat' ? L("أسئلة من كل الفصول", "Questions from every class") : L("أدوات سارة", "Sara's tools")}</p>
             <p data-testid="sara-tool-title" className="text-sm font-black truncate">{L(TITLES[tool], TITLES_EN[tool])}</p>
           </div>
           <button onClick={() => { saraStopNarrator(); onClose(); }} className="p-1.5 rounded-lg hover:bg-white/10" aria-label="close"><X size={18} /></button>
@@ -873,6 +875,7 @@ export const SaraTools: React.FC<Props> = ({ tool, onClose, uid, unlockAll, onPl
         {tool === 'pronunciation' && <Pronunciation {...p} />}
         {tool === 'voicecoach' && <VoiceCoach {...p} />}
         {tool === 'grammar' && <GrammarCheck />}
+        {tool === 'hayat' && <Suspense fallback={<div className="flex-1 flex items-center justify-center text-[13px] font-bold text-slate-500">{L("حياة تجهّز أسئلتك…", "Hayat is getting your questions ready…")}</div>}><HayatSchool /></Suspense>}
         {tool === 'board' && <SaraBoardTutor uid={uid} unlockAll={unlockAll} tools={classTools} initialPersona={classPersona} initialToolsOpen={classToolsOpen} />}
       </div>
     </div>
