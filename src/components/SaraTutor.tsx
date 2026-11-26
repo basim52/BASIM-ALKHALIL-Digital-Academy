@@ -630,6 +630,19 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
             </span>
           </button>
   );
+  /** 🌿 مدرسة حياة — questions only, from every class (opens its own page; local scores, no progress/XP). */
+  const renderHayatBanner = () => (
+          <button type="button" dir="ltr" onClick={() => setSaraTool('hayat')} data-testid="hayat-banner" aria-label={isRtl ? 'مدرسة حياة' : "Hayat's School"}
+            className="group relative w-full overflow-hidden rounded-3xl border border-[#C49E3A]/70 bg-gradient-to-r from-[#001a38] to-[#0a2d5c] text-start shadow-lg hover:shadow-xl hover:border-[#C49E3A] transition-all active:scale-[0.995] cursor-pointer flex flex-col sm:flex-row-reverse">
+            {/* Hayat stands on the picture's right, so the picture sits right and the words beside it (stacked on phones) */}
+            <img src="/hayat/banner.webp" alt="" width={1024} height={576} loading="lazy" decoding="async" className="w-full sm:w-[52%] h-[130px] sm:h-[170px] object-cover" style={{ objectPosition: '78% 25%' }} />
+            <span className="flex flex-1 flex-col justify-center gap-1 px-4 py-3 sm:p-6" dir={isRtl ? 'rtl' : 'ltr'}>
+              <span className="text-[20px] sm:text-[26px] font-black text-[#E8C766] leading-tight">🌿 {isRtl ? 'مدرسة حياة' : "Hayat's School"}</span>
+              <span className="text-[12px] sm:text-[14px] font-bold text-white/85">{isRtl ? 'ما فيها شرح، أسئلة بس! من كل الفصول، بالصور والصوت والتحدي' : 'No lessons, only questions! From every class, with pictures, sound and a challenge'}</span>
+              <span className="mt-1.5 inline-flex w-fit items-center gap-1.5 rounded-2xl bg-[#C49E3A] group-hover:bg-[#d4ae4a] text-[#002147] font-black text-[13px] px-4 py-2 shadow-md">{isRtl ? 'ابدأ الأسئلة' : 'Start the questions'}{isRtl ? <ArrowLeft size={15} /> : <ArrowRight size={15} />}</span>
+            </span>
+          </button>
+  );
   /** 💬 «تكلّم مع سارة» — the chat now lives on its own full-screen view; this card opens it. */
   const renderTalkToSaraCard = () => (
           <div data-testid="sara-talk-card" className="relative overflow-hidden rounded-3xl border border-[#C49E3A]/60 bg-gradient-to-l from-[#002147] to-[#0a2d5c] px-4 py-4 sm:px-6 sm:py-5 shadow-lg">
@@ -3457,6 +3470,7 @@ export const SaraTutor: React.FC<SaraTutorProps> = ({
       {/* ======================================================== */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-3 py-4 sm:px-5 sm:py-6 flex flex-col gap-5 overflow-hidden">
         <div className={mobileTab === 'chat' ? 'block' : 'hidden md:block'}>{renderTeachersBanner()}</div>
+        <div className={mobileTab === 'chat' ? 'block' : 'hidden md:block'}>{renderHayatBanner()}</div>
 
         
         {/* 🧭 TOP: the single «ابدأ درس اليوم» card from the saved path + this week's table (only when a path plan exists). */}

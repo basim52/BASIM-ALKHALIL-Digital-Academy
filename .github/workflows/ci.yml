@@ -15,4 +15,5 @@ jobs:
       - run: npx tsc --noEmit -p .
       - run: npx eslint src
       - run: npm run test:abboud
+      - run: npm run test:hayat
       - run: npm run build
