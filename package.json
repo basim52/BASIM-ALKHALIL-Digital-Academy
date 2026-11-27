@@ -23,7 +23,8 @@
     "test:gamify": "tsx --import ./scripts/test-stubs/register-map.mjs --test scripts/test-gamify.tsx",
     "test:teacher-map": "tsx --import ./scripts/test-stubs/register-map.mjs --test scripts/test-teacher-lesson-map.tsx scripts/test-teacher-cloud-progress.tsx scripts/test-lina.tsx",
     "test:abboud": "tsx --import ./scripts/test-stubs/register.mjs --test scripts/test-abboud-protocol.ts scripts/test-abboud-awards.ts scripts/test-abboud-ui.tsx scripts/test-abboud-voice.ts scripts/test-abboud-dictation.ts scripts/test-abboud-serverless.ts scripts/test-abboud-live.tsx scripts/test-abboud-ice.ts",
-    "test:hayat": "tsx --import ./scripts/test-stubs/register-map.mjs --test scripts/test-hayat.tsx"
+    "test:hayat": "tsx --import ./scripts/test-stubs/register-map.mjs --test scripts/test-hayat.tsx",
+    "build:hayat-english": "tsx --import ./scripts/test-stubs/register-map.mjs scripts/build-hayat-english.ts"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
