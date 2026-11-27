@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Volume2, Heart, Flame, Timer, X, RotateCcw, ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { BidiText } from './BidiText';
-import { useT, useExplainLang } from '../lib/explainLang';
+import { useExplainLang } from '../lib/explainLang';
 import { useLandscapeSplit } from '../lib/useLandscapeSplit';
 import { saraNarrate, saraStopNarrator, saraUnlockNarrator } from './SaraTrackPlayer';
 import { personaById } from '../data/saraBoardPersonas';
 import {
-  HAYAT_CLASSES, hayatClass, buildSession, countFor, MODE_KINDS, SESSION_LEN, CHALLENGE_SECONDS, readHayatBest, saveHayatBest,
-  type HayatClassId, type HayatMode, type HayatQ, type HayatPic,
+  HAYAT_CLASSES, hayatClass, buildSession, countFor, MODE_KINDS, SESSION_LEN, CHALLENGE_SECONDS, readHayatBest, saveHayatBest, loadHayatEnglish,
+  type HayatClassId, type HayatMode, type HayatLang, type HayatQ, type HayatPic,
 } from '../data/hayat/questions';
 
 /**
@@ -23,6 +23,8 @@ const MODES: { id: HayatMode; img: string; ar: string; en: string; subAr: string
   { id: 'picture', img: '/hayat/pictures.webp', ar: 'الصورة وكلمتها', en: 'Picture to word', subAr: 'شوف الصورة واختر جملتها', subEn: 'See the picture, pick its sentence' },
   { id: 'listen', img: '/hayat/listen.webp', ar: 'اسمع واختر', en: 'Listen and choose', subAr: 'اسمع الجملة واختر صورتها', subEn: 'Hear it, pick the picture' },
   { id: 'tf', img: '/hayat/truefalse.webp', ar: 'صح ولا غلط؟', en: 'True or false?', subAr: 'اسحب الكرت يمين أو يسار', subEn: 'Swipe the card right or left' },
+  { id: 'vocab', img: '/tutors/sara.webp', ar: 'معنى الكلمة', en: 'Word meaning', subAr: 'كلمة إنجليزي ومعناها، بالاتجاهين', subEn: 'English words and what they mean, both ways' },
+  { id: 'hear', img: '/hayat/listen.webp', ar: 'اسمع واقرأ', en: 'Listen and read', subAr: 'اسمع الجملة واختر المكتوبة صح', subEn: 'Hear it, pick the sentence you heard' },
   { id: 'order', img: '/hayat/order.webp', ar: 'رتّب الجملة', en: 'Order the sentence', subAr: 'رتّب الكلمات صح', subEn: 'Put the words in order' },
 ];
 const PRAISE: [string, string][] = [['ممتاز! 🌟', 'Excellent! 🌟'], ['يا سلام عليك! 👏', 'Brilliant! 👏'], ['برافو! 💚', 'Bravo! 💚'], ['صح عليك! ✨', 'Spot on! ✨'], ['كفو! 🔥', 'Great! 🔥']];
@@ -31,14 +33,14 @@ const shuffle = <T,>(a: T[]) => { const r = [...a]; for (let i = r.length - 1; i
 const voiceFor = (q: HayatQ) => q.cls === 'abboud' ? 'Kore' : personaById(q.cls).voice;
 
 /** The right answer as a short line (feedback + results card). */
-export const answerLine = (q: HayatQ): string => {
+export const answerLine = (q: HayatQ, en = false): string => {
   switch (q.kind) {
     case 'choice': return q.options[q.correct];
     case 'picture': return `${q.options[q.correct]} = ${q.ar}`;
-    case 'listen': return `${q.say} = ${q.ar}`;
-    case 'tf': return q.truth ? `صح: «${q.en}» = ${q.trueAr}` : `غلط: «${q.en}» معناها ${q.trueAr}`;
-    case 'gap': return `${q.en} = ${q.ar}`;
-    case 'order': return `${q.en} = ${q.ar}`;
+    case 'listen': case 'hear': return `${q.say} = ${q.ar}`;
+    case 'tf': return en ? (q.truth ? `True: “${q.en}” = ${q.trueAr}` : `False: “${q.en}” means ${q.trueAr}`) : (q.truth ? `صح: «${q.en}» = ${q.trueAr}` : `غلط: «${q.en}» معناها ${q.trueAr}`);
+    case 'gap': case 'order': return `${q.en} = ${q.ar}`;
+    case 'vocab': return `${q.en} = ${q.ar}`;
   }
 };
 
@@ -57,7 +59,13 @@ const Lightbox: React.FC<{ pic: HayatPic | null; onClose: () => void }> = ({ pic
 );
 
 export const HayatSchool: React.FC<{ mockMode?: HayatMode; mockSession?: HayatQ[] }> = ({ mockMode, mockSession }) => {
-  const t = useT(); const [lang] = useExplainLang(); const rtl = lang !== 'en';
+  const [lang] = useExplainLang();
+  const [hl, setHl] = useState<HayatLang>(lang === 'en' ? 'en' : 'all');
+  const enMode = hl === 'en' || lang === 'en';
+  const t = (ar: string, en: string) => (enMode ? en : ar); const rtl = !enMode;
+  // English stems/explanations (one small file) load once; counts and rounds use them.
+  const [enTick, setEnTick] = useState(0); const [loading, setLoading] = useState(false);
+  useEffect(() => { void loadHayatEnglish().then(() => setEnTick(x => x + 1)); }, []);
   const land = useLandscapeSplit();
   const [classes, setClasses] = useState<HayatClassId[]>(HAYAT_CLASSES.map(c => c.id));
   const [mode, setMode] = useState<HayatMode | null>(mockMode ?? null);
@@ -76,11 +84,13 @@ export const HayatSchool: React.FC<{ mockMode?: HayatMode; mockSession?: HayatQ[
   const allOn = classes.length === HAYAT_CLASSES.length;
   const toggle = (id: HayatClassId | 'all') => setClasses(cur => id === 'all' ? (allOn ? cur : HAYAT_CLASSES.map(c => c.id))
     : allOn ? [id] : cur.includes(id) ? (cur.length > 1 ? cur.filter(x => x !== id) : cur) : [...cur, id]);
-  const counts = useMemo(() => Object.fromEntries(MODES.map(m => [m.id, countFor(classes, MODE_KINDS[m.id])])) as Record<HayatMode, number>, [classes]);
-  const total = useMemo(() => countFor(classes, MODE_KINDS.mixed), [classes]);
+  const counts = useMemo(() => Object.fromEntries(MODES.map(m => [m.id, countFor(classes, MODE_KINDS[m.id], hl)])) as Record<HayatMode, number>, [classes, hl, enTick]); // eslint-disable-line react-hooks/exhaustive-deps -- enTick: the English stems load into the bank after mount
+  const total = useMemo(() => countFor(classes, MODE_KINDS.mixed, hl), [classes, hl, enTick]); // eslint-disable-line react-hooks/exhaustive-deps -- enTick: the English stems load into the bank after mount
 
   const start = (m: HayatMode) => {
-    setMode(m); setSession(buildSession(classes, m)); setIdx(0); setAnswers([]); setHearts(HEARTS); setStreak(0); setBestStreak(0); setScore(0);
+    setMode(m); setSession([]); setLoading(true);
+    void loadHayatEnglish().then(() => { setSession(buildSession(classes, m, Math.random, undefined, hl)); setLoading(false); });
+    setIdx(0); setAnswers([]); setHearts(HEARTS); setStreak(0); setBestStreak(0); setScore(0);
     setLeft(CHALLENGE_SECONDS); setDone(false); setNewBest(false);
   };
   const finish = (finalScore: number) => {
@@ -134,6 +144,16 @@ export const HayatSchool: React.FC<{ mockMode?: HayatMode; mockSession?: HayatQ[
         </div>
 
         <section className="rounded-3xl bg-white border border-amber-200 p-3 sm:p-4 shadow-sm">
+          <p className="text-[14px] font-black text-[#002147] mb-2">{t('لغة الأسئلة', 'Question language')}</p>
+          <div className="flex flex-wrap gap-2" data-testid="hayat-langs">
+            {([['all', '🌍', 'عربي + إنجليزي', 'Arabic + English'], ['en', '🇬🇧', 'English', 'English only']] as const).map(([id, ic, ar, en]) => (
+              <button key={id} type="button" data-testid={`hayat-lang-${id}`} aria-pressed={hl === id} onClick={() => setHl(id)}
+                className={`px-3.5 py-2 rounded-full text-[13px] font-black border-2 ${hl === id ? 'text-white border-emerald-700' : 'bg-white text-[#002147] border-slate-200'}`} style={hl === id ? { background: EMERALD } : undefined}>{ic} {t(ar, en)}</button>))}
+          </div>
+          {hl === 'en' && <p className="mt-1.5 text-[11.5px] font-bold text-slate-500">{t('', 'Questions are worded in English; Arabic shows only as a small help.')}</p>}
+        </section>
+
+        <section className="rounded-3xl bg-white border border-amber-200 p-3 sm:p-4 shadow-sm">
           <p className="text-[14px] font-black text-[#002147] mb-2">{t('من أي فصل تبي الأسئلة؟', 'Which classes?')}</p>
           <div className="flex flex-wrap gap-2" data-testid="hayat-classes">
             <button type="button" data-testid="hayat-class-all" aria-pressed={allOn} onClick={() => toggle('all')}
@@ -168,6 +188,8 @@ export const HayatSchool: React.FC<{ mockMode?: HayatMode; mockSession?: HayatQ[
       <Lightbox pic={zoom} onClose={() => setZoom(null)} />
     </div>
   );
+
+  if (loading) return <div data-testid="hayat-loading" className="flex-1 flex items-center justify-center text-[14px] font-black text-slate-500 bg-[#fdfaf3]">{t('حياة تجهّز أسئلتك…', 'Hayat is getting your questions ready…')}</div>;
 
   // ---------- Results ----------
   if (done || !q) {
@@ -207,8 +229,8 @@ export const HayatSchool: React.FC<{ mockMode?: HayatMode; mockSession?: HayatQ[
               {wrong.length > 0 && <div className="rounded-3xl bg-white border border-amber-200 p-3" data-testid="hayat-review">
                 <p className="text-[13px] font-black text-[#002147] mb-2">{t('راجع اللي فاتك', 'Review your misses')}</p>
                 <ul className="grid gap-1.5">{wrong.map((a, i) => (
-                  <li key={i} className="rounded-xl bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 text-[12.5px] font-bold text-emerald-900"><BidiText text={answerLine(a.q)} />
-                    <span className="block text-[10.5px] text-emerald-700/80">{t(`${hayatClass(a.q.cls).nameAr} · ${a.q.lessonAr}`, hayatClass(a.q.cls).nameEn)}</span></li>))}</ul>
+                  <li key={i} className="rounded-xl bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 text-[12.5px] font-bold text-emerald-900"><BidiText text={answerLine(a.q, enMode)} />
+                    <span className="block text-[10.5px] text-emerald-700/80">{t(`${hayatClass(a.q.cls).nameAr} · ${a.q.lessonAr}`, `${hayatClass(a.q.cls).nameEn} · ${a.q.lessonEn}`)}</span></li>))}</ul>
               </div>}
             </div>
           </div>
@@ -244,10 +266,10 @@ export const HayatSchool: React.FC<{ mockMode?: HayatMode; mockSession?: HayatQ[
             <img src="/tutors/hayat.webp" alt="" width={44} height={44} className="w-11 h-11 rounded-full border-2 object-cover" style={{ borderColor: EMERALD }} />
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-black text-[#002147] leading-tight">{t('حياة تسألك', 'Hayat asks')} <span className="text-slate-400">· {mode === 'challenge' ? `#${idx + 1}` : `${idx + 1}/${session.length}`}</span></p>
-              <p className="text-[11px] font-bold text-slate-500 truncate inline-flex items-center gap-1"><img src={cls.img} alt="" className="w-4 h-4 rounded-full object-cover" />{t(`من فصل ${cls.nameAr} · ${q.lessonAr}`, `From ${cls.nameEn}'s class`)}</p>
+              <p className="text-[11px] font-bold text-slate-500 truncate inline-flex items-center gap-1"><img src={cls.img} alt="" className="w-4 h-4 rounded-full object-cover" />{t(`من فصل ${cls.nameAr} · ${q.lessonAr}`, `From ${cls.nameEn}'s class · ${q.lessonEn}`)}</p>
             </div>
           </div>
-          <Prompt q={q} t={t} answered={answered} onZoom={setZoom} land={land} />
+          <Prompt q={q} t={t} en={enMode} answered={answered} onZoom={setZoom} land={land} />
         </div>
         <div className={`${land ? 'min-h-0 overflow-y-auto' : 'mt-3'} max-w-2xl w-full mx-auto`}>
           <Answers key={`${idx}-${q.id}`} q={q} t={t} answered={answered} onAnswer={onAnswer} onZoom={setZoom} />
@@ -258,7 +280,8 @@ export const HayatSchool: React.FC<{ mockMode?: HayatMode; mockSession?: HayatQ[
         {answered ? (
           <div data-testid="hayat-feedback" data-ok={last.ok ? '1' : '0'} className={`max-w-2xl mx-auto rounded-2xl px-3 py-2 mb-2 max-h-[30dvh] overflow-y-auto ${last.ok ? 'bg-emerald-50 border border-emerald-300' : 'bg-amber-50 border border-amber-300'}`}>
             <p className={`text-[14px] font-black ${last.ok ? 'text-emerald-800' : 'text-amber-800'}`}>{t(praise[0], praise[1])}</p>
-            <p className="text-[12.5px] font-bold text-slate-700 leading-snug"><BidiText text={q.kind === 'choice' ? q.explainAr : answerLine(q)} /></p>
+            <p className="text-[12.5px] font-bold text-slate-700 leading-snug"><BidiText text={q.kind === 'choice' ? (enMode ? `Correct answer: “${q.options[q.correct]}”.${q.explainEn ? ' ' + q.explainEn : ''}` : q.explainAr) : answerLine(q, enMode)} />
+            {q.kind === 'choice' && !enMode && q.explainEn && <span dir="ltr" className="block mt-0.5 text-[12px] text-slate-600">{q.explainEn}</span>}</p>
           </div>
         ) : <p className="max-w-2xl mx-auto text-center text-[11.5px] font-bold text-slate-500 mb-1.5">{t('خذ وقتك، وبعدها اختر 💭', 'Take your time, then choose 💭')}</p>}
         {mode !== 'challenge' && (
@@ -277,13 +300,13 @@ type T = (ar: string, en: string) => string;
 const say = (q: HayatQ, text: string) => { saraUnlockNarrator(); void saraNarrate(text, () => {}, () => {}, () => {}, voiceFor(q)); };
 
 /** The question side (left column on tablet landscape). */
-const Prompt: React.FC<{ q: HayatQ; t: T; answered: boolean; onZoom: (p: HayatPic) => void; land: boolean }> = ({ q, t, answered, onZoom, land }) => {
+const Prompt: React.FC<{ q: HayatQ; t: T; en: boolean; answered: boolean; onZoom: (p: HayatPic) => void; land: boolean }> = ({ q, t, en, answered, onZoom, land }) => {
   const box = 'rounded-3xl bg-white border-2 border-amber-200 shadow-sm p-3 sm:p-4';
   switch (q.kind) {
     case 'choice': return (
       <div className={box}>
-        <p className="text-[15px] sm:text-[17px] font-black text-[#002147] leading-snug"><BidiText text={q.promptAr} /></p>
-        {q.promptEn && <p dir="ltr" className="mt-2 rounded-2xl bg-[#f0f7ff] px-3 py-2 text-[16px] sm:text-[18px] font-black text-[#002147]">{q.promptEn}</p>}
+        {!(en && q.promptEn) && <p className="text-[15px] sm:text-[17px] font-black text-[#002147] leading-snug"><BidiText text={q.promptAr} /></p>}
+        {q.promptEn && <p dir="ltr" className={`${en ? '' : 'mt-2 '}rounded-2xl bg-[#f0f7ff] px-3 py-2 text-[16px] sm:text-[18px] font-black text-[#002147]`}>{q.promptEn}</p>}
       </div>);
     case 'picture': return (
       <div className={box}>
@@ -291,7 +314,14 @@ const Prompt: React.FC<{ q: HayatQ; t: T; answered: boolean; onZoom: (p: HayatPi
         <Pic pic={q.pic} big onZoom={onZoom} className={`mx-auto aspect-square ${land ? 'h-[calc(100dvh-345px)] max-h-[320px] min-h-[140px] w-auto' : 'w-full max-w-[260px]'}`} />
         {q.pic.img && <p className="mt-1 text-center text-[10.5px] font-bold text-slate-400">{t('اضغط الصورة لتكبيرها', 'Tap to enlarge')}</p>}
       </div>);
-    case 'listen': return <ListenPrompt q={q} t={t} answered={answered} box={box} />;
+    case 'listen': case 'hear': return <ListenPrompt q={q} t={t} answered={answered} box={box} />;
+    case 'vocab': return (
+      <div className={box}>
+        <p className="text-[15px] font-black text-[#002147] mb-2">{q.dir === 'toAr' ? t('وش معنى هالكلمة؟', 'What does this word mean?') : t('أي كلمة إنجليزية معناها:', 'Which English word means:')}</p>
+        {q.dir === 'toAr'
+          ? <VocabWord q={q} t={t} />
+          : <p className="rounded-2xl bg-[#f0f7ff] px-3 py-4 text-center text-[24px] font-black text-[#002147]">{q.ar}</p>}
+      </div>);
     case 'tf': return (
       <div className={box}>
         <p className="text-[15px] font-black text-[#002147]">{t('هل المعنى صحيح؟', 'Is the meaning right?')}</p>
@@ -311,16 +341,28 @@ const Prompt: React.FC<{ q: HayatQ; t: T; answered: boolean; onZoom: (p: HayatPi
   }
 };
 
-const ListenPrompt: React.FC<{ q: Extract<HayatQ, { kind: 'listen' }>; t: T; answered: boolean; box: string }> = ({ q, t, answered, box }) => {
+const VocabWord: React.FC<{ q: Extract<HayatQ, { kind: 'vocab' }>; t: T }> = ({ q, t }) => {
+  useEffect(() => { say(q, q.en); }, [q]);
+  return (
+    <div className="flex items-center justify-center gap-3 rounded-2xl bg-[#f0f7ff] px-3 py-3">
+      <span dir="ltr" className="text-[26px] sm:text-[30px] font-black text-[#002147]">{q.en}</span>
+      <button type="button" data-testid="hayat-listen" aria-label={t('اسمعها', 'Hear it')} onClick={() => say(q, q.en)} className="p-2.5 rounded-full text-white shadow active:scale-95" style={{ background: EMERALD }}><Volume2 size={20} /></button>
+    </div>
+  );
+};
+
+const ListenPrompt: React.FC<{ q: Extract<HayatQ, { kind: 'listen' | 'hear' }>; t: T; answered: boolean; box: string }> = ({ q, t, answered, box }) => {
   const [shown, setShown] = useState(false);
   useEffect(() => { say(q, q.say); }, [q]);
   return (
     <div className={box}>
-      <p className="text-[15px] font-black text-[#002147] mb-2">{t('اسمع الجملة واختر صورتها', 'Listen and choose the picture')}</p>
+      <p className="text-[15px] font-black text-[#002147] mb-2">{q.kind === 'hear' ? t('اسمع الجملة واختر المكتوبة', 'Listen and pick the sentence you heard') : t('اسمع الجملة واختر صورتها', 'Listen and choose the picture')}</p>
       <button type="button" data-testid="hayat-listen" onClick={() => say(q, q.say)} className="mx-auto flex items-center justify-center gap-2 rounded-full text-white font-black text-[15px] px-6 py-3 shadow-md active:scale-95" style={{ background: EMERALD }}><Volume2 size={20} />{t('اسمع مرة ثانية', 'Hear it again')}</button>
       {(shown || answered)
-        ? <p dir="ltr" className="mt-2 text-center text-[16px] font-black text-[#002147]">{q.say}</p>
-        : <button type="button" onClick={() => setShown(true)} className="mt-2 mx-auto block text-[11.5px] font-bold text-slate-500 underline">{t('ما اشتغل الصوت؟ اعرض الجملة', 'No sound? Show the sentence')}</button>}
+        ? (q.kind === 'hear'
+            ? <p className="mt-2 text-center text-[14px] font-black text-emerald-800">{q.ar}</p>
+            : <p dir="ltr" className="mt-2 text-center text-[16px] font-black text-[#002147]">{q.say}</p>)
+        : <button type="button" onClick={() => setShown(true)} className="mt-2 mx-auto block text-[11.5px] font-bold text-slate-500 underline">{q.kind === 'hear' ? t('ما اشتغل الصوت؟ اعرض المعنى بالعربي', 'No sound? Show the Arabic meaning') : t('ما اشتغل الصوت؟ اعرض الجملة', 'No sound? Show the sentence')}</button>}
     </div>
   );
 };
@@ -332,7 +374,7 @@ const Answers: React.FC<{ q: HayatQ; t: T; answered: boolean; onAnswer: (ok: boo
   const tone = (i: number, correct: number) => picked === null && !answered ? 'bg-white border-amber-300 text-[#002147] hover:border-[#C49E3A]'
     : i === correct ? 'bg-emerald-100 border-emerald-500 text-emerald-900' : i === picked ? 'bg-rose-100 border-rose-400 text-rose-900' : 'bg-white/60 border-slate-200 text-slate-500';
   switch (q.kind) {
-    case 'choice': case 'picture': case 'gap': return (
+    case 'choice': case 'picture': case 'gap': case 'vocab': case 'hear': return (
       <div className="grid gap-2">{q.options.map((o, i) => (
         <button key={i} type="button" data-testid="hayat-option" disabled={answered} onClick={() => pick(i, q.correct)} dir="auto"
           className={`w-full rounded-2xl border-2 px-3.5 py-3 text-[15px] sm:text-[16px] font-black text-start transition-all active:scale-[0.99] ${tone(i, q.correct)}`}>
